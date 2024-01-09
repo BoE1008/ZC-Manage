@@ -13,6 +13,7 @@ import {
   Avatar,
   Popconfirm,
   Tooltip,
+  Popover,
   Checkbox,
 } from "antd";
 import {
@@ -21,6 +22,7 @@ import {
   DeleteTwoTone,
   InteractionTwoTone,
   CalendarTwoTone,
+  AppstoreTwoTone,
 } from "@ant-design/icons";
 import {
   getProjectsSubmitList,
@@ -408,18 +410,24 @@ const Project = () => {
           </Button>
         </Space>
 
-        <Space style={{ marginLeft: "20px" }}>
-          <Checkbox.Group
-            options={columns?.map((c) => ({
-              label: c.label,
-              value: c.value,
-            }))}
-            defaultValue={columns.map((c) => c.value)}
-            onChange={onOptionChange}
-          ></Checkbox.Group>
-        </Space>
-
         <Space>
+          <Popover
+            content={
+              <Checkbox.Group
+                style={{ display: "flex", flexDirection: "column" }}
+                options={columns?.map((c) => ({
+                  label: c.label,
+                  value: c.value,
+                }))}
+                defaultValue={columns.map((c) => c.value)}
+                onChange={onOptionChange}
+              ></Checkbox.Group>
+            }
+            title="显隐列"
+            trigger="click"
+          >
+            <AppstoreTwoTone twoToneColor="#198348" />
+          </Popover>
           <Input
             placeholder="名称"
             value={searchValue}

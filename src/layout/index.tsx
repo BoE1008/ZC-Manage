@@ -16,6 +16,7 @@ const AppLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [menu, setMenu] = useState();
 
   const [openKeys, setOpenKeys] = useState([]);
+  const [collapsed, setCollapsed] = useState(false);
 
   const onOpenChange = (keys) => {
     const latestOpenKey = keys.find((key) => openKeys.indexOf(key) === -1);
@@ -71,15 +72,20 @@ const AppLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
         </Link>
         <User />
       </Header>
-      <Layout className="min-h-screen w-screen">
+      <Layout className="h-screen w-screen" style={{ display: "flex" }}>
         <Sider
-          width={180}
+          collapsible
+          collapsed={collapsed}
+          onCollapse={(value) => setCollapsed(value)}
           style={{
-            position: "fixed",
-            top: 80,
-            left: 0,
-            zIndex: 5,
-            height: "calc(100vh - 80px)",
+            // position: "fixed",
+            // top: 80,
+            // left: 0,
+            height: "100vh",
+            paddingTop: "80px",
+            maxWidth: "160px",
+            // zIndex: 5,
+            // height: "calc(100vh - 80px)",
           }}
           className="overflow-y-auto"
         >
@@ -101,11 +107,12 @@ const AppLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
         </Sider>
         <Layout
           style={{
-            paddingLeft: "180px",
+            // paddingLeft: "180px",
             paddingTop: "90px",
             minHeight: "100%",
+            flex: 1,
           }}
-          className="min-h-screen"
+          className="h-screen overflow-y-auto"
         >
           <Content
             style={{

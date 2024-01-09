@@ -36,6 +36,10 @@ body {
   color: rgb(31, 196, 168) !important;
 }
 
+.ant-menu-submenu-selected .ant-menu-submenu-title > .ant-menu-inline-collapsed-noicon {
+  color: rgb(31, 196, 168) !important;
+}
+
 .ant-layout.ant-layout-has-sider >.ant-layout {
   width: auto !important;
 }
@@ -60,4 +64,13 @@ body {
 
 .ant-switch {
   background-color: gray;
+}
+
+.ant-layout-sider-trigger {
+  background-color: #198348 !important;
+}
+
+.ant-menu-submenu-popup.ant-menu-submenu > ul {
+  background-color: #198348 !important;
+  color: white
 }

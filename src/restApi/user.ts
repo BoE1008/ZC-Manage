@@ -1,9 +1,14 @@
 import { User } from "@/types";
 import axiosInstance from "./axiosInstance";
+import axios from "axios";
 
-export const login = async (loginName: string, password: string) => {
+export const login = async (
+  loginName: string,
+  password: string,
+  validateCode: string
+) => {
   const res = await axiosInstance.post(
-    `/zc/user/login?loginName=${loginName}&password=${password}`
+    `/zc/user/login?loginName=${loginName}&password=${password}&validateCode=${validateCode}`
   );
 
   return res.data;
@@ -58,4 +63,12 @@ export const updatePassword = async (info) => {
   );
 
   return res.data;
+};
+
+export const getCodeImage = async () => {
+  const res = await axios.get(`/zc/captcha/captchaImage`, {
+    responseType: "blob",
+  });
+
+  if (res?.data) return res.data;
 };

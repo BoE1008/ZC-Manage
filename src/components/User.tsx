@@ -123,7 +123,60 @@ const User = () => {
           <Form.Item name="oldPassword">
             <Input.Password size="large" placeholder="请输入旧密码" />
           </Form.Item>
-          <Form.Item name="newPassword">
+          <Form.Item
+            name="newPassword"
+            validateTrigger="onBlur"
+            rules={[
+              {
+                validator: (rule, value) => {
+                  if (!value.trim()) {
+                    rule.message = "密码必填！";
+                    return Promise.reject();
+                  }
+                  const oNumber = "0123456789";
+                  const oLetter =
+                    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+                  const oSpecial = "!@#$%&*";
+                  const oTher = oNumber + oLetter + oSpecial;
+                  let total = 0;
+                  const oSpeArr = value.split("");
+                  const oNumberItem = oSpeArr.find(
+                    (item: any) => oNumber.indexOf(item) !== -1
+                  );
+                  const oLetterItem = oSpeArr.find(
+                    (item: any) => oLetter.indexOf(item) !== -1
+                  );
+                  const oSpeItem = oSpeArr.find(
+                    (item: any) => oSpecial.indexOf(item) !== -1
+                  );
+                  const oTherItem = oSpeArr.find(
+                    (item: any) => oTher.indexOf(item) === -1
+                  );
+
+                  if (value.length < 6 || oTherItem !== undefined) {
+                    rule.message =
+                      "密码不能小于六位，为字母（不区分大小写）、数字、特殊字符（!@#$%&*）的组合！";
+                    return Promise.reject();
+                  }
+                  if (oNumberItem !== undefined) {
+                    total += 1;
+                  }
+                  if (oLetterItem !== undefined) {
+                    total += 1;
+                  }
+                  if (oSpeItem !== undefined) {
+                    total += 1;
+                  }
+                  if (total >= 3) {
+                    return Promise.resolve();
+                  }
+                  rule.message =
+                    "密码不能小于六位，为字母（不区分大小写）、数字、特殊字符（!@#$%&*）的组合！";
+                  return Promise.reject();
+                },
+              },
+            ]}
+          >
             <Input.Password size="large" placeholder="请输入新密码" />
           </Form.Item>
         </Form>

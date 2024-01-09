@@ -1,9 +1,9 @@
-import { Input, Button, Form } from "antd";
+import { Input, Button, Form, Space } from "antd";
 import { UserOutlined } from "@ant-design/icons";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Background from "@/assets/images/bg.jpg";
-import { login } from "@/restApi/user";
+import { login, getCodeImage } from "@/restApi/user";
 import { notification } from "antd";
 import { menuHandler } from "@/utils";
 import { getMenu } from "@/restApi/menu";
@@ -15,19 +15,32 @@ const Login = () => {
 
   const [form] = Form.useForm();
 
+  const [imgSrc, setImgSrc] = useState("");
+  const [clickTimes, setClickTimes] = useState(0);
+
   const userLogin = async () => {
     const values = form.getFieldsValue();
-    const res = await login(values.username, values.password);
-    sessionStorage.setItem("username", res.entity?.userName);
-    sessionStorage.setItem("userInfo", JSON.stringify(res.entity));
-    sessionStorage.setItem;
-    const data = await getMenu();
-    sessionStorage.setItem(
-      "menu",
-      JSON.stringify(menuHandler(data.entity.data))
-    );
 
-    router.push("/");
+    await login(values.username, values.password, values.validateCode)
+      .catch(async () => {
+        const codeData = await getCodeImage();
+        const url = URL.createObjectURL(codeData);
+        setImgSrc(url);
+      })
+      .then(async (res) => {
+        if (res) {
+          sessionStorage.setItem("username", res.entity?.userName);
+          sessionStorage.setItem("userInfo", JSON.stringify(res.entity));
+          sessionStorage.setItem;
+          const data = await getMenu();
+          sessionStorage.setItem(
+            "menu",
+            JSON.stringify(menuHandler(data.entity.data))
+          );
+
+          router.push("/");
+        }
+      });
   };
 
   const handleEnter = async (e) => {
@@ -43,6 +56,14 @@ const Login = () => {
       document.removeEventListener("keydown", handleEnter);
     };
   }, []);
+
+  useEffect(() => {
+    (async () => {
+      const res = await getCodeImage();
+      const url = URL.createObjectURL(res);
+      setImgSrc(url);
+    })();
+  }, [clickTimes]);
 
   return (
     <div
@@ -65,6 +86,19 @@ const Login = () => {
         </Form.Item>
         <Form.Item name="password">
           <Input.Password size="large" placeholder="请输入密码" />
+        </Form.Item>
+        <Form.Item name="validateCode">
+          <Space style={{ display: "flex", flexDirection: "row" }}>
+            <Input size="middle" placeholder="验证码" />
+            <Image
+              src={imgSrc}
+              width={100}
+              height={40}
+              onClick={() => setClickTimes((pre) => pre + 1)}
+              style={{ cursor: "pointer" }}
+              alt="code"
+            />
+          </Space>
         </Form.Item>
         <Form.Item>
           <Button
