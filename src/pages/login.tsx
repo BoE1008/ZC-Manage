@@ -9,6 +9,12 @@ import { menuHandler } from "@/utils";
 import { getMenu } from "@/restApi/menu";
 import logo from "@/assets/images/loginLogo.png";
 import Image from "next/image";
+import * as SM from "sm-crypto";
+
+const SM_PUBLIC_FLAG = "04";
+const SM_PUBLIC_KEY =
+  "2b0378fdb303cf0486b06e2d2f1fc3f98ef426ecf5cc14f6c2fb587523f48b6e7573e51d89e8d9";
+const SM_PUBLIC_ALL_KEY = `${SM_PUBLIC_FLAG}${SM_PUBLIC_KEY}`;
 
 const Login = () => {
   const router = useRouter();
@@ -21,7 +27,12 @@ const Login = () => {
   const userLogin = async () => {
     const values = form.getFieldsValue();
 
-    await login(values.username, values.password, values.validateCode)
+    const { username, password, validateCode } = values;
+
+    const sm_username = SM.sm2.doEncrypt(username, SM_PUBLIC_ALL_KEY);
+    const sm_password = SM.sm2.doEncrypt(password, SM_PUBLIC_ALL_KEY);
+
+    await login(sm_username, sm_password, validateCode)
       .catch(async () => {
         const codeData = await getCodeImage();
         const url = URL.createObjectURL(codeData);
