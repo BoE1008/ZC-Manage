@@ -190,8 +190,16 @@ const User = () => {
     },
   ];
 
-  const onSelect = (selectedKeys) => {
-    setSelectDeptId(selectedKeys[0]);
+  // const onSelect = (selectedKeys) => {
+  //   setSelectDeptId(selectedKeys[0]);
+  // };
+
+  const onSelect = (keys, e) => {
+    if (!e.selected) {
+      setSelectDeptId([e.node.key]);
+      return;
+    }
+    setSelectDeptId(keys);
   };
 
   const defaultCheckedKeys = useMemo(() => {
@@ -211,14 +219,16 @@ const User = () => {
     <div className="w-full p-2" style={{ color: "#000" }}>
       <div className="w-full flex flex-row gap-x-10">
         <div className="min-w-[150px]">
-          <Tree
-            defaultExpandAll
-            // defaultExpandedKeys={["100"]}
-            defaultSelectedKeys={["100"]}
-            switcherIcon={<DownOutlined />}
-            onSelect={onSelect}
-            treeData={depts}
-          />
+          {depts.length > 0 && (
+            <Tree
+              defaultExpandAll={true}
+              // defaultExpandedKeys={["100"]}
+              defaultSelectedKeys={["100"]}
+              switcherIcon={<DownOutlined />}
+              onSelect={onSelect}
+              treeData={depts}
+            />
+          )}
         </div>
         <div className="flex-1">
           <div className="flex flex-row justify-between gap-y-3">

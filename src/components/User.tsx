@@ -5,6 +5,8 @@ import { DownOutlined } from "@ant-design/icons";
 import { logout } from "@/restApi/user";
 import { Modal, Form, Input, notification } from "antd";
 import { updatePassword } from "@/restApi/user";
+import { sm2 } from "sm-crypto";
+import { SM_PUBLIC_KEY } from "@/utils/const";
 
 const User = () => {
   const router = useRouter();
@@ -25,8 +27,14 @@ const User = () => {
 
   const handleConfirmPass = async () => {
     const values = form.getFieldsValue();
+    const { oldPassword, newPassword } = values;
+
+    const sm_old = sm2.doEncrypt(oldPassword, SM_PUBLIC_KEY, 0);
+    const sm_new = sm2.doEncrypt(newPassword, SM_PUBLIC_KEY, 0);
+
     const params = {
-      ...values,
+      oldPassword: `04${sm_old}`,
+      newPassword: `04${sm_new}`,
       id: session?.id,
     };
     await updatePassword(params);
@@ -125,7 +133,7 @@ const User = () => {
           </Form.Item>
           <Form.Item
             name="newPassword"
-            validateTrigger="onBlur"
+            validateTrigger="onChange"
             rules={[
               {
                 validator: (rule, value) => {
@@ -177,7 +185,10 @@ const User = () => {
               },
             ]}
           >
-            <Input.Password size="large" placeholder="请输入新密码" />
+            <Input.Password
+              size="large"
+              placeholder="不能小于六位，为字母、数字、特殊字符的组合！"
+            />
           </Form.Item>
         </Form>
       </Modal>
