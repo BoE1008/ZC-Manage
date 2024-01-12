@@ -485,18 +485,20 @@ const Item = ({ projectId, onClose, modalType }) => {
             <Space size="middle" className="flex flex-row !gap-x-1">
               {modalType === ModalType.Submit && projectState === "未完结" && (
                 <>
-                  <Tooltip title="编辑">
-                    <Button
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        padding: "3px 5px",
-                      }}
-                      onClick={() => handleEditYfOne(record)}
-                    >
-                      <EditTwoTone twoToneColor="#198348" />
-                    </Button>
-                  </Tooltip>
+                  {record?.state !== "审批通过" && (
+                    <Tooltip title="编辑">
+                      <Button
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          padding: "3px 5px",
+                        }}
+                        onClick={() => handleEditYfOne(record)}
+                      >
+                        <EditTwoTone twoToneColor="#198348" />
+                      </Button>
+                    </Tooltip>
+                  )}
                   {record?.state === "未提交" && (
                     <Tooltip title="提交至业务审核">
                       <Button
@@ -511,24 +513,28 @@ const Item = ({ projectId, onClose, modalType }) => {
                       </Button>
                     </Tooltip>
                   )}
-                  <Tooltip title="删除">
-                    <Popconfirm
-                      title="是否删除？"
-                      okButtonProps={{ style: { backgroundColor: "#198348" } }}
-                      getPopupContainer={(node) => node.parentElement}
-                      onConfirm={() => handleDeleteYF(record.id)}
-                    >
-                      <Button
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          padding: "3px 5px",
+                  {record?.state !== "审批通过" && (
+                    <Tooltip title="删除">
+                      <Popconfirm
+                        title="是否删除？"
+                        okButtonProps={{
+                          style: { backgroundColor: "#198348" },
                         }}
+                        getPopupContainer={(node) => node.parentElement}
+                        onConfirm={() => handleDeleteYF(record.id)}
                       >
-                        <DeleteTwoTone twoToneColor="#198348" />
-                      </Button>
-                    </Popconfirm>
-                  </Tooltip>
+                        <Button
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            padding: "3px 5px",
+                          }}
+                        >
+                          <DeleteTwoTone twoToneColor="#198348" />
+                        </Button>
+                      </Popconfirm>
+                    </Tooltip>
+                  )}
                 </>
               )}
               {modalType === ModalType.Approve &&
@@ -735,7 +741,7 @@ const Item = ({ projectId, onClose, modalType }) => {
           <Space size="middle" className="flex flex-row !gap-x-1">
             {modalType === ModalType.Submit && (
               <>
-                {projectState === "未完结" && (
+                {projectState === "未完结" && record?.state !== "审批通过" && (
                   <Tooltip title="编辑">
                     <Button
                       style={{
@@ -749,7 +755,7 @@ const Item = ({ projectId, onClose, modalType }) => {
                     </Button>
                   </Tooltip>
                 )}
-                {projectState === "未完结" && (
+                {projectState === "未完结" && record?.state !== "审批通过" && (
                   <Tooltip title="添加应付">
                     <Button
                       style={{
@@ -777,7 +783,7 @@ const Item = ({ projectId, onClose, modalType }) => {
                     </Button>
                   </Tooltip>
                 )}
-                {projectState === "未完结" && (
+                {projectState === "未完结" && record?.state !== "审批通过" && (
                   <Tooltip title="删除">
                     <Popconfirm
                       title="是否删除？"

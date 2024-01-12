@@ -141,15 +141,15 @@ const Project = () => {
     };
   }, [data]);
 
-  // useEffect(() => {
-  //   const chart = echarts.init(chartRef.current);
+  useEffect(() => {
+    const chart = echarts.init(chartRef.current);
 
-  //   chart.setOption(option);
+    chart.setOption(option);
 
-  //   return () => {
-  //     chart.dispose();
-  //   };
-  // }, [option]);
+    return () => {
+      chart.dispose();
+    };
+  }, [option]);
 
   const handleAdd = async () => {
     form.setFieldsValue(initialValues);
@@ -605,7 +605,10 @@ const Project = () => {
         style={{ width: "100%", minHeight: "1000px", marginTop: "100px" }}
         ref={chartRef}
       ></div> */}
-      {/* <div style={{ width: '100%', minHeight: "1000px", marginTop: '100px' }} ref={chartRef}></div> */}
+      <div
+        style={{ width: "100%", minHeight: "1000px", marginTop: "100px" }}
+        ref={chartRef}
+      ></div>
     </div>
   );
 };

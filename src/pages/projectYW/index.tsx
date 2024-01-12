@@ -335,7 +335,9 @@ const Project = () => {
       align: "center",
       key: "action",
       render: (_, record: Company) => {
-        const isFinished = record.state === "已完结";
+        const unSubmit = record.state === "未完结";
+        const isApprove = record.state === "待完结审批";
+        // const isFinished = record.state === "已完结";
         return (
           <Space size="middle" className="flex flex-row !gap-x-1">
             <Tooltip title="查看应收应付">
@@ -351,7 +353,7 @@ const Project = () => {
               </Button>
             </Tooltip>
 
-            {!isFinished && (
+            {isApprove && (
               <Tooltip title="完成审核">
                 <Popconfirm
                   title="是否通过审核？"
@@ -372,7 +374,7 @@ const Project = () => {
               </Tooltip>
             )}
 
-            {
+            {!unSubmit && (
               <Tooltip title="退回">
                 <Popconfirm
                   title="是否退回申请？"
@@ -391,7 +393,7 @@ const Project = () => {
                   </Button>
                 </Popconfirm>
               </Tooltip>
-            }
+            )}
 
             {/* <Tooltip title="查看审核日志">
               <Button
