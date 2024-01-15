@@ -269,22 +269,11 @@ const InvoicingSubmit = () => {
       key: "action",
       render: (_, record) => {
         const isFinished = record.state === "审批通过";
+        const isSubmit = record.state === '待业务审批'
 
         return (
           <Space size="middle" className="flex flex-row !gap-x-1">
-            {/* {!isFinished&&<Tooltip title="编辑">
-              <Button
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "3px 5px",
-                }}
-                onClick={() => handleEditOne(record)}
-              >
-                <EditTwoTone twoToneColor="#198348" />
-              </Button>
-            </Tooltip>} */}
-            {!isFinished && (
+            {isSubmit && (
               <Tooltip title="提交至财务审核">
                 <Popconfirm
                   title="提交至财务审核？"
@@ -337,25 +326,6 @@ const InvoicingSubmit = () => {
                 <CalendarTwoTone twoToneColor="#198348" />
               </Button>
             </Tooltip>
-            {/* {!isFinished && (
-              <Tooltip title="删除">
-                <Popconfirm
-                  title="是否删除？"
-                  okButtonProps={{ style: { backgroundColor: "#198348" } }}
-                  onConfirm={() => handleDeleteOne(record.id)}
-                >
-                  <Button
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      padding: "3px 5px",
-                    }}
-                  >
-                    <DeleteTwoTone twoToneColor="#198348" />
-                  </Button>
-                </Popconfirm>
-              </Tooltip>
-            )} */}
           </Space>
         );
       },

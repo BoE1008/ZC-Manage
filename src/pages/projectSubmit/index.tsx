@@ -126,11 +126,6 @@ const Project = () => {
     setLoading(false);
   };
 
-  const handleLogs = async (id: string) => {
-    const res = await logsOne(id);
-    setLogs(res.entity.data);
-  };
-
   const handleSubmitOne = async (id: string) => {
     await submitOne(id);
     notification.success({ message: "提交成功" });
@@ -151,6 +146,7 @@ const Project = () => {
       dataIndex: "projectNum",
       align: "center",
       key: "projectNum",
+      fixed: "left",
     },
     {
       title: "项目名称",
@@ -159,6 +155,15 @@ const Project = () => {
       dataIndex: "name",
       align: "center",
       key: "name",
+      fixed: "left",
+      ellipsis: {
+        showTitle: false,
+      },
+      render: (name) => (
+        <Tooltip placement="topLeft" title={name}>
+          {name}
+        </Tooltip>
+      ),
     },
     {
       title: "产品",
@@ -175,6 +180,14 @@ const Project = () => {
       dataIndex: "customName",
       align: "center",
       key: "customName",
+      ellipsis: {
+        showTitle: false,
+      },
+      render: (customName) => (
+        <Tooltip placement="topLeft" title={customName}>
+          {customName}
+        </Tooltip>
+      ),
     },
     {
       title: "品牌",
@@ -199,6 +212,8 @@ const Project = () => {
       dataIndex: "projectDate",
       align: "center",
       key: "projectDate",
+      sorter: (a, b) =>
+        new Date(a.projectDate).getTime() - new Date(b.projectDate).getTime(),
     },
     {
       title: "服务内容",
@@ -268,6 +283,22 @@ const Project = () => {
       align: "center",
       key: "state",
       render: (record) => `${record?.state}(${record?.waitApproveNum})`,
+      filters: [
+        {
+          text: "未完结",
+          value: "未完结",
+        },
+        {
+          text: "待完结审批",
+          value: "待完结审批",
+        },
+        {
+          text: "已完结",
+          value: "已完结",
+        },
+      ],
+      filterSearch: true,
+      onFilter: (value: string, record) => record.state === value,
     },
     {
       title: "备注",
@@ -282,6 +313,7 @@ const Project = () => {
       label: "操作",
       value: "操作",
       align: "center",
+      fixed: "right",
       key: "action",
       render: (_, record) => {
         const unFinished = record.state === "未完结";
@@ -393,7 +425,7 @@ const Project = () => {
   return (
     <div className="w-full p-2" style={{ color: "#000" }}>
       <div className="flex flex-row gap-y-3 justify-between">
-        <Space>
+        <Space className="flex flex-row justify-center items-center">
           <Button
             onClick={handleAdd}
             type="primary"
@@ -426,7 +458,11 @@ const Project = () => {
             title="显隐列"
             trigger="click"
           >
-            <AppstoreTwoTone twoToneColor="#198348" />
+            <AppstoreTwoTone
+              style={{ fontSize: "30px" }}
+              twoToneColor="#198348"
+              className="mr-5"
+            />
           </Popover>
           <Input
             placeholder="名称"
@@ -440,7 +476,7 @@ const Project = () => {
         bordered
         loading={loading}
         dataSource={data?.entity.data}
-        columns={displayColumn?.length > 0 ? displayColumn : columns}
+        columns={displayColumn}
         scroll={{ scrollToFirstRowOnChange: true, y: "800px" }}
         pagination={{
           // 设置总条数

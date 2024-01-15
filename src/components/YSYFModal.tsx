@@ -611,19 +611,7 @@ const Item = ({ projectId, onClose, modalType }) => {
         <Table
           bordered
           loading={loading}
-          dataSource={
-            modalType === ModalType.Approve
-              ? record.yf_data
-                  .map((item, index) => ({
-                    ...item,
-                    key: index,
-                  }))
-                  .filter((c) => c.state !== "未提交")
-              : record.yf_data.map((item, index) => ({
-                  ...item,
-                  key: index,
-                }))
-          }
+          dataSource={record.yf_data}
           columns={littleTableColumn}
           pagination={false}
         />
@@ -963,11 +951,7 @@ const Item = ({ projectId, onClose, modalType }) => {
         <Table
           bordered
           loading={loading}
-          dataSource={
-            modalType === ModalType.Approve
-              ? data?.entity?.data?.filter((c) => c.state !== "未提交")
-              : data?.entity?.data
-          }
+          dataSource={data?.entity?.data}
           columns={columns}
           expandable={{
             expandedRowRender: (record) => expandedRowRender(record),
@@ -1040,7 +1024,7 @@ const Item = ({ projectId, onClose, modalType }) => {
             <Form.Item label="汇率" name="ysExrate">
               <InputNumber placeholder="请输入汇率" style={{ width: "100%" }} />
             </Form.Item>
-            <Form.Item label="明细" name="ysPurpose">
+            <Form.Item label="明细" name="ysPurpose" required>
               <Input.TextArea placeholder="明细" maxLength={100} />
             </Form.Item>
 
@@ -1102,7 +1086,7 @@ const Item = ({ projectId, onClose, modalType }) => {
             <Form.Item label="美金" labelCol={{ span: 5 }} name="yfDollar">
               <InputNumber placeholder="请输入金额" style={{ width: "100%" }} />
             </Form.Item>
-            <Form.Item label="明细" labelCol={{ span: 5 }} name="yfPurpose">
+            <Form.Item label="明细" labelCol={{ span: 5 }} name="yfPurpose" required>
               <Input.TextArea placeholder="明细" maxLength={100} />
             </Form.Item>
             <Form.Item label="汇率" labelCol={{ span: 5 }} name="yfExrate">

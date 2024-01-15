@@ -71,18 +71,6 @@ const Role = () => {
     })();
   }, [page, pageSize]);
 
-  const handleAdd = async () => {
-    setOperation(Operation.Add);
-    setModalOpen(true);
-  };
-
-  const handleEditOne = (record) => {
-    setOperation(Operation.Edit);
-    setEditId(record.id);
-    form.setFieldsValue(record);
-    setModalOpen(true);
-  };
-
   const handleOk = async () => {
     form.validateFields();
     const values = form.getFieldsValue();
@@ -132,19 +120,6 @@ const Role = () => {
   const handleLogsOne = async (id: string) => {
     const res = await logsOne(id);
     setLogs(res.entity.data);
-  };
-
-  const handleDeleteOne = async (id: string) => {};
-
-  const validateName = () => {
-    return {
-      validator: (_, value) => {
-        if (value.trim() !== "") {
-          return Promise.resolve();
-        }
-        return Promise.reject(new Error("请输入客户名称"));
-      },
-    };
   };
 
   const customerFilterOption = (
@@ -242,9 +217,11 @@ const Role = () => {
       key: "action",
       render: (_, record) => {
         const isFinished = record.state === "审批通过";
+        const isSubmit = record.state === "待财务审核";
+
         return (
           <Space size="middle" className="flex flex-row !gap-x-1">
-            {!isFinished && (
+            {isSubmit && (
               <Tooltip title="审核通过">
                 <Popconfirm
                   title="是否批准？"
@@ -284,20 +261,6 @@ const Role = () => {
                 </Popconfirm>
               </Tooltip>
             )}
-            {/* {!isFinished && (
-              <Tooltip title="编辑">
-                <Button
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    padding: "3px 5px",
-                  }}
-                  onClick={() => handleEditOne(record)}
-                >
-                  <EditTwoTone twoToneColor="#198348" />
-                </Button>
-              </Tooltip>
-            )} */}
             <Tooltip title="查看审核日志">
               <Button
                 style={{
@@ -310,25 +273,6 @@ const Role = () => {
                 <CalendarTwoTone twoToneColor="#198348" />
               </Button>
             </Tooltip>
-            {/* {!isFinished && (
-              <Tooltip title="删除">
-                <Popconfirm
-                  title="是否删除？"
-                  okButtonProps={{ style: { backgroundColor: "#198348" } }}
-                  onConfirm={() => handleDeleteOne(record.id)}
-                >
-                  <Button
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      padding: "3px 5px",
-                    }}
-                  >
-                    <DeleteTwoTone twoToneColor="#198348" />
-                  </Button>
-                </Popconfirm>
-              </Tooltip>
-            )} */}
           </Space>
         );
       },
@@ -484,7 +428,7 @@ const Role = () => {
         />
       )}
 
-      {!!detail && (
+      {!!rejectId && (
         <RejectModal
           open={!!rejectId}
           onClose={() => setRejectId(undefined)}

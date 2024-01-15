@@ -12,6 +12,7 @@ import {
   List,
   Avatar,
   Tooltip,
+  Divider,
   Popconfirm,
 } from "antd";
 import {
@@ -233,13 +234,23 @@ const Project = () => {
       title: "项目编号",
       dataIndex: "projectNum",
       align: "center",
+      fixed: 'left',
       key: "projectNum",
     },
     {
       title: "项目名称",
       dataIndex: "name",
       align: "center",
+      fixed: 'left',
       key: "name",
+      ellipsis: {
+        showTitle: false,
+      },
+      render: (name) => (
+        <Tooltip placement="topLeft" title={name}>
+          {name}
+        </Tooltip>
+      ),
     },
     {
       title: "产品",
@@ -252,6 +263,14 @@ const Project = () => {
       dataIndex: "customName",
       align: "center",
       key: "customName",
+      ellipsis: {
+        showTitle: false,
+      },
+      render: (customName) => (
+        <Tooltip placement="topLeft" title={customName}>
+          {customName}
+        </Tooltip>
+      ),
     },
     {
       title: "品牌",
@@ -270,6 +289,8 @@ const Project = () => {
       dataIndex: "projectDate",
       align: "center",
       key: "projectDate",
+      sorter: (a, b) =>
+        new Date(a.projectDate).getTime() - new Date(b.projectDate).getTime(),
     },
     {
       title: "服务内容",
@@ -323,6 +344,22 @@ const Project = () => {
       align: "center",
       key: "state",
       render: (record) => `${record?.state}(${record?.waitApproveNum})`,
+      filters: [
+        {
+          text: "未完结",
+          value: "未完结",
+        },
+        {
+          text: "待完结审批",
+          value: "待完结审批",
+        },
+        {
+          text: "已完结",
+          value: "已完结",
+        },
+      ],
+      filterSearch: true,
+      onFilter: (value: string, record) => record.state === value
     },
     {
       title: "备注",
@@ -334,6 +371,7 @@ const Project = () => {
       title: "操作",
       align: "center",
       key: "action",
+      fixed: 'right',
       render: (_, record: Company) => {
         return (
           <Space size="middle" className="flex flex-row !gap-x-1">
@@ -600,6 +638,8 @@ const Project = () => {
           onReject={(value) => handleRejectOne(rejectId, value)}
         />
       )}
+
+      <Divider />
 
       {/* <div
         style={{ width: "100%", minHeight: "1000px", marginTop: "100px" }}

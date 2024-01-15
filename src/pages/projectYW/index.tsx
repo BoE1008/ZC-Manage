@@ -157,13 +157,6 @@ const Project = () => {
     setModalOpen(true);
   };
 
-  const handleEditOne = (record: Company) => {
-    setOperation(Operation.Edit);
-    setEditId(record.id);
-    form.setFieldsValue(record);
-    setModalOpen(true);
-  };
-
   const handleOk = async () => {
     form.validateFields();
     const values = form.getFieldsValue();
@@ -186,18 +179,6 @@ const Project = () => {
     }
   };
 
-  const handleDeleteOne = async (id: string) => {
-    await deleteProject(id);
-    const data = await getProjectsApproveList(page, pageSize, searchValue);
-    setData(data);
-    setLoading(false);
-  };
-
-  const handleDetail = async (id) => {
-    const res = await getProjectDetailById(id);
-    setDetail(res.entity.data);
-  };
-
   const handleApproveOne = async (id) => {
     await approveOne(id);
     notification.success({ message: "审核完成" });
@@ -216,11 +197,6 @@ const Project = () => {
     setLoading(false);
   };
 
-  const handleLogs = async (id: string) => {
-    const res = await logsOne(id);
-    setLogs(res.entity.data);
-  };
-
   const handleExport = async () => {
     const file = await exportProject();
     window.open(
@@ -233,13 +209,23 @@ const Project = () => {
       title: "项目编号",
       dataIndex: "projectNum",
       align: "center",
+      fixed: "left",
       key: "projectNum",
     },
     {
       title: "项目名称",
       dataIndex: "name",
       align: "center",
+      fixed: "left",
       key: "name",
+      ellipsis: {
+        showTitle: false,
+      },
+      render: (name) => (
+        <Tooltip placement="topLeft" title={name}>
+          {name}
+        </Tooltip>
+      ),
     },
     {
       title: "产品",
@@ -252,6 +238,14 @@ const Project = () => {
       dataIndex: "customName",
       align: "center",
       key: "customName",
+      ellipsis: {
+        showTitle: false,
+      },
+      render: (customName) => (
+        <Tooltip placement="topLeft" title={customName}>
+          {customName}
+        </Tooltip>
+      ),
     },
     {
       title: "品牌",
@@ -270,6 +264,8 @@ const Project = () => {
       dataIndex: "projectDate",
       align: "center",
       key: "projectDate",
+      sorter: (a, b) =>
+        new Date(a.projectDate).getTime() - new Date(b.projectDate).getTime(),
     },
     {
       title: "服务内容",
@@ -323,6 +319,22 @@ const Project = () => {
       align: "center",
       key: "state",
       render: (record) => `${record?.state}(${record?.waitApproveNum})`,
+      filters: [
+        {
+          text: "未完结",
+          value: "未完结",
+        },
+        {
+          text: "待完结审批",
+          value: "待完结审批",
+        },
+        {
+          text: "已完结",
+          value: "已完结",
+        },
+      ],
+      filterSearch: true,
+      onFilter: (value: string, record) => record.state === value,
     },
     {
       title: "备注",
@@ -333,6 +345,7 @@ const Project = () => {
     {
       title: "操作",
       align: "center",
+      fixed: "right",
       key: "action",
       render: (_, record: Company) => {
         const unSubmit = record.state === "未完结";
@@ -394,37 +407,6 @@ const Project = () => {
                 </Popconfirm>
               </Tooltip>
             )}
-
-            {/* <Tooltip title="查看审核日志">
-              <Button
-                onClick={() => handleLogs(record.id)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "3px 5px",
-                }}
-              >
-                <CalendarTwoTone twoToneColor="#198348" />
-              </Button>
-            </Tooltip> */}
-
-            {/* <Tooltip title="删除">
-              <Popconfirm
-                title="是否删除？"
-                okButtonProps={{ style: { backgroundColor: "#198348" } }}
-                onConfirm={() => handleDeleteOne(record.id)}
-              >
-                <Button
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    padding: "3px 5px",
-                  }}
-                >
-                  <DeleteTwoTone twoToneColor="#198348" />
-                </Button>
-              </Popconfirm>
-            </Tooltip> */}
           </Space>
         );
       },
