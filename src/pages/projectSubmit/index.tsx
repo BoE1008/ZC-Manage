@@ -54,6 +54,7 @@ const Project = () => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchValue, setSearchValue] = useState("");
+  const [searchNumValue, setSearchNumValue] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [operation, setOperation] = useState<Operation>(Operation.Add);
   const [logs, setLogs] = useState();
@@ -68,13 +69,46 @@ const Project = () => {
 
   const [projectId, setProjectId] = useState();
 
+  const [projectDateSort, setProjectDateSort] = useState("1");
+  const [productId, setProductId] = useState();
+  const [projectType, setProjectType] = useState();
+  const [projectBrand, setProjectBrand] = useState();
+  const [projectState, setProjectState] = useState();
+
   useEffect(() => {
     (async () => {
-      const data = await getProjectsSubmitList(page, pageSize, searchValue);
+      const res = await getDictById();
+      setDict(res.entity);
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      const data = await getProjectsSubmitList(
+        page,
+        pageSize,
+        searchValue,
+        searchNumValue,
+        projectDateSort,
+        productId,
+        projectType,
+        projectBrand,
+        projectState
+      );
       setData(data);
       setLoading(false);
     })();
-  }, [page, pageSize, searchValue]);
+  }, [
+    page,
+    pageSize,
+    searchValue,
+    searchNumValue,
+    projectDateSort,
+    productId,
+    projectType,
+    projectBrand,
+    projectState,
+  ]);
 
   const handleAdd = async () => {
     form.setFieldsValue(initialValues);
@@ -110,7 +144,12 @@ const Project = () => {
         : await updateProject(editId, params);
     if (code === 200) {
       setModalOpen(false);
-      const data = await getProjectsSubmitList(page, pageSize, searchValue);
+      const data = await getProjectsSubmitList(
+        page,
+        pageSize,
+        searchValue,
+        searchNumValue
+      );
       setData(data);
       notification.success({
         message: operation === Operation.Add ? "添加成功" : "编辑成功",
@@ -121,7 +160,12 @@ const Project = () => {
 
   const handleDeleteOne = async (id: string) => {
     await deleteProject(id);
-    const data = await getProjectsSubmitList(page, pageSize, searchValue);
+    const data = await getProjectsSubmitList(
+      page,
+      pageSize,
+      searchValue,
+      searchNumValue
+    );
     setData(data);
     setLoading(false);
   };
@@ -138,259 +182,306 @@ const Project = () => {
     );
   };
 
-  const columns = [
+  const stateFilters = [
     {
-      title: "项目编号",
-      label: "项目编号",
-      value: "项目编号",
-      dataIndex: "projectNum",
-      align: "center",
-      key: "projectNum",
-      fixed: "left",
+      text: "未完结",
+      value: "0",
     },
     {
-      title: "项目名称",
-      label: "项目名称",
-      value: "项目名称",
-      dataIndex: "name",
-      align: "center",
-      key: "name",
-      fixed: "left",
-      ellipsis: {
-        showTitle: false,
+      text: "待完结审批",
+      value: "1",
+    },
+    {
+      text: "已完结",
+      value: "2",
+    },
+  ];
+
+  const columns = useMemo(() => {
+    return [
+      {
+        title: "项目编号",
+        label: "项目编号",
+        value: "项目编号",
+        dataIndex: "projectNum",
+        align: "center",
+        key: "projectNum",
+        fixed: "left",
       },
-      render: (name) => (
-        <Tooltip placement="topLeft" title={name}>
-          {name}
-        </Tooltip>
-      ),
-    },
-    {
-      title: "产品",
-      label: "产品",
-      value: "产品",
-      dataIndex: "typeName",
-      align: "center",
-      key: "typeName",
-    },
-    {
-      title: "客户",
-      label: "客户",
-      value: "客户",
-      dataIndex: "customName",
-      align: "center",
-      key: "customName",
-      ellipsis: {
-        showTitle: false,
+      {
+        title: "项目名称",
+        label: "项目名称",
+        value: "项目名称",
+        dataIndex: "name",
+        align: "center",
+        key: "name",
+        fixed: "left",
+        ellipsis: {
+          showTitle: false,
+        },
+        render: (name) => (
+          <Tooltip placement="topLeft" title={name}>
+            {name}
+          </Tooltip>
+        ),
       },
-      render: (customName) => (
-        <Tooltip placement="topLeft" title={customName}>
-          {customName}
-        </Tooltip>
-      ),
-    },
-    {
-      title: "品牌",
-      label: "品牌",
-      value: "品牌",
-      dataIndex: "brandName",
-      align: "center",
-      key: "brandName",
-    },
-    {
-      title: "货物",
-      label: "货物",
-      value: "货物",
-      dataIndex: "productName",
-      align: "center",
-      key: "productName",
-    },
-    {
-      title: "发运日期",
-      label: "发运日期",
-      value: "发运日期",
-      dataIndex: "projectDate",
-      align: "center",
-      key: "projectDate",
-      sorter: (a, b) =>
-        new Date(a.projectDate).getTime() - new Date(b.projectDate).getTime(),
-    },
-    {
-      title: "服务内容",
-      label: "服务内容",
-      value: "服务内容",
-      dataIndex: "serviceName",
-      align: "center",
-      key: "serviceName",
-    },
-    {
-      title: "班列号/船名",
-      label: "班列号/船名",
-      value: "班列号/船名",
-      dataIndex: "trainNumName",
-      align: "center",
-      key: "trainNumName",
-    },
-    {
-      title: "数量",
-      label: "数量",
-      value: "数量",
-      dataIndex: "num",
-      align: "center",
-      key: "num",
-    },
-    {
-      title: "收入小计",
-      label: "收入小计",
-      value: "收入小计",
-      // dataIndex: "proIncome",
-      align: "center",
-      key: "proIncome",
-      render: (record) => formatNumber(record?.proIncome),
-    },
-    {
-      title: "成本小计",
-      label: "成本小计",
-      value: "成本小计",
-      // dataIndex: "proCost",
-      align: "center",
-      key: "proCost",
-      render: (record) => formatNumber(record?.proCost),
-    },
-    {
-      title: "利润",
-      label: "利润",
-      value: "利润",
-      // dataIndex: "profit",
-      align: "center",
-      key: "profit",
-      render: (record) => formatNumber(record?.profit),
-    },
-    {
-      title: "扣除后利润",
-      label: "扣除后利润",
-      value: "扣除后利润",
-      // dataIndex: "deductProfit",
-      align: "center",
-      key: "deductProfit",
-      render: (record) => formatNumber(record?.deductProfit),
-    },
-    {
-      title: "项目状态",
-      label: "项目状态",
-      value: "项目状态",
-      // dataIndex: "state",
-      align: "center",
-      key: "state",
-      render: (record) => `${record?.state}(${record?.waitApproveNum})`,
-      filters: [
-        {
-          text: "未完结",
-          value: "未完结",
+      {
+        title: "产品",
+        label: "产品",
+        value: "产品",
+        dataIndex: "typeName",
+        align: "center",
+        key: "typeName",
+        filterMultiple: false,
+        filters: dict
+          ?.find((con) => con.code === "sys_project_type")
+          .childList?.map((con) => ({
+            value: con.id,
+            text: con.dictLabel,
+          })),
+        filterSearch: true,
+        onFilter: (value: string, record) => {
+          setProjectType(value);
+          return record.typeId === value;
         },
-        {
-          text: "待完结审批",
-          value: "待完结审批",
+      },
+      {
+        title: "客户",
+        label: "客户",
+        value: "客户",
+        dataIndex: "customName",
+        align: "center",
+        key: "customName",
+        ellipsis: {
+          showTitle: false,
         },
-        {
-          text: "已完结",
-          value: "已完结",
+        render: (customName) => (
+          <Tooltip placement="topLeft" title={customName}>
+            {customName}
+          </Tooltip>
+        ),
+      },
+      {
+        title: "品牌",
+        label: "品牌",
+        value: "品牌",
+        dataIndex: "brandName",
+        align: "center",
+        key: "brandName",
+        filterMultiple: false,
+        filters: dict
+          ?.find((con) => con.code === "sys_project_brand")
+          .childList?.map((con) => ({
+            value: con.id,
+            text: con.dictLabel,
+          })),
+        filterSearch: true,
+        onFilter: (value: string, record) => {
+          setProjectBrand(value);
+          return record.brandId === value;
         },
-      ],
-      filterSearch: true,
-      onFilter: (value: string, record) => record.state === value,
-    },
-    {
-      title: "备注",
-      label: "备注",
-      value: "备注",
-      dataIndex: "remark",
-      align: "center",
-      key: "remark",
-    },
-    {
-      title: "操作",
-      label: "操作",
-      value: "操作",
-      align: "center",
-      fixed: "right",
-      key: "action",
-      render: (_, record) => {
-        const unFinished = record.state === "未完结";
-        return (
-          <Space size="middle" className="flex flex-row !gap-x-1">
-            {unFinished && (
-              <Tooltip title={<span>编辑</span>}>
+      },
+      {
+        title: "货物",
+        label: "货物",
+        value: "货物",
+        dataIndex: "productName",
+        align: "center",
+        key: "productName",
+        filterMultiple: false,
+        filters: dict
+          ?.find((con) => con.code === "sys_product_type")
+          .childList?.map((con) => ({
+            value: con.id,
+            text: con.dictLabel,
+          })),
+        filterSearch: true,
+        onFilter: (value: string, record) => {
+          setProductId(value);
+          return record.productId === value;
+        },
+      },
+      {
+        title: "发运日期",
+        label: "发运日期",
+        value: "发运日期",
+        dataIndex: "projectDate",
+        align: "center",
+        key: "projectDate",
+        sortDirections: ["ascend", "descend"],
+        sorter: true,
+      },
+      {
+        title: "服务内容",
+        label: "服务内容",
+        value: "服务内容",
+        dataIndex: "serviceName",
+        align: "center",
+        key: "serviceName",
+      },
+      {
+        title: "班列号/船名",
+        label: "班列号/船名",
+        value: "班列号/船名",
+        dataIndex: "trainNumName",
+        align: "center",
+        key: "trainNumName",
+      },
+      {
+        title: "数量",
+        label: "数量",
+        value: "数量",
+        dataIndex: "num",
+        align: "center",
+        key: "num",
+      },
+      {
+        title: "收入小计",
+        label: "收入小计",
+        value: "收入小计",
+        // dataIndex: "proIncome",
+        align: "center",
+        key: "proIncome",
+        render: (record) => formatNumber(record?.proIncome),
+      },
+      {
+        title: "成本小计",
+        label: "成本小计",
+        value: "成本小计",
+        // dataIndex: "proCost",
+        align: "center",
+        key: "proCost",
+        render: (record) => formatNumber(record?.proCost),
+      },
+      {
+        title: "利润",
+        label: "利润",
+        value: "利润",
+        // dataIndex: "profit",
+        align: "center",
+        key: "profit",
+        render: (record) => formatNumber(record?.profit),
+      },
+      {
+        title: "扣除后利润",
+        label: "扣除后利润",
+        value: "扣除后利润",
+        // dataIndex: "deductProfit",
+        align: "center",
+        key: "deductProfit",
+        render: (record) => formatNumber(record?.deductProfit),
+      },
+      {
+        title: "项目状态",
+        label: "项目状态",
+        value: "项目状态",
+        // dataIndex: "state",
+        align: "center",
+        key: "state",
+        render: (record) => `${record?.state}(${record?.waitApproveNum})`,
+        filterMultiple: false,
+        filters: stateFilters,
+        filterSearch: true,
+        onFilter: (value: string, record) => {
+          setProjectState(value);
+          return (
+            record.state ===
+            stateFilters.find((item) => value === item.value)?.text
+          );
+        },
+      },
+      {
+        title: "备注",
+        label: "备注",
+        value: "备注",
+        dataIndex: "remark",
+        align: "center",
+        key: "remark",
+      },
+      {
+        title: "操作",
+        label: "操作",
+        value: "操作",
+        align: "center",
+        fixed: "right",
+        key: "action",
+        render: (_, record) => {
+          const unFinished = record.state === "未完结";
+          return (
+            <Space size="middle" className="flex flex-row !gap-x-1">
+              {unFinished && (
+                <Tooltip title={<span>编辑</span>}>
+                  <Button
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      padding: "3px 5px",
+                    }}
+                    onClick={() => handleEditOne(record)}
+                  >
+                    <EditTwoTone twoToneColor="#198348" />
+                  </Button>
+                </Tooltip>
+              )}
+              <Tooltip title={<span>查看应收应付</span>}>
                 <Button
+                  onClick={() => setProjectId(record.id)}
                   style={{
                     display: "flex",
                     alignItems: "center",
                     padding: "3px 5px",
                   }}
-                  onClick={() => handleEditOne(record)}
                 >
-                  <EditTwoTone twoToneColor="#198348" />
+                  <ProfileTwoTone twoToneColor="#198348" />
                 </Button>
               </Tooltip>
-            )}
-            <Tooltip title={<span>查看应收应付</span>}>
-              <Button
-                onClick={() => setProjectId(record.id)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "3px 5px",
-                }}
-              >
-                <ProfileTwoTone twoToneColor="#198348" />
-              </Button>
-            </Tooltip>
 
-            {unFinished && (
-              <Tooltip title={<span>提交业务审核</span>}>
-                <Popconfirm
-                  title="是否提交审核？"
-                  getPopupContainer={(node) => node.parentElement}
-                  okButtonProps={{ style: { backgroundColor: "#198348" } }}
-                  onConfirm={() => handleSubmitOne(record.id)}
-                >
-                  <Button
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      padding: "3px 5px",
-                    }}
+              {unFinished && (
+                <Tooltip title={<span>提交业务审核</span>}>
+                  <Popconfirm
+                    title="是否提交审核？"
+                    getPopupContainer={(node) => node.parentElement}
+                    okButtonProps={{ style: { backgroundColor: "#198348" } }}
+                    onConfirm={() => handleSubmitOne(record.id)}
                   >
-                    <InteractionTwoTone twoToneColor="#198348" />
-                  </Button>
-                </Popconfirm>
-              </Tooltip>
-            )}
-            {unFinished && (
-              <Tooltip title={<span>删除</span>}>
-                <Popconfirm
-                  title="是否删除？"
-                  okButtonProps={{ style: { backgroundColor: "#198348" } }}
-                  getPopupContainer={(node) => node.parentElement}
-                  onConfirm={() => handleDeleteOne(record.id)}
-                >
-                  <Button
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      padding: "3px 5px",
-                    }}
+                    <Button
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        padding: "3px 5px",
+                      }}
+                    >
+                      <InteractionTwoTone twoToneColor="#198348" />
+                    </Button>
+                  </Popconfirm>
+                </Tooltip>
+              )}
+              {unFinished && (
+                <Tooltip title={<span>删除</span>}>
+                  <Popconfirm
+                    title="是否删除？"
+                    okButtonProps={{ style: { backgroundColor: "#198348" } }}
+                    getPopupContainer={(node) => node.parentElement}
+                    onConfirm={() => handleDeleteOne(record.id)}
                   >
-                    <DeleteTwoTone twoToneColor="#198348" />
-                  </Button>
-                </Popconfirm>
-              </Tooltip>
-            )}
-          </Space>
-        );
+                    <Button
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        padding: "3px 5px",
+                      }}
+                    >
+                      <DeleteTwoTone twoToneColor="#198348" />
+                    </Button>
+                  </Popconfirm>
+                </Tooltip>
+              )}
+            </Space>
+          );
+        },
       },
-    },
-  ];
+    ];
+  }, [dict]);
 
   const [options, setOptions] = useState(columns.map((c) => c.value));
 
@@ -420,7 +511,17 @@ const Project = () => {
         return con === item.value;
       });
     });
-  }, [options]);
+  }, [options, dict]);
+
+  const handleTableChange = (pagination, filters, sorter) => {
+    if (sorter.order === "ascend") {
+      setProjectDateSort("0");
+    } else if (sorter.order === "descend") {
+      setProjectDateSort("1");
+    } else {
+      setProjectDateSort("");
+    }
+  };
 
   return (
     <div className="w-full p-2" style={{ color: "#000" }}>
@@ -465,43 +566,53 @@ const Project = () => {
             />
           </Popover>
           <Input
-            placeholder="名称"
+            placeholder="按项目名称搜索"
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
+          />
+          <Input
+            placeholder="按项目编号搜索"
+            value={searchNumValue}
+            onChange={(e) => setSearchNumValue(e.target.value)}
           />
         </Space>
       </div>
 
-      <Table
-        bordered
-        loading={loading}
-        dataSource={data?.entity.data}
-        columns={displayColumn}
-        scroll={{ scrollToFirstRowOnChange: true, y: "800px" }}
-        pagination={{
-          // 设置总条数
-          total: data?.entity.total,
-          // 显示总条数
-          showTotal: (total) => `共 ${total} 条`,
-          // 是否可以改变 pageSize
-          showSizeChanger: true,
+      {
+        <Table
+          bordered
+          loading={loading}
+          dataSource={data?.entity.data}
+          columns={displayColumn}
+          rowKey={(record) => record.projectNum}
+          scroll={{ scrollToFirstRowOnChange: true, y: "800px" }}
+          pagination={{
+            // 设置总条数
+            total: data?.entity.total,
+            // 显示总条数
+            showTotal: (total) => `共 ${total} 条`,
+            // 是否可以改变 pageSize
+            showSizeChanger: true,
 
-          // 改变页码时
-          onChange: async (page) => {
-            setPage(page);
-          },
-          // pageSize 变化的回调
-          onShowSizeChange: async (page, size) => {
-            setPage(page);
-            setPageSize(size);
-          },
-        }}
-        onRow={(record) => {
-          return {
-            onDoubleClick: () => setProjectId(record.id),
-          };
-        }}
-      />
+            // 改变页码时
+            onChange: async (page) => {
+              setPage(page);
+            },
+            // pageSize 变化的回调
+            onShowSizeChange: async (page, size) => {
+              setPage(page);
+              setPageSize(size);
+            },
+          }}
+          onRow={(record) => {
+            return {
+              onDoubleClick: () => setProjectId(record.id),
+            };
+          }}
+          onChange={handleTableChange}
+        />
+      }
+
       <Modal
         centered
         destroyOnClose

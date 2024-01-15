@@ -271,7 +271,7 @@ const InvoicingSubmit = () => {
       key: "action",
       render: (_, record) => {
         const isFinished = record.state === "审批通过";
-        const isSubmit = record.state === "待财务审批"
+        const isSubmit = record.state === "待财务审批";
         return (
           <Space size="middle" className="flex flex-row !gap-x-1">
             {isSubmit && (
@@ -296,7 +296,7 @@ const InvoicingSubmit = () => {
                 </Popconfirm>
               </Tooltip>
             )}
-            {!isFinished && (
+            {
               <Tooltip title="退回申请">
                 <Popconfirm
                   title="是否退回申请？"
@@ -315,7 +315,7 @@ const InvoicingSubmit = () => {
                   </Button>
                 </Popconfirm>
               </Tooltip>
-            )}
+            }
             <Tooltip title="查看审核日志">
               <Button
                 style={{

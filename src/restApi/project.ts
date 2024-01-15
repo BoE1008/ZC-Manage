@@ -5,13 +5,25 @@ import axiosInstance from "./axiosInstance";
 export const getProjectsSubmitList = async (
   pageNo: number,
   pageSize: number,
-  name?: string
+  name?: string,
+  projectNum?: string,
+  projectDateSort?: string,
+  productId?: string,
+  projectType?: string,
+  projectBrand?: string,
+  state?: string
 ) => {
   const res = await axiosInstance.get("/zc/project/submit/list", {
     params: {
       pageNo,
       pageSize,
       name,
+      projectNum,
+      projectDateSort,
+      productId,
+      typeId: projectType,
+      brandId: projectBrand,
+      state,
     },
   });
 

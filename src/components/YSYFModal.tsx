@@ -118,10 +118,6 @@ const Item = ({ projectId, onClose, modalType }) => {
     const params = {
       ...values,
       yfDate: dayjs(values.yfDate).format("YYYY-MM-DD"),
-      yfChecking: values.yfChecking?.value || "x",
-      isPay: values.isPay?.value || "x",
-      yfCollection: values.yfCollection?.value || "x",
-      yfInvoice: values.yfInvoice?.value || "x",
     };
 
     const { code } =
@@ -307,6 +303,21 @@ const Item = ({ projectId, onClose, modalType }) => {
     });
   };
 
+  const handleYfPay = async (id, value) => {
+    await updateYFThreeStatus({ id, isPay: value ? "0" : "1" });
+    const data = await getProjectYSList(projectId as string, page, pageSize);
+    setData({
+      ...data,
+      entity: {
+        ...data.entity,
+        data: data.entity.data.map((item, index) => ({
+          key: index,
+          ...item,
+        })),
+      },
+    });
+  };
+
   const handleYSChecking = async (id, value) => {
     await updateYSThreeStatus({ id, ysChecking: value ? "0" : "1" });
     const data = await getProjectYSList(projectId as string, page, pageSize);
@@ -458,10 +469,24 @@ const Item = ({ projectId, onClose, modalType }) => {
         render: (record) => formatNumber(record?.ylProfitMoney),
       },
       {
-        title: "是否支付",
-        dataIndex: "isPay",
+        title: "预留利润支付",
+        // dataIndex: "ysChecking",
         key: "isPay",
         align: "center",
+        render: (record) => {
+          return modalType !== ModalType.Approve ? (
+            record.isPay === "0" ? (
+              "√"
+            ) : (
+              "×"
+            )
+          ) : (
+            <Switch
+              checked={record.isPay === "0"}
+              onChange={(value) => handleYfPay(record.id, value)}
+            />
+          );
+        },
       },
 
       {
@@ -875,9 +900,6 @@ const Item = ({ projectId, onClose, modalType }) => {
     const params = {
       ...values,
       ysDate: dayjs(values.ysDate).format("YYYY-MM-DD"),
-      ysChecking: values.ysChecking?.value || "x",
-      ysCollection: values.ysCollection?.value || "x",
-      ysInvoice: values.ysInvoice?.value || "x",
     };
     const { code } =
       operation === Operation.Add
@@ -1086,7 +1108,12 @@ const Item = ({ projectId, onClose, modalType }) => {
             <Form.Item label="美金" labelCol={{ span: 5 }} name="yfDollar">
               <InputNumber placeholder="请输入金额" style={{ width: "100%" }} />
             </Form.Item>
-            <Form.Item label="明细" labelCol={{ span: 5 }} name="yfPurpose" required>
+            <Form.Item
+              label="明细"
+              labelCol={{ span: 5 }}
+              name="yfPurpose"
+              required
+            >
               <Input.TextArea placeholder="明细" maxLength={100} />
             </Form.Item>
             <Form.Item label="汇率" labelCol={{ span: 5 }} name="yfExrate">
@@ -1107,7 +1134,7 @@ const Item = ({ projectId, onClose, modalType }) => {
             >
               <Input placeholder="预留利润金额" />
             </Form.Item>
-            <Form.Item label="是否支付" labelCol={{ span: 5 }} name="isPay">
+            {/* <Form.Item label="是否支付" labelCol={{ span: 5 }} name="isPay">
               <Select
                 showSearch
                 labelInValue
@@ -1119,7 +1146,7 @@ const Item = ({ projectId, onClose, modalType }) => {
                   value: con,
                 }))}
               ></Select>
-            </Form.Item>
+            </Form.Item> */}
             {/* <Form.Item
             label="日期"
             labelCol={{ span: 5 }}

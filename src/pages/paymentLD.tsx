@@ -236,7 +236,7 @@ const Role = () => {
 
         return (
           <Space size="middle" className="flex flex-row !gap-x-1">
-            { isSubmit&& (
+            {isSubmit && (
               <Tooltip title="审核通过">
                 <Popconfirm
                   title="是否批准？"
@@ -256,7 +256,7 @@ const Role = () => {
                 </Popconfirm>
               </Tooltip>
             )}
-            {!isFinished && (
+            {isSubmit && (
               <Tooltip title="退回申请">
                 <Popconfirm
                   title="是否退回？"

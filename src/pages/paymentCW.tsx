@@ -241,7 +241,7 @@ const Role = () => {
                 </Popconfirm>
               </Tooltip>
             )}
-            {!isFinished && (
+            {
               <Tooltip title="退回">
                 <Popconfirm
                   title="是否退回？"
@@ -260,7 +260,7 @@ const Role = () => {
                   </Button>
                 </Popconfirm>
               </Tooltip>
-            )}
+            }
             <Tooltip title="查看审核日志">
               <Button
                 style={{
