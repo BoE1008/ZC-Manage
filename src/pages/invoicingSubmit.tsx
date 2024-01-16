@@ -56,6 +56,7 @@ const InvoicingSubmit = () => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchValue, setSearchValue] = useState("");
+  const [userName, setUserName] = useState("");
 
   const [modalOpen, setModalOpen] = useState(false);
   const [operation, setOperation] = useState<Operation>(Operation.Add);
@@ -96,11 +97,12 @@ const InvoicingSubmit = () => {
         pageSize,
         searchValue,
         customerId,
-        projectState
+        projectState,
+        userName
       );
       setData(res);
     })();
-  }, [page, pageSize, searchValue, customerId, projectState]);
+  }, [page, pageSize, searchValue, customerId, projectState, userName]);
 
   const handleAdd = async () => {
     setOperation(Operation.Add);
@@ -325,11 +327,11 @@ const InvoicingSubmit = () => {
     },
     {
       text: "待财务审批",
-      value: "2",
+      value: "3",
     },
     {
       text: "审批通过",
-      value: "3",
+      value: "4",
     },
   ];
 
@@ -596,6 +598,11 @@ const InvoicingSubmit = () => {
             placeholder="按项目名称搜索"
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
+          />
+          <Input
+            placeholder="按申请人搜索"
+            value={userName}
+            onChange={(e) => setUserName(e.target.value)}
           />
         </div>
       </div>

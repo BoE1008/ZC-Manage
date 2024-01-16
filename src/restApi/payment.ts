@@ -1,10 +1,21 @@
 import axiosInstance from "./axiosInstance";
 
-export const getPaymentList = async (pageNo: number, pageSize: number) => {
+export const getPaymentList = async (
+  pageNo: number,
+  pageSize: number,
+  projectName?: string,
+  supplierId?: string,
+  projectState?: string,
+  userName?: string
+) => {
   const res = await axiosInstance.get(`/zc/payment/list`, {
     params: {
       pageNo,
       pageSize,
+      projectName,
+      supplierId,
+      projectState,
+      userName,
     },
   });
   return res.data;
@@ -29,31 +40,64 @@ export const updatePayment = async (id: string, info) => {
   return res.data;
 };
 
-export const getPaymentYWList = async (pageNo: number, pageSize: number) => {
+export const getPaymentYWList = async (
+  pageNo: number,
+  pageSize: number,
+  projectName?: string,
+  supplierId?: string,
+  projectState?: string,
+  userName?: string
+) => {
   const res = await axiosInstance.get(`/zc/payment/yw/list`, {
     params: {
       pageNo,
       pageSize,
+      projectName,
+      supplierId,
+      projectState,
+      userName,
     },
   });
   return res.data;
 };
 
-export const getPaymentCWList = async (pageNo: number, pageSize: number) => {
+export const getPaymentCWList = async (
+  pageNo: number,
+  pageSize: number,
+  projectName?: string,
+  supplierId?: string,
+  projectState?: string,
+  userName?: string
+) => {
   const res = await axiosInstance.get(`/zc/payment/cw/list`, {
     params: {
       pageNo,
       pageSize,
+      projectName,
+      supplierId,
+      projectState,
+      userName,
     },
   });
   return res.data;
 };
 
-export const getPaymentLDList = async (pageNo: number, pageSize: number) => {
+export const getPaymentLDList = async (
+  pageNo: number,
+  pageSize: number,
+  projectName?: string,
+  supplierId?: string,
+  projectState?: string,
+  userName?: string
+) => {
   const res = await axiosInstance.get(`/zc/payment/ld/list`, {
     params: {
       pageNo,
       pageSize,
+      projectName,
+      supplierId,
+      projectState,
+      userName,
     },
   });
   return res.data;

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   Table,
   Space,
@@ -45,6 +45,8 @@ const Role = () => {
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [searchValue, setSearchValue] = useState("");
+  const [userName, setUserName] = useState("");
 
   const [project, setProject] = useState();
   const [supplier, setSupplier] = useState();
@@ -63,18 +65,33 @@ const Role = () => {
 
   const [submitType, setSubmitType] = useState();
 
+  const [supplierId, setSupplierId] = useState();
+  const [projectState, setProjectState] = useState();
+
   useEffect(() => {
     (async () => {
-      const res = await getPaymentYWList(page, pageSize);
       const projectData = await getProjectsSubmitList(1, 10000);
       const supplierData = await getSuppliersList(1, 10000);
-      setData(res);
       setSupplier(supplierData.entity.data);
       setProject(
         projectData.entity.data.filter((item) => item.state === "审批通过")
       );
     })();
-  }, [page, pageSize]);
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      const res = await getPaymentYWList(
+        page,
+        pageSize,
+        searchValue,
+        supplierId,
+        projectState,
+        userName
+      );
+      setData(res);
+    })();
+  }, [page, pageSize, searchValue, supplierId, projectState, userName]);
 
   const handleDetail = async (id) => {
     const res = await getPaymentDetailById(id);
@@ -153,6 +170,36 @@ const Role = () => {
     option?: { label: string; value: string }
   ) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
 
+  const supplierFilters = useMemo(() => {
+    return supplier?.map((item) => ({
+      text: item.name,
+      value: item.id,
+    }));
+  }, [supplier]);
+
+  const stateFilters = [
+    {
+      text: "未提交",
+      value: "0",
+    },
+    {
+      text: "待业务审批",
+      value: "1",
+    },
+    {
+      text: "待领导审批",
+      value: "2",
+    },
+    {
+      text: "待财务审批",
+      value: "3",
+    },
+    {
+      text: "审批通过",
+      value: "4",
+    },
+  ];
+
   const columns = [
     {
       title: "项目编号",
@@ -181,6 +228,10 @@ const Role = () => {
       dataIndex: "supplierName",
       align: "center",
       key: "supplierName",
+      filterMultiple: false,
+      filters: supplierFilters,
+      filterSearch: true,
+      onFilter: (value: string, record) => record.supplierId === value,
     },
     {
       title: "金额",
@@ -200,6 +251,12 @@ const Role = () => {
       dataIndex: "state",
       align: "center",
       key: "state",
+      filterMultiple: false,
+      filters: stateFilters,
+      filterSearch: true,
+      onFilter: (value: string, record) =>
+        record.state ===
+        stateFilters.find((item) => value === item.value)?.text,
     },
     {
       title: "税号",
@@ -332,8 +389,30 @@ const Role = () => {
     },
   ];
 
+  const handleTableChange = (pagination, filters, sorter) => {
+    // setProductId(filters.productName?.[0]);
+    // setProjectType(filters.typeName?.[0]);
+    // setProjectBrand(filters.brandName?.[0]);
+    setProjectState(filters.state?.[0]);
+    setSupplierId(filters.supplierName?.[0]);
+  };
+
   return (
     <div className="p-2">
+      <div className="flex flex-row gap-y-3 justify-between mb-4">
+        <div className="flex flex-row gap-x-4">
+          <Input
+            placeholder="按项目名称搜索"
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+          />
+          <Input
+            placeholder="按申请人搜索"
+            value={userName}
+            onChange={(e) => setUserName(e.target.value)}
+          />
+        </div>
+      </div>
       <Table
         bordered
         // loading={loading}
@@ -358,6 +437,7 @@ const Role = () => {
             setPageSize(size);
           },
         }}
+        onChange={handleTableChange}
       />
 
       <Modal
