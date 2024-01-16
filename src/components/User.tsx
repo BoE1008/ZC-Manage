@@ -1,12 +1,24 @@
 import { useRouter } from "next/router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import clsx from "clsx";
-import { DownOutlined } from "@ant-design/icons";
+import { DownOutlined, SoundTwoTone } from "@ant-design/icons";
 import { logout } from "@/restApi/user";
-import { Modal, Form, Input, notification } from "antd";
+import {
+  Modal,
+  Form,
+  Input,
+  notification,
+  Badge,
+  Statistic,
+  Col,
+  Row,
+  Card,
+} from "antd";
 import { updatePassword } from "@/restApi/user";
 import { sm2 } from "sm-crypto";
 import { SM_PUBLIC_KEY } from "@/utils/const";
+import { getBadge } from "@/restApi/menu";
+import Link from "next/link";
 
 const User = () => {
   const router = useRouter();
@@ -18,11 +30,28 @@ const User = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [session, setSession] = useState();
   const [passModal, setPassModal] = useState(false);
+  const [badges, setBadges] = useState();
+  const [noticeModal, setNoticeModal] = useState(false);
+
+  const noticeRef = useRef();
 
   useEffect(() => {
     setUsername(sessionStorage.getItem("username")!);
     const res = JSON.parse(sessionStorage.getItem("userInfo"));
     setSession(res);
+  }, []);
+
+  useEffect(() => {
+    const func = async () => {
+      const badges = await getBadge();
+      setBadges(badges?.entity);
+    };
+    const timer = setInterval(func, 1000 * 3600);
+    func();
+
+    return () => {
+      clearInterval(timer);
+    };
   }, []);
 
   const handleConfirmPass = async () => {
@@ -42,8 +71,92 @@ const User = () => {
     notification.success({ message: "修改密码成功" });
   };
 
+  const handleNoticeClick = () => {
+    setNoticeModal((pre) => !pre);
+  };
+
   return (
-    <div className="pr-5 text-[#198348]">
+    <div className="pr-5 text-[#198348] flex flex-row items-center gap-x-10">
+      <div className="relative w-[25px] h-[50px]">
+        <div className="absolute inset-0 w-full h-full">
+          <Badge
+            size="small"
+            color="red"
+            count={
+              badges?.projectNum +
+              badges?.iywNum +
+              badges?.icwNum +
+              badges?.pywNum +
+              badges?.pldNum +
+              badges?.pcwNum
+            }
+          >
+            <SoundTwoTone
+              twoToneColor="#198348"
+              style={{ fontSize: "25px", cursor: "pointer" }}
+              onClick={handleNoticeClick}
+            />
+          </Badge>
+        </div>
+
+        <section
+          ref={noticeRef}
+          className={clsx(
+            "absolute top-10 right-0 z-10 border-[1px] px-5 py-2 bg-[#fff] w-max",
+            !noticeModal && "hidden"
+          )}
+        >
+          <Row gutter={16}>
+            <Col>
+              <Link href="/projectYW" onClick={() => setNoticeModal(false)}>
+                <Card size="small">
+                  <Statistic title="项目业务审核" value={badges?.projectNum} />
+                </Card>
+              </Link>
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col>
+              <Link href="/invoicingYW" onClick={() => setNoticeModal(false)}>
+                <Card size="small">
+                  <Statistic title="开票业务审核" value={badges?.iywNum} />
+                </Card>
+              </Link>
+            </Col>
+            <Col>
+              <Link href="/invoicingCW" onClick={() => setNoticeModal(false)}>
+                <Card size="small">
+                  <Statistic title="开票财务审核" value={badges?.icwNum} />
+                </Card>
+              </Link>
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col>
+              <Link href="/paymentYW" onClick={() => setNoticeModal(false)}>
+                <Card size="small">
+                  <Statistic title="付款业务审核" value={badges?.pywNum} />
+                </Card>
+              </Link>
+            </Col>
+            <Col>
+              <Link href="/paymentLD" onClick={() => setNoticeModal(false)}>
+                <Card size="small">
+                  <Statistic title="付款领导审核" value={badges?.pldNum} />
+                </Card>
+              </Link>
+            </Col>
+            <Col>
+              <Link href="/paymentCW" onClick={() => setNoticeModal(false)}>
+                <Card size="small">
+                  <Statistic title="付款财务审核" value={badges?.pcwNum} />
+                </Card>
+              </Link>
+            </Col>
+          </Row>
+        </section>
+      </div>
+
       <div
         className="flex font-medium tracking-wider w-full py-2.5 px-3.5 relative justify-center items-center"
         onMouseEnter={() => setHovered(true)}

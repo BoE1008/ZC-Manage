@@ -1,11 +1,12 @@
-import React, { ReactNode, useEffect, useState } from "react";
-import { Layout, Menu } from "antd";
+import React, { ReactNode, useEffect, useMemo, useState } from "react";
+import { Layout, Menu, Badge } from "antd";
 import User from "@/components/User";
 import { useRouter } from "next/router";
 import type { MenuProps } from "antd";
 import Link from "next/link";
 import logo from "@/assets/images/logo.png";
 import Image from "next/image";
+import { getBadge } from "@/restApi/menu";
 
 const { Header, Content, Sider } = Layout;
 
@@ -14,6 +15,7 @@ const AppLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { asPath } = router;
 
   const [menu, setMenu] = useState();
+  // const [badges, setBadges] = useState();
 
   const [openKeys, setOpenKeys] = useState([]);
   const [collapsed, setCollapsed] = useState(false);
@@ -35,6 +37,63 @@ const AppLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
       }
     })();
   }, [asPath]);
+
+  // useEffect(() => {
+  //   const timer = setInterval(async () => {
+  //     const badges = await getBadge();
+  //     setBadges(badges?.entity);
+  //   }, 1000);
+
+  //   return () => {
+  //     clearInterval(timer);
+  //   };
+  // }, []);
+
+  // const badgeMenu = useMemo(() => {
+  //   return menu?.map((i) => {
+  //     if (i.children) {
+  //       return i.children.map((c) => {
+  //         if (c.key === "projectYW") {
+  //           return {
+  //             ...c,
+  //             icon: (
+  //               <Badge dot color={"red"} count={badges?.projectNum}></Badge>
+  //             ),
+  //           };
+  //         } else if (c.key === "invoicingYW") {
+  //           return {
+  //             ...c,
+  //             icon: <Badge dot color={"red"} count={badges?.iywNum}></Badge>,
+  //           };
+  //         } else if (c.key === "invoicingCW") {
+  //           return {
+  //             ...c,
+  //             icon: <Badge dot color={"red"} count={badges?.icwNum}></Badge>,
+  //           };
+  //         } else if (c.key === "paymentYW") {
+  //           return {
+  //             ...c,
+  //             icon: <Badge dot color={"red"} count={badges?.pywNum}></Badge>,
+  //           };
+  //         } else if (c.key === "paymentLD") {
+  //           return {
+  //             ...c,
+  //             icon: <Badge dot color={"red"} count={badges?.pldNum}></Badge>,
+  //           };
+  //         } else if (c.key === "paymentCW") {
+  //           return {
+  //             ...c,
+  //             icon: <Badge dot color={"red"} count={badges?.pcwNum}></Badge>,
+  //           };
+  //         } else {
+  //           return c;
+  //         }
+  //       });
+  //     } else {
+  //       return i;
+  //     }
+  //   });
+  // }, [menu, badges]);
 
   const handleClick: MenuProps["onClick"] = (props) => {
     router.push(`/${props.key}`);

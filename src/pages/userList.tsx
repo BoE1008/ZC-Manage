@@ -48,6 +48,8 @@ const User = () => {
 
   const [form] = Form.useForm();
 
+  const [deptId, setDeptId] = useState("100");
+
   useEffect(() => {
     (async () => {
       if (!!sessionStorage.getItem("username")) {
@@ -89,8 +91,8 @@ const User = () => {
     const values = form.getFieldsValue();
     // setLoading(true);
     operation === Operation.Add
-      ? await addUser({ ...values, deptId: selectDeptId, roleIds })
-      : await updateUser({ ...values, deptId: selectDeptId, roleIds }, editId);
+      ? await addUser({ ...values, deptId, roleIds })
+      : await updateUser({ ...values, deptId, roleIds }, editId);
     setModalOpen(false);
     const data = await getUserList(page, pageSize, searchValue, selectDeptId);
     setLoading(false);
@@ -215,6 +217,14 @@ const User = () => {
     setRoleIds(list);
   };
 
+  const onDeptSelect = (keys, e) => {
+    if (!e.selected) {
+      setDeptId(e.node.key);
+      return;
+    }
+    setDeptId(keys[0]);
+  };
+
   return (
     <div className="w-full p-2" style={{ color: "#000" }}>
       <div className="w-full flex flex-row gap-x-10">
@@ -278,6 +288,7 @@ const User = () => {
           />
         </div>
       </div>
+
       <Modal
         centered
         destroyOnClose
@@ -308,6 +319,24 @@ const User = () => {
           )}
           <Form.Item required label="用户编号" name="userNum">
             <Input placeholder="请输入用户编号" />
+          </Form.Item>
+          <Form.Item required label="所属部门" name="deptId">
+            <div className="min-w-[150px]">
+              {depts.length > 0 && (
+                <Tree
+                  defaultExpandAll={true}
+                  // defaultExpandedKeys={["100"]}
+                  defaultSelectedKeys={
+                    operation === Operation.Add
+                      ? ["100"]
+                      : [form.getFieldValue("deptId")]
+                  }
+                  switcherIcon={<DownOutlined />}
+                  onSelect={onDeptSelect}
+                  treeData={depts}
+                />
+              )}
+            </div>
           </Form.Item>
           <Form.Item label="用户角色" name="userRole">
             <Tree
