@@ -21,7 +21,6 @@ import {
   ProfileTwoTone,
   DeleteTwoTone,
   InteractionTwoTone,
-  CalendarTwoTone,
   AppstoreTwoTone,
 } from "@ant-design/icons";
 import {
@@ -74,11 +73,14 @@ const Project = () => {
   const [projectType, setProjectType] = useState();
   const [projectBrand, setProjectBrand] = useState();
   const [projectState, setProjectState] = useState();
+  const [customerId, setCustomerId] = useState();
 
   useEffect(() => {
     (async () => {
       const res = await getDictById();
+      const customer = await getCustomersList(1, 1000);
       setDict(res.entity);
+      setCustomer(customer.entity.data);
     })();
   }, []);
 
@@ -93,7 +95,8 @@ const Project = () => {
         productId,
         projectType,
         projectBrand,
-        projectState
+        projectState,
+        customerId
       );
       setData(data);
       setLoading(false);
@@ -108,15 +111,16 @@ const Project = () => {
     projectType,
     projectBrand,
     projectState,
+    customerId,
   ]);
 
   const handleAdd = async () => {
     form.setFieldsValue(initialValues);
     setOperation(Operation.Add);
     setModalOpen(true);
-    const customer = await getCustomersList(1, 1000);
     const res = await getDictById();
     setDict(res.entity);
+    const customer = await getCustomersList(1, 1000);
     setCustomer(customer.entity.data);
   };
 
@@ -197,6 +201,13 @@ const Project = () => {
     },
   ];
 
+  const customerFilters = useMemo(() => {
+    return customer?.map((item) => ({
+      text: item.name,
+      value: item.id,
+    }));
+  }, [customer]);
+
   const columns = useMemo(() => {
     return [
       {
@@ -240,10 +251,7 @@ const Project = () => {
             text: con.dictLabel,
           })),
         filterSearch: true,
-        onFilter: (value: string, record) => {
-          setProjectType(value);
-          return record.typeId === value;
-        },
+        onFilter: (value: string, record) => record.typeId === value,
       },
       {
         title: "客户",
@@ -260,6 +268,10 @@ const Project = () => {
             {customName}
           </Tooltip>
         ),
+        filterMultiple: false,
+        filters: customerFilters,
+        filterSearch: true,
+        onFilter: (value: string, record) => record.customId === value,
       },
       {
         title: "品牌",
@@ -276,10 +288,7 @@ const Project = () => {
             text: con.dictLabel,
           })),
         filterSearch: true,
-        onFilter: (value: string, record) => {
-          setProjectBrand(value);
-          return record.brandId === value;
-        },
+        onFilter: (value: string, record) => record.brandId === value,
       },
       {
         title: "货物",
@@ -296,10 +305,7 @@ const Project = () => {
             text: con.dictLabel,
           })),
         filterSearch: true,
-        onFilter: (value: string, record) => {
-          setProductId(value);
-          return record.productId === value;
-        },
+        onFilter: (value: string, record) => record.productId === value,
       },
       {
         title: "发运日期",
@@ -382,13 +388,9 @@ const Project = () => {
         filterMultiple: false,
         filters: stateFilters,
         filterSearch: true,
-        onFilter: (value: string, record) => {
-          setProjectState(value);
-          return (
-            record.state ===
-            stateFilters.find((item) => value === item.value)?.text
-          );
-        },
+        onFilter: (value: string, record) =>
+          record.state ===
+          stateFilters.find((item) => value === item.value)?.text,
       },
       {
         title: "备注",
@@ -521,27 +523,58 @@ const Project = () => {
     } else {
       setProjectDateSort("");
     }
+
+    setProductId(filters.productName?.[0]);
+    setProjectType(filters.typeName?.[0]);
+    setProjectBrand(filters.brandName?.[0]);
+    setProjectState(filters.state?.[0]);
+    setCustomerId(filters.customName?.[0]);
   };
 
   return (
     <div className="w-full p-2" style={{ color: "#000" }}>
-      <div className="flex flex-row gap-y-3 justify-between">
-        <Space className="flex flex-row justify-center items-center">
-          <Button
-            onClick={handleAdd}
-            type="primary"
-            style={{ marginBottom: 16, background: "#198348", width: "100px" }}
-          >
-            添加
-          </Button>
-          <Button
-            onClick={handleExport}
-            type="primary"
-            style={{ marginBottom: 16, background: "#198348", width: "100px" }}
-          >
-            导出
-          </Button>
-        </Space>
+      <div className="flex flex-row gap-y-3 justify-between my-4 pr-[100px]">
+        <div className="flex flex-row gap-x-10">
+          <div className="flex flex-row gap-x-4">
+            <Button
+              onClick={handleAdd}
+              type="primary"
+              style={{
+                // marginBottom: 16,
+                background: "#198348",
+                width: "100px",
+                height: "40px",
+              }}
+            >
+              添加
+            </Button>
+            <Button
+              onClick={handleExport}
+              type="primary"
+              style={{
+                // marginBottom: 16,
+                background: "#198348",
+                height: "40px",
+                width: "100px",
+              }}
+            >
+              导出
+            </Button>
+          </div>
+
+          <div className="flex flex-row gap-x-4">
+            <Input
+              placeholder="按项目名称搜索"
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+            />
+            <Input
+              placeholder="按项目编号搜索"
+              value={searchNumValue}
+              onChange={(e) => setSearchNumValue(e.target.value)}
+            />
+          </div>
+        </div>
 
         <Space>
           <Popover
@@ -562,19 +595,9 @@ const Project = () => {
             <AppstoreTwoTone
               style={{ fontSize: "30px" }}
               twoToneColor="#198348"
-              className="mr-5"
+              className="mr-15"
             />
           </Popover>
-          <Input
-            placeholder="按项目名称搜索"
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-          />
-          <Input
-            placeholder="按项目编号搜索"
-            value={searchNumValue}
-            onChange={(e) => setSearchNumValue(e.target.value)}
-          />
         </Space>
       </div>
 

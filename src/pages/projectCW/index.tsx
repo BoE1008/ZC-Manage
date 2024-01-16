@@ -14,12 +14,15 @@ import {
   Tooltip,
   Divider,
   Popconfirm,
+  Popover,
+  Checkbox,
 } from "antd";
 import {
   ProfileTwoTone,
   CalendarTwoTone,
   StopTwoTone,
   CheckCircleTwoTone,
+  AppstoreTwoTone,
 } from "@ant-design/icons";
 import {
   getProjectsApproveList,
@@ -55,6 +58,8 @@ const Project = () => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchValue, setSearchValue] = useState("");
+  const [searchNumValue, setSearchNumValue] = useState("");
+
   const [modalOpen, setModalOpen] = useState(false);
   const [operation, setOperation] = useState<Operation>(Operation.Add);
   const [logs, setLogs] = useState();
@@ -75,11 +80,37 @@ const Project = () => {
   const [detail, setDetail] = useState();
 
   const chartRef = useRef(null);
-  const [options, setOptions] = useState();
+
+  const [projectDateSort, setProjectDateSort] = useState("1");
+  const [productId, setProductId] = useState();
+  const [projectType, setProjectType] = useState();
+  const [projectBrand, setProjectBrand] = useState();
+  const [projectState, setProjectState] = useState();
+  const [customerId, setCustomerId] = useState();
 
   useEffect(() => {
     (async () => {
-      const data = await getProjectsApproveList(page, pageSize, searchValue);
+      const res = await getDictById();
+      setDict(res.entity);
+      const customer = await getCustomersList(1, 1000);
+      setCustomer(customer.entity.data);
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      const data = await getProjectsApproveList(
+        page,
+        pageSize,
+        searchValue,
+        searchNumValue,
+        projectDateSort,
+        productId,
+        projectType,
+        projectBrand,
+        projectState,
+        customerId
+      );
       const customer = await getCustomersList(1, 1000);
       const res = await getDictById();
       setDict(res.entity);
@@ -90,7 +121,18 @@ const Project = () => {
       setData(data);
       // setFileName(file.msg);
     })();
-  }, [page, pageSize, searchValue]);
+  }, [
+    page,
+    pageSize,
+    searchValue,
+    searchNumValue,
+    projectDateSort,
+    productId,
+    projectType,
+    projectBrand,
+    projectState,
+    customerId,
+  ]);
 
   const option = useMemo(() => {
     return {
@@ -151,19 +193,6 @@ const Project = () => {
       chart.dispose();
     };
   }, [option]);
-
-  const handleAdd = async () => {
-    form.setFieldsValue(initialValues);
-    setOperation(Operation.Add);
-    setModalOpen(true);
-  };
-
-  const handleEditOne = (record: Company) => {
-    setOperation(Operation.Edit);
-    setEditId(record.id);
-    form.setFieldsValue(record);
-    setModalOpen(true);
-  };
 
   const handleOk = async () => {
     form.validateFields();
@@ -229,169 +258,250 @@ const Project = () => {
     );
   };
 
-  const columns = [
+  const stateFilters = [
     {
-      title: "项目编号",
-      dataIndex: "projectNum",
-      align: "center",
-      fixed: 'left',
-      key: "projectNum",
+      text: "未完结",
+      value: "0",
     },
     {
-      title: "项目名称",
-      dataIndex: "name",
-      align: "center",
-      fixed: 'left',
-      key: "name",
-      ellipsis: {
-        showTitle: false,
-      },
-      render: (name) => (
-        <Tooltip placement="topLeft" title={name}>
-          {name}
-        </Tooltip>
-      ),
+      text: "待完结审批",
+      value: "1",
     },
     {
-      title: "产品",
-      dataIndex: "typeName",
-      align: "center",
-      key: "typeName",
-    },
-    {
-      title: "客户",
-      dataIndex: "customName",
-      align: "center",
-      key: "customName",
-      ellipsis: {
-        showTitle: false,
-      },
-      render: (customName) => (
-        <Tooltip placement="topLeft" title={customName}>
-          {customName}
-        </Tooltip>
-      ),
-    },
-    {
-      title: "品牌",
-      dataIndex: "brandName",
-      align: "center",
-      key: "brandName",
-    },
-    {
-      title: "货物",
-      dataIndex: "productName",
-      align: "center",
-      key: "productName",
-    },
-    {
-      title: "发运日期",
-      dataIndex: "projectDate",
-      align: "center",
-      key: "projectDate",
-      sorter: (a, b) =>
-        new Date(a.projectDate).getTime() - new Date(b.projectDate).getTime(),
-    },
-    {
-      title: "服务内容",
-      dataIndex: "serviceName",
-      align: "center",
-      key: "serviceName",
-    },
-    {
-      title: "班列号/船名",
-      dataIndex: "trainNumName",
-      align: "center",
-      key: "trainNumName",
-    },
-    {
-      title: "数量",
-      dataIndex: "num",
-      align: "center",
-      key: "num",
-    },
-    {
-      title: "收入小计",
-      // dataIndex: "proIncome",
-      align: "center",
-      key: "proIncome",
-      render: (record) => formatNumber(record?.proIncome),
-    },
-    {
-      title: "成本小计",
-      // dataIndex: "proCost",
-      align: "center",
-      key: "proCost",
-      render: (record) => formatNumber(record?.proCost),
-    },
-    {
-      title: "利润",
-      // dataIndex: "profit",
-      align: "center",
-      key: "profit",
-      render: (record) => formatNumber(record?.profit),
-    },
-    {
-      title: "扣除后利润",
-      // dataIndex: "deductProfit",
-      align: "center",
-      key: "deductProfit",
-      render: (record) => formatNumber(record?.deductProfit),
-    },
-    {
-      title: "项目状态",
-      // dataIndex: "state",
-      align: "center",
-      key: "state",
-      render: (record) => `${record?.state}(${record?.waitApproveNum})`,
-      filters: [
-        {
-          text: "未完结",
-          value: "未完结",
-        },
-        {
-          text: "待完结审批",
-          value: "待完结审批",
-        },
-        {
-          text: "已完结",
-          value: "已完结",
-        },
-      ],
-      filterSearch: true,
-      onFilter: (value: string, record) => record.state === value
-    },
-    {
-      title: "备注",
-      dataIndex: "remark",
-      align: "center",
-      key: "remark",
-    },
-    {
-      title: "操作",
-      align: "center",
-      key: "action",
-      fixed: 'right',
-      render: (_, record: Company) => {
-        return (
-          <Space size="middle" className="flex flex-row !gap-x-1">
-            <Tooltip title="查看应收应付">
-              <Button
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "3px 5px",
-                }}
-                onClick={() => setProjectId(record.id)}
-              >
-                <ProfileTwoTone twoToneColor="#198348" />
-              </Button>
-            </Tooltip>
-          </Space>
-        );
-      },
+      text: "已完结",
+      value: "2",
     },
   ];
+
+  const customerFilters = useMemo(() => {
+    return customer?.map((item) => ({
+      text: item.name,
+      value: item.id,
+    }));
+  }, [customer]);
+
+  const columns = useMemo(() => {
+    return [
+      {
+        label: "项目编号",
+        value: "项目编号",
+        title: "项目编号",
+        dataIndex: "projectNum",
+        align: "center",
+        fixed: "left",
+        key: "projectNum",
+      },
+      {
+        label: "项目名称",
+        value: "项目名称",
+        title: "项目名称",
+        dataIndex: "name",
+        align: "center",
+        fixed: "left",
+        key: "name",
+        ellipsis: {
+          showTitle: false,
+        },
+        render: (name) => (
+          <Tooltip placement="topLeft" title={name}>
+            {name}
+          </Tooltip>
+        ),
+      },
+      {
+        label: "产品",
+        value: "产品",
+        title: "产品",
+        dataIndex: "typeName",
+        align: "center",
+        key: "typeName",
+        filterMultiple: false,
+        filters: dict
+          ?.find((con) => con.code === "sys_project_type")
+          .childList?.map((con) => ({
+            value: con.id,
+            text: con.dictLabel,
+          })),
+        filterSearch: true,
+        onFilter: (value: string, record) => record.typeId === value,
+      },
+      {
+        label: "客户",
+        value: "客户",
+        title: "客户",
+        dataIndex: "customName",
+        align: "center",
+        key: "customName",
+        ellipsis: {
+          showTitle: false,
+        },
+        render: (customName) => (
+          <Tooltip placement="topLeft" title={customName}>
+            {customName}
+          </Tooltip>
+        ),
+        filterMultiple: false,
+        filters: customerFilters,
+        filterSearch: true,
+        onFilter: (value: string, record) => record.customId === value,
+      },
+      {
+        label: "品牌",
+        value: "品牌",
+        title: "品牌",
+        dataIndex: "brandName",
+        align: "center",
+        key: "brandName",
+        filterMultiple: false,
+        filters: dict
+          ?.find((con) => con.code === "sys_project_brand")
+          .childList?.map((con) => ({
+            value: con.id,
+            text: con.dictLabel,
+          })),
+        filterSearch: true,
+        onFilter: (value: string, record) => record.brandId === value,
+      },
+      {
+        label: "货物",
+        value: "货物",
+        title: "货物",
+        dataIndex: "productName",
+        align: "center",
+        key: "productName",
+        filterMultiple: false,
+        filters: dict
+          ?.find((con) => con.code === "sys_product_type")
+          .childList?.map((con) => ({
+            value: con.id,
+            text: con.dictLabel,
+          })),
+        filterSearch: true,
+        onFilter: (value: string, record) => record.productId === value,
+      },
+      {
+        label: "发运日期",
+        value: "发运日期",
+        title: "发运日期",
+        dataIndex: "projectDate",
+        align: "center",
+        key: "projectDate",
+        sortDirections: ["ascend", "descend"],
+        sorter: true,
+      },
+      {
+        label: "服务内容",
+        value: "服务内容",
+        title: "服务内容",
+        dataIndex: "serviceName",
+        align: "center",
+        key: "serviceName",
+      },
+      {
+        label: "班列号/船名",
+        value: "班列号/船名",
+        title: "班列号/船名",
+        dataIndex: "trainNumName",
+        align: "center",
+        key: "trainNumName",
+      },
+      {
+        label: "数量",
+        value: "数量",
+        title: "数量",
+        dataIndex: "num",
+        align: "center",
+        key: "num",
+      },
+      {
+        label: "收入小计",
+        value: "收入小计",
+        title: "收入小计",
+        // dataIndex: "proIncome",
+        align: "center",
+        key: "proIncome",
+        render: (record) => formatNumber(record?.proIncome),
+      },
+      {
+        label: "成本小计",
+        value: "成本小计",
+        title: "成本小计",
+        // dataIndex: "proCost",
+        align: "center",
+        key: "proCost",
+        render: (record) => formatNumber(record?.proCost),
+      },
+      {
+        label: "利润",
+        value: "利润",
+        title: "利润",
+        // dataIndex: "profit",
+        align: "center",
+        key: "profit",
+        render: (record) => formatNumber(record?.profit),
+      },
+      {
+        label: "扣除后利润",
+        value: "扣除后利润",
+        title: "扣除后利润",
+        // dataIndex: "deductProfit",
+        align: "center",
+        key: "deductProfit",
+        render: (record) => formatNumber(record?.deductProfit),
+      },
+      {
+        label: "项目状态",
+        value: "项目状态",
+        title: "项目状态",
+        // dataIndex: "state",
+        align: "center",
+        key: "state",
+        render: (record) => `${record?.state}(${record?.waitApproveNum})`,
+        filterMultiple: false,
+        filters: stateFilters,
+        filterSearch: true,
+        onFilter: (value: string, record) =>
+          record.state ===
+          stateFilters.find((item) => value === item.value)?.text,
+      },
+      {
+        label: "备注",
+        value: "备注",
+        title: "备注",
+        dataIndex: "remark",
+        align: "center",
+        key: "remark",
+      },
+      {
+        label: "操作",
+        value: "操作",
+        title: "操作",
+        align: "center",
+        key: "action",
+        fixed: "right",
+        render: (_, record: Company) => {
+          return (
+            <Space size="middle" className="flex flex-row !gap-x-1">
+              <Tooltip title="查看应收应付">
+                <Button
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    padding: "3px 5px",
+                  }}
+                  onClick={() => setProjectId(record.id)}
+                >
+                  <ProfileTwoTone twoToneColor="#198348" />
+                </Button>
+              </Tooltip>
+            </Space>
+          );
+        },
+      },
+    ];
+  }, [dict]);
+
+  const [options, setOptions] = useState(columns.map((c) => c.value));
 
   const filterOption = (
     input: string,
@@ -409,9 +519,38 @@ const Project = () => {
     };
   };
 
+  const onOptionChange = (con) => {
+    setOptions(con);
+  };
+
+  const displayColumn = useMemo(() => {
+    return options.map((con) => {
+      return columns.find((item) => {
+        return con === item.value;
+      });
+    });
+  }, [options, dict]);
+
+  const handleTableChange = (pagination, filters, sorter) => {
+    if (sorter.order === "ascend") {
+      setProjectDateSort("0");
+    } else if (sorter.order === "descend") {
+      setProjectDateSort("1");
+    } else {
+      setProjectDateSort("");
+    }
+
+    console.log(filters, "filters");
+    setProductId(filters.productName?.[0]);
+    setProjectType(filters.typeName?.[0]);
+    setProjectBrand(filters.brandName?.[0]);
+    setProjectState(filters.state?.[0]);
+    setCustomerId(filters.customName?.[0]);
+  };
+
   return (
     <div className="w-full p-2" style={{ color: "#000" }}>
-      <div className="flex flex-row gap-y-3 justify-between">
+      {/* <div className="flex flex-row gap-y-3 justify-between">
         <Space>
           <Button
             onClick={handleExport}
@@ -424,10 +563,70 @@ const Project = () => {
 
         <Space>
           <Input
-            placeholder="名称"
+            placeholder="按项目名称搜索"
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
           />
+          <Input
+            placeholder="按项目编号搜索"
+            value={searchNumValue}
+            onChange={(e) => setSearchNumValue(e.target.value)}
+          />
+        </Space>
+      </div> */}
+      <div className="flex flex-row gap-y-3 justify-between my-4 pr-[100px]">
+        <div className="flex flex-row gap-x-10">
+          <div className="flex flex-row gap-x-4">
+            <Button
+              onClick={handleExport}
+              type="primary"
+              style={{
+                // marginBottom: 16,
+                background: "#198348",
+                height: "40px",
+                width: "100px",
+              }}
+            >
+              导出
+            </Button>
+          </div>
+
+          <div className="flex flex-row gap-x-4">
+            <Input
+              placeholder="按项目名称搜索"
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+            />
+            <Input
+              placeholder="按项目编号搜索"
+              value={searchNumValue}
+              onChange={(e) => setSearchNumValue(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <Space>
+          <Popover
+            content={
+              <Checkbox.Group
+                style={{ display: "flex", flexDirection: "column" }}
+                options={columns?.map((c) => ({
+                  label: c.label,
+                  value: c.value,
+                }))}
+                defaultValue={columns.map((c) => c.value)}
+                onChange={onOptionChange}
+              ></Checkbox.Group>
+            }
+            title="显隐列"
+            trigger="click"
+          >
+            <AppstoreTwoTone
+              style={{ fontSize: "30px" }}
+              twoToneColor="#198348"
+              className="mr-15"
+            />
+          </Popover>
         </Space>
       </div>
 
@@ -436,7 +635,7 @@ const Project = () => {
         loading={loading}
         dataSource={data?.entity?.data}
         scroll={{ scrollToFirstRowOnChange: true, y: "800px" }}
-        columns={columns}
+        columns={displayColumn}
         pagination={{
           // 设置总条数
           total: data?.entity?.total,
@@ -460,6 +659,7 @@ const Project = () => {
             onDoubleClick: () => setProjectId(record.id),
           };
         }}
+        onChange={handleTableChange}
       />
       <Modal
         centered

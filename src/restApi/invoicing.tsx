@@ -3,12 +3,17 @@ import axiosInstance from "./axiosInstance";
 export const getinvoicingList = async (
   pageNo: number,
   pageSize: number,
-  name?: string
+  projectName?: string,
+  customId?: string,
+  state?: string
 ) => {
   const res = await axiosInstance.get(`/zc/invoicing/list`, {
     params: {
       pageNo,
       pageSize,
+      name: projectName,
+      customId,
+      state,
     },
   });
   return res.data;
@@ -33,21 +38,39 @@ export const updateInvoicing = async (id: string, info: Project) => {
   return res.data;
 };
 
-export const getinvoicingYWList = async (pageNo: number, pageSize: number) => {
+export const getinvoicingYWList = async (
+  pageNo: number,
+  pageSize: number,
+  projectName?: string,
+  customId?: string,
+  state?: string
+) => {
   const res = await axiosInstance.get(`/zc/invoicing/yw/list`, {
     params: {
       pageNo,
       pageSize,
+      name: projectName,
+      customId,
+      state,
     },
   });
   return res.data;
 };
 
-export const getinvoicingCWList = async (pageNo: number, pageSize: number) => {
+export const getinvoicingCWList = async (
+  pageNo: number,
+  pageSize: number,
+  projectName?: string,
+  customId?: string,
+  state?: string
+) => {
   const res = await axiosInstance.get(`/zc/invoicing/cw/list`, {
     params: {
       pageNo,
       pageSize,
+      name: projectName,
+      customId,
+      state,
     },
   });
   return res.data;

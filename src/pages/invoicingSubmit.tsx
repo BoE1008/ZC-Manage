@@ -10,7 +10,7 @@ import {
   updateFileById,
   deleteFileById,
 } from "@/restApi/invoicing";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   Table,
   Space,
@@ -39,7 +39,7 @@ import {
   UploadOutlined,
   ArrowDownOutlined,
 } from "@ant-design/icons";
-import { getCustomersYSList } from "@/restApi/customer";
+import { getCustomersYSList, getCustomersList } from "@/restApi/customer";
 import { InvoicingTypeArr } from "@/utils/const";
 import { getDictByCode } from "@/restApi/dict";
 import InvoicingSubmitModal from "@/components/InvoicingSubmitModal";
@@ -55,6 +55,7 @@ const InvoicingSubmit = () => {
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [searchValue, setSearchValue] = useState("");
 
   const [modalOpen, setModalOpen] = useState(false);
   const [operation, setOperation] = useState<Operation>(Operation.Add);
@@ -76,14 +77,30 @@ const InvoicingSubmit = () => {
   const [files, setFiles] = useState([]);
   const [oldFiles, setOldFiles] = useState([]);
 
+  const [customerId, setCustomerId] = useState();
+  const [projectState, setProjectState] = useState();
+
   useEffect(() => {
     (async () => {
-      const res = await getinvoicingList(page, pageSize);
+      const customer = await getCustomersList(1, 1000);
+      setCustomer(customer.entity.data);
       const projectData = await getProjectsSubmitList(1, 10000);
-      setData(res);
       setProject(projectData.entity.data);
     })();
-  }, [page, pageSize]);
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      const res = await getinvoicingList(
+        page,
+        pageSize,
+        searchValue,
+        customerId,
+        projectState
+      );
+      setData(res);
+    })();
+  }, [page, pageSize, searchValue, customerId, projectState]);
 
   const handleAdd = async () => {
     setOperation(Operation.Add);
@@ -290,6 +307,32 @@ const InvoicingSubmit = () => {
     option?: { label: string; value: string }
   ) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
 
+  const customerFilters = useMemo(() => {
+    return customer?.map((item) => ({
+      text: item.name,
+      value: item.id,
+    }));
+  }, [customer]);
+
+  const stateFilters = [
+    {
+      text: "未提交",
+      value: "0",
+    },
+    {
+      text: "待业务审批",
+      value: "1",
+    },
+    {
+      text: "待财务审批",
+      value: "2",
+    },
+    {
+      text: "审批通过",
+      value: "3",
+    },
+  ];
+
   const columns = [
     {
       title: "项目编号",
@@ -317,6 +360,18 @@ const InvoicingSubmit = () => {
       dataIndex: "customName",
       align: "center",
       key: "customName",
+      ellipsis: {
+        showTitle: false,
+      },
+      render: (customName) => (
+        <Tooltip placement="topLeft" title={customName}>
+          {customName}
+        </Tooltip>
+      ),
+      filterMultiple: false,
+      filters: customerFilters,
+      filterSearch: true,
+      onFilter: (value: string, record) => record.customId === value,
     },
     {
       title: "开票票种",
@@ -391,6 +446,12 @@ const InvoicingSubmit = () => {
       dataIndex: "state",
       align: "center",
       key: "state",
+      filterMultiple: false,
+      filters: stateFilters,
+      filterSearch: true,
+      onFilter: (value: string, record) =>
+        record.state ===
+        stateFilters.find((item) => value === item.value)?.text,
     },
     {
       title: "备注",
@@ -509,10 +570,18 @@ const InvoicingSubmit = () => {
     },
   };
 
+  const handleTableChange = (pagination, filters, sorter) => {
+    // setProductId(filters.productName?.[0]);
+    // setProjectType(filters.typeName?.[0]);
+    // setProjectBrand(filters.brandName?.[0]);
+    setProjectState(filters.state?.[0]);
+    setCustomerId(filters.customName?.[0]);
+  };
+
   return (
     <div className="p-2">
-      <div className="flex flex-row gap-y-3 justify-between">
-        <Space>
+      <div className="flex flex-row gap-y-3 justify-between mb-4">
+        <Space className="flex flex-row items-center">
           <Button
             onClick={handleAdd}
             type="primary"
@@ -522,13 +591,13 @@ const InvoicingSubmit = () => {
           </Button>
         </Space>
 
-        {/* <Space>
+        <div className="flex flex-row gap-x-4">
           <Input
-            placeholder="名称"
+            placeholder="按项目名称搜索"
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
           />
-        </Space> */}
+        </div>
       </div>
       <Table
         bordered
@@ -547,6 +616,7 @@ const InvoicingSubmit = () => {
             setPageSize(size);
           },
         }}
+        onChange={handleTableChange}
       />
 
       <Modal
