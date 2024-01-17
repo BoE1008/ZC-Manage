@@ -28,7 +28,7 @@ const InvoicingDetailModal = ({ onClose, data }) => {
     name: "file",
     multiple: true,
     fileList: files,
-    listType: "text",
+    listType: "picture-card",
     withCredentials: true,
     headers: {
       "Content-Type": "multipart/form-data",
@@ -39,6 +39,7 @@ const InvoicingDetailModal = ({ onClose, data }) => {
       showPreviewIcon: true,
     },
     onPreview: async (file) => {
+      console.log(file, "file");
       // if (!file.url && !file.preview) {
       //   file.preview = await getBase64(file.originFileObj as FileType);
       // }
@@ -361,7 +362,7 @@ const InvoicingDetailModal = ({ onClose, data }) => {
 
         <Upload {...uploadProps}></Upload>
       </Modal>
-      
+
       <Modal
         open={previewOpen}
         title={previewTitle}

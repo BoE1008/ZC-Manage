@@ -547,12 +547,13 @@ const InvoicingSubmit = () => {
     multiple: true,
     fileList: files,
     withCredentials: true,
-    listType: "text",
+    listType: "picture-card",
     headers: {
       "Content-Type": "multipart/form-data",
     },
     showUploadList: {
       showDownloadIcon: true,
+      showPreviewIcon: true,
     },
     onRemove: async (file) => {
       await deleteFileById(file?.id);
