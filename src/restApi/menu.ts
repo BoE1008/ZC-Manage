@@ -7,7 +7,7 @@ export const getMenu = async () => {
 };
 
 export const getBadge = async () => {
-  const res = await axiosInstance.get("/zc/menu/redDot?type=ALL");
+  const res = await axiosInstance.get("/zc/menu/redDot");
 
   return res.data;
 };

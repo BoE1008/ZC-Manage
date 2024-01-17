@@ -9,6 +9,7 @@ const nextConfig = {
     // !! WARN !!
     ignoreBuildErrors: true,
   },
+  transpilePackages: ['ahooks'],
   images: {
     unoptimized: true
   },

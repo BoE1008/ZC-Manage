@@ -84,6 +84,7 @@ const User = () => {
     setEditId(record.id);
     form.setFieldsValue(record);
     setModalOpen(true);
+    setDeptId(form.getFieldValue("deptId"))
   };
 
   const handleOk = async () => {
@@ -218,10 +219,6 @@ const User = () => {
   };
 
   const onDeptSelect = (keys, e) => {
-    if (!e.selected) {
-      setDeptId(e.node.key);
-      return;
-    }
     setDeptId(keys[0]);
   };
 

@@ -159,7 +159,7 @@ const Payment = () => {
             taxationNumber: selectSupplier?.taxationNumber || "",
             fee: values.fee || "",
             remark: values.remark || "",
-            yfDate: dayjs(values.projectDate).format("YYYY-MM-DD"),
+            yfDate: dayjs(values.yfDate).format("YYYY-MM-DD"),
           }
         : {
             ...values,
@@ -181,7 +181,7 @@ const Payment = () => {
             taxationNumber: selectSupplier?.taxationNumber || "",
             fee: values.fee || "",
             remark: values.remark || "",
-            yfDate: dayjs(values.projectDate).format("YYYY-MM-DD"),
+            yfDate: dayjs(values.yfDate).format("YYYY-MM-DD"),
             // files,
           };
 
