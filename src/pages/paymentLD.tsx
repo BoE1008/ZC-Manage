@@ -8,7 +8,7 @@ import {
   Form,
   Select,
   DatePicker,
-  notification,
+  message,
   Tooltip,
   Popconfirm,
   List,
@@ -101,9 +101,9 @@ const Role = () => {
       const data = await getPaymentLDList(page, pageSize);
       setLoading(false);
       setData(data);
-      notification.success({
-        message: operation === Operation.Add ? "添加成功" : "编辑成功",
-        duration: 3,
+      message.success({
+        content: operation === Operation.Add ? "添加成功" : "编辑成功",
+        type: 'success',
       });
     }
   };
@@ -124,7 +124,7 @@ const Role = () => {
     await submitLDToCW(detail.id);
     const res = await getPaymentLDList(page, pageSize);
     setData(res);
-    notification.success({ message: "已提交至财务审核" });
+    message.success({ content: "已提交至财务审核", type: 'success' });
     setDetail(undefined);
   };
 
@@ -133,7 +133,7 @@ const Role = () => {
     setRejectId(undefined);
     const res = await getPaymentLDList(page, pageSize);
     setData(res);
-    notification.success({ message: "申请已退回" });
+    message.success({ content: "申请已退回" , type: 'success'});
   };
 
   const handleLogsOne = async (id: string) => {

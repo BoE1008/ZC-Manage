@@ -7,7 +7,7 @@ import {
   Modal,
   Form,
   Input,
-  notification,
+  message,
   Badge,
   Statistic,
   Col,
@@ -47,7 +47,7 @@ const User = () => {
       const badges = await getBadge();
       setBadges(badges?.entity);
     };
-    const timer = setInterval(func, 1000 * 3600);
+    const timer = setInterval(func, 600000);
     func();
 
     return () => {
@@ -73,7 +73,7 @@ const User = () => {
     };
     await updatePassword(params);
     setPassModal(false);
-    notification.success({ message: "修改密码成功" });
+    message.success("修改密码成功");
   };
 
   return (

@@ -6,7 +6,7 @@ import {
   Input,
   Modal,
   Form,
-  notification,
+  message,
   TreeSelect,
   Tooltip,
   Popconfirm,
@@ -63,9 +63,8 @@ const Dept = () => {
       const data = await getDeptList(1, 1000);
       setLoading(false);
       setData(arrayToTree(data?.entity.data, "0"));
-      notification.success({
-        message: operation === Operation.Add ? "添加成功" : "编辑成功",
-        duration: 3,
+      message.success({
+        content: operation === Operation.Add ? "添加成功" : "编辑成功",
       });
     }
   };

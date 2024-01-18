@@ -17,7 +17,7 @@ import {
   Form,
   Select,
   DatePicker,
-  notification,
+  message,
   List,
   Avatar,
   Tooltip,
@@ -110,9 +110,8 @@ const InvoicingSubmit = () => {
       const data = await getinvoicingCWList(page, pageSize);
       setLoading(false);
       setData(data);
-      notification.success({
-        message: operation === Operation.Add ? "添加成功" : "编辑成功",
-        duration: 3,
+      message.success({
+        content: operation === Operation.Add ? "添加成功" : "编辑成功",
       });
     }
   };
@@ -129,7 +128,7 @@ const InvoicingSubmit = () => {
 
   const handleApprove = async () => {
     await approveOne(detail.id);
-    notification.success({ message: "审核完成" });
+    message.success({ content: "审核完成", type: 'success' });
     setDetail(undefined);
     const data = await getinvoicingCWList(page, pageSize);
     setLoading(false);
@@ -138,7 +137,7 @@ const InvoicingSubmit = () => {
 
   const handleReject = async (invoicingId: string, remark: string) => {
     await rejectOne(invoicingId, remark, 3);
-    notification.success({ message: "申请已退回" });
+    message.success({ content: "申请已退回", type: 'success' });
     setRejectId(undefined);
     const data = await getinvoicingCWList(page, pageSize);
     setLoading(false);

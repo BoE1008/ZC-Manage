@@ -8,7 +8,7 @@ import {
   Form,
   Select,
   DatePicker,
-  notification,
+  message,
   Tooltip,
   Popconfirm,
   List,
@@ -220,9 +220,9 @@ const Payment = () => {
     const data = await getPaymentList(page, pageSize);
     setLoading(false);
     setData(data);
-    notification.success({
-      message: operation === Operation.Add ? "添加成功" : "编辑成功",
-      duration: 3,
+    message.success({
+      content: operation === Operation.Add ? "添加成功" : "编辑成功",
+      type: 'success',
     });
   };
 
@@ -249,7 +249,7 @@ const Payment = () => {
 
   const handleSubmitOne = async () => {
     await submitToYW(detail.id);
-    notification.success({ message: "提交成功" });
+    message.success({ content: "提交成功", type: 'success' });
     setDetail(undefined);
     const data = await getPaymentList(page, pageSize);
     setData(data);
@@ -516,12 +516,14 @@ const Payment = () => {
     name: "file",
     multiple: true,
     fileList: files,
+    listType: 'picture',
     withCredentials: true,
     headers: {
       "Content-Type": "multipart/form-data",
     },
     showUploadList: {
       showDownloadIcon: true,
+      showPreviewIcon:true,
     },
     onRemove: async (file) => {
       await deleteFileById(file?.id);

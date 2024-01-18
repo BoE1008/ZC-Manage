@@ -1,6 +1,7 @@
 import { memo, useEffect, useState } from "react";
 import { Modal, Upload } from "antd";
 import { getFilesById } from "@/restApi/payment";
+import { formatNumber } from "@/utils";
 
 const PaymentDetailModal = ({ onClose, data }) => {
   const [files, setFiles] = useState([]);
@@ -25,6 +26,7 @@ const PaymentDetailModal = ({ onClose, data }) => {
     name: "file",
     multiple: true,
     fileList: files,
+    listType: "picture-card",
     withCredentials: true,
     headers: {
       "Content-Type": "multipart/form-data",
@@ -284,7 +286,7 @@ const PaymentDetailModal = ({ onClose, data }) => {
               textAlign: "center",
             }}
           >
-            {data?.fee}
+            {formatNumber(data?.fee)}
           </td>
         </tr>
 

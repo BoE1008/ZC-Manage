@@ -8,7 +8,7 @@ import {
   Form,
   Select,
   DatePicker,
-  notification,
+  message,
   List,
   Avatar,
   Tooltip,
@@ -105,7 +105,7 @@ const Role = () => {
 
   const handleSubmitToLD = async () => {
     await submitToLD(detail.id);
-    notification.success({ message: "已提交至领导审核" });
+    message.success({ content: "已提交至领导审核", type: 'success' });
     setDetail(undefined);
     const res = await getPaymentYWList(page, pageSize);
     setData(res);
@@ -113,7 +113,7 @@ const Role = () => {
 
   const handleSubmitToCW = async () => {
     await submitYWToCW(detail.id);
-    notification.success({ message: "已提交至财务审核" });
+    message.success({ content: "已提交至财务审核", type: 'success' });
     setDetail(undefined);
     const res = await getPaymentYWList(page, pageSize);
     setData(res);
@@ -122,7 +122,7 @@ const Role = () => {
   const handleRejectOne = async (id: string, remark: string) => {
     await rejectOne(id, remark, 1);
     setRejectId(undefined);
-    notification.success({ message: "申请已退回" });
+    message.success({ content: "申请已退回" , type: 'success'});
     const res = await getPaymentYWList(page, pageSize);
     setData(res);
   };
@@ -145,9 +145,9 @@ const Role = () => {
       const data = await getPaymentYWList(page, pageSize);
       setLoading(false);
       setData(data);
-      notification.success({
-        message: operation === Operation.Add ? "添加成功" : "编辑成功",
-        duration: 3,
+      message.success({
+        content: operation === Operation.Add ? "添加成功" : "编辑成功",
+        type: 'success',
       });
     }
   };

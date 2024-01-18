@@ -6,6 +6,7 @@ import {
   updateFileById,
 } from "@/restApi/payment";
 import { UploadOutlined } from "@ant-design/icons";
+import { formatNumber } from "@/utils";
 
 const PaymentDetailModal = ({ onClose, data, onConfirm }) => {
   const [files, setFiles] = useState([]);
@@ -54,6 +55,7 @@ const PaymentDetailModal = ({ onClose, data, onConfirm }) => {
     name: "file",
     multiple: true,
     fileList: files,
+    listType: "picture-card",
     withCredentials: true,
     headers: {
       "Content-Type": "multipart/form-data",
@@ -319,7 +321,7 @@ const PaymentDetailModal = ({ onClose, data, onConfirm }) => {
               textAlign: "center",
             }}
           >
-            {data?.fee}
+            {formatNumber(data?.fee)}
           </td>
         </tr>
 

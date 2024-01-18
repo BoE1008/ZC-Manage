@@ -6,7 +6,7 @@ import {
   Input,
   Modal,
   Form,
-  notification,
+  message,
   Tag,
   Tree,
   Tooltip,
@@ -93,9 +93,9 @@ const Role = () => {
       const data = await getRoleList(page, pageSize);
       setLoading(false);
       setData(data);
-      notification.success({
-        message: operation === Operation.Add ? "添加成功" : "编辑成功",
-        duration: 3,
+      message.success({
+        content: operation === Operation.Add ? "添加成功" : "编辑成功",
+        type: 'success',
       });
     }
   };

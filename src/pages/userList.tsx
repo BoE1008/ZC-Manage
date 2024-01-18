@@ -6,7 +6,7 @@ import {
   Form,
   Input,
   Space,
-  notification,
+  message,
   Tooltip,
   Popconfirm,
   Tree,
@@ -98,9 +98,9 @@ const User = () => {
     const data = await getUserList(page, pageSize, searchValue, selectDeptId);
     setLoading(false);
     setData(data);
-    notification.success({
-      message: operation === Operation.Add ? "添加成功" : "编辑成功",
-      duration: 3,
+    message.success({
+      content: operation === Operation.Add ? "添加成功" : "编辑成功",
+      type: 'success',
     });
   };
 

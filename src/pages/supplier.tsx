@@ -6,7 +6,7 @@ import {
   Form,
   Input,
   Space,
-  notification,
+  message,
   Tooltip,
   Select,
   Popconfirm,
@@ -84,9 +84,9 @@ const Supplyer = () => {
       setModalOpen(false);
       const data = await getSuppliersList(page, pageSize, searchValue);
       setData(data);
-      notification.success({
-        message: operation === Operation.Add ? "添加成功" : "编辑成功",
-        duration: 3,
+      message.success({
+        content: operation === Operation.Add ? "添加成功" : "编辑成功",
+        type: "success",
       });
     }
   };
@@ -158,9 +158,9 @@ const Supplyer = () => {
       setBankModalState(false);
       const res = await getSupplierBankList(supplierId);
       setBankData(res);
-      notification.success({
-        message: bankOperation === Operation.Add ? "添加成功" : "编辑成功",
-        duration: 3,
+      message.success({
+        content: bankOperation === Operation.Add ? "添加成功" : "编辑成功",
+        type: "success",
       });
     }
   };
@@ -169,9 +169,9 @@ const Supplyer = () => {
     await deleteBank(id);
     const res = await getSupplierBankList(supplierId);
     setBankData(res);
-    notification.success({
-      message: "删除成功",
-      duration: 3,
+    message.success({
+      content: "删除成功",
+      type: "success",
     });
   };
 

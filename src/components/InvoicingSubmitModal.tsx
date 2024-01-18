@@ -6,6 +6,7 @@ import {
   updateFileById,
 } from "@/restApi/invoicing";
 import { UploadOutlined } from "@ant-design/icons";
+import { formatNumber } from "@/utils";
 
 const InvoicingDetailModal = ({ onClose, data, onConfirm }) => {
   const [files, setFiles] = useState([]);
@@ -51,6 +52,7 @@ const InvoicingDetailModal = ({ onClose, data, onConfirm }) => {
     name: "file",
     multiple: true,
     fileList: files,
+    listType: "picture-card",
     withCredentials: true,
     headers: {
       "Content-Type": "multipart/form-data",
@@ -58,6 +60,7 @@ const InvoicingDetailModal = ({ onClose, data, onConfirm }) => {
     showUploadList: {
       showDownloadIcon: true,
       showRemoveIcon: false,
+      showPreviewIcon: true,
     },
     onRemove: async (file) => {
       await deleteFileById(file?.id);
@@ -353,7 +356,7 @@ const InvoicingDetailModal = ({ onClose, data, onConfirm }) => {
               textAlign: "center",
             }}
           >
-            {data?.fee}
+            {formatNumber(data?.fee)}
           </td>
         </tr>
 

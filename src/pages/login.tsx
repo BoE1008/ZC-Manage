@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Background from "@/assets/images/bg.jpg";
 import { login, getCodeImage, updatePassword } from "@/restApi/user";
-import { notification } from "antd";
+import { message } from "antd";
 import { menuHandler } from "@/utils";
 import { getMenu } from "@/restApi/menu";
 import logo from "@/assets/images/loginLogo.png";
@@ -94,7 +94,7 @@ const Login = () => {
     };
     await updatePassword(params);
     setPassModal(false);
-    notification.success({ message: "修改密码成功" });
+    message.success({ content: "修改密码成功"});
     const codeData = await getCodeImage();
     const url = URL.createObjectURL(codeData);
     setImgSrc(url);

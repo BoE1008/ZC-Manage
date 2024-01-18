@@ -27,7 +27,7 @@ import {
   Space,
   Select,
   InputNumber,
-  notification,
+  message,
   Tooltip,
   Popconfirm,
   List,
@@ -47,7 +47,6 @@ import { Operation, ModalType } from "@/types";
 import { getCustomersList } from "@/restApi/customer";
 import { getSuppliersList } from "@/restApi/supplyer";
 import dayjs from "dayjs";
-import { BooltypeArr } from "@/utils/const";
 import RejectModal from "@/components/RejectModal";
 import { formatNumber } from "@/utils";
 
@@ -138,10 +137,7 @@ const Item = ({ projectId, onClose, modalType }) => {
           })),
         },
       });
-      notification.success({
-        message: operation === Operation.Add ? "添加成功" : "编辑成功",
-        duration: 3,
-      });
+      message.success(operation === Operation.Add ? "添加成功" : "编辑成功");
     }
   };
 
@@ -200,7 +196,7 @@ const Item = ({ projectId, onClose, modalType }) => {
 
   const handleSubmitYF = async (record) => {
     await submitYF(projectId, record?.id);
-    notification.success({ message: "已提交至业务审核" });
+    message.success("已提交至业务审核");
     const data = await getProjectYSList(projectId as string, page, pageSize);
     setData({
       ...data,
@@ -216,7 +212,7 @@ const Item = ({ projectId, onClose, modalType }) => {
 
   const handleSubmitYS = async (record) => {
     await submitYS(projectId, record?.id);
-    notification.success({ message: "已提交至业务审核" });
+    message.success("已提交至业务审核");
     const data = await getProjectYSList(projectId as string, page, pageSize);
     setData({
       ...data,
@@ -587,31 +583,34 @@ const Item = ({ projectId, onClose, modalType }) => {
                         </Popconfirm>
                       </Tooltip>
                     )}
-                    <Tooltip title="退回">
-                      <Popconfirm
-                        title="是否退回申请？"
-                        okButtonProps={{
-                          style: { backgroundColor: "#198348" },
-                        }}
-                        getPopupContainer={(node) => node.parentElement}
-                        onConfirm={() => {
-                          setRejectId(record.id);
-                          setRejectType("YF");
-                        }}
-                      >
-                        <Button
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            padding: "3px 5px",
-                          }}
-                        >
-                          <StopTwoTone twoToneColor="#198348" />
-                        </Button>
-                      </Popconfirm>
-                    </Tooltip>
                   </>
                 )}
+
+              {modalType === ModalType.Approve && record.state !== "未提交" && (
+                <Tooltip title="退回">
+                  <Popconfirm
+                    title="是否退回申请？"
+                    okButtonProps={{
+                      style: { backgroundColor: "#198348" },
+                    }}
+                    getPopupContainer={(node) => node.parentElement}
+                    onConfirm={() => {
+                      setRejectId(record.id);
+                      setRejectType("YF");
+                    }}
+                  >
+                    <Button
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        padding: "3px 5px",
+                      }}
+                    >
+                      <StopTwoTone twoToneColor="#198348" />
+                    </Button>
+                  </Popconfirm>
+                </Tooltip>
+              )}
 
               <Tooltip title={<span>查看审核日志</span>}>
                 <Button
@@ -818,37 +817,15 @@ const Item = ({ projectId, onClose, modalType }) => {
                 )}
               </>
             )}
-            {modalType === ModalType.Approve && record.state !== "审批通过" && (
-              <>
-                {record?.state === "待业务审批" && (
-                  <Tooltip title="批准">
-                    <Popconfirm
-                      title="是否通过审批？"
-                      okButtonProps={{ style: { backgroundColor: "#198348" } }}
-                      getPopupContainer={(node) => node.parentElement}
-                      onConfirm={() => handleApproveYS(record.id)}
-                    >
-                      <Button
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          padding: "3px 5px",
-                        }}
-                      >
-                        <CheckCircleTwoTone twoToneColor="#198348" />
-                      </Button>
-                    </Popconfirm>
-                  </Tooltip>
-                )}
-                <Tooltip title="退回">
+            {modalType === ModalType.Approve &&
+              record.state !== "审批通过" &&
+              record?.state === "待业务审批" && (
+                <Tooltip title="批准">
                   <Popconfirm
-                    title="是否退回申请？"
-                    getPopupContainer={(node) => node.parentElement}
+                    title="是否通过审批？"
                     okButtonProps={{ style: { backgroundColor: "#198348" } }}
-                    onConfirm={() => {
-                      setRejectId(record.id);
-                      setRejectType("YS");
-                    }}
+                    getPopupContainer={(node) => node.parentElement}
+                    onConfirm={() => handleApproveYS(record.id)}
                   >
                     <Button
                       style={{
@@ -857,13 +834,34 @@ const Item = ({ projectId, onClose, modalType }) => {
                         padding: "3px 5px",
                       }}
                     >
-                      <StopTwoTone twoToneColor="#198348" />
+                      <CheckCircleTwoTone twoToneColor="#198348" />
                     </Button>
                   </Popconfirm>
                 </Tooltip>
-              </>
+              )}
+            {modalType === ModalType.Approve && record.state !== "未提交" && (
+              <Tooltip title="退回">
+                <Popconfirm
+                  title="是否退回申请？"
+                  getPopupContainer={(node) => node.parentElement}
+                  okButtonProps={{ style: { backgroundColor: "#198348" } }}
+                  onConfirm={() => {
+                    setRejectId(record.id);
+                    setRejectType("YS");
+                  }}
+                >
+                  <Button
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      padding: "3px 5px",
+                    }}
+                  >
+                    <StopTwoTone twoToneColor="#198348" />
+                  </Button>
+                </Popconfirm>
+              </Tooltip>
             )}
-
             <Tooltip title={<span>查看审核日志</span>}>
               <Button
                 onClick={() => handleLogs(record.id)}
@@ -919,10 +917,7 @@ const Item = ({ projectId, onClose, modalType }) => {
           })),
         },
       });
-      notification.success({
-        message: operation === Operation.Add ? "添加成功" : "编辑成功",
-        duration: 3,
-      });
+      message.success(operation === Operation.Add ? "添加成功" : "编辑成功");
     }
   };
 

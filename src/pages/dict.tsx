@@ -6,7 +6,7 @@ import {
   Form,
   Input,
   Space,
-  notification,
+  message,
   Tag,
   Select,
 } from "antd";
@@ -90,9 +90,8 @@ const Dict = () => {
       const data = await getDictList(page, pageSize);
       setLoading(false);
       setData(data);
-      notification.success({
-        message: operation === Operation.Add ? "添加成功" : "编辑成功",
-        duration: 3,
+      message.success({
+        content: operation === Operation.Add ? "添加成功" : "编辑成功",
       });
     }
   };
@@ -110,9 +109,8 @@ const Dict = () => {
       const data = await getDictDetail(typeId, 1, 20);
       setLoading(false);
       setDictDetail(data.entity.data);
-      notification.success({
-        message: dataOperation === Operation.Add ? "添加成功" : "编辑成功",
-        duration: 3,
+      message.success({
+        content: dataOperation === Operation.Add ? "添加成功" : "编辑成功",
       });
     }
   };

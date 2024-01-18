@@ -6,7 +6,7 @@ import {
   Form,
   Input,
   Space,
-  notification,
+  message,
   Tooltip,
   Select,
   Popconfirm,
@@ -89,10 +89,7 @@ const Customer = () => {
       setModalOpen(false);
       const data = await getCustomersList(page, pageSize, searchValue);
       setData(data);
-      notification.success({
-        message: operation === Operation.Add ? "添加成功" : "编辑成功",
-        duration: 3,
-      });
+      message.success(operation === Operation.Add ? "添加成功" : "编辑成功");
     }
   };
 
@@ -163,10 +160,9 @@ const Customer = () => {
       setBankModalState(false);
       const res = await getCustomBankList(customId);
       setBankData(res);
-      notification.success({
-        message: bankOperation === Operation.Add ? "添加成功" : "编辑成功",
-        duration: 3,
-      });
+      message.success(
+        bankOperation === Operation.Add ? "添加成功" : "编辑成功"
+      );
     }
   };
 
@@ -174,10 +170,7 @@ const Customer = () => {
     await deleteBank(id);
     const res = await getCustomBankList(customId);
     setBankData(res);
-    notification.success({
-      message: "删除成功",
-      duration: 3,
-    });
+    message.success("删除成功");
   };
 
   const columns = [

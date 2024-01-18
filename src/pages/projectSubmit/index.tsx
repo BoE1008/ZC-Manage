@@ -8,7 +8,7 @@ import {
   Space,
   Select,
   DatePicker,
-  notification,
+  message,
   List,
   Avatar,
   Popconfirm,
@@ -155,9 +155,9 @@ const Project = () => {
         searchNumValue
       );
       setData(data);
-      notification.success({
-        message: operation === Operation.Add ? "添加成功" : "编辑成功",
-        duration: 3,
+      message.success({
+        content: operation === Operation.Add ? "添加成功" : "编辑成功",
+        type: 'success',
       });
     }
   };
@@ -176,7 +176,7 @@ const Project = () => {
 
   const handleSubmitOne = async (id: string) => {
     await submitOne(id);
-    notification.success({ message: "提交成功" });
+    message.success({ content: "提交成功", type: 'success' });
   };
 
   const handleExport = async () => {

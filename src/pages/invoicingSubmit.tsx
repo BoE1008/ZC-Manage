@@ -19,15 +19,13 @@ import {
   Modal,
   Form,
   Select,
-  DatePicker,
-  notification,
+  message,
   List,
   Avatar,
   Tooltip,
   Popconfirm,
   Typography,
   Upload,
-  message,
 } from "antd";
 import { Operation } from "@/types";
 import { getProjectsSubmitList } from "@/restApi/project";
@@ -37,7 +35,6 @@ import {
   CalendarTwoTone,
   InteractionTwoTone,
   UploadOutlined,
-  ArrowDownOutlined,
 } from "@ant-design/icons";
 import { getCustomersYSList, getCustomersList } from "@/restApi/customer";
 import { InvoicingTypeArr } from "@/utils/const";
@@ -222,9 +219,9 @@ const InvoicingSubmit = () => {
     const data = await getinvoicingList(page, pageSize);
     setLoading(false);
     setData(data);
-    notification.success({
-      message: operation === Operation.Add ? "添加成功" : "编辑成功",
-      duration: 3,
+    message.success({
+      content: operation === Operation.Add ? "添加成功" : "编辑成功",
+      type: "success",
     });
   };
 
@@ -240,7 +237,7 @@ const InvoicingSubmit = () => {
 
   const handleSubmitOne = async () => {
     await submitToYw(detail.id);
-    notification.success({ message: "提交成功" });
+    message.success({ content: "提交成功", type: "success" });
     setDetail(undefined);
     const data = await getinvoicingList(page, pageSize);
     setData(data);

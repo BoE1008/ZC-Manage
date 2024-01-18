@@ -1,12 +1,11 @@
-import React, { ReactNode, useEffect, useMemo, useState } from "react";
-import { Layout, Menu, Badge } from "antd";
+import React, { ReactNode, useEffect, useState } from "react";
+import { Layout, Menu, Watermark } from "antd";
 import User from "@/components/User";
 import { useRouter } from "next/router";
 import type { MenuProps } from "antd";
 import Link from "next/link";
 import logo from "@/assets/images/logo.png";
 import Image from "next/image";
-import { getBadge } from "@/restApi/menu";
 
 const { Header, Content, Sider } = Layout;
 
@@ -38,153 +37,98 @@ const AppLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
     })();
   }, [asPath]);
 
-  // useEffect(() => {
-  //   const timer = setInterval(async () => {
-  //     const badges = await getBadge();
-  //     setBadges(badges?.entity);
-  //   }, 1000);
-
-  //   return () => {
-  //     clearInterval(timer);
-  //   };
-  // }, []);
-
-  // const badgeMenu = useMemo(() => {
-  //   return menu?.map((i) => {
-  //     if (i.children) {
-  //       return i.children.map((c) => {
-  //         if (c.key === "projectYW") {
-  //           return {
-  //             ...c,
-  //             icon: (
-  //               <Badge dot color={"red"} count={badges?.projectNum}></Badge>
-  //             ),
-  //           };
-  //         } else if (c.key === "invoicingYW") {
-  //           return {
-  //             ...c,
-  //             icon: <Badge dot color={"red"} count={badges?.iywNum}></Badge>,
-  //           };
-  //         } else if (c.key === "invoicingCW") {
-  //           return {
-  //             ...c,
-  //             icon: <Badge dot color={"red"} count={badges?.icwNum}></Badge>,
-  //           };
-  //         } else if (c.key === "paymentYW") {
-  //           return {
-  //             ...c,
-  //             icon: <Badge dot color={"red"} count={badges?.pywNum}></Badge>,
-  //           };
-  //         } else if (c.key === "paymentLD") {
-  //           return {
-  //             ...c,
-  //             icon: <Badge dot color={"red"} count={badges?.pldNum}></Badge>,
-  //           };
-  //         } else if (c.key === "paymentCW") {
-  //           return {
-  //             ...c,
-  //             icon: <Badge dot color={"red"} count={badges?.pcwNum}></Badge>,
-  //           };
-  //         } else {
-  //           return c;
-  //         }
-  //       });
-  //     } else {
-  //       return i;
-  //     }
-  //   });
-  // }, [menu, badges]);
-
   const handleClick: MenuProps["onClick"] = (props) => {
     router.push(`/${props.key}`);
   };
 
   return asPath !== "/login" ? (
     <Layout className="h-full" style={{ minHeight: "100vh" }}>
-      <Header
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          zIndex: 5,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          height: "80px",
-          padding: 0,
-          background: "#fff",
-        }}
-        className="w-full h-[50px]"
-      >
-        <Link href="/" className="flex flex-row items-center">
-          <Image src={logo} alt="logo" width={200} height={60} />
-          <h2
-            style={{
-              color: "#198348",
-              fontSize: "18px",
-              fontWeight: "bold",
-              marginLeft: "20px",
-            }}
-          >
-            专业版
-          </h2>
-        </Link>
-        <User />
-      </Header>
-      <Layout className="h-screen w-screen" style={{ display: "flex" }}>
-        <Sider
-          collapsible
-          collapsed={collapsed}
-          onCollapse={(value) => setCollapsed(value)}
+      <Watermark content="甄察供应链" inherit={false} zIndex={0}>
+        <Header
           style={{
-            // position: "fixed",
-            // top: 80,
-            // left: 0,
-            height: "100vh",
-            paddingTop: "80px",
-            maxWidth: "160px",
-            // zIndex: 5,
-            // height: "calc(100vh - 80px)",
+            position: "fixed",
+            top: 0,
+            left: 0,
+            zIndex: 5,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            height: "80px",
+            padding: 0,
+            background: "#fff",
           }}
-          className="overflow-y-auto"
+          className="w-full h-[50px]"
         >
-          <Menu
-            mode="inline"
-            openKeys={openKeys}
-            onOpenChange={onOpenChange}
-            defaultSelectedKeys={["custom"]}
-            selectedKeys={[asPath.slice(1, asPath.length)]}
+          <Link href="/" className="flex flex-row items-center">
+            <Image src={logo} alt="logo" width={200} height={60} />
+            <h2
+              style={{
+                color: "#198348",
+                fontSize: "18px",
+                fontWeight: "bold",
+                marginLeft: "20px",
+              }}
+            >
+              专业版
+            </h2>
+          </Link>
+          <User />
+        </Header>
+        <Layout className="h-screen w-screen" style={{ display: "flex" }}>
+          <Sider
+            collapsible
+            collapsed={collapsed}
+            onCollapse={(value) => setCollapsed(value)}
             style={{
-              height: "100%",
-              borderRight: 0,
-              background: "#198348",
-              color: "#fff",
+              // position: "fixed",
+              // top: 80,
+              // left: 0,
+              height: "100vh",
+              paddingTop: "80px",
+              maxWidth: "160px",
+              // zIndex: 5,
+              // height: "calc(100vh - 80px)",
             }}
-            items={menu}
-            onClick={(props) => handleClick(props)}
-          />
-        </Sider>
-        <Layout
-          style={{
-            // paddingLeft: "180px",
-            paddingTop: "90px",
-            minHeight: "100%",
-            flex: 1,
-          }}
-          className="h-screen overflow-y-auto"
-        >
-          <Content
-            style={{
-              marginLeft: 5,
-              marginTop: 0,
-              minHeight: 280,
-              background: "#FFF",
-            }}
+            className="overflow-y-auto"
           >
-            {children}
-          </Content>
+            <Menu
+              mode="inline"
+              openKeys={openKeys}
+              onOpenChange={onOpenChange}
+              defaultSelectedKeys={["custom"]}
+              selectedKeys={[asPath.slice(1, asPath.length)]}
+              style={{
+                height: "100%",
+                borderRight: 0,
+                background: "#198348",
+                color: "#fff",
+              }}
+              items={menu}
+              onClick={(props) => handleClick(props)}
+            />
+          </Sider>
+          <Layout
+            style={{
+              // paddingLeft: "180px",
+              paddingTop: "90px",
+              minHeight: "100%",
+              flex: 1,
+            }}
+            className="h-screen overflow-y-auto"
+          >
+            <Content
+              style={{
+                marginLeft: 5,
+                marginTop: 0,
+                minHeight: 280,
+                background: "#FFF",
+              }}
+            >
+              {children}
+            </Content>
+          </Layout>
         </Layout>
-      </Layout>
+      </Watermark>
     </Layout>
   ) : (
     <Layout>{children}</Layout>

@@ -8,7 +8,7 @@ import {
   Space,
   Select,
   DatePicker,
-  notification,
+  message,
   List,
   Avatar,
   Tooltip,
@@ -208,16 +208,16 @@ const Project = () => {
       setModalOpen(false);
       const data = await getProjectsApproveList(page, pageSize, searchValue);
       setData(data);
-      notification.success({
-        message: operation === Operation.Add ? "添加成功" : "编辑成功",
-        duration: 3,
+      message.success({
+        content: operation === Operation.Add ? "添加成功" : "编辑成功",
+        type: 'success',
       });
     }
   };
 
   const handleApproveOne = async (id) => {
     await approveOne(id);
-    notification.success({ message: "审核完成" });
+    message.success({ content: "审核完成", type:'success' });
     setDetail(undefined);
     const data = await getProjectsApproveList(page, pageSize, searchValue);
     setData(data);
@@ -226,7 +226,7 @@ const Project = () => {
 
   const handleRejectOne = async (projectId: string, remark) => {
     await rejectOne(projectId, remark);
-    notification.success({ message: "审核退回" });
+    message.success({ content: "审核退回", type: 'success' });
     setRejectId(undefined);
     const data = await getProjectsApproveList(page, pageSize, searchValue);
     setData(data);
