@@ -12,7 +12,6 @@ import {
   Popconfirm,
 } from "antd";
 import { Operation } from "@/types";
-import dayjs from "dayjs";
 import { EditTwoTone, DeleteTwoTone } from "@ant-design/icons";
 import { addDept, updateDept, deleteDept, getDeptList } from "@/restApi/dept";
 import { arrayToTree, formatDept } from "@/utils";
@@ -86,11 +85,6 @@ const Dept = () => {
       },
     };
   };
-
-  const customerFilterOption = (
-    input: string,
-    option?: { label: string; value: string }
-  ) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
 
   const columns = [
     {

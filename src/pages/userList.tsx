@@ -238,12 +238,11 @@ const User = () => {
           )}
         </div>
         <div className="flex-1">
-          <div className="flex flex-row justify-between gap-y-3">
+          <div className="flex flex-row items-center gap-3 mb-4">
             <Button
               onClick={handleAdd}
               type="primary"
               style={{
-                marginBottom: 16,
                 background: "#198348",
                 width: "100px",
               }}
@@ -256,7 +255,6 @@ const User = () => {
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.target.value)}
               />
-              {/* <Button onClick={handleSearch}>查询</Button> */}
             </Space>
           </div>
           <Table

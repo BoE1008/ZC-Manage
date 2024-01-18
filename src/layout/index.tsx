@@ -43,7 +43,12 @@ const AppLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
 
   return asPath !== "/login" ? (
     <Layout className="h-full" style={{ minHeight: "100vh" }}>
-      <Watermark content="甄察供应链" inherit={false} zIndex={0}>
+      <Watermark
+        content="甄察供应链"
+        inherit={false}
+        zIndex={0}
+        gap={[150, 150]}
+      >
         <Header
           style={{
             position: "fixed",

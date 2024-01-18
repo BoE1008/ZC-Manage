@@ -333,11 +333,11 @@ const Supplyer = () => {
 
   return (
     <div className="w-full p-2" style={{ color: "#000" }}>
-      <div className="flex flex-row gap-y-3 justify-between">
+      <div className="flex flex-row items-center gap-3 mb-4">
         <Button
           onClick={handleAdd}
           type="primary"
-          style={{ marginBottom: 16, background: "#198348", width: "100px" }}
+          style={{ background: "#198348", width: "100px" }}
         >
           添加
         </Button>

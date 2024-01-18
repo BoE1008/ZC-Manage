@@ -553,12 +553,12 @@ const Payment = () => {
 
   return (
     <div className="p-2">
-      <div className="flex flex-row gap-y-3 justify-between mb-4">
+      <div className="flex flex-row gap-3 items-center mb-4">
         <Space>
           <Button
             onClick={handleAdd}
             type="primary"
-            style={{ marginBottom: 16, background: "#198348", width: "100px" }}
+            style={{ background: "#198348", width: "100px" }}
           >
             添加
           </Button>

@@ -310,14 +310,6 @@ const Dict = () => {
         >
           添加
         </Button>
-        <Space>
-          <Input
-            placeholder="名称"
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-          />
-          {/* <Button onClick={handleSearch}>查询</Button> */}
-        </Space>
       </div>
       <Table
         bordered
