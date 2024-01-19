@@ -157,7 +157,7 @@ const Project = () => {
       setData(data);
       message.success({
         content: operation === Operation.Add ? "添加成功" : "编辑成功",
-        type: 'success',
+        type: "success",
       });
     }
   };
@@ -176,7 +176,7 @@ const Project = () => {
 
   const handleSubmitOne = async (id: string) => {
     await submitOne(id);
-    message.success({ content: "提交成功", type: 'success' });
+    message.success({ content: "提交成功", type: "success" });
   };
 
   const handleExport = async () => {
@@ -603,6 +603,7 @@ const Project = () => {
 
       {
         <Table
+          virtual
           bordered
           loading={loading}
           dataSource={data?.entity.data}

@@ -274,7 +274,7 @@ const Role = () => {
       key: "action",
       render: (_, record) => {
         const isFinished = record.state === "审批通过";
-        const isSubmit = record.state === "待财务审核";
+        const isSubmit = record.state === "待财务审批";
 
         return (
           <Space size="middle" className="flex flex-row !gap-x-1">

@@ -12,7 +12,7 @@ export const getProjectsSubmitList = async (
   projectType?: string,
   projectBrand?: string,
   state?: string,
-  customId?:string
+  customId?: string
 ) => {
   const res = await axiosInstance.get("/zc/project/submit/list", {
     params: {
@@ -25,7 +25,7 @@ export const getProjectsSubmitList = async (
       typeId: projectType,
       brandId: projectBrand,
       state,
-      customId
+      customId,
     },
   });
 
@@ -42,7 +42,7 @@ export const getProjectsApproveList = async (
   projectType?: string,
   projectBrand?: string,
   state?: string,
-  customId?:string
+  customId?: string
 ) => {
   const res = await axiosInstance.get("/zc/project/approve/list", {
     params: {
@@ -55,7 +55,7 @@ export const getProjectsApproveList = async (
       typeId: projectType,
       brandId: projectBrand,
       state,
-      customId
+      customId,
     },
   });
 
@@ -266,7 +266,11 @@ export const updateYFThreeStatus = async (info) => {
 };
 
 export const updateYSThreeStatus = async (info) => {
-  console.log(info);
   const res = await axiosInstance.post("/zc/project/ys/status/change", info);
+  return res.data;
+};
+
+export const getProjectCWStatic = async () => {
+  const res = await axiosInstance.get("/zc/reports/project/bar/income");
   return res.data;
 };

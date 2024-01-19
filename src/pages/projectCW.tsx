@@ -12,28 +12,20 @@ import {
   List,
   Avatar,
   Tooltip,
-  Divider,
-  Popconfirm,
   Popover,
   Checkbox,
 } from "antd";
 import {
   ProfileTwoTone,
-  CalendarTwoTone,
-  StopTwoTone,
-  CheckCircleTwoTone,
   AppstoreTwoTone,
+  FundTwoTone,
 } from "@ant-design/icons";
 import {
   getProjectsApproveList,
   addProject,
   updateProject,
-  deleteProject,
   exportProject,
-  approveOne,
   rejectOne,
-  logsOne,
-  getProjectDetailById,
 } from "@/restApi/project";
 import { Company, ModalType, Operation } from "@/types";
 import dayjs from "dayjs";
@@ -42,7 +34,7 @@ import { getCustomersList } from "@/restApi/customer";
 import YSYFModal from "@/components/YSYFModal";
 import RejectModal from "@/components/RejectModal";
 import { formatNumber } from "@/utils";
-import * as echarts from "echarts";
+import ProjectCWStaticModal from "@/components/ProjectCWStaticModal";
 
 const initialValues = {
   name: "",
@@ -79,14 +71,14 @@ const Project = () => {
   const [rejectId, setRejectId] = useState();
   const [detail, setDetail] = useState();
 
-  const chartRef = useRef(null);
-
   const [projectDateSort, setProjectDateSort] = useState("1");
   const [productId, setProductId] = useState();
   const [projectType, setProjectType] = useState();
   const [projectBrand, setProjectBrand] = useState();
   const [projectState, setProjectState] = useState();
   const [customerId, setCustomerId] = useState();
+
+  const [staticModal, setStaticModal] = useState(false)
 
   useEffect(() => {
     (async () => {
@@ -134,65 +126,7 @@ const Project = () => {
     customerId,
   ]);
 
-  const option = useMemo(() => {
-    return {
-      title: { text: "项目图", left: "center" },
-      tooltip: {
-        trigger: "axis",
-      },
-      legend: {
-        data: ["收入小计", "成本小计", "利润", "扣除后利润"],
-        show: true,
-        right: "20px",
-        orient: "vertical",
-      },
-      yAxis: {
-        type: "category",
-        data: data?.entity?.data?.map((c) => c.name),
-        axisPointer: {
-          type: "shadow",
-        },
-        axisLabel: {
-          rotate: 45,
-        },
-      },
-      xAxis: {
-        type: "value",
-      },
-      series: [
-        {
-          data: data?.entity?.data?.map((c) => c.proIncome),
-          type: "bar",
-          name: "收入小计",
-        },
-        {
-          data: data?.entity?.data?.map((c) => c.proCost),
-          type: "bar",
-          name: "成本小计",
-        },
-        {
-          data: data?.entity?.data?.map((c) => c.profit),
-          type: "bar",
-          name: "利润",
-        },
-        {
-          data: data?.entity?.data?.map((c) => c.deductProfit),
-          type: "bar",
-          name: "扣除后利润",
-        },
-      ],
-    };
-  }, [data]);
-
-  useEffect(() => {
-    const chart = echarts.init(chartRef.current);
-
-    chart.setOption(option);
-
-    return () => {
-      chart.dispose();
-    };
-  }, [option]);
+  
 
   const handleOk = async () => {
     form.validateFields();
@@ -216,27 +150,6 @@ const Project = () => {
     }
   };
 
-  const handleDeleteOne = async (id: string) => {
-    await deleteProject(id);
-    const data = await getProjectsApproveList(page, pageSize, searchValue);
-    setData(data);
-    setLoading(false);
-  };
-
-  const handleDetail = async (id) => {
-    const res = await getProjectDetailById(id);
-    setDetail(res.entity.data);
-  };
-
-  const handleApproveOne = async (id) => {
-    await approveOne(id);
-    message.success({ content: "审核完成", type: "success" });
-    setDetail(undefined);
-    const data = await getProjectsApproveList(page, pageSize, searchValue);
-    setData(data);
-    setLoading(false);
-  };
-
   const handleRejectOne = async (projectId: string, remark) => {
     await rejectOne(projectId, remark);
     message.success({ content: "审核退回", type: "success" });
@@ -244,11 +157,6 @@ const Project = () => {
     const data = await getProjectsApproveList(page, pageSize, searchValue);
     setData(data);
     setLoading(false);
-  };
-
-  const handleLogs = async (id: string) => {
-    const res = await logsOne(id);
-    setLogs(res.entity.data);
   };
 
   const handleExport = async () => {
@@ -550,31 +458,7 @@ const Project = () => {
 
   return (
     <div className="w-full p-2" style={{ color: "#000" }}>
-      {/* <div className="flex flex-row gap-y-3 justify-between">
-        <Space>
-          <Button
-            onClick={handleExport}
-            type="primary"
-            style={{ marginBottom: 16, background: "#198348", width: "100px" }}
-          >
-            导出
-          </Button>
-        </Space>
-
-        <Space>
-          <Input
-            placeholder="按项目名称搜索"
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-          />
-          <Input
-            placeholder="按项目编号搜索"
-            value={searchNumValue}
-            onChange={(e) => setSearchNumValue(e.target.value)}
-          />
-        </Space>
-      </div> */}
-      <div className="flex flex-row gap-y-3 justify-between my-4 pr-[100px]">
+      <div className="flex flex-row gap-y-3 justify-between my-4 pr-5">
         <div className="flex flex-row gap-x-10">
           <div className="flex flex-row gap-x-4">
             <Button
@@ -605,28 +489,37 @@ const Project = () => {
           </div>
         </div>
 
-        <Space>
-          <Popover
-            content={
-              <Checkbox.Group
-                style={{ display: "flex", flexDirection: "column" }}
-                options={columns?.map((c) => ({
-                  label: c.label,
-                  value: c.value,
-                }))}
-                defaultValue={columns.map((c) => c.value)}
-                onChange={onOptionChange}
-              ></Checkbox.Group>
-            }
-            title="显隐列"
-            trigger="click"
-          >
-            <AppstoreTwoTone
-              style={{ fontSize: "30px" }}
+        <Space className="flex flex-row !gap-x-5">
+          <Tooltip title="显隐列">
+            <Popover
+              content={
+                <Checkbox.Group
+                  style={{ display: "flex", flexDirection: "column" }}
+                  options={columns?.map((c) => ({
+                    label: c.label,
+                    value: c.value,
+                  }))}
+                  defaultValue={columns.map((c) => c.value)}
+                  onChange={onOptionChange}
+                ></Checkbox.Group>
+              }
+              title="显隐列"
+              trigger="click"
+            >
+              <AppstoreTwoTone
+                style={{ fontSize: "30px", cursor: "pointer" }}
+                twoToneColor="#198348"
+              />
+            </Popover>
+          </Tooltip>
+
+          <Tooltip title="统计数据">
+            <FundTwoTone
               twoToneColor="#198348"
-              className="mr-15"
+              style={{ fontSize: "30px", cursor: "pointer" }}
+              onClick={() => setStaticModal(true)}
             />
-          </Popover>
+          </Tooltip>
         </Space>
       </div>
 
@@ -696,11 +589,6 @@ const Project = () => {
             <Select
               placeholder="选择客户"
               optionFilterProp="children"
-              // filterOption={customerFilterOption}
-              // options={project?.map((con) => ({
-              //   label: con.name,
-              //   value: con.id,
-              // }))}
               options={customer?.map((con) => ({
                 value: con.id,
                 label: con.name,
@@ -730,7 +618,6 @@ const Project = () => {
             <Select
               placeholder="选择品牌"
               optionFilterProp="children"
-              // filterOption={customerFilterOption}
               options={dict
                 ?.find((con) => con.code === "sys_project_brand")
                 ?.childList?.map((con) => ({
@@ -743,11 +630,6 @@ const Project = () => {
             <Select
               placeholder="选择货物"
               optionFilterProp="children"
-              // filterOption={customerFilterOption}
-              // options={project?.map((con) => ({
-              //   label: con.name,
-              //   value: con.id,
-              // }))}
               options={dict
                 ?.find((con) => con.code === "sys_product_type")
                 ?.childList?.map((con) => ({
@@ -766,11 +648,6 @@ const Project = () => {
                   value: con.id,
                   label: con.dictLabel,
                 }))}
-              // filterOption={customerFilterOption}
-              // options={project?.map((con) => ({
-              //   label: con.name,
-              //   value: con.id,
-              // }))}
             />
           </Form.Item>
           <Form.Item label="班列号/船名" name="trainNumName">
@@ -839,16 +716,7 @@ const Project = () => {
         />
       )}
 
-      <Divider />
-
-      {/* <div
-        style={{ width: "100%", minHeight: "1000px", marginTop: "100px" }}
-        ref={chartRef}
-      ></div> */}
-      <div
-        style={{ width: "100%", minHeight: "1000px", marginTop: "100px" }}
-        ref={chartRef}
-      ></div>
+      {!!staticModal && <ProjectCWStaticModal open={staticModal} onCancel={() =>{setStaticModal(false)}} />}
     </div>
   );
 };

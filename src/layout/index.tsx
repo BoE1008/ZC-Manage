@@ -14,6 +14,7 @@ const AppLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { asPath } = router;
 
   const [menu, setMenu] = useState();
+  const [userName, setUserName] = useState('');
   // const [badges, setBadges] = useState();
 
   const [openKeys, setOpenKeys] = useState([]);
@@ -30,8 +31,10 @@ const AppLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
 
   useEffect(() => {
     (async () => {
-      if (sessionStorage.getItem("username")) {
+      const userName = sessionStorage.getItem("username")
+      if (!!userName) {
         const menu = JSON.parse(sessionStorage.getItem("menu"));
+        setUserName(userName)
         setMenu(menu);
       }
     })();
@@ -44,7 +47,7 @@ const AppLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
   return asPath !== "/login" ? (
     <Layout className="h-full" style={{ minHeight: "100vh" }}>
       <Watermark
-        content="甄察供应链"
+        content={`甄察供应链（${userName}）`}
         inherit={false}
         zIndex={0}
         gap={[150, 150]}

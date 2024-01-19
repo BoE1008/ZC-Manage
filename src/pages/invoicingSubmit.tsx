@@ -582,13 +582,13 @@ const InvoicingSubmit = () => {
     <div className="p-2">
       <div className="flex flex-row gap-3 mb-4">
         <Space className="flex flex-row items-center">
-          <Button
-            onClick={handleAdd}
-            type="primary"
-            style={{ background: "#198348", width: "100px" }}
-          >
-            添加
-          </Button>
+            <Button
+              onClick={handleAdd}
+              type="primary"
+              style={{ background: "#198348", width: "100px" }}
+            >
+              添加
+            </Button>
         </Space>
 
         <div className="flex flex-row gap-x-4">
