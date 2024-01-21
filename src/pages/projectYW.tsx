@@ -22,6 +22,7 @@ import {
   StopTwoTone,
   CheckCircleTwoTone,
   AppstoreTwoTone,
+  FundTwoTone,
 } from "@ant-design/icons";
 import {
   getProjectsApproveList,
@@ -41,7 +42,7 @@ import { getCustomersList } from "@/restApi/customer";
 import YSYFModal from "@/components/YSYFModal";
 import RejectModal from "@/components/RejectModal";
 import { formatNumber } from "@/utils";
-import * as echarts from "echarts";
+import ProjectYWStaticModal from "@/components/ProjectYWStaticModal";
 
 const initialValues = {
   name: "",
@@ -85,7 +86,7 @@ const Project = () => {
   const [projectState, setProjectState] = useState();
   const [customerId, setCustomerId] = useState();
 
-  const chartRef = useRef(null);
+  const [staticModal, setStaticModal] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -210,14 +211,14 @@ const Project = () => {
       setData(data);
       message.success({
         content: operation === Operation.Add ? "添加成功" : "编辑成功",
-        type: 'success',
+        type: "success",
       });
     }
   };
 
   const handleApproveOne = async (id) => {
     await approveOne(id);
-    message.success({ content: "审核完成", type:'success' });
+    message.success({ content: "审核完成", type: "success" });
     setDetail(undefined);
     const data = await getProjectsApproveList(page, pageSize, searchValue);
     setData(data);
@@ -226,7 +227,7 @@ const Project = () => {
 
   const handleRejectOne = async (projectId: string, remark) => {
     await rejectOne(projectId, remark);
-    message.success({ content: "审核退回", type: 'success' });
+    message.success({ content: "审核退回", type: "success" });
     setRejectId(undefined);
     const data = await getProjectsApproveList(page, pageSize, searchValue);
     setData(data);
@@ -577,52 +578,7 @@ const Project = () => {
 
   return (
     <div className="w-full p-2" style={{ color: "#000" }}>
-      {/* <div className="flex flex-row gap-y-3 justify-between">
-        <Space>
-          <Button
-            onClick={handleExport}
-            type="primary"
-            style={{ marginBottom: 16, background: "#198348", width: "100px" }}
-          >
-            导出
-          </Button>
-        </Space>
-
-        <Space>
-          <Input
-            placeholder="按项目名称搜索"
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-          />
-          <Input
-            placeholder="按项目编号搜索"
-            value={searchNumValue}
-            onChange={(e) => setSearchNumValue(e.target.value)}
-          />
-          <Popover
-            content={
-              <Checkbox.Group
-                style={{ display: "flex", flexDirection: "column" }}
-                options={columns?.map((c) => ({
-                  label: c.label,
-                  value: c.value,
-                }))}
-                defaultValue={columns.map((c) => c.value)}
-                onChange={onOptionChange}
-              ></Checkbox.Group>
-            }
-            title="显隐列"
-            trigger="click"
-          >
-            <AppstoreTwoTone
-              style={{ fontSize: "30px" }}
-              twoToneColor="#198348"
-              className="mr-15"
-            />
-          </Popover>
-        </Space>
-      </div> */}
-      <div className="flex flex-row gap-y-3 justify-between my-4 pr-[100px]">
+      <div className="flex flex-row gap-y-3 justify-between my-4 pr-5">
         <div className="flex flex-row gap-x-10">
           <div className="flex flex-row gap-x-4">
             <Button
@@ -675,6 +631,13 @@ const Project = () => {
               className="mr-15"
             />
           </Popover>
+          <Tooltip title="统计数据">
+            <FundTwoTone
+              twoToneColor="#198348"
+              style={{ fontSize: "30px", cursor: "pointer" }}
+              onClick={() => setStaticModal(true)}
+            />
+          </Tooltip>
         </Space>
       </div>
 
@@ -887,11 +850,14 @@ const Project = () => {
         />
       )}
 
-      {/* <div
-        style={{ width: "100%", minHeight: "1000px", marginTop: "100px" }}
-        ref={chartRef}
-      ></div> */}
-      {/* <div style={{ width: '100%', minHeight: "1000px", marginTop: '100px' }} ref={chartRef}></div> */}
+      {!!staticModal && (
+        <ProjectYWStaticModal
+          open={staticModal}
+          onCancel={() => {
+            setStaticModal(false);
+          }}
+        />
+      )}
     </div>
   );
 };

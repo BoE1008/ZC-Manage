@@ -12,6 +12,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@types/lodash": "^4.14.202",
     "@types/qs": "^6.9.10",
     "@types/sm-crypto": "^0.3.4",
     "ahooks": "^3.7.8",
@@ -19,6 +20,7 @@
     "axios": "^1.5.1",
     "clsx": "^2.0.0",
     "dayjs": "^1.11.10",
+    "lodash": "^4.17.21",
     "next": "13.5.4",
     "qs": "^6.11.2",
     "react": "^18",
