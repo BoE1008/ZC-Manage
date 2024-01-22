@@ -7,7 +7,7 @@ const BuildTitle = ({title}) => {
   useEffect(() => {
     setDom(
       document.getElementsByClassName(
-        "ant-modal-wrap" //modal的class是ant-modal-wrap
+        "ant-modal-wrap"
       )[0]
     );
   }, []);

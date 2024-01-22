@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import clsx from "clsx";
 import { DownOutlined, SoundTwoTone } from "@ant-design/icons";
 import { logout } from "@/restApi/user";
@@ -59,6 +59,14 @@ const User = () => {
     setNoticeModal(false);
   }, [noticeContainerRef]);
 
+  const count = useMemo(() => {
+    if (badges) {
+      return Object.values(badges).reduce((a, pre) => pre + a, 0);
+    } else {
+      return 0;
+    }
+  }, [badges]);
+
   const handleConfirmPass = async () => {
     const values = form.getFieldsValue();
     const { oldPassword, newPassword } = values;
@@ -78,98 +86,106 @@ const User = () => {
 
   return (
     <div className="pr-5 text-[#198348] flex flex-row items-center gap-x-10">
-      <div
-        ref={noticeContainerRef}
-        className="relative w-[25px] h-[50px] cursor-pointer"
-        onClick={() => setNoticeModal(true)}
-      >
-        <div className="absolute inset-0 w-full h-full">
-          <Badge
-            size="small"
-            color="red"
-            count={
-              badges ? Object.values(badges).reduce((a, pre) => pre + a, 0) : 0
-            }
-          >
-            <SoundTwoTone
-              twoToneColor="#198348"
-              style={{ fontSize: "25px", cursor: "pointer" }}
-            />
-          </Badge>
-        </div>
-
-        <section
-          className={clsx(
-            "absolute top-10 right-0 z-10 border-[1px] px-5 py-2 bg-[#fff] w-max  flex flex-col gap-y-4",
-            !noticeModal && "hidden"
-          )}
+      {count > 0 && (
+        <div
+          ref={noticeContainerRef}
+          className="relative w-[25px] h-[50px] cursor-pointer"
+          onClick={() => setNoticeModal(true)}
         >
-          <Row gutter={[16, 16]}>
-            {!!badges?.projectNum && (
-              <Col>
-                <Link href="/projectYW" onClick={() => setNoticeModal(false)}>
-                  <Card size="small">
-                    <Statistic
-                      title="项目业务审核"
-                      value={badges?.projectNum}
-                    />
-                  </Card>
-                </Link>
-              </Col>
-            )}
-          </Row>
-          <Row gutter={[16, 16]}>
-            {!!badges?.iywNum && (
-              <Col>
-                <Link href="/invoicingYW" onClick={() => setNoticeModal(false)}>
-                  <Card size="small">
-                    <Statistic title="开票业务审核" value={badges?.iywNum} />
-                  </Card>
-                </Link>
-              </Col>
-            )}
-            {!!badges?.icwNum && (
-              <Col>
-                <Link href="/invoicingCW" onClick={() => setNoticeModal(false)}>
-                  <Card size="small">
-                    <Statistic title="开票财务审核" value={badges?.icwNum} />
-                  </Card>
-                </Link>
-              </Col>
-            )}
-          </Row>
-          <Row gutter={[16, 16]}>
-            {!!badges?.pywNum && (
-              <Col>
-                <Link href="/paymentYW" onClick={() => setNoticeModal(false)}>
-                  <Card size="small">
-                    <Statistic title="付款业务审核" value={badges?.pywNum} />
-                  </Card>
-                </Link>
-              </Col>
-            )}
+          <div className="absolute inset-0 w-full h-full">
+            <Badge size="small" color="red" count={badges ? count : 0}>
+              <SoundTwoTone
+                twoToneColor="#198348"
+                style={{ fontSize: "25px", cursor: "pointer" }}
+              />
+            </Badge>
+          </div>
 
-            {!!badges?.pldNum && (
-              <Col>
-                <div className="cursor-pointer" onClick={() => { setNoticeModal(false); router.push('/paymentLD') }}>
-                  <Card size="small">
-                    <Statistic title="付款领导审核" value={badges?.pldNum} />
-                  </Card>
-                </div>
-              </Col>
+          <section
+            className={clsx(
+              "absolute top-10 right-0 z-10 border-[1px] px-5 py-2 bg-[#fff] w-max  flex flex-col gap-y-4",
+              !noticeModal && "hidden"
             )}
-            {!!badges?.pcwNum && (
-              <Col>
-                <Link href="/paymentCW" onClick={() => setNoticeModal(false)}>
-                  <Card size="small">
-                    <Statistic title="付款财务审核" value={badges?.pcwNum} />
-                  </Card>
-                </Link>
-              </Col>
-            )}
-          </Row>
-        </section>
-      </div>
+          >
+            <Row gutter={[16, 16]}>
+              {!!badges?.projectNum && (
+                <Col>
+                  <Link href="/projectYW" onClick={() => setNoticeModal(false)}>
+                    <Card size="small">
+                      <Statistic
+                        title="项目业务审核"
+                        value={badges?.projectNum}
+                      />
+                    </Card>
+                  </Link>
+                </Col>
+              )}
+            </Row>
+            <Row gutter={[16, 16]}>
+              {!!badges?.iywNum && (
+                <Col>
+                  <Link
+                    href="/invoicingYW"
+                    onClick={() => setNoticeModal(false)}
+                  >
+                    <Card size="small">
+                      <Statistic title="开票业务审核" value={badges?.iywNum} />
+                    </Card>
+                  </Link>
+                </Col>
+              )}
+              {!!badges?.icwNum && (
+                <Col>
+                  <Link
+                    href="/invoicingCW"
+                    onClick={() => setNoticeModal(false)}
+                  >
+                    <Card size="small">
+                      <Statistic title="开票财务审核" value={badges?.icwNum} />
+                    </Card>
+                  </Link>
+                </Col>
+              )}
+            </Row>
+            <Row gutter={[16, 16]}>
+              {!!badges?.pywNum && (
+                <Col>
+                  <Link href="/paymentYW" onClick={() => setNoticeModal(false)}>
+                    <Card size="small">
+                      <Statistic title="付款业务审核" value={badges?.pywNum} />
+                    </Card>
+                  </Link>
+                </Col>
+              )}
+
+              {!!badges?.pldNum && (
+                <Col>
+                  <div
+                    className="cursor-pointer"
+                    onClick={() => {
+                      setNoticeModal(false);
+                      router.push("/paymentLD");
+                    }}
+                  >
+                    <Card size="small">
+                      <Statistic title="付款领导审核" value={badges?.pldNum} />
+                    </Card>
+                  </div>
+                </Col>
+              )}
+              {!!badges?.pcwNum && (
+                <Col>
+                  <Link href="/paymentCW" onClick={() => setNoticeModal(false)}>
+                    <Card size="small">
+                      <Statistic title="付款财务审核" value={badges?.pcwNum} />
+                    </Card>
+                  </Link>
+                </Col>
+              )}
+            </Row>
+          </section>
+        </div>
+      )}
 
       <div
         className="flex font-medium tracking-wider w-full py-2.5 px-3.5 relative justify-center items-center"

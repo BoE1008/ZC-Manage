@@ -177,12 +177,6 @@ const Dept = () => {
         pagination={false}
         dataSource={data}
         columns={columns}
-        // expandable={{
-        //   expandedRowRender: (record) => expandedRowRender(record),
-        //   defaultExpandedRowKeys: ["0"],
-        //   expandRowByClick: true,
-        //   indentSize: 300,
-        // }}
       />
 
       <Modal

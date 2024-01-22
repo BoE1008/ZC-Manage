@@ -405,11 +405,12 @@ const Project = () => {
         label: "操作",
         value: "操作",
         align: "center",
+        fixed: 'right',
         key: "action",
         render: (_, record) => {
           const unFinished = record.state === "未完结";
           return (
-            <Space size="middle" className="flex flex-row !gap-x-1">
+            <Space size="middle" className="!grid grid-cols-2 xl:grid-cols-4 !gap-x-1">
               {unFinished && (
                 <Tooltip title={<span>编辑</span>}>
                   <Button
@@ -608,7 +609,7 @@ const Project = () => {
           dataSource={data?.entity.data}
           columns={displayColumn}
           rowKey={(record) => record.projectNum}
-          scroll={{ scrollToFirstRowOnChange: true, y: "800px" }}
+          // scroll={{ scrollToFirstRowOnChange: true, x: true, y: "800px" }}
           pagination={{
             // 设置总条数
             total: data?.entity.total,

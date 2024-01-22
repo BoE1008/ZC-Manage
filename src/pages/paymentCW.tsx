@@ -5,17 +5,12 @@ import {
   Button,
   Input,
   Modal,
-  Form,
-  Select,
-  DatePicker,
   message,
   Tooltip,
   Popconfirm,
   List,
   Avatar,
 } from "antd";
-import { Operation } from "@/types";
-import dayjs from "dayjs";
 import {
   CheckCircleTwoTone,
   StopTwoTone,
@@ -24,14 +19,11 @@ import {
 } from "@ant-design/icons";
 import {
   getPaymentCWList,
-  addPayment,
-  updatePayment,
   approveOne,
   rejectOne,
   logsOne,
   getPaymentDetailById,
 } from "@/restApi/payment";
-import { getProjectsSubmitList } from "@/restApi/project";
 import { getSuppliersList } from "@/restApi/supplyer";
 import RejectModal from "@/components/RejectModal";
 import PaymentSubmitModal from "@/components/PaymentSubmitModal";
@@ -41,7 +33,6 @@ import { ModalType } from "@/types";
 import YSYFModal from "@/components/YSYFModal";
 
 const Role = () => {
-  const [form] = Form.useForm();
   const [data, setData] = useState();
 
   const [page, setPage] = useState(1);
@@ -49,13 +40,9 @@ const Role = () => {
   const [searchValue, setSearchValue] = useState("");
   const [userName, setUserName] = useState("");
 
-  const [project, setProject] = useState();
   const [supplier, setSupplier] = useState();
   const [logs, setLogs] = useState();
 
-  const [modalOpen, setModalOpen] = useState(false);
-  const [operation, setOperation] = useState<Operation>(Operation.Add);
-  const [editId, setEditId] = useState("");
   const [loading, setLoading] = useState(true);
 
   const [rejectId, setRejectId] = useState();
@@ -70,48 +57,28 @@ const Role = () => {
 
   useEffect(() => {
     (async () => {
-      const projectData = await getProjectsSubmitList(1, 10000);
       const supplierData = await getSuppliersList(1, 10000);
       setSupplier(supplierData.entity.data);
-      setProject(
-        projectData.entity.data.filter((item) => item.state === "审批通过")
-      );
     })();
   }, []);
 
   useEffect(() => {
     (async () => {
-      const res = await getPaymentCWList(
-        page,
-        pageSize,
-        searchValue,
-        supplierId,
-        projectState,
-        userName
-      );
-      setData(res);
+      setLoading(true)
+      try {
+        const res = await getPaymentCWList(
+          page,
+          pageSize,
+          searchValue,
+          supplierId,
+          projectState,
+          userName
+        );
+        setData(res);
+        setLoading(false)
+      } catch { }
     })();
   }, [page, pageSize, searchValue, supplierId, projectState, userName]);
-
-  const handleOk = async () => {
-    form.validateFields();
-    const values = form.getFieldsValue();
-    setLoading(true);
-    const { code } =
-      operation === Operation.Add
-        ? await addPayment(values)
-        : await updatePayment(editId, values);
-    if (code === 200) {
-      setModalOpen(false);
-      const data = await getPaymentCWList(page, pageSize);
-      setLoading(false);
-      setData(data);
-      message.success({
-        content: operation === Operation.Add ? "添加成功" : "编辑成功",
-        type: "success",
-      });
-    }
-  };
 
   const handleDetail = async (id) => {
     const res = await getPaymentDetailById(id);
@@ -143,11 +110,6 @@ const Role = () => {
     const res = await logsOne(id);
     setLogs(res.entity.data);
   };
-
-  const customerFilterOption = (
-    input: string,
-    option?: { label: string; value: string }
-  ) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
 
   const supplierFilters = useMemo(() => {
     return supplier?.map((item) => ({
@@ -354,9 +316,6 @@ const Role = () => {
   ];
 
   const handleTableChange = (pagination, filters, sorter) => {
-    // setProductId(filters.productName?.[0]);
-    // setProjectType(filters.typeName?.[0]);
-    // setProjectBrand(filters.brandName?.[0]);
     setProjectState(filters.state?.[0]);
     setSupplierId(filters.supplierName?.[0]);
   };
@@ -380,9 +339,9 @@ const Role = () => {
 
       <Table
         bordered
-        // loading={loading}
+        loading={loading}
         dataSource={data?.entity.data}
-        scroll={{ scrollToFirstRowOnChange: true, y: "800px" }}
+        // scroll={{ scrollToFirstRowOnChange: true, y: "800px" }}
         columns={columns}
         pagination={{
           // 设置总条数
@@ -404,84 +363,6 @@ const Role = () => {
         }}
         onChange={handleTableChange}
       />
-
-      <Modal
-        centered
-        destroyOnClose
-        title={operation === Operation.Add ? "添加申请" : "编辑申请"}
-        open={modalOpen}
-        onOk={handleOk}
-        okButtonProps={{ style: { background: "#198348" } }}
-        // confirmLoading={confirmLoading}
-        onCancel={() => setModalOpen(false)}
-        afterClose={() => form.resetFields()}
-        style={{ minWidth: "650px" }}
-        maskClosable={false}
-      >
-        <Form
-          labelCol={{ span: 3 }}
-          wrapperCol={{ span: 20 }}
-          layout={"horizontal"}
-          form={form}
-          style={{ minWidth: 600, color: "#000" }}
-        >
-          <Form.Item
-            label="项目"
-            name="projectName"
-            rules={[{ required: true, message: "项目名称不能为空" }]}
-          >
-            <Select
-              placeholder="选择项目"
-              optionFilterProp="children"
-              filterOption={customerFilterOption}
-              options={project?.map((con) => ({
-                label: con.name,
-                value: con.id,
-              }))}
-            />
-          </Form.Item>
-          <Form.Item
-            label="供应商"
-            name="supplierName"
-            rules={[{ required: true, message: "客户名称不能为空" }]}
-          >
-            <Select
-              placeholder="选择供应商"
-              optionFilterProp="children"
-              filterOption={customerFilterOption}
-              options={supplier?.map((con) => ({
-                label: con.name,
-                value: con.id,
-              }))}
-            />
-          </Form.Item>
-          <Form.Item required label="币种" name="moneyType">
-            <Input placeholder="币种" />
-          </Form.Item>
-          <Form.Item required label="金额" name="fee">
-            <Input placeholder="金额" />
-          </Form.Item>
-          <Form.Item label="税号" name="taxationNumber">
-            <Input placeholder="税号" />
-          </Form.Item>
-          <Form.Item label="开户行" name="bank">
-            <Input placeholder="开户行" />
-          </Form.Item>
-          <Form.Item label="卡号" name="bankCard">
-            <Input placeholder="卡号" />
-          </Form.Item>
-          <Form.Item
-            label="应付日期"
-            name="yfDate"
-            getValueProps={(i) => ({ value: dayjs(i) })}
-          >
-            <DatePicker allowClear={false} />
-          </Form.Item>
-          <Form.Item label="备注" name="remark">
-            <Input.TextArea placeholder="备注" maxLength={100} />
-          </Form.Item>
-        </Form>
-      </Modal>
 
       <Modal
         centered

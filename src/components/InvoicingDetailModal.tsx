@@ -39,23 +39,6 @@ const InvoicingDetailModal = ({ onClose, data }) => {
       showRemoveIcon: false,
       showPreviewIcon: true,
     },
-    // onPreview: async (file) => {
-    //   console.log(file, "file");
-    //   const fileArr = file.url.split(".");
-    //   const ext = fileArr[fileArr.length - 1];
-
-    //   if (["jpg", "jpeg", "png"].includes(ext.toLowerCase())) {
-    //     setPreviewOpen(true);
-    //     setPreviewImage(file.url);
-    //     setPreviewTitle(file.name)
-    //   }
-    //   // if (!file.url && !file.preview) {
-    //   //   file.preview = await getBase64(file.originFileObj as FileType);
-    //   // }
-    //   // setPreviewImage(file.url || (file.preview as string));
-    //   // setPreviewOpen(true);
-    //   // setPreviewTitle(file.name || file.url!.substring(file.url!.lastIndexOf('/') + 1));
-    // },
     onDownload: async (file) => {
       window.open(
         `http://123.60.88.8/zc/common/download/resource?resource=${file?.url}`

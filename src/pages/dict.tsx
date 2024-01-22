@@ -317,18 +317,12 @@ const Dict = () => {
         dataSource={data?.entity.data}
         columns={columns}
         pagination={{
-          // 设置总条数
           total: data?.entity.total,
-          // 显示总条数
           showTotal: (total) => `共 ${total} 条`,
-          // 是否可以改变 pageSize
           showSizeChanger: true,
-
-          // 改变页码时
           onChange: async (page) => {
             setPage(page);
           },
-          // pageSize 变化的回调
           onShowSizeChange: async (page, size) => {
             setPage(page);
             setPageSize(size);

@@ -385,6 +385,7 @@ const Project = () => {
         value: "操作",
         title: "操作",
         align: "center",
+        fixed: 'right',
         key: "action",
         render: (_, record: Company) => {
           return (
@@ -526,7 +527,7 @@ const Project = () => {
         bordered
         loading={loading}
         dataSource={data?.entity?.data}
-        scroll={{ scrollToFirstRowOnChange: true, y: "800px" }}
+        // scroll={{ scrollToFirstRowOnChange: true, y: "800px" }}
         columns={displayColumn}
         pagination={{
           // 设置总条数

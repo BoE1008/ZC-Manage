@@ -94,15 +94,19 @@ const InvoicingSubmit = () => {
 
   useEffect(() => {
     (async () => {
-      const res = await getinvoicingList(
-        page,
-        pageSize,
-        searchValue,
-        customerId,
-        projectState,
-        userName
-      );
-      setData(res);
+      setLoading(true);
+      try {
+        const res = await getinvoicingList(
+          page,
+          pageSize,
+          searchValue,
+          customerId,
+          projectState,
+          userName
+        );
+        setData(res);
+        setLoading(false);
+      } catch {}
     })();
   }, [page, pageSize, searchValue, customerId, projectState, userName]);
 
@@ -588,9 +592,6 @@ const InvoicingSubmit = () => {
   };
 
   const handleTableChange = (pagination, filters, sorter) => {
-    // setProductId(filters.productName?.[0]);
-    // setProjectType(filters.typeName?.[0]);
-    // setProjectBrand(filters.brandName?.[0]);
     setProjectState(filters.state?.[0]);
     setCustomerId(filters.customName?.[0]);
   };
@@ -623,8 +624,9 @@ const InvoicingSubmit = () => {
       </div>
       <Table
         bordered
+        loading={loading}
         dataSource={data?.entity.data}
-        scroll={{ scrollToFirstRowOnChange: true, y: "800px" }}
+        // scroll={{ scrollToFirstRowOnChange: true, y: "800px" }}
         columns={columns}
         pagination={{
           total: data?.entity.total,
