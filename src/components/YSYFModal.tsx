@@ -1235,18 +1235,12 @@ const Item = ({ projectId, onClose, modalType }) => {
             indentSize: 300,
           }}
           pagination={{
-            // 设置总条数
             total: data?.entity.total,
-            // 显示总条数
             showTotal: (total) => `共 ${total} 条`,
-            // 是否可以改变 pageSize
             showSizeChanger: true,
-
-            // 改变页码时
             onChange: async (page) => {
               setPage(page);
             },
-            // pageSize 变化的回调
             onShowSizeChange: async (page, size) => {
               setPage(page);
               setPageSize(size);
@@ -1302,14 +1296,6 @@ const Item = ({ projectId, onClose, modalType }) => {
             <Form.Item label="明细" name="ysPurpose" required>
               <Input.TextArea placeholder="明细" maxLength={100} />
             </Form.Item>
-
-            {/* <Form.Item
-            label="日期"
-            name="ysDate"
-            getValueProps={(i) => ({ value: dayjs(i) })}
-          >
-            <DatePicker allowClear={false} />
-          </Form.Item> */}
             <Form.Item label="备注" name="remark">
               <Input.TextArea placeholder="备注" maxLength={100} />
             </Form.Item>
@@ -1385,29 +1371,8 @@ const Item = ({ projectId, onClose, modalType }) => {
               labelCol={{ span: 5 }}
               name="ylProfitMoney"
             >
-              <Input placeholder="预留利润金额" />
+              <InputNumber placeholder="预留利润金额" className="w-full" />
             </Form.Item>
-            {/* <Form.Item label="是否支付" labelCol={{ span: 5 }} name="isPay">
-              <Select
-                showSearch
-                labelInValue
-                placeholder="是否支付"
-                optionFilterProp="children"
-                filterOption={customerFilterOption}
-                options={BooltypeArr?.map((con) => ({
-                  label: con,
-                  value: con,
-                }))}
-              ></Select>
-            </Form.Item> */}
-            {/* <Form.Item
-            label="日期"
-            labelCol={{ span: 5 }}
-            name="yfDate"
-            getValueProps={(i) => ({ value: dayjs(i) })}
-          >
-            <DatePicker allowClear={false} />
-          </Form.Item> */}
             <Form.Item label="备注" labelCol={{ span: 5 }} name="remark">
               <Input.TextArea placeholder="备注" maxLength={100} />
             </Form.Item>
@@ -1445,12 +1410,6 @@ const Item = ({ projectId, onClose, modalType }) => {
           )}
         />
       </Modal>
-
-      {/* <ProjectDetailModal
-        data={detail}
-        onConfirm={handleApproveOne}
-        onClose={() => setDetail(undefined)}
-      /> */}
 
       {!!rejectId && (
         <RejectModal

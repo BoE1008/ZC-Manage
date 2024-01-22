@@ -743,7 +743,7 @@ const Project = () => {
             />
           </Form.Item>
           <Form.Item label="班列号/船名" name="trainNumName">
-            <Input placeholder="数量" />
+            <Input placeholder="班列号/船名" />
           </Form.Item>
           <Form.Item label="数量" name="num">
             <Input placeholder="数量" />
