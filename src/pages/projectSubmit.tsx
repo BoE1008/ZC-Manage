@@ -533,7 +533,7 @@ const Project = () => {
 
   return (
     <div className="w-full p-2" style={{ color: "#000" }}>
-      <div className="flex flex-row gap-y-3 justify-between my-4 pr-[100px]">
+      <div className="flex flex-row gap-y-3 justify-between my-4 pr-5">
         <div className="flex flex-row gap-x-10">
           <div className="flex flex-row gap-x-4">
             <Button
@@ -595,7 +595,6 @@ const Project = () => {
             <AppstoreTwoTone
               style={{ fontSize: "30px" }}
               twoToneColor="#198348"
-              className="mr-15"
             />
           </Popover>
         </Space>
