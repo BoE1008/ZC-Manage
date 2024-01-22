@@ -386,7 +386,6 @@ const Project = () => {
         title: "操作",
         align: "center",
         key: "action",
-        fixed: "right",
         render: (_, record: Company) => {
           return (
             <Space size="middle" className="flex flex-row !gap-x-1">

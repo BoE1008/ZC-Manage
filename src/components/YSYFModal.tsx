@@ -49,6 +49,7 @@ import { getSuppliersList } from "@/restApi/supplyer";
 import dayjs from "dayjs";
 import RejectModal from "@/components/RejectModal";
 import { formatNumber } from "@/utils";
+import BuildTitle from "./DragM";
 
 const Item = ({ projectId, onClose, modalType }) => {
   const [data, setData] = useState();
@@ -1190,6 +1191,8 @@ const Item = ({ projectId, onClose, modalType }) => {
     option?: { label: string; value: string }
   ) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
 
+  const title=<BuildTitle title="应收应付列表" />
+
   return (
     <>
       <Modal
@@ -1198,7 +1201,7 @@ const Item = ({ projectId, onClose, modalType }) => {
         centered
         footer={null}
         destroyOnClose
-        title="应收应付列表"
+        title={title}
         style={{ minWidth: "90%" }}
         styles={{ body: { height: "800px", overflowY: "auto" } }}
         maskClosable={false}

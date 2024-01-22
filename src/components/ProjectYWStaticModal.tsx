@@ -156,11 +156,11 @@ const StaticModal = ({ open, onCancel }) => {
         <div ref={typeChartRef} style={{ width: "33%", height: "500px" }}></div>
         <div
           ref={productChartRef}
-          style={{ width: "33%", height: "300px" }}
+          style={{ width: "33%", height: "500px" }}
         ></div>
         <div
           ref={brandChartRef}
-          style={{ width: "33%", height: "300px" }}
+          style={{ width: "33%", height: "500px" }}
         ></div>
       </div>
     </Modal>

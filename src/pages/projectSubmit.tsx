@@ -405,7 +405,6 @@ const Project = () => {
         label: "操作",
         value: "操作",
         align: "center",
-        fixed: "right",
         key: "action",
         render: (_, record) => {
           const unFinished = record.state === "未完结";
