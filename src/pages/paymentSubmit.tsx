@@ -15,6 +15,7 @@ import {
   Avatar,
   Typography,
   Upload,
+  InputNumber,
 } from "antd";
 import { Operation } from "@/types";
 import dayjs from "dayjs";
@@ -701,7 +702,7 @@ const Payment = () => {
           </Form.Item>
 
           <Form.Item required label="金额" name="fee">
-            <Input placeholder="金额" />
+            <InputNumber placeholder="金额" className="w-full" />
           </Form.Item>
           <Form.Item label="税号" name="taxationNumber">
             {/* <Input placeholder="税号" /> */}
