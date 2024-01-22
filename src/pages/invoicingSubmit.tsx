@@ -35,6 +35,7 @@ import {
   CalendarTwoTone,
   InteractionTwoTone,
   UploadOutlined,
+  ProfileTwoTone,
 } from "@ant-design/icons";
 import { getCustomersYSList, getCustomersList } from "@/restApi/customer";
 import { InvoicingTypeArr } from "@/utils/const";
@@ -42,6 +43,8 @@ import { getDictByCode } from "@/restApi/dict";
 import InvoicingSubmitModal from "@/components/InvoicingSubmitModal";
 import InvoicingDetailModal from "@/components/InvoicingDetailModal";
 import { formatNumber } from "@/utils";
+import { ModalType } from "@/types";
+import YSYFModal from "@/components/YSYFModal";
 
 const InvoicingSubmit = () => {
   const [form] = Form.useForm();
@@ -77,6 +80,8 @@ const InvoicingSubmit = () => {
 
   const [customerId, setCustomerId] = useState();
   const [projectState, setProjectState] = useState();
+
+  const [projectId, setProjectId] = useState();
 
   useEffect(() => {
     (async () => {
@@ -466,6 +471,18 @@ const InvoicingSubmit = () => {
         const isFinished = record.state !== "未提交";
         return (
           <Space size="middle" className="flex flex-row !gap-x-1">
+            <Tooltip title={<span>查看应收应付</span>}>
+              <Button
+                onClick={() => setProjectId(record.projectId)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  padding: "3px 5px",
+                }}
+              >
+                <ProfileTwoTone twoToneColor="#198348" />
+              </Button>
+            </Tooltip>
             {!isFinished && (
               <Tooltip title={<span>提交业务审核</span>}>
                 <Popconfirm
@@ -582,13 +599,13 @@ const InvoicingSubmit = () => {
     <div className="p-2">
       <div className="flex flex-row gap-3 mb-4">
         <Space className="flex flex-row items-center">
-            <Button
-              onClick={handleAdd}
-              type="primary"
-              style={{ background: "#198348", width: "100px" }}
-            >
-              添加
-            </Button>
+          <Button
+            onClick={handleAdd}
+            type="primary"
+            style={{ background: "#198348", width: "100px" }}
+          >
+            添加
+          </Button>
         </Space>
 
         <div className="flex flex-row gap-x-4">
@@ -851,6 +868,14 @@ const InvoicingSubmit = () => {
         <InvoicingDetailModal
           data={check}
           onClose={() => setCheck(undefined)}
+        />
+      )}
+
+      {!!projectId && (
+        <YSYFModal
+          modalType={ModalType.OTHERS}
+          projectId={projectId}
+          onClose={() => setProjectId(undefined)}
         />
       )}
     </div>

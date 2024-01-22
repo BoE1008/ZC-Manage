@@ -21,6 +21,7 @@ import {
   CalendarTwoTone,
   StopTwoTone,
   IdcardTwoTone,
+  ProfileTwoTone,
 } from "@ant-design/icons";
 import {
   getPaymentYWList,
@@ -38,6 +39,8 @@ import RejectModal from "@/components/RejectModal";
 import PaymentSubmitModal from "@/components/PaymentSubmitModal";
 import { formatNumber } from "@/utils";
 import PaymentDetailModal from "@/components/PaymentDetailModal";
+import { ModalType } from "@/types";
+import YSYFModal from "@/components/YSYFModal";
 
 const Role = () => {
   const [form] = Form.useForm();
@@ -67,6 +70,8 @@ const Role = () => {
 
   const [supplierId, setSupplierId] = useState();
   const [projectState, setProjectState] = useState();
+
+  const [projectId, setProjectId] = useState();
 
   useEffect(() => {
     (async () => {
@@ -105,7 +110,7 @@ const Role = () => {
 
   const handleSubmitToLD = async () => {
     await submitToLD(detail.id);
-    message.success({ content: "已提交至领导审核", type: 'success' });
+    message.success({ content: "已提交至领导审核", type: "success" });
     setDetail(undefined);
     const res = await getPaymentYWList(page, pageSize);
     setData(res);
@@ -113,7 +118,7 @@ const Role = () => {
 
   const handleSubmitToCW = async () => {
     await submitYWToCW(detail.id);
-    message.success({ content: "已提交至财务审核", type: 'success' });
+    message.success({ content: "已提交至财务审核", type: "success" });
     setDetail(undefined);
     const res = await getPaymentYWList(page, pageSize);
     setData(res);
@@ -122,7 +127,7 @@ const Role = () => {
   const handleRejectOne = async (id: string, remark: string) => {
     await rejectOne(id, remark, 1);
     setRejectId(undefined);
-    message.success({ content: "申请已退回" , type: 'success'});
+    message.success({ content: "申请已退回", type: "success" });
     const res = await getPaymentYWList(page, pageSize);
     setData(res);
   };
@@ -147,7 +152,7 @@ const Role = () => {
       setData(data);
       message.success({
         content: operation === Operation.Add ? "添加成功" : "编辑成功",
-        type: 'success',
+        type: "success",
       });
     }
   };
@@ -304,6 +309,18 @@ const Role = () => {
 
         return (
           <Space size="middle" className="flex flex-row !gap-x-1">
+            <Tooltip title={<span>查看应收应付</span>}>
+              <Button
+                onClick={() => setProjectId(record.projectId)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  padding: "3px 5px",
+                }}
+              >
+                <ProfileTwoTone twoToneColor="#198348" />
+              </Button>
+            </Tooltip>
             {isSubmit && (
               <Tooltip title="提交至领导审核">
                 <Popconfirm
@@ -568,6 +585,14 @@ const Role = () => {
           open={!!rejectId}
           onClose={() => setRejectId(undefined)}
           onReject={(value) => handleRejectOne(rejectId, value)}
+        />
+      )}
+
+      {!!projectId && (
+        <YSYFModal
+          modalType={ModalType.OTHERS}
+          projectId={projectId}
+          onClose={() => setProjectId(undefined)}
         />
       )}
     </div>

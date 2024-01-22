@@ -24,6 +24,7 @@ import {
   CalendarTwoTone,
   InteractionTwoTone,
   UploadOutlined,
+  ProfileTwoTone,
 } from "@ant-design/icons";
 import {
   getPaymentList,
@@ -43,6 +44,8 @@ import { getDictByCode } from "@/restApi/dict";
 import PaymentSubmitModal from "@/components/PaymentSubmitModal";
 import { formatNumber } from "@/utils";
 import PaymentDetailModal from "@/components/PaymentDetailModal";
+import { ModalType } from "@/types";
+import YSYFModal from "@/components/YSYFModal";
 
 const Payment = () => {
   const [form] = Form.useForm();
@@ -77,6 +80,8 @@ const Payment = () => {
 
   const [supplierId, setSupplierId] = useState();
   const [projectState, setProjectState] = useState();
+
+  const [projectId, setProjectId] = useState();
 
   useEffect(() => {
     (async () => {
@@ -222,7 +227,7 @@ const Payment = () => {
     setData(data);
     message.success({
       content: operation === Operation.Add ? "添加成功" : "编辑成功",
-      type: 'success',
+      type: "success",
     });
   };
 
@@ -249,7 +254,7 @@ const Payment = () => {
 
   const handleSubmitOne = async () => {
     await submitToYW(detail.id);
-    message.success({ content: "提交成功", type: 'success' });
+    message.success({ content: "提交成功", type: "success" });
     setDetail(undefined);
     const data = await getPaymentList(page, pageSize);
     setData(data);
@@ -439,6 +444,18 @@ const Payment = () => {
         const isFinished = record.state !== "未提交";
         return (
           <Space size="middle" className="flex flex-row !gap-x-1">
+            <Tooltip title={<span>查看应收应付</span>}>
+              <Button
+                onClick={() => setProjectId(record.projectId)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  padding: "3px 5px",
+                }}
+              >
+                <ProfileTwoTone twoToneColor="#198348" />
+              </Button>
+            </Tooltip>
             {!isFinished && (
               <Tooltip title={<span>提交业务审核</span>}>
                 <Popconfirm
@@ -516,14 +533,14 @@ const Payment = () => {
     name: "file",
     multiple: true,
     fileList: files,
-    listType: 'picture',
+    listType: "picture",
     withCredentials: true,
     headers: {
       "Content-Type": "multipart/form-data",
     },
     showUploadList: {
       showDownloadIcon: true,
-      showPreviewIcon:true,
+      showPreviewIcon: true,
     },
     onRemove: async (file) => {
       await deleteFileById(file?.id);
@@ -808,6 +825,14 @@ const Payment = () => {
           data={detail}
           onConfirm={handleSubmitOne}
           onClose={() => setDetail(undefined)}
+        />
+      )}
+
+      {!!projectId && (
+        <YSYFModal
+          modalType={ModalType.OTHERS}
+          projectId={projectId}
+          onClose={() => setProjectId(undefined)}
         />
       )}
     </div>

@@ -32,6 +32,7 @@ export enum ModalType {
   Submit,
   Approve,
   CW,
+  OTHERS
 }
 
 enum DictRecord {}

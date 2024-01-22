@@ -358,277 +358,421 @@ const Item = ({ projectId, onClose, modalType }) => {
   };
 
   const expandedRowRender = (record) => {
-    const littleTableColumn = [
-      {
-        title: "",
-        dataIndex: "",
-        key: "",
-        width: 60,
-      },
-      {
-        title: "供应商",
-        dataIndex: "supplierName",
-        key: "supplierName",
-        align: "center",
-      },
-      {
-        title: "人民币",
-        key: "yfRmb",
-        align: "center",
-        render: (record) => formatNumber(record?.yfRmb),
-      },
-      {
-        title: "美金",
-        key: "yfDollar",
-        align: "center",
-        render: (record) => formatNumber(record?.yfDollar),
-      },
-      {
-        title: "明细",
-        dataIndex: "yfPurpose",
-        key: "yfPurpose",
-        align: "center",
-      },
-      {
-        title: "汇率",
-        dataIndex: "yfExrate",
-        key: "yfExrate",
-        align: "center",
-      },
-      {
-        title: "对账",
-        // dataIndex: "yfChecking",
-        key: "yfChecking",
-        align: "center",
-        render: (record) => {
-          return modalType !== ModalType.Approve ? (
-            record.ysChecking === "0" ? (
-              "√"
-            ) : (
-              "×"
-            )
-          ) : (
-            <Switch
-              checked={record.yfChecking === "0"}
-              onChange={(value) => handleYFChecking(record.id, value)}
-            />
-          );
-        },
-      },
-      {
-        key: "yfInvoice",
-        title: "开票",
-        // dataIndex: "yfInvoice",
-        align: "center",
-        render: (record) => {
-          return modalType === ModalType.CW ? (
-            <Switch
-              checked={record.yfInvoice === "0"}
-              onChange={(value) => handleYFInvoicing(record.id, value)}
-            />
-          ) : record.ysInvoice === "0" ? (
-            "√"
-          ) : (
-            "×"
-          );
-        },
-      },
-      {
-        title: "付款",
-        // dataIndex: "yfCollection",
-        key: "yfCollection",
-        align: "center",
-        render: (record) => {
-          return modalType === ModalType.CW ? (
-            <Switch
-              checked={record.yfCollection === "0"}
-              onChange={(value) => handleYFCollection(record.id, value)}
-            />
-          ) : record.ysInvoice === "0" ? (
-            "√"
-          ) : (
-            "×"
-          );
-        },
-      },
-      {
-        title: "预留利润名称",
-        dataIndex: "ylProfitName",
-        key: "ylProfitName",
-        align: "center",
-      },
-      {
-        title: "预留利润金额",
-        dataIndex: "ylProfitMoney",
-        key: "ylProfitMoney",
-        align: "center",
-        render: (record) => formatNumber(record?.ylProfitMoney),
-      },
-      {
-        title: "预留利润支付",
-        // dataIndex: "ysChecking",
-        key: "isPay",
-        align: "center",
-        render: (record) => {
-          return modalType !== ModalType.Approve ? (
-            record.isPay === "0" ? (
-              "√"
-            ) : (
-              "×"
-            )
-          ) : (
-            <Switch
-              checked={record.isPay === "0"}
-              onChange={(value) => handleYfPay(record.id, value)}
-            />
-          );
-        },
-      },
+    const littleTableColumn =
+      modalType === ModalType.OTHERS
+        ? [
+            {
+              title: "",
+              dataIndex: "",
+              key: "",
+              width: 60,
+            },
+            {
+              title: "供应商",
+              dataIndex: "supplierName",
+              key: "supplierName",
+              align: "center",
+            },
+            {
+              title: "人民币",
+              key: "yfRmb",
+              align: "center",
+              render: (record) => formatNumber(record?.yfRmb),
+            },
+            {
+              title: "美金",
+              key: "yfDollar",
+              align: "center",
+              render: (record) => formatNumber(record?.yfDollar),
+            },
+            {
+              title: "明细",
+              dataIndex: "yfPurpose",
+              key: "yfPurpose",
+              align: "center",
+            },
+            {
+              title: "汇率",
+              dataIndex: "yfExrate",
+              key: "yfExrate",
+              align: "center",
+            },
+            {
+              title: "对账",
+              // dataIndex: "yfChecking",
+              key: "yfChecking",
+              align: "center",
+              render: (record) => {
+                return modalType !== ModalType.Approve ? (
+                  record.ysChecking === "0" ? (
+                    "√"
+                  ) : (
+                    "×"
+                  )
+                ) : (
+                  <Switch
+                    checked={record.yfChecking === "0"}
+                    onChange={(value) => handleYFChecking(record.id, value)}
+                  />
+                );
+              },
+            },
+            {
+              key: "yfInvoice",
+              title: "开票",
+              // dataIndex: "yfInvoice",
+              align: "center",
+              render: (record) => {
+                return modalType === ModalType.CW ? (
+                  <Switch
+                    checked={record.yfInvoice === "0"}
+                    onChange={(value) => handleYFInvoicing(record.id, value)}
+                  />
+                ) : record.ysInvoice === "0" ? (
+                  "√"
+                ) : (
+                  "×"
+                );
+              },
+            },
+            {
+              title: "付款",
+              // dataIndex: "yfCollection",
+              key: "yfCollection",
+              align: "center",
+              render: (record) => {
+                return modalType === ModalType.CW ? (
+                  <Switch
+                    checked={record.yfCollection === "0"}
+                    onChange={(value) => handleYFCollection(record.id, value)}
+                  />
+                ) : record.ysInvoice === "0" ? (
+                  "√"
+                ) : (
+                  "×"
+                );
+              },
+            },
+            {
+              title: "预留利润名称",
+              dataIndex: "ylProfitName",
+              key: "ylProfitName",
+              align: "center",
+            },
+            {
+              title: "预留利润金额",
+              dataIndex: "ylProfitMoney",
+              key: "ylProfitMoney",
+              align: "center",
+              render: (record) => formatNumber(record?.ylProfitMoney),
+            },
+            {
+              title: "预留利润支付",
+              // dataIndex: "ysChecking",
+              key: "isPay",
+              align: "center",
+              render: (record) => {
+                return modalType !== ModalType.Approve ? (
+                  record.isPay === "0" ? (
+                    "√"
+                  ) : (
+                    "×"
+                  )
+                ) : (
+                  <Switch
+                    checked={record.isPay === "0"}
+                    onChange={(value) => handleYfPay(record.id, value)}
+                  />
+                );
+              },
+            },
 
-      {
-        title: "审核状态",
-        dataIndex: "state",
-        key: "state",
-        align: "center",
-      },
-      {
-        title: "备注",
-        dataIndex: "remark",
-        key: "remark",
-        align: "center",
-      },
-      {
-        title: "操作",
-        key: "operation",
-        align: "center",
-        render: (_, record) => {
-          return (
-            <Space size="middle" className="flex flex-row !gap-x-1">
-              {modalType === ModalType.Submit && projectState === "未完结" && (
-                <>
-                  {record?.state !== "审批通过" && (
-                    <Tooltip title="编辑">
-                      <Button
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          padding: "3px 5px",
-                        }}
-                        onClick={() => handleEditYfOne(record)}
-                      >
-                        <EditTwoTone twoToneColor="#198348" />
-                      </Button>
-                    </Tooltip>
-                  )}
-                  {record?.state === "未提交" && (
-                    <Tooltip title="提交至业务审核">
-                      <Button
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          padding: "3px 5px",
-                        }}
-                        onClick={() => handleSubmitYF(record)}
-                      >
-                        <InteractionTwoTone twoToneColor="#198348" />
-                      </Button>
-                    </Tooltip>
-                  )}
-                  {record?.state !== "审批通过" && (
-                    <Tooltip title="删除">
-                      <Popconfirm
-                        title="是否删除？"
-                        okButtonProps={{
-                          style: { backgroundColor: "#198348" },
-                        }}
-                        getPopupContainer={(node) => node.parentElement}
-                        onConfirm={() => handleDeleteYF(record.id)}
-                      >
-                        <Button
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            padding: "3px 5px",
-                          }}
-                        >
-                          <DeleteTwoTone twoToneColor="#198348" />
-                        </Button>
-                      </Popconfirm>
-                    </Tooltip>
-                  )}
-                </>
-              )}
-              {modalType === ModalType.Approve &&
-                record.state !== "审批通过" && (
-                  <>
-                    {record?.state === "待业务审批" && (
-                      <Tooltip title="批准">
-                        <Popconfirm
-                          title="是否通过审批？"
-                          okButtonProps={{
-                            style: { backgroundColor: "#198348" },
-                          }}
-                          getPopupContainer={(node) => node.parentElement}
-                          onConfirm={() => handleApproveYF(record.id)}
-                        >
-                          <Button
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              padding: "3px 5px",
+            {
+              title: "审核状态",
+              dataIndex: "state",
+              key: "state",
+              align: "center",
+            },
+            {
+              title: "备注",
+              dataIndex: "remark",
+              key: "remark",
+              align: "center",
+            },
+          ]
+        : [
+            {
+              title: "",
+              dataIndex: "",
+              key: "",
+              width: 60,
+            },
+            {
+              title: "供应商",
+              dataIndex: "supplierName",
+              key: "supplierName",
+              align: "center",
+            },
+            {
+              title: "人民币",
+              key: "yfRmb",
+              align: "center",
+              render: (record) => formatNumber(record?.yfRmb),
+            },
+            {
+              title: "美金",
+              key: "yfDollar",
+              align: "center",
+              render: (record) => formatNumber(record?.yfDollar),
+            },
+            {
+              title: "明细",
+              dataIndex: "yfPurpose",
+              key: "yfPurpose",
+              align: "center",
+            },
+            {
+              title: "汇率",
+              dataIndex: "yfExrate",
+              key: "yfExrate",
+              align: "center",
+            },
+            {
+              title: "对账",
+              // dataIndex: "yfChecking",
+              key: "yfChecking",
+              align: "center",
+              render: (record) => {
+                return modalType !== ModalType.Approve ? (
+                  record.ysChecking === "0" ? (
+                    "√"
+                  ) : (
+                    "×"
+                  )
+                ) : (
+                  <Switch
+                    checked={record.yfChecking === "0"}
+                    onChange={(value) => handleYFChecking(record.id, value)}
+                  />
+                );
+              },
+            },
+            {
+              key: "yfInvoice",
+              title: "开票",
+              // dataIndex: "yfInvoice",
+              align: "center",
+              render: (record) => {
+                return modalType === ModalType.CW ? (
+                  <Switch
+                    checked={record.yfInvoice === "0"}
+                    onChange={(value) => handleYFInvoicing(record.id, value)}
+                  />
+                ) : record.ysInvoice === "0" ? (
+                  "√"
+                ) : (
+                  "×"
+                );
+              },
+            },
+            {
+              title: "付款",
+              // dataIndex: "yfCollection",
+              key: "yfCollection",
+              align: "center",
+              render: (record) => {
+                return modalType === ModalType.CW ? (
+                  <Switch
+                    checked={record.yfCollection === "0"}
+                    onChange={(value) => handleYFCollection(record.id, value)}
+                  />
+                ) : record.ysInvoice === "0" ? (
+                  "√"
+                ) : (
+                  "×"
+                );
+              },
+            },
+            {
+              title: "预留利润名称",
+              dataIndex: "ylProfitName",
+              key: "ylProfitName",
+              align: "center",
+            },
+            {
+              title: "预留利润金额",
+              dataIndex: "ylProfitMoney",
+              key: "ylProfitMoney",
+              align: "center",
+              render: (record) => formatNumber(record?.ylProfitMoney),
+            },
+            {
+              title: "预留利润支付",
+              // dataIndex: "ysChecking",
+              key: "isPay",
+              align: "center",
+              render: (record) => {
+                return modalType !== ModalType.Approve ? (
+                  record.isPay === "0" ? (
+                    "√"
+                  ) : (
+                    "×"
+                  )
+                ) : (
+                  <Switch
+                    checked={record.isPay === "0"}
+                    onChange={(value) => handleYfPay(record.id, value)}
+                  />
+                );
+              },
+            },
+
+            {
+              title: "审核状态",
+              dataIndex: "state",
+              key: "state",
+              align: "center",
+            },
+            {
+              title: "备注",
+              dataIndex: "remark",
+              key: "remark",
+              align: "center",
+            },
+            {
+              title: "操作",
+              key: "operation",
+              align: "center",
+              render: (_, record) => {
+                return (
+                  <Space size="middle" className="flex flex-row !gap-x-1">
+                    {modalType === ModalType.Submit &&
+                      projectState === "未完结" && (
+                        <>
+                          {record?.state !== "审批通过" && (
+                            <Tooltip title="编辑">
+                              <Button
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  padding: "3px 5px",
+                                }}
+                                onClick={() => handleEditYfOne(record)}
+                              >
+                                <EditTwoTone twoToneColor="#198348" />
+                              </Button>
+                            </Tooltip>
+                          )}
+                          {record?.state === "未提交" && (
+                            <Tooltip title="提交至业务审核">
+                              <Button
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  padding: "3px 5px",
+                                }}
+                                onClick={() => handleSubmitYF(record)}
+                              >
+                                <InteractionTwoTone twoToneColor="#198348" />
+                              </Button>
+                            </Tooltip>
+                          )}
+                          {record?.state !== "审批通过" && (
+                            <Tooltip title="删除">
+                              <Popconfirm
+                                title="是否删除？"
+                                okButtonProps={{
+                                  style: { backgroundColor: "#198348" },
+                                }}
+                                getPopupContainer={(node) => node.parentElement}
+                                onConfirm={() => handleDeleteYF(record.id)}
+                              >
+                                <Button
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    padding: "3px 5px",
+                                  }}
+                                >
+                                  <DeleteTwoTone twoToneColor="#198348" />
+                                </Button>
+                              </Popconfirm>
+                            </Tooltip>
+                          )}
+                        </>
+                      )}
+                    {modalType === ModalType.Approve &&
+                      record.state !== "审批通过" && (
+                        <>
+                          {record?.state === "待业务审批" && (
+                            <Tooltip title="批准">
+                              <Popconfirm
+                                title="是否通过审批？"
+                                okButtonProps={{
+                                  style: { backgroundColor: "#198348" },
+                                }}
+                                getPopupContainer={(node) => node.parentElement}
+                                onConfirm={() => handleApproveYF(record.id)}
+                              >
+                                <Button
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    padding: "3px 5px",
+                                  }}
+                                >
+                                  <CheckCircleTwoTone twoToneColor="#198348" />
+                                </Button>
+                              </Popconfirm>
+                            </Tooltip>
+                          )}
+                        </>
+                      )}
+
+                    {modalType === ModalType.Approve &&
+                      record.state !== "未提交" && (
+                        <Tooltip title="退回">
+                          <Popconfirm
+                            title="是否退回申请？"
+                            okButtonProps={{
+                              style: { backgroundColor: "#198348" },
+                            }}
+                            getPopupContainer={(node) => node.parentElement}
+                            onConfirm={() => {
+                              setRejectId(record.id);
+                              setRejectType("YF");
                             }}
                           >
-                            <CheckCircleTwoTone twoToneColor="#198348" />
-                          </Button>
-                        </Popconfirm>
-                      </Tooltip>
-                    )}
-                  </>
-                )}
+                            <Button
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                padding: "3px 5px",
+                              }}
+                            >
+                              <StopTwoTone twoToneColor="#198348" />
+                            </Button>
+                          </Popconfirm>
+                        </Tooltip>
+                      )}
 
-              {modalType === ModalType.Approve && record.state !== "未提交" && (
-                <Tooltip title="退回">
-                  <Popconfirm
-                    title="是否退回申请？"
-                    okButtonProps={{
-                      style: { backgroundColor: "#198348" },
-                    }}
-                    getPopupContainer={(node) => node.parentElement}
-                    onConfirm={() => {
-                      setRejectId(record.id);
-                      setRejectType("YF");
-                    }}
-                  >
-                    <Button
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        padding: "3px 5px",
-                      }}
-                    >
-                      <StopTwoTone twoToneColor="#198348" />
-                    </Button>
-                  </Popconfirm>
-                </Tooltip>
-              )}
-
-              <Tooltip title={<span>查看审核日志</span>}>
-                <Button
-                  onClick={() => handleLogs(record.id)}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    padding: "3px 5px",
-                  }}
-                >
-                  <CalendarTwoTone twoToneColor="#198348" />
-                </Button>
-              </Tooltip>
-            </Space>
-          );
-        },
-      },
-    ];
+                    <Tooltip title={<span>查看审核日志</span>}>
+                      <Button
+                        onClick={() => handleLogs(record.id)}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          padding: "3px 5px",
+                        }}
+                      >
+                        <CalendarTwoTone twoToneColor="#198348" />
+                      </Button>
+                    </Tooltip>
+                  </Space>
+                );
+              },
+            },
+          ];
 
     return (
       <div>
@@ -643,242 +787,353 @@ const Item = ({ projectId, onClose, modalType }) => {
     );
   };
 
-  const columns = [
-    {
-      title: "客户",
-      dataIndex: "customName",
-      key: "customName",
-      align: "center",
-    },
-    {
-      title: "人民币",
-      // dataIndex: "ysRmb",
-      key: "ysRmb",
-      align: "center",
-      render: (record) => formatNumber(record?.ysRmb),
-    },
-    {
-      title: "美金",
-      // dataIndex: "ysDollar",
-      key: "ysDollar",
-      align: "center",
-      render: (record) => formatNumber(record?.ysDollar),
-    },
-    {
-      title: "明细",
-      dataIndex: "ysPurpose",
-      key: "ysPurpose",
-      align: "center",
-    },
-    {
-      title: "汇率",
-      dataIndex: "ysExrate",
-      key: "ysExrate",
-      align: "center",
-    },
-    {
-      title: "对账",
-      // dataIndex: "ysChecking",
-      key: "ysChecking",
-      align: "center",
-      render: (record) => {
-        return modalType !== ModalType.Approve ? (
-          record.ysChecking === "0" ? (
-            "√"
-          ) : (
-            "×"
-          )
-        ) : (
-          <Switch
-            checked={record.ysChecking === "0"}
-            onChange={(value) => handleYSChecking(record.id, value)}
-          />
-        );
-      },
-    },
-    {
-      title: "开票",
-      // dataIndex: "ysInvoice",
-      key: "ysInvoice",
-      align: "center",
-      render: (record) => {
-        return modalType === ModalType.CW ? (
-          <Switch
-            checked={record.ysInvoice === "0"}
-            onChange={(value) => handleYSInvoicing(record.id, value)}
-          />
-        ) : record.ysInvoice === "0" ? (
-          "√"
-        ) : (
-          "×"
-        );
-      },
-    },
-    {
-      title: "收款",
-      // dataIndex: "ysCollection",
-      align: "center",
-      key: "ysCollection",
-      render: (record) => {
-        return modalType === ModalType.CW ? (
-          <Switch
-            checked={record.ysCollection === "0"}
-            onChange={(value) => handleYSCollection(record.id, value)}
-          />
-        ) : record.ysCollection === "0" ? (
-          "√"
-        ) : (
-          "×"
-        );
-      },
-    },
-    {
-      title: "审核状态",
-      dataIndex: "state",
-      align: "center",
-      key: "state",
-    },
-    {
-      title: "备注",
-      dataIndex: "remark",
-      align: "center",
-      key: "remark",
-    },
-    {
-      title: "操作",
-      align: "center",
-      key: "action",
-      render: (_, record) => {
-        return (
-          <Space size="middle" className="flex flex-row !gap-x-1">
-            {modalType === ModalType.Submit && (
-              <>
-                {projectState === "未完结" && record?.state !== "审批通过" && (
-                  <Tooltip title="编辑">
+  const columns =
+    modalType === ModalType.OTHERS
+      ? [
+          {
+            title: "客户",
+            dataIndex: "customName",
+            key: "customName",
+            align: "center",
+          },
+          {
+            title: "人民币",
+            // dataIndex: "ysRmb",
+            key: "ysRmb",
+            align: "center",
+            render: (record) => formatNumber(record?.ysRmb),
+          },
+          {
+            title: "美金",
+            // dataIndex: "ysDollar",
+            key: "ysDollar",
+            align: "center",
+            render: (record) => formatNumber(record?.ysDollar),
+          },
+          {
+            title: "明细",
+            dataIndex: "ysPurpose",
+            key: "ysPurpose",
+            align: "center",
+          },
+          {
+            title: "汇率",
+            dataIndex: "ysExrate",
+            key: "ysExrate",
+            align: "center",
+          },
+          {
+            title: "对账",
+            // dataIndex: "ysChecking",
+            key: "ysChecking",
+            align: "center",
+            render: (record) => {
+              return modalType === ModalType.Approve ? (
+                <Switch
+                  checked={record.ysChecking === "0"}
+                  onChange={(value) => handleYSChecking(record.id, value)}
+                />
+              ) : record.ysChecking === "0" ? (
+                "√"
+              ) : (
+                "×"
+              );
+            },
+          },
+          {
+            title: "开票",
+            // dataIndex: "ysInvoice",
+            key: "ysInvoice",
+            align: "center",
+            render: (record) => {
+              return modalType === ModalType.CW ? (
+                <Switch
+                  checked={record.ysInvoice === "0"}
+                  onChange={(value) => handleYSInvoicing(record.id, value)}
+                />
+              ) : record.ysInvoice === "0" ? (
+                "√"
+              ) : (
+                "×"
+              );
+            },
+          },
+          {
+            title: "收款",
+            // dataIndex: "ysCollection",
+            align: "center",
+            key: "ysCollection",
+            render: (record) => {
+              return modalType === ModalType.CW ? (
+                <Switch
+                  checked={record.ysCollection === "0"}
+                  onChange={(value) => handleYSCollection(record.id, value)}
+                />
+              ) : record.ysCollection === "0" ? (
+                "√"
+              ) : (
+                "×"
+              );
+            },
+          },
+          {
+            title: "审核状态",
+            dataIndex: "state",
+            align: "center",
+            key: "state",
+          },
+          {
+            title: "备注",
+            dataIndex: "remark",
+            align: "center",
+            key: "remark",
+          },
+        ]
+      : [
+          {
+            title: "客户",
+            dataIndex: "customName",
+            key: "customName",
+            align: "center",
+          },
+          {
+            title: "人民币",
+            // dataIndex: "ysRmb",
+            key: "ysRmb",
+            align: "center",
+            render: (record) => formatNumber(record?.ysRmb),
+          },
+          {
+            title: "美金",
+            // dataIndex: "ysDollar",
+            key: "ysDollar",
+            align: "center",
+            render: (record) => formatNumber(record?.ysDollar),
+          },
+          {
+            title: "明细",
+            dataIndex: "ysPurpose",
+            key: "ysPurpose",
+            align: "center",
+          },
+          {
+            title: "汇率",
+            dataIndex: "ysExrate",
+            key: "ysExrate",
+            align: "center",
+          },
+          {
+            title: "对账",
+            // dataIndex: "ysChecking",
+            key: "ysChecking",
+            align: "center",
+            render: (record) => {
+              return modalType === ModalType.Approve ? (
+                <Switch
+                  checked={record.ysChecking === "0"}
+                  onChange={(value) => handleYSChecking(record.id, value)}
+                />
+              ) : record.ysChecking === "0" ? (
+                "√"
+              ) : (
+                "×"
+              );
+            },
+          },
+          {
+            title: "开票",
+            // dataIndex: "ysInvoice",
+            key: "ysInvoice",
+            align: "center",
+            render: (record) => {
+              return modalType === ModalType.CW ? (
+                <Switch
+                  checked={record.ysInvoice === "0"}
+                  onChange={(value) => handleYSInvoicing(record.id, value)}
+                />
+              ) : record.ysInvoice === "0" ? (
+                "√"
+              ) : (
+                "×"
+              );
+            },
+          },
+          {
+            title: "收款",
+            // dataIndex: "ysCollection",
+            align: "center",
+            key: "ysCollection",
+            render: (record) => {
+              return modalType === ModalType.CW ? (
+                <Switch
+                  checked={record.ysCollection === "0"}
+                  onChange={(value) => handleYSCollection(record.id, value)}
+                />
+              ) : record.ysCollection === "0" ? (
+                "√"
+              ) : (
+                "×"
+              );
+            },
+          },
+          {
+            title: "审核状态",
+            dataIndex: "state",
+            align: "center",
+            key: "state",
+          },
+          {
+            title: "备注",
+            dataIndex: "remark",
+            align: "center",
+            key: "remark",
+          },
+          {
+            title: "操作",
+            align: "center",
+            key: "action",
+            render: (_, record) => {
+              return (
+                <Space size="middle" className="flex flex-row !gap-x-1">
+                  {modalType === ModalType.Submit && (
+                    <>
+                      {projectState === "未完结" &&
+                        record?.state !== "审批通过" && (
+                          <Tooltip title="编辑">
+                            <Button
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                padding: "3px 5px",
+                              }}
+                              onClick={() => handleEditYsOne(record)}
+                            >
+                              <EditTwoTone twoToneColor="#198348" />
+                            </Button>
+                          </Tooltip>
+                        )}
+                      {projectState === "未完结" &&
+                        record?.state !== "审批通过" && (
+                          <Tooltip title="添加应付">
+                            <Button
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                padding: "3px 5px",
+                              }}
+                              onClick={() => handleYfAddClick(record)}
+                            >
+                              <PlusSquareTwoTone twoToneColor="#198348" />
+                            </Button>
+                          </Tooltip>
+                        )}
+                      {projectState === "未完结" &&
+                        record?.state === "未提交" && (
+                          <Tooltip title="提交至业务审核">
+                            <Button
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                padding: "3px 5px",
+                              }}
+                              onClick={() => handleSubmitYS(record)}
+                            >
+                              <InteractionTwoTone twoToneColor="#198348" />
+                            </Button>
+                          </Tooltip>
+                        )}
+                      {projectState === "未完结" &&
+                        record?.state !== "审批通过" && (
+                          <Tooltip title="删除">
+                            <Popconfirm
+                              title="是否删除？"
+                              okButtonProps={{
+                                style: { backgroundColor: "#198348" },
+                              }}
+                              getPopupContainer={(node) => node.parentElement}
+                              onConfirm={() => handleDeleteYS(record.id)}
+                            >
+                              <Button
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  padding: "3px 5px",
+                                }}
+                              >
+                                <DeleteTwoTone twoToneColor="#198348" />
+                              </Button>
+                            </Popconfirm>
+                          </Tooltip>
+                        )}
+                    </>
+                  )}
+                  {modalType === ModalType.Approve &&
+                    record.state !== "审批通过" &&
+                    record?.state === "待业务审批" && (
+                      <Tooltip title="批准">
+                        <Popconfirm
+                          title="是否通过审批？"
+                          okButtonProps={{
+                            style: { backgroundColor: "#198348" },
+                          }}
+                          getPopupContainer={(node) => node.parentElement}
+                          onConfirm={() => handleApproveYS(record.id)}
+                        >
+                          <Button
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              padding: "3px 5px",
+                            }}
+                          >
+                            <CheckCircleTwoTone twoToneColor="#198348" />
+                          </Button>
+                        </Popconfirm>
+                      </Tooltip>
+                    )}
+                  {modalType === ModalType.Approve &&
+                    record.state !== "未提交" && (
+                      <Tooltip title="退回">
+                        <Popconfirm
+                          title="是否退回申请？"
+                          getPopupContainer={(node) => node.parentElement}
+                          okButtonProps={{
+                            style: { backgroundColor: "#198348" },
+                          }}
+                          onConfirm={() => {
+                            setRejectId(record.id);
+                            setRejectType("YS");
+                          }}
+                        >
+                          <Button
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              padding: "3px 5px",
+                            }}
+                          >
+                            <StopTwoTone twoToneColor="#198348" />
+                          </Button>
+                        </Popconfirm>
+                      </Tooltip>
+                    )}
+                  <Tooltip title={<span>查看审核日志</span>}>
                     <Button
+                      onClick={() => handleLogs(record.id)}
                       style={{
                         display: "flex",
                         alignItems: "center",
                         padding: "3px 5px",
                       }}
-                      onClick={() => handleEditYsOne(record)}
                     >
-                      <EditTwoTone twoToneColor="#198348" />
+                      <CalendarTwoTone twoToneColor="#198348" />
                     </Button>
                   </Tooltip>
-                )}
-                {projectState === "未完结" && record?.state !== "审批通过" && (
-                  <Tooltip title="添加应付">
-                    <Button
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        padding: "3px 5px",
-                      }}
-                      onClick={() => handleYfAddClick(record)}
-                    >
-                      <PlusSquareTwoTone twoToneColor="#198348" />
-                    </Button>
-                  </Tooltip>
-                )}
-                {projectState === "未完结" && record?.state === "未提交" && (
-                  <Tooltip title="提交至业务审核">
-                    <Button
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        padding: "3px 5px",
-                      }}
-                      onClick={() => handleSubmitYS(record)}
-                    >
-                      <InteractionTwoTone twoToneColor="#198348" />
-                    </Button>
-                  </Tooltip>
-                )}
-                {projectState === "未完结" && record?.state !== "审批通过" && (
-                  <Tooltip title="删除">
-                    <Popconfirm
-                      title="是否删除？"
-                      okButtonProps={{ style: { backgroundColor: "#198348" } }}
-                      getPopupContainer={(node) => node.parentElement}
-                      onConfirm={() => handleDeleteYS(record.id)}
-                    >
-                      <Button
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          padding: "3px 5px",
-                        }}
-                      >
-                        <DeleteTwoTone twoToneColor="#198348" />
-                      </Button>
-                    </Popconfirm>
-                  </Tooltip>
-                )}
-              </>
-            )}
-            {modalType === ModalType.Approve &&
-              record.state !== "审批通过" &&
-              record?.state === "待业务审批" && (
-                <Tooltip title="批准">
-                  <Popconfirm
-                    title="是否通过审批？"
-                    okButtonProps={{ style: { backgroundColor: "#198348" } }}
-                    getPopupContainer={(node) => node.parentElement}
-                    onConfirm={() => handleApproveYS(record.id)}
-                  >
-                    <Button
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        padding: "3px 5px",
-                      }}
-                    >
-                      <CheckCircleTwoTone twoToneColor="#198348" />
-                    </Button>
-                  </Popconfirm>
-                </Tooltip>
-              )}
-            {modalType === ModalType.Approve && record.state !== "未提交" && (
-              <Tooltip title="退回">
-                <Popconfirm
-                  title="是否退回申请？"
-                  getPopupContainer={(node) => node.parentElement}
-                  okButtonProps={{ style: { backgroundColor: "#198348" } }}
-                  onConfirm={() => {
-                    setRejectId(record.id);
-                    setRejectType("YS");
-                  }}
-                >
-                  <Button
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      padding: "3px 5px",
-                    }}
-                  >
-                    <StopTwoTone twoToneColor="#198348" />
-                  </Button>
-                </Popconfirm>
-              </Tooltip>
-            )}
-            <Tooltip title={<span>查看审核日志</span>}>
-              <Button
-                onClick={() => handleLogs(record.id)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "3px 5px",
-                }}
-              >
-                <CalendarTwoTone twoToneColor="#198348" />
-              </Button>
-            </Tooltip>
-          </Space>
-        );
-      },
-    },
-  ];
+                </Space>
+              );
+            },
+          },
+        ];
 
   const handleYsAddClick = () => {
     setOperation(Operation.Add);

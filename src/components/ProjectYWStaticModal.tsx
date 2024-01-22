@@ -23,6 +23,7 @@ const StaticModal = ({ open, onCancel }) => {
       title: { text: "按产品分类统计", left: "center", top: "0" },
       tooltip: {
         trigger: "item",
+        formatter: "{a} <br/>{b}: {c} ({d}%)",
       },
       series: [
         {
@@ -34,6 +35,15 @@ const StaticModal = ({ open, onCancel }) => {
             name: i[0],
             value: i[1].length,
           })),
+          itemStyle: {
+            normal: {
+              label: {
+                show: true,
+                formatter: "{b} : {c} ({d}%)", //展示的文字   类型+百分比
+              },
+              labelLine: { show: true },
+            },
+          },
         },
       ],
     };
@@ -44,6 +54,7 @@ const StaticModal = ({ open, onCancel }) => {
       title: { text: "按货物分类统计", left: "center", top: "0" },
       tooltip: {
         trigger: "item",
+        formatter: "{a} <br/>{b}: {c} ({d}%)",
       },
       series: [
         {
@@ -62,6 +73,15 @@ const StaticModal = ({ open, onCancel }) => {
             name: i[0],
             value: i[1].length,
           })),
+          itemStyle: {
+            normal: {
+              label: {
+                show: true,
+                formatter: "{b} : {c} ({d}%)", //展示的文字   类型+百分比
+              },
+              labelLine: { show: true },
+            },
+          },
         },
       ],
     };
@@ -72,6 +92,7 @@ const StaticModal = ({ open, onCancel }) => {
       title: { text: "按品牌分类统计", left: "center", top: "0" },
       tooltip: {
         trigger: "item",
+        formatter: "{a} <br/>{b}: {c} ({d}%)",
       },
       series: [
         {
@@ -90,6 +111,15 @@ const StaticModal = ({ open, onCancel }) => {
             name: i[0],
             value: i[1].length,
           })),
+          itemStyle: {
+            normal: {
+              label: {
+                show: true,
+                formatter: "{b} : {c} ({d}%)", //展示的文字   类型+百分比
+              },
+              labelLine: { show: true },
+            },
+          },
         },
       ],
     };

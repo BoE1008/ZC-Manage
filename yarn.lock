@@ -1067,6 +1067,13 @@ doctrine@^3.0.0:
   dependencies:
     esutils "^2.0.2"
 
+dragm@^0.0.5:
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/dragm/-/dragm-0.0.5.tgz#2a0a60f93e849dd4ad9bbfe3c62071bceba6d090"
+  integrity sha512-YDEQTUzwNSSqXX+/nsGVaXhXyHahNv66UrERGe0a1LpSYZ0pjM90BHqhdlxZNBZCszytfVuQAz3U1XYUkBpi6g==
+  dependencies:
+    prop-types "^15.5.8"
+
 eastasianwidth@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/eastasianwidth/-/eastasianwidth-0.2.0.tgz#696ce2ec0aa0e6ea93a397ffcf24aa7840c827cb"
@@ -2546,7 +2553,7 @@ prelude-ls@^1.2.1:
   resolved "https://registry.yarnpkg.com/prelude-ls/-/prelude-ls-1.2.1.tgz#debc6489d7a6e6b0e7611888cec880337d316396"
   integrity sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==
 
-prop-types@^15.8.1:
+prop-types@^15.5.8, prop-types@^15.8.1:
   version "15.8.1"
   resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.8.1.tgz#67d87bf1a694f48435cf332c24af10214a3140b5"
   integrity sha512-oj87CgZICdulUohogVAR7AjlC0327U4el4L6eAvOqCeudMDVU0NThNaV+b9Df4dXgSP1gXMTnPdhfe/2qDH5cg==

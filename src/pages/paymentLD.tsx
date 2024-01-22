@@ -22,6 +22,7 @@ import {
   CheckCircleTwoTone,
   StopTwoTone,
   CalendarTwoTone,
+  ProfileTwoTone,
 } from "@ant-design/icons";
 import {
   getPaymentLDList,
@@ -38,6 +39,8 @@ import RejectModal from "@/components/RejectModal";
 import PaymentSubmitModal from "@/components/PaymentSubmitModal";
 import { formatNumber } from "@/utils";
 import PaymentDetailModal from "@/components/PaymentDetailModal";
+import { ModalType } from "@/types";
+import YSYFModal from "@/components/YSYFModal";
 
 const Role = () => {
   const [form] = Form.useForm();
@@ -64,6 +67,8 @@ const Role = () => {
 
   const [supplierId, setSupplierId] = useState();
   const [projectState, setProjectState] = useState();
+
+  const [projectId, setProjectId] = useState();
 
   useEffect(() => {
     (async () => {
@@ -103,7 +108,7 @@ const Role = () => {
       setData(data);
       message.success({
         content: operation === Operation.Add ? "添加成功" : "编辑成功",
-        type: 'success',
+        type: "success",
       });
     }
   };
@@ -124,7 +129,7 @@ const Role = () => {
     await submitLDToCW(detail.id);
     const res = await getPaymentLDList(page, pageSize);
     setData(res);
-    message.success({ content: "已提交至财务审核", type: 'success' });
+    message.success({ content: "已提交至财务审核", type: "success" });
     setDetail(undefined);
   };
 
@@ -133,7 +138,7 @@ const Role = () => {
     setRejectId(undefined);
     const res = await getPaymentLDList(page, pageSize);
     setData(res);
-    message.success({ content: "申请已退回" , type: 'success'});
+    message.success({ content: "申请已退回", type: "success" });
   };
 
   const handleLogsOne = async (id: string) => {
@@ -291,6 +296,18 @@ const Role = () => {
 
         return (
           <Space size="middle" className="flex flex-row !gap-x-1">
+            <Tooltip title={<span>查看应收应付</span>}>
+              <Button
+                onClick={() => setProjectId(record.projectId)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  padding: "3px 5px",
+                }}
+              >
+                <ProfileTwoTone twoToneColor="#198348" />
+              </Button>
+            </Tooltip>
             {isSubmit && (
               <Tooltip title="审核通过">
                 <Popconfirm
@@ -527,6 +544,14 @@ const Role = () => {
           open={!!rejectId}
           onClose={() => setRejectId(undefined)}
           onReject={(value) => handleRejectOne(rejectId, value)}
+        />
+      )}
+
+      {!!projectId && (
+        <YSYFModal
+          modalType={ModalType.OTHERS}
+          projectId={projectId}
+          onClose={() => setProjectId(undefined)}
         />
       )}
     </div>
