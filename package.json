@@ -12,9 +12,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@types/lodash": "^4.14.202",
-    "@types/qs": "^6.9.10",
-    "@types/sm-crypto": "^0.3.4",
     "ahooks": "^3.7.8",
     "antd": "^5.10.1",
     "axios": "^1.5.1",
@@ -30,6 +27,9 @@
     "sm-crypto": "^0.3.13"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.202",
+    "@types/qs": "^6.9.10",
+    "@types/sm-crypto": "^0.3.4",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
