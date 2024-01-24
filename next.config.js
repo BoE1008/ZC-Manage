@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  distDir: 'dist',
+  distDir: "dist",
   typescript: {
     // !! WARN !!
     // Dangerously allow production builds to successfully complete even if
@@ -9,20 +9,20 @@ const nextConfig = {
     // !! WARN !!
     ignoreBuildErrors: true,
   },
-  transpilePackages: ['ahooks'],
+  transpilePackages: ["ahooks"],
   images: {
-    unoptimized: true
+    unoptimized: true,
   },
   async rewrites() {
     return {
       fallback: [
         {
-          source: '/:path*',
+          source: "/:path*",
           destination: `http://123.60.88.8/:path*`,
         },
       ],
-    }
+    };
   },
-}
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;

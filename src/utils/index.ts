@@ -37,17 +37,18 @@ export const formatDept = (menu) => {
   });
 };
 
-export const arrayToTree = (arr, parentId:string = '0') => arr
-.filter(item => item.parentId === parentId)
-.map(item => {
-  const children = arrayToTree(arr, item.id);
-  if (children.length > 0) {
-    return {
-      ...item,
-      children,
-    };
-  } else {
-    const { children, ...rest } = item;
-    return rest;
-  }
-});
+export const arrayToTree = (arr, parentId: string = "0") =>
+  arr
+    .filter((item) => item.parentId === parentId)
+    .map((item) => {
+      const children = arrayToTree(arr, item.id);
+      if (children.length > 0) {
+        return {
+          ...item,
+          children,
+        };
+      } else {
+        const { children, ...rest } = item;
+        return rest;
+      }
+    });

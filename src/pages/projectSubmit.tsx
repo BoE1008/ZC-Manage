@@ -136,7 +136,7 @@ const Project = () => {
   };
 
   const handleOk = async () => {
-    form.validateFields().then(async() => {
+    form.validateFields().then(async () => {
       const values = form.getFieldsValue();
       const params = {
         ...values,

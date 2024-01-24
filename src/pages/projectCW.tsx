@@ -78,7 +78,7 @@ const Project = () => {
   const [projectState, setProjectState] = useState();
   const [customerId, setCustomerId] = useState();
 
-  const [staticModal, setStaticModal] = useState(false)
+  const [staticModal, setStaticModal] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -125,8 +125,6 @@ const Project = () => {
     projectState,
     customerId,
   ]);
-
-  
 
   const handleOk = async () => {
     form.validateFields();
@@ -385,7 +383,7 @@ const Project = () => {
         value: "操作",
         title: "操作",
         align: "center",
-        fixed: 'right',
+        fixed: "right",
         key: "action",
         render: (_, record: Company) => {
           return (
@@ -716,7 +714,14 @@ const Project = () => {
         />
       )}
 
-      {!!staticModal && <ProjectCWStaticModal open={staticModal} onCancel={() =>{setStaticModal(false)}} />}
+      {!!staticModal && (
+        <ProjectCWStaticModal
+          open={staticModal}
+          onCancel={() => {
+            setStaticModal(false);
+          }}
+        />
+      )}
     </div>
   );
 };

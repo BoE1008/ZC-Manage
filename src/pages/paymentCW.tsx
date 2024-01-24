@@ -64,7 +64,7 @@ const Role = () => {
 
   useEffect(() => {
     (async () => {
-      setLoading(true)
+      setLoading(true);
       try {
         const res = await getPaymentCWList(
           page,
@@ -75,8 +75,8 @@ const Role = () => {
           userName
         );
         setData(res);
-        setLoading(false)
-      } catch { }
+        setLoading(false);
+      } catch {}
     })();
   }, [page, pageSize, searchValue, supplierId, projectState, userName]);
 

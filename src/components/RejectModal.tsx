@@ -1,5 +1,5 @@
 import { Modal, Input } from "antd";
-import { useState,memo } from "react";
+import { useState, memo } from "react";
 
 const RejectModal = ({ open, onReject, onClose }) => {
   const [value, setValue] = useState("");

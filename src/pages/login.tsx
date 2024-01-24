@@ -94,7 +94,7 @@ const Login = () => {
     };
     await updatePassword(params);
     setPassModal(false);
-    message.success({ content: "修改密码成功"});
+    message.success({ content: "修改密码成功" });
     const codeData = await getCodeImage();
     const url = URL.createObjectURL(codeData);
     setImgSrc(url);

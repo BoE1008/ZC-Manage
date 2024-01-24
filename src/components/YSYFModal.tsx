@@ -1019,19 +1019,19 @@ const Item = ({ projectId, onClose, modalType }) => {
                           </Tooltip>
                         )}
                       {projectState === "未完结" && (
-                          <Tooltip title="添加应付">
-                            <Button
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                padding: "3px 5px",
-                              }}
-                              onClick={() => handleYfAddClick(record)}
-                            >
-                              <PlusSquareTwoTone twoToneColor="#198348" />
-                            </Button>
-                          </Tooltip>
-                        )}
+                        <Tooltip title="添加应付">
+                          <Button
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              padding: "3px 5px",
+                            }}
+                            onClick={() => handleYfAddClick(record)}
+                          >
+                            <PlusSquareTwoTone twoToneColor="#198348" />
+                          </Button>
+                        </Tooltip>
+                      )}
                       {projectState === "未完结" &&
                         record?.state === "未提交" && (
                           <Tooltip title="提交至业务审核">

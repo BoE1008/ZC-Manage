@@ -11,7 +11,7 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <>
       <Head>
-        <link rel='ico' type='image' href='/favicon.ico' />
+        <link rel="ico" type="image" href="/favicon.ico" />
       </Head>
       <ConfigProvider
         locale={locale}

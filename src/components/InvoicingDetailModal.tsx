@@ -361,7 +361,11 @@ const InvoicingDetailModal = ({ onClose, data }) => {
         footer={null}
         onCancel={handleCancel}
       >
-        <img alt="file" style={{width: '100%', padding: '40px'}} src={previewImage}/>
+        <img
+          alt="file"
+          style={{ width: "100%", padding: "40px" }}
+          src={previewImage}
+        />
       </Modal>
     </>
   );

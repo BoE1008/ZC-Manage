@@ -14,7 +14,7 @@ const AppLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { asPath } = router;
 
   const [menu, setMenu] = useState();
-  const [userName, setUserName] = useState('');
+  const [userName, setUserName] = useState("");
   // const [badges, setBadges] = useState();
 
   const [openKeys, setOpenKeys] = useState([]);
@@ -31,10 +31,10 @@ const AppLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
 
   useEffect(() => {
     (async () => {
-      const userName = sessionStorage.getItem("username")
+      const userName = sessionStorage.getItem("username");
       if (!!userName) {
         const menu = JSON.parse(sessionStorage.getItem("menu"));
-        setUserName(userName)
+        setUserName(userName);
         setMenu(menu);
       }
     })();
