@@ -97,22 +97,23 @@ const Dict = () => {
   };
 
   const handleDataOk = async () => {
-    form1.validateFields();
-    const values = form1.getFieldsValue();
-    setLoading(true);
-    const { code } =
-      dataOperation === Operation.Add
-        ? await addDictData({ ...values, dictTypeId: typeId })
-        : await updateDictData(dataEditId, { ...values, dictTypeId: typeId });
-    if (code === 200) {
-      setDataModalOpen(false);
-      const data = await getDictDetail(typeId, 1, 20);
-      setLoading(false);
-      setDictDetail(data.entity.data);
-      message.success({
-        content: dataOperation === Operation.Add ? "添加成功" : "编辑成功",
-      });
-    }
+    form1.validateFields().then(async () => {
+      const values = form1.getFieldsValue();
+      setLoading(true);
+      const { code } =
+        dataOperation === Operation.Add
+          ? await addDictData({ ...values, dictTypeId: typeId })
+          : await updateDictData(dataEditId, { ...values, dictTypeId: typeId });
+      if (code === 200) {
+        setDataModalOpen(false);
+        const data = await getDictDetail(typeId, 1, 20);
+        setLoading(false);
+        setDictDetail(data.entity.data);
+        message.success({
+          content: dataOperation === Operation.Add ? "添加成功" : "编辑成功",
+        });
+      }
+    });
   };
 
   const handleDetail = async (id) => {
@@ -289,17 +290,6 @@ const Dict = () => {
     },
   ];
 
-  const validateName = () => {
-    return {
-      validator: (_, value) => {
-        if (value.trim() !== "") {
-          return Promise.resolve();
-        }
-        return Promise.reject(new Error("请输入客户名称"));
-      },
-    };
-  };
-
   return (
     <div className="w-full p-2" style={{ color: "#000" }}>
       <div className="flex flex-row gap-y-3 justify-between">
@@ -354,13 +344,18 @@ const Dict = () => {
             required
             label="字典名称"
             name="dictName"
-            rules={[validateName]}
             validateTrigger="onBlur"
+            rules={[{ required: true, message: "字典名称不能为空" }]}
             hasFeedback
           >
             <Input placeholder="请输入字典名称" />
           </Form.Item>
-          <Form.Item required label="code" name="code">
+          <Form.Item
+            label="code"
+            name="code"
+            validateTrigger="onBlur"
+            rules={[{ required: true, message: "字典编码不能为空" }]}
+          >
             <Input placeholder="请输入编码" />
           </Form.Item>
           <Form.Item label="状态" name="status">
@@ -458,8 +453,8 @@ const Dict = () => {
             required
             label="数据标签"
             name="dictLabel"
-            rules={[validateName]}
             validateTrigger="onBlur"
+            rules={[{ required: true, message: "数据标签不能为空" }]}
             hasFeedback
           >
             <Input placeholder="请输入数据标签" />

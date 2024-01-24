@@ -152,86 +152,89 @@ const InvoicingSubmit = () => {
   };
 
   const handleOk = async () => {
-    form.validateFields();
-    const values = form.getFieldsValue();
-    console.log(values, "values");
+    form.validateFields().then(async () => {
+      const values = form.getFieldsValue();
+      console.log(values, "values");
 
-    const params =
-      operation === Operation.Add
-        ? {
-            ...values,
-            invoicingType: values.invoicingType?.value || "",
-            moneyType: values.moneyType?.value || "",
-            projectNum: values.projectNum.label || "",
-            projectId: values.projectNum?.value || "",
-            projectName: selectProject?.name || "",
-            customId: values.customName?.value || "",
-            customName: values.customName?.label || "",
-            bankCard: values.bankCard.value || "",
-            bank: values.bank.value || "",
-            taxationNumber: selectCustomer?.taxationNumber || "",
-            content: values.content?.value || "",
-            fee: values.fee || "",
-            remark: values.remark || "",
-          }
-        : {
-            ...values,
-            invoicingType:
-              values.invoicingType?.value || values.invoicingType || "",
-            moneyType: values.moneyType?.value || values.moneyType || "",
-            projectNum: values.projectNum.label || values.projectNum || "",
-            projectId:
-              values.projectNum?.value ||
-              project?.find((c) => c.name === values.projectName)?.id ||
-              "",
-            projectName: selectProject?.name,
-            customId:
-              values.customName?.value ||
-              customer?.find((a) => a.name === values.customName)?.id ||
-              "",
-            customName: values.customName?.label || values.customName || "",
-            bankCard: values.bankCard?.value || values.bankCard || "",
-            bank: values.bank?.value || values.bank || "",
-            taxationNumber: selectCustomer?.taxationNumber || "",
-            content: values.content?.value || values.content || "",
-            fee: values.fee || "",
-            remark: values.remark || "",
-          };
+      const params =
+        operation === Operation.Add
+          ? {
+              ...values,
+              invoicingType: values.invoicingType?.value || "",
+              moneyType: values.moneyType?.value || "",
+              projectNum: values.projectNum.label || "",
+              projectId: values.projectNum?.value || "",
+              projectName: selectProject?.name || "",
+              customId: values.customName?.value || "",
+              customName: values.customName?.label || "",
+              bankCard: values.bankCard.value || "",
+              bank: values.bank.value || "",
+              taxationNumber: selectCustomer?.taxationNumber || "",
+              content: values.content?.value || "",
+              fee: values.fee || "",
+              remark: values.remark || "",
+            }
+          : {
+              ...values,
+              invoicingType:
+                values.invoicingType?.value || values.invoicingType || "",
+              moneyType: values.moneyType?.value || values.moneyType || "",
+              projectNum: values.projectNum.label || values.projectNum || "",
+              projectId:
+                values.projectNum?.value ||
+                project?.find((c) => c.name === values.projectName)?.id ||
+                "",
+              projectName: selectProject?.name,
+              customId:
+                values.customName?.value ||
+                customer?.find((a) => a.name === values.customName)?.id ||
+                "",
+              customName: values.customName?.label || values.customName || "",
+              bankCard: values.bankCard?.value || values.bankCard || "",
+              bank: values.bank?.value || values.bank || "",
+              taxationNumber: selectCustomer?.taxationNumber || "",
+              content: values.content?.value || values.content || "",
+              fee: values.fee || "",
+              remark: values.remark || "",
+            };
 
-    if (operation === Operation.Add) {
-      const formData = new FormData();
-      for (const name in params) {
-        formData.append(name, params[name]);
-      }
-      files.forEach((file) => {
-        formData.append("files", file);
-      });
-      await addInvoicing(formData);
-    } else {
-      await updateInvoicing(editId, params);
-
-      const formData = new FormData();
-      formData.append("invoicingId", editId);
-
-      const fileList = files.filter(
-        (itemA) => !oldFiles.some((itemB) => itemA.name === itemB.name)
-      );
-      if (fileList.length > 0) {
-        fileList.forEach((file) => {
-          formData.append("files", file);
+      if (operation === Operation.Add) {
+        const formData = new FormData();
+        for (const name in params) {
+          formData.append(name, params[name]);
+        }
+        files.forEach((file) => {
+          formData.append("files", file?.originFileObj);
         });
-        await updateFileById(formData);
+
+        await addInvoicing(formData);
+      } else {
+        await updateInvoicing(editId, params);
+
+        const formData = new FormData();
+        formData.append("invoicingId", editId);
+
+        const fileList = files.filter(
+          (itemA) => !oldFiles.some((itemB) => itemA.name === itemB.name)
+        );
+        if (fileList.length > 0) {
+          fileList.forEach((file) => {
+            formData.append("files", file?.originFileObj);
+          });
+
+          await updateFileById(formData);
+        }
       }
-    }
-    setOldFiles([]);
-    setFiles([]);
-    setModalOpen(false);
-    const data = await getinvoicingList(page, pageSize);
-    setLoading(false);
-    setData(data);
-    message.success({
-      content: operation === Operation.Add ? "添加成功" : "编辑成功",
-      type: "success",
+      setOldFiles([]);
+      setFiles([]);
+      setModalOpen(false);
+      const data = await getinvoicingList(page, pageSize);
+      setLoading(false);
+      setData(data);
+      message.success({
+        content: operation === Operation.Add ? "添加成功" : "编辑成功",
+        type: "success",
+      });
     });
   };
 
@@ -262,17 +265,6 @@ const InvoicingSubmit = () => {
     await deleteOne(id);
     const data = await getinvoicingList(page, pageSize);
     setData(data);
-  };
-
-  const validateName = () => {
-    return {
-      validator: (_, value) => {
-        if (value.trim() !== "") {
-          return Promise.resolve();
-        }
-        return Promise.reject(new Error("请输入客户名称"));
-      },
-    };
   };
 
   const handleProjectChanged = async (param) => {
@@ -585,6 +577,10 @@ const InvoicingSubmit = () => {
       setFiles([...files, file]);
       return false;
     },
+    onChange: (info) => {
+      console.log("onchange", info);
+      setFiles([...info.fileList]);
+    },
     onDownload: async (file) => {
       window.open(
         `http://123.60.88.8/zc/common/download/resource?resource=${file?.url}`
@@ -671,7 +667,12 @@ const InvoicingSubmit = () => {
           form={form}
           style={{ minWidth: 600, color: "#000" }}
         >
-          <Form.Item label="项目编号" name="projectNum" required>
+          <Form.Item
+            label="项目编号"
+            name="projectNum"
+            validateTrigger="onBlur"
+            rules={[{ required: true, message: "项目编号不能为空" }]}
+          >
             <Select
               showSearch
               labelInValue
@@ -709,6 +710,7 @@ const InvoicingSubmit = () => {
             label="客户"
             name="customName"
             dependencies={["projectName"]}
+            validateTrigger="onBlur"
             rules={[{ required: true, message: "客户名称不能为空" }]}
           >
             <Select
@@ -724,7 +726,12 @@ const InvoicingSubmit = () => {
               }))}
             />
           </Form.Item>
-          <Form.Item required label="票种" name="invoicingType">
+          <Form.Item
+            label="票种"
+            name="invoicingType"
+            validateTrigger="onBlur"
+            rules={[{ required: true, message: "票种不能为空" }]}
+          >
             <Select
               showSearch
               labelInValue
@@ -738,7 +745,12 @@ const InvoicingSubmit = () => {
             ></Select>
           </Form.Item>
 
-          <Form.Item required label="开票内容" name="content">
+          <Form.Item
+            label="开票内容"
+            name="content"
+            validateTrigger="onBlur"
+            rules={[{ required: true, message: "开票内容不能为空" }]}
+          >
             <Select
               showSearch
               labelInValue
@@ -752,7 +764,12 @@ const InvoicingSubmit = () => {
               }))}
             ></Select>
           </Form.Item>
-          <Form.Item required label="金额" name="fee">
+          <Form.Item
+            label="金额"
+            name="fee"
+            validateTrigger="onBlur"
+            rules={[{ required: true, message: "金额不能为空" }]}
+          >
             <InputNumber placeholder="金额" className="w-full" />
           </Form.Item>
           <Form.Item label="税号" name="taxationNumber">
@@ -770,7 +787,12 @@ const InvoicingSubmit = () => {
               </code>
             </Typography>
           </Form.Item>
-          <Form.Item required label="币种" name="moneyType">
+          <Form.Item
+            label="币种"
+            name="moneyType"
+            validateTrigger="onBlur"
+            rules={[{ required: true, message: "币种不能为空" }]}
+          >
             <Select
               showSearch
               labelInValue

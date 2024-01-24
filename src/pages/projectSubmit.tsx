@@ -136,30 +136,31 @@ const Project = () => {
   };
 
   const handleOk = async () => {
-    form.validateFields();
-    const values = form.getFieldsValue();
-    const params = {
-      ...values,
-      projectDate: dayjs(values.projectDate).format("YYYY-MM-DD"),
-    };
-    const { code } =
-      operation === Operation.Add
-        ? await addProject(params)
-        : await updateProject(editId, params);
-    if (code === 200) {
-      setModalOpen(false);
-      const data = await getProjectsSubmitList(
-        page,
-        pageSize,
-        searchValue,
-        searchNumValue
-      );
-      setData(data);
-      message.success({
-        content: operation === Operation.Add ? "添加成功" : "编辑成功",
-        type: "success",
-      });
-    }
+    form.validateFields().then(async() => {
+      const values = form.getFieldsValue();
+      const params = {
+        ...values,
+        projectDate: dayjs(values.projectDate).format("YYYY-MM-DD"),
+      };
+      const { code } =
+        operation === Operation.Add
+          ? await addProject(params)
+          : await updateProject(editId, params);
+      if (code === 200) {
+        setModalOpen(false);
+        const data = await getProjectsSubmitList(
+          page,
+          pageSize,
+          searchValue,
+          searchNumValue
+        );
+        setData(data);
+        message.success({
+          content: operation === Operation.Add ? "添加成功" : "编辑成功",
+          type: "success",
+        });
+      }
+    });
   };
 
   const handleDeleteOne = async (id: string) => {
@@ -405,12 +406,15 @@ const Project = () => {
         label: "操作",
         value: "操作",
         align: "center",
-        fixed: 'right',
+        fixed: "right",
         key: "action",
         render: (_, record) => {
           const unFinished = record.state === "未完结";
           return (
-            <Space size="middle" className="!grid grid-cols-2 xl:grid-cols-4 !gap-x-1">
+            <Space
+              size="middle"
+              className="!grid grid-cols-2 xl:grid-cols-4 !gap-x-1"
+            >
               {unFinished && (
                 <Tooltip title={<span>编辑</span>}>
                   <Button
@@ -498,7 +502,7 @@ const Project = () => {
         if (value.trim() !== "") {
           return Promise.resolve();
         }
-        return Promise.reject(new Error("请输入供应商名称"));
+        return Promise.reject(new Error("请输入项目名称"));
       },
     };
   };
@@ -642,7 +646,9 @@ const Project = () => {
         title={operation === Operation.Add ? "添加项目" : "编辑项目"}
         open={modalOpen}
         onOk={handleOk}
-        okButtonProps={{ style: { background: "#198348" } }}
+        okButtonProps={{
+          style: { background: "#198348" },
+        }}
         // confirmLoading={confirmLoading}
         onCancel={() => setModalOpen(false)}
         afterClose={() => form.resetFields()}

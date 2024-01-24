@@ -74,30 +74,31 @@ const Role = () => {
   };
 
   const handleOk = async () => {
-    form.validateFields();
-    const values = form.getFieldsValue();
+    form.validateFields().then(async () => {
+      const values = form.getFieldsValue();
 
-    const menuIdsParams = Array.from(new Set(handleMenuIds(menuIds)));
+      const menuIdsParams = Array.from(new Set(handleMenuIds(menuIds)));
 
-    setLoading(true);
-    const { code } =
-      operation === Operation.Add
-        ? await addRole({ ...values, menuIds, status: status ? "0" : "1" })
-        : await updateRole(editId, {
-            ...values,
-            menuIds: menuIdsParams,
-            status: status ? "0" : "1",
-          });
-    if (code === 200) {
-      setModalOpen(false);
-      const data = await getRoleList(page, pageSize);
-      setLoading(false);
-      setData(data);
-      message.success({
-        content: operation === Operation.Add ? "添加成功" : "编辑成功",
-        type: 'success',
-      });
-    }
+      setLoading(true);
+      const { code } =
+        operation === Operation.Add
+          ? await addRole({ ...values, menuIds, status: status ? "0" : "1" })
+          : await updateRole(editId, {
+              ...values,
+              menuIds: menuIdsParams,
+              status: status ? "0" : "1",
+            });
+      if (code === 200) {
+        setModalOpen(false);
+        const data = await getRoleList(page, pageSize);
+        setLoading(false);
+        setData(data);
+        message.success({
+          content: operation === Operation.Add ? "添加成功" : "编辑成功",
+          type: "success",
+        });
+      }
+    });
   };
 
   const handleDeleteOne = async (id: string) => {
@@ -105,22 +106,6 @@ const Role = () => {
     const res = await getRoleList(page, pageSize);
     setData(res);
   };
-
-  const validateName = () => {
-    return {
-      validator: (_, value) => {
-        if (value.trim() !== "") {
-          return Promise.resolve();
-        }
-        return Promise.reject(new Error("请输入客户名称"));
-      },
-    };
-  };
-
-  const customerFilterOption = (
-    input: string,
-    option?: { label: string; value: string }
-  ) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
 
   const columns = [
     {
@@ -317,13 +302,18 @@ const Role = () => {
           form={form}
           style={{ minWidth: 600, color: "#000" }}
         >
-          <Form.Item required label="名称" name="name">
+          <Form.Item
+            label="名称"
+            name="name"
+            validateTrigger="onBlur"
+            rules={[{ required: true, message: "角色名称不能为空" }]}
+          >
             <Input placeholder="名称" />
           </Form.Item>
-          <Form.Item required label="roleKey" name="roleKey">
+          <Form.Item label="roleKey" name="roleKey">
             <Input placeholder="roleKey" />
           </Form.Item>
-          <Form.Item required label="状态" name="state">
+          <Form.Item label="状态" name="state">
             <Switch defaultChecked checked={status} onChange={onChange} />
           </Form.Item>
           <Form.Item label="菜单权限" name="menu">

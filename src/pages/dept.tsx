@@ -50,22 +50,23 @@ const Dept = () => {
   };
 
   const handleOk = async () => {
-    form.validateFields();
-    const values = form.getFieldsValue();
-    setLoading(true);
-    const { code } =
-      operation === Operation.Add
-        ? await addDept(values)
-        : await updateDept(editId, values);
-    if (code === 200) {
-      setModalOpen(false);
-      const data = await getDeptList(1, 1000);
-      setLoading(false);
-      setData(arrayToTree(data?.entity.data, "0"));
-      message.success({
-        content: operation === Operation.Add ? "添加成功" : "编辑成功",
-      });
-    }
+    form.validateFields().then(async () => {
+      const values = form.getFieldsValue();
+      setLoading(true);
+      const { code } =
+        operation === Operation.Add
+          ? await addDept(values)
+          : await updateDept(editId, values);
+      if (code === 200) {
+        setModalOpen(false);
+        const data = await getDeptList(1, 1000);
+        setLoading(false);
+        setData(arrayToTree(data?.entity.data, "0"));
+        message.success({
+          content: operation === Operation.Add ? "添加成功" : "编辑成功",
+        });
+      }
+    });
   };
 
   const handleDeleteOne = async (id: string) => {
@@ -73,17 +74,6 @@ const Dept = () => {
     const data = await getDeptList(1, 1000);
     setLoading(false);
     setData(arrayToTree(data?.entity.data, "0"));
-  };
-
-  const validateName = () => {
-    return {
-      validator: (_, value) => {
-        if (value.trim() !== "") {
-          return Promise.resolve();
-        }
-        return Promise.reject(new Error("请输入客户名称"));
-      },
-    };
   };
 
   const columns = [
@@ -172,12 +162,7 @@ const Dept = () => {
           </Button>
         </Space>
       </div>
-      <Table
-        bordered
-        pagination={false}
-        dataSource={data}
-        columns={columns}
-      />
+      <Table bordered pagination={false} dataSource={data} columns={columns} />
 
       <Modal
         centered
@@ -199,11 +184,22 @@ const Dept = () => {
           form={form}
           style={{ minWidth: 600, color: "#000" }}
         >
-          <Form.Item required label="部门名称" name="name">
+          <Form.Item
+            label="部门名称"
+            name="name"
+            validateTrigger="onBlur"
+            rules={[{ required: true, message: "名称不能为空" }]}
+          >
             <Input placeholder="部门名称" />
           </Form.Item>
 
-          <Form.Item required label="上级部门" name="parentId">
+          <Form.Item
+            required
+            label="上级部门"
+            name="parentId"
+            validateTrigger="onBlur"
+            rules={[{ required: true, message: "上级部门不能为空" }]}
+          >
             <TreeSelect
               style={{ width: "60%" }}
               // value={allDepts?.find((c) => c.id === parentId)}

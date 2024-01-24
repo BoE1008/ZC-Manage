@@ -149,90 +149,91 @@ const Payment = () => {
   };
 
   const handleOk = async () => {
-    form.validateFields();
-    const values = form.getFieldsValue();
+    form.validateFields().then(async () => {
+      const values = form.getFieldsValue();
 
-    console.log(values, "values");
+      console.log(values, "values");
 
-    const params =
-      operation === Operation.Add
-        ? {
-            ...values,
-            moneyType: values.moneyType.value || "",
-            projectNum: values.projectNum.label || "",
-            projectId: values.projectNum?.value || "",
-            projectName: selectProject?.name || "",
-            supplierName: values.supplierName.label || "",
-            supplierId: values.supplierName.value || "",
-            bank: values.bank.value || "",
-            bankCard: values.bankCard.value || "",
-            taxationNumber: selectSupplier?.taxationNumber || "",
-            fee: values.fee || "",
-            remark: values.remark || "",
-            yfDate: dayjs(values.yfDate).format("YYYY-MM-DD"),
-          }
-        : {
-            ...values,
-            moneyType: values.moneyType.value || values.moneyType || "",
-            projectNum: values.projectNum.label || values.projectNum || "",
-            projectId:
-              values.projectNum?.value ||
-              project?.find((c) => c.name === values.projectName)?.id ||
-              "",
-            projectName: selectProject?.name,
-            supplierName:
-              values.supplierName?.label || values.supplierName || "",
-            supplierId:
-              values.supplierName?.value ||
-              supplier?.find((a) => a.name === values.supplierName)?.id ||
-              "",
-            bank: values.bank.value || values.bank || "",
-            bankCard: values.bankCard.value || values.bankCard || "",
-            taxationNumber: selectSupplier?.taxationNumber || "",
-            fee: values.fee || "",
-            remark: values.remark || "",
-            yfDate: dayjs(values.yfDate).format("YYYY-MM-DD"),
-            // files,
-          };
+      const params =
+        operation === Operation.Add
+          ? {
+              ...values,
+              moneyType: values.moneyType.value || "",
+              projectNum: values.projectNum.label || "",
+              projectId: values.projectNum?.value || "",
+              projectName: selectProject?.name || "",
+              supplierName: values.supplierName.label || "",
+              supplierId: values.supplierName.value || "",
+              bank: values.bank.value || "",
+              bankCard: values.bankCard.value || "",
+              taxationNumber: selectSupplier?.taxationNumber || "",
+              fee: values.fee || "",
+              remark: values.remark || "",
+              yfDate: dayjs(values.yfDate).format("YYYY-MM-DD"),
+            }
+          : {
+              ...values,
+              moneyType: values.moneyType.value || values.moneyType || "",
+              projectNum: values.projectNum.label || values.projectNum || "",
+              projectId:
+                values.projectNum?.value ||
+                project?.find((c) => c.name === values.projectName)?.id ||
+                "",
+              projectName: selectProject?.name,
+              supplierName:
+                values.supplierName?.label || values.supplierName || "",
+              supplierId:
+                values.supplierName?.value ||
+                supplier?.find((a) => a.name === values.supplierName)?.id ||
+                "",
+              bank: values.bank.value || values.bank || "",
+              bankCard: values.bankCard.value || values.bankCard || "",
+              taxationNumber: selectSupplier?.taxationNumber || "",
+              fee: values.fee || "",
+              remark: values.remark || "",
+              yfDate: dayjs(values.yfDate).format("YYYY-MM-DD"),
+              // files,
+            };
 
-    if (operation === Operation.Add) {
-      const formData = new FormData();
-      for (const name in params) {
-        formData.append(name, params[name]);
-      }
-      files.forEach((file) => {
-        formData.append("files", file);
-      });
-      await addPayment(formData);
-    } else {
-      await updatePayment(editId, params);
-
-      const formData = new FormData();
-      formData.append("paymentId", editId);
-
-      console.log(files, "files");
-      console.log(oldFiles, "oldFiles");
-      const fileList = files.filter(
-        (itemA) => !oldFiles.some((itemB) => itemA.name === itemB.name)
-      );
-      console.log(fileList, "fileList");
-
-      if (fileList.length > 0) {
-        fileList.forEach((file) => {
-          formData.append("files", file);
+      if (operation === Operation.Add) {
+        const formData = new FormData();
+        for (const name in params) {
+          formData.append(name, params[name]);
+        }
+        files.forEach((file) => {
+          formData.append("files", file?.originFileObj);
         });
-        await updateFileById(formData);
+        await addPayment(formData);
+      } else {
+        await updatePayment(editId, params);
+
+        const formData = new FormData();
+        formData.append("paymentId", editId);
+
+        console.log(files, "files");
+        console.log(oldFiles, "oldFiles");
+        const fileList = files.filter(
+          (itemA) => !oldFiles.some((itemB) => itemA.name === itemB.name)
+        );
+        console.log(fileList, "fileList");
+
+        if (fileList.length > 0) {
+          fileList.forEach((file) => {
+            formData.append("files", file?.originFileObj);
+          });
+          await updateFileById(formData);
+        }
       }
-    }
-    setOldFiles([]);
-    setFiles([]);
-    setModalOpen(false);
-    const data = await getPaymentList(page, pageSize);
-    setLoading(false);
-    setData(data);
-    message.success({
-      content: operation === Operation.Add ? "添加成功" : "编辑成功",
-      type: "success",
+      setOldFiles([]);
+      setFiles([]);
+      setModalOpen(false);
+      const data = await getPaymentList(page, pageSize);
+      setLoading(false);
+      setData(data);
+      message.success({
+        content: operation === Operation.Add ? "添加成功" : "编辑成功",
+        type: "success",
+      });
     });
   };
 
@@ -538,7 +539,7 @@ const Payment = () => {
     name: "file",
     multiple: true,
     fileList: files,
-    listType: "picture",
+    listType: "picture-card",
     withCredentials: true,
     headers: {
       "Content-Type": "multipart/form-data",
@@ -557,6 +558,10 @@ const Payment = () => {
     beforeUpload: (file) => {
       setFiles([...files, file]);
       return false;
+    },
+    onChange: (info) => {
+      console.log("onchange", info);
+      setFiles([...info.fileList]);
     },
     onDownload: async (file) => {
       window.open(
@@ -647,7 +652,12 @@ const Payment = () => {
           form={form}
           style={{ minWidth: 600, color: "#000" }}
         >
-          <Form.Item label="项目编号" name="projectNum" required>
+          <Form.Item
+            label="项目编号"
+            name="projectNum"
+            validateTrigger="onBlur"
+            rules={[{ required: true, message: "项目编号不能为空" }]}
+          >
             <Select
               showSearch
               labelInValue
@@ -684,7 +694,8 @@ const Payment = () => {
           <Form.Item
             label="供应商"
             name="supplierName"
-            rules={[{ required: true, message: "客户名称不能为空" }]}
+            validateTrigger="onBlur"
+            rules={[{ required: true, message: "供应商不能为空" }]}
           >
             <Select
               showSearch
@@ -701,7 +712,12 @@ const Payment = () => {
             />
           </Form.Item>
 
-          <Form.Item required label="金额" name="fee">
+          <Form.Item
+            label="金额"
+            name="fee"
+            validateTrigger="onBlur"
+            rules={[{ required: true, message: "金额不能为空" }]}
+          >
             <InputNumber placeholder="金额" className="w-full" />
           </Form.Item>
           <Form.Item label="税号" name="taxationNumber">
@@ -720,7 +736,12 @@ const Payment = () => {
             </Typography>
           </Form.Item>
 
-          <Form.Item required label="币种" name="moneyType">
+          <Form.Item
+            label="币种"
+            name="moneyType"
+            validateTrigger="onBlur"
+            rules={[{ required: true, message: "币种不能为空" }]}
+          >
             <Select
               showSearch
               labelInValue

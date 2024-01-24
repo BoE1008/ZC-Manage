@@ -84,23 +84,24 @@ const User = () => {
     setEditId(record.id);
     form.setFieldsValue(record);
     setModalOpen(true);
-    setDeptId(form.getFieldValue("deptId"))
+    setDeptId(form.getFieldValue("deptId"));
   };
 
   const handleOk = async () => {
-    form.validateFields();
-    const values = form.getFieldsValue();
-    // setLoading(true);
-    operation === Operation.Add
-      ? await addUser({ ...values, deptId, roleIds })
-      : await updateUser({ ...values, deptId, roleIds }, editId);
-    setModalOpen(false);
-    const data = await getUserList(page, pageSize, searchValue, selectDeptId);
-    setLoading(false);
-    setData(data);
-    message.success({
-      content: operation === Operation.Add ? "添加成功" : "编辑成功",
-      type: 'success',
+    form.validateFields().then(async () => {
+      const values = form.getFieldsValue();
+      // setLoading(true);
+      operation === Operation.Add
+        ? await addUser({ ...values, deptId, roleIds })
+        : await updateUser({ ...values, deptId, roleIds }, editId);
+      setModalOpen(false);
+      const data = await getUserList(page, pageSize, searchValue, selectDeptId);
+      setLoading(false);
+      setData(data);
+      message.success({
+        content: operation === Operation.Add ? "添加成功" : "编辑成功",
+        type: "success",
+      });
     });
   };
 
@@ -304,7 +305,12 @@ const User = () => {
           initialValues={initialValues}
           style={{ minWidth: 600, color: "#000" }}
         >
-          <Form.Item required label="用户名" name="userName">
+          <Form.Item
+            label="用户名"
+            name="userName"
+            validateTrigger="onBlur"
+            rules={[{ required: true, message: "用户名不能为空" }]}
+          >
             <Input placeholder="请输入用户名" />
           </Form.Item>
           {operation === Operation.Add && (
@@ -312,10 +318,20 @@ const User = () => {
               <Input placeholder="请输入登录名" />
             </Form.Item>
           )}
-          <Form.Item required label="用户编号" name="userNum">
+          <Form.Item
+            label="用户编号"
+            name="userNum"
+            validateTrigger="onBlur"
+            rules={[{ required: true, message: "用户编号不能为空" }]}
+          >
             <Input placeholder="请输入用户编号" />
           </Form.Item>
-          <Form.Item required label="所属部门" name="deptId">
+          <Form.Item
+            label="所属部门"
+            name="deptId"
+            validateTrigger="onBlur"
+            rules={[{ required: true, message: "所属部门不能为空" }]}
+          >
             <div className="min-w-[150px]">
               {depts.length > 0 && (
                 <Tree

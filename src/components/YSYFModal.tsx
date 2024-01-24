@@ -113,33 +113,38 @@ const Item = ({ projectId, onClose, modalType }) => {
   };
 
   const handleYfOk = async () => {
-    form1.validateFields();
-    const values = form1.getFieldsValue();
-    const params = {
-      ...values,
-      yfDate: dayjs(values.yfDate).format("YYYY-MM-DD"),
-    };
+    form1.validateFields().then(async () => {
+      const values = form1.getFieldsValue();
+      const params = {
+        ...values,
+        yfDate: dayjs(values.yfDate).format("YYYY-MM-DD"),
+      };
 
-    const { code } =
-      operation === Operation.Add
-        ? await addProjectYf({ ...params, projectId, ysId: ysEditId })
-        : await updateProjectYf(yfEditId, params);
+      const { code } =
+        operation === Operation.Add
+          ? await addProjectYf({ ...params, projectId, ysId: ysEditId })
+          : await updateProjectYf(yfEditId, params);
 
-    if (code === 200) {
-      setYfModalOpen(false);
-      const data = await getProjectYSList(projectId as string, page, pageSize);
-      setData({
-        ...data,
-        entity: {
-          ...data.entity,
-          data: data.entity.data.map((item, index) => ({
-            key: index,
-            ...item,
-          })),
-        },
-      });
-      message.success(operation === Operation.Add ? "添加成功" : "编辑成功");
-    }
+      if (code === 200) {
+        setYfModalOpen(false);
+        const data = await getProjectYSList(
+          projectId as string,
+          page,
+          pageSize
+        );
+        setData({
+          ...data,
+          entity: {
+            ...data.entity,
+            data: data.entity.data.map((item, index) => ({
+              key: index,
+              ...item,
+            })),
+          },
+        });
+        message.success(operation === Operation.Add ? "添加成功" : "编辑成功");
+      }
+    });
   };
 
   const handleLogs = async (id: string) => {
@@ -1013,8 +1018,7 @@ const Item = ({ projectId, onClose, modalType }) => {
                             </Button>
                           </Tooltip>
                         )}
-                      {projectState === "未完结" &&
-                        record?.state !== "审批通过" && (
+                      {projectState === "未完结" && (
                           <Tooltip title="添加应付">
                             <Button
                               style={{
@@ -1149,32 +1153,37 @@ const Item = ({ projectId, onClose, modalType }) => {
   };
 
   const handleYsOk = async () => {
-    form.validateFields();
-    const values = form.getFieldsValue();
-    const params = {
-      ...values,
-      ysDate: dayjs(values.ysDate).format("YYYY-MM-DD"),
-    };
-    const { code } =
-      operation === Operation.Add
-        ? await addProjectYS({ ...params, projectId: projectId })
-        : await updateProjectYS(ysEditId, params);
+    form.validateFields().then(async () => {
+      const values = form.getFieldsValue();
+      const params = {
+        ...values,
+        ysDate: dayjs(values.ysDate).format("YYYY-MM-DD"),
+      };
+      const { code } =
+        operation === Operation.Add
+          ? await addProjectYS({ ...params, projectId: projectId })
+          : await updateProjectYS(ysEditId, params);
 
-    if (code === 200) {
-      setYsModalOpen(false);
-      const data = await getProjectYSList(projectId as string, page, pageSize);
-      setData({
-        ...data,
-        entity: {
-          ...data.entity,
-          data: data.entity.data.map((item, index) => ({
-            key: index,
-            ...item,
-          })),
-        },
-      });
-      message.success(operation === Operation.Add ? "添加成功" : "编辑成功");
-    }
+      if (code === 200) {
+        setYsModalOpen(false);
+        const data = await getProjectYSList(
+          projectId as string,
+          page,
+          pageSize
+        );
+        setData({
+          ...data,
+          entity: {
+            ...data.entity,
+            data: data.entity.data.map((item, index) => ({
+              key: index,
+              ...item,
+            })),
+          },
+        });
+        message.success(operation === Operation.Add ? "添加成功" : "编辑成功");
+      }
+    });
   };
 
   const customerFilterOption = (
@@ -1191,7 +1200,7 @@ const Item = ({ projectId, onClose, modalType }) => {
     option?: { label: string; value: string }
   ) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
 
-  const title=<BuildTitle title="应收应付列表" />
+  const title = <BuildTitle title="应收应付列表" />;
 
   return (
     <>
@@ -1271,6 +1280,7 @@ const Item = ({ projectId, onClose, modalType }) => {
             <Form.Item
               label="客户"
               name="customId"
+              validateTrigger="onBlur"
               rules={[{ required: true, message: "客户名称不能为空" }]}
             >
               <Select
@@ -1293,7 +1303,12 @@ const Item = ({ projectId, onClose, modalType }) => {
             <Form.Item label="汇率" name="ysExrate">
               <InputNumber placeholder="请输入汇率" style={{ width: "100%" }} />
             </Form.Item>
-            <Form.Item label="明细" name="ysPurpose" required>
+            <Form.Item
+              label="明细"
+              name="ysPurpose"
+              validateTrigger="onBlur"
+              rules={[{ required: true, message: "明细不能为空" }]}
+            >
               <Input.TextArea placeholder="明细" maxLength={100} />
             </Form.Item>
             <Form.Item label="备注" name="remark">
@@ -1326,7 +1341,8 @@ const Item = ({ projectId, onClose, modalType }) => {
               label="供应商"
               labelCol={{ span: 5 }}
               name="supplierId"
-              rules={[{ required: true, message: "客户名称不能为空" }]}
+              validateTrigger="onBlur"
+              rules={[{ required: true, message: "供应商名称不能为空" }]}
             >
               <Select
                 showSearch
@@ -1351,7 +1367,8 @@ const Item = ({ projectId, onClose, modalType }) => {
               label="明细"
               labelCol={{ span: 5 }}
               name="yfPurpose"
-              required
+              validateTrigger="onBlur"
+              rules={[{ required: true, message: "明细不能为空" }]}
             >
               <Input.TextArea placeholder="明细" maxLength={100} />
             </Form.Item>
