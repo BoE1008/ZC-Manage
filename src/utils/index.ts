@@ -1,3 +1,4 @@
+// 处理左侧菜单栏
 export const menuHandler = (data) => {
   return data.map(({ name, url, children }) => ({
     key: url,
@@ -9,12 +10,14 @@ export const menuHandler = (data) => {
   }));
 };
 
+// 处理金额
 export const formatNumber = (number?: number) => {
   const formattedNumber = number?.toLocaleString();
 
   return formattedNumber;
 };
 
+// 菜单处理为antd类型
 export const formatMenu = (menu) => {
   return menu.map((c) => {
     return {
@@ -26,6 +29,7 @@ export const formatMenu = (menu) => {
   });
 };
 
+// 处理部门
 export const formatDept = (menu) => {
   return menu.map((c) => {
     return {
@@ -37,6 +41,7 @@ export const formatDept = (menu) => {
   });
 };
 
+// 数组处理成树状
 export const arrayToTree = (arr, parentId: string = "0") =>
   arr
     .filter((item) => item.parentId === parentId)

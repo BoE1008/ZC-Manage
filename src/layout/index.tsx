@@ -33,7 +33,7 @@ const AppLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
     (async () => {
       const userName = sessionStorage.getItem("username");
       if (!!userName) {
-        const menu = JSON.parse(sessionStorage.getItem("menu"));
+        const menu = JSON.parse(sessionStorage.getItem("menu") as string);
         setUserName(userName);
         setMenu(menu);
       }

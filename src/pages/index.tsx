@@ -5,7 +5,11 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    router.push("/custom");
+    if (!!sessionStorage.getItem("username")) {
+      router.push("/custom");
+    } else {
+      router.push("/login");
+    }
   }, [router]);
 
   return <></>;
