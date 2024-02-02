@@ -51,3 +51,11 @@ export const getSuppliersYFList = async (projectId: string) => {
 
   return res.data;
 };
+
+export const getSupplierDetailById = async (id) => {
+  const res = await axiosInstance.get("/zc/supplier/detail", {
+    params: { id },
+  });
+
+  return res.data;
+};

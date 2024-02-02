@@ -84,7 +84,7 @@ const StaticModal = ({ open, onCancel }) => {
     >
       <div
         style={{ width: "100%", marginTop: "50px" }}
-        className="md:h-[600px] lg:h-[1000px]"
+        className="md:h-[600px] lg:h-[700px]"
         ref={chartRef}
       ></div>
     </Modal>

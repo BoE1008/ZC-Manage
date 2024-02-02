@@ -56,6 +56,7 @@ const Payment = () => {
   const [pageSize, setPageSize] = useState(10);
   const [searchValue, setSearchValue] = useState("");
   const [userName, setUserName] = useState("");
+  const [projectNum, setProjectNum] = useState("");
 
   const [project, setProject] = useState();
   const [supplier, setSupplier] = useState();
@@ -103,13 +104,22 @@ const Payment = () => {
           searchValue,
           supplierId,
           projectState,
-          userName
+          userName,
+          projectNum
         );
         setData(res);
         setLoading(false);
       } catch {}
     })();
-  }, [page, pageSize, searchValue, supplierId, projectState, userName]);
+  }, [
+    page,
+    pageSize,
+    searchValue,
+    supplierId,
+    projectState,
+    userName,
+    projectNum,
+  ]);
 
   const handleAdd = async () => {
     setOperation(Operation.Add);
@@ -186,8 +196,16 @@ const Payment = () => {
                 values.supplierName?.value ||
                 supplier?.find((a) => a.name === values.supplierName)?.id ||
                 "",
-              bank: values.bank.value || values.bank || "",
-              bankCard: values.bankCard.value || values.bankCard || "",
+              bank:
+                values.bank?.value ||
+                (JSON.stringify(values.bank) === "{}" ? "" : values.bank) ||
+                "",
+              bankCard:
+                values.bankCard?.value ||
+                (JSON.stringify(values.bankCard) === "{}"
+                  ? ""
+                  : values.bankCard) ||
+                "",
               taxationNumber: selectSupplier?.taxationNumber || "",
               fee: values.fee || "",
               remark: values.remark || "",
@@ -346,6 +364,10 @@ const Payment = () => {
       text: "审批通过",
       value: "4",
     },
+    {
+      text: "已退回",
+      value: "-1",
+    },
   ];
 
   const columns = [
@@ -382,17 +404,17 @@ const Payment = () => {
       onFilter: (value: string, record) => record.supplierId === value,
     },
     {
+      title: "币种",
+      dataIndex: "moneyType",
+      align: "center",
+      key: "moneyType",
+    },
+    {
       title: "金额",
       // dataIndex: "fee",
       align: "center",
       key: "fee",
       render: (record) => formatNumber(record?.fee),
-    },
-    {
-      title: "币种",
-      dataIndex: "moneyType",
-      align: "center",
-      key: "moneyType",
     },
     {
       title: "审核状态",
@@ -447,7 +469,8 @@ const Payment = () => {
       align: "center",
       key: "action",
       render: (_, record) => {
-        const isFinished = record.state !== "未提交";
+        const isFinished =
+          record.state !== "未提交" && record.state !== "已退回";
         return (
           <Space size="middle" className="flex flex-row !gap-x-1">
             <Tooltip title={<span>查看应收应付</span>}>
@@ -593,6 +616,11 @@ const Payment = () => {
             placeholder="按项目名称搜索"
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
+          />
+          <Input
+            placeholder="按项目编号搜索"
+            value={projectNum}
+            onChange={(e) => setProjectNum(e.target.value)}
           />
           <Input
             placeholder="按申请人搜索"

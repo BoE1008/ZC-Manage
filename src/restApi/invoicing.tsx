@@ -6,12 +6,14 @@ export const getinvoicingList = async (
   projectName?: string,
   customId?: string,
   state?: string,
-  userName?: string
+  userName?: string,
+  projectNum?: string
 ) => {
   const res = await axiosInstance.get(`/zc/invoicing/list`, {
     params: {
       pageNo,
       pageSize,
+      projectNum,
       projectName,
       customId,
       state,
@@ -23,6 +25,16 @@ export const getinvoicingList = async (
 
 export const addInvoicing = async (info) => {
   const res = await axiosInstance.post("/zc/invoicing/add", info, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  return res.data;
+};
+
+export const addAndSubmitInvoicing = async (info) => {
+  const res = await axiosInstance.post("/zc/invoicing/addSubmit", info, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
@@ -46,7 +58,8 @@ export const getinvoicingYWList = async (
   projectName?: string,
   customId?: string,
   state?: string,
-  userName?: string
+  userName?: string,
+  projectNum?: string
 ) => {
   const res = await axiosInstance.get(`/zc/invoicing/yw/list`, {
     params: {
@@ -56,6 +69,7 @@ export const getinvoicingYWList = async (
       customId,
       state,
       userName,
+      projectNum,
     },
   });
   return res.data;
@@ -67,7 +81,8 @@ export const getinvoicingCWList = async (
   projectName?: string,
   customId?: string,
   state?: string,
-  userName?: string
+  userName?: string,
+  projectNum?: string
 ) => {
   const res = await axiosInstance.get(`/zc/invoicing/cw/list`, {
     params: {
@@ -77,6 +92,7 @@ export const getinvoicingCWList = async (
       customId,
       state,
       userName,
+      projectNum,
     },
   });
   return res.data;

@@ -39,6 +39,7 @@ const Role = () => {
   const [pageSize, setPageSize] = useState(10);
   const [searchValue, setSearchValue] = useState("");
   const [userName, setUserName] = useState("");
+  const [projectNum, setProjectNum] = useState("");
 
   const [supplier, setSupplier] = useState();
   const [logs, setLogs] = useState();
@@ -72,13 +73,22 @@ const Role = () => {
           searchValue,
           supplierId,
           projectState,
-          userName
+          userName,
+          projectNum
         );
         setData(res);
         setLoading(false);
       } catch {}
     })();
-  }, [page, pageSize, searchValue, supplierId, projectState, userName]);
+  }, [
+    page,
+    pageSize,
+    searchValue,
+    supplierId,
+    projectState,
+    userName,
+    projectNum,
+  ]);
 
   const handleDetail = async (id) => {
     const res = await getPaymentDetailById(id);
@@ -139,6 +149,10 @@ const Role = () => {
       text: "审批通过",
       value: "4",
     },
+    {
+      text: "已退回",
+      value: "-1",
+    },
   ];
 
   const columns = [
@@ -175,17 +189,17 @@ const Role = () => {
       onFilter: (value: string, record) => record.supplierId === value,
     },
     {
+      title: "币种",
+      dataIndex: "moneyType",
+      align: "center",
+      key: "moneyType",
+    },
+    {
       title: "金额",
       // dataIndex: "fee",
       align: "center",
       key: "fee",
       render: (record) => formatNumber(record?.fee),
-    },
-    {
-      title: "币种",
-      dataIndex: "moneyType",
-      align: "center",
-      key: "moneyType",
     },
     {
       title: "审核状态",
@@ -240,7 +254,6 @@ const Role = () => {
       align: "center",
       key: "action",
       render: (_, record) => {
-        const isFinished = record.state === "审批通过";
         const isSubmit = record.state === "待财务审批";
 
         return (
@@ -328,6 +341,11 @@ const Role = () => {
             placeholder="按项目名称搜索"
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
+          />
+          <Input
+            placeholder="按项目编号搜索"
+            value={projectNum}
+            onChange={(e) => setProjectNum(e.target.value)}
           />
           <Input
             placeholder="按申请人搜索"

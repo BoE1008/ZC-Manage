@@ -1,20 +1,21 @@
 import { getLogs } from "@/restApi/log";
 import { useEffect, useState } from "react";
-import { Table } from "antd";
+import { Table, Space, Input } from "antd";
 
 const System = () => {
   const [data, setData] = useState();
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [userName, setUserName] = useState("");
 
   useEffect(() => {
     (async () => {
-      const logs = await getLogs(page, pageSize);
+      const logs = await getLogs(page, pageSize, userName);
       setData(logs);
       setLoading(false);
     })();
-  }, [pageSize, page]);
+  }, [pageSize, page, userName]);
 
   const columns = [
     {
@@ -36,12 +37,6 @@ const System = () => {
       key: "logName",
     },
     {
-      title: "操作接口",
-      dataIndex: "logUrl",
-      align: "center",
-      key: "logUrl",
-    },
-    {
       title: "操作时间",
       dataIndex: "createTime",
       align: "center",
@@ -51,6 +46,13 @@ const System = () => {
 
   return (
     <div>
+      <Space className="my-4 ml-4">
+        <Input
+          placeholder="按用户名搜索"
+          value={userName}
+          onChange={(e) => setUserName(e.target.value)}
+        />
+      </Space>
       <Table
         bordered
         loading={loading}

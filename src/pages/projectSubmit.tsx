@@ -38,6 +38,7 @@ import { getDictById } from "@/restApi/dict";
 import { getCustomersList } from "@/restApi/customer";
 import YSYFModal from "@/components/YSYFModal";
 import { formatNumber } from "@/utils";
+import clsx from "clsx";
 
 const initialValues = {
   name: "",
@@ -68,7 +69,7 @@ const Project = () => {
 
   const [projectId, setProjectId] = useState();
 
-  const [projectDateSort, setProjectDateSort] = useState("1");
+  const [projectDateSort, setProjectDateSort] = useState();
   const [productId, setProductId] = useState();
   const [projectType, setProjectType] = useState();
   const [projectBrand, setProjectBrand] = useState();
@@ -199,6 +200,10 @@ const Project = () => {
     {
       text: "已完结",
       value: "2",
+    },
+    {
+      text: "已退回",
+      value: "-1",
     },
   ];
 
@@ -385,7 +390,11 @@ const Project = () => {
         // dataIndex: "state",
         align: "center",
         key: "state",
-        render: (record) => `${record?.state}(${record?.waitApproveNum})`,
+        render: (record) => (
+          <span className={clsx(record.returnNum > 0 && "text-red-500")}>
+            {`${record?.state}(${record?.waitApproveNum})`}
+          </span>
+        ),
         filterMultiple: false,
         filters: stateFilters,
         filterSearch: true,
@@ -409,7 +418,8 @@ const Project = () => {
         fixed: "right",
         key: "action",
         render: (_, record) => {
-          const unFinished = record.state === "未完结";
+          const unFinished =
+            record.state === "未完结" || record.state === "已退回";
           return (
             <Space
               size="middle"

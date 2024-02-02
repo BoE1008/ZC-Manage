@@ -71,7 +71,7 @@ const Project = () => {
   const [rejectId, setRejectId] = useState();
   const [detail, setDetail] = useState();
 
-  const [projectDateSort, setProjectDateSort] = useState("1");
+  const [projectDateSort, setProjectDateSort] = useState();
   const [productId, setProductId] = useState();
   const [projectType, setProjectType] = useState();
   const [projectBrand, setProjectBrand] = useState();
@@ -176,6 +176,10 @@ const Project = () => {
     {
       text: "已完结",
       value: "2",
+    },
+    {
+      text: "已退回",
+      value: "-1",
     },
   ];
 

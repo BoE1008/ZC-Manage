@@ -42,6 +42,7 @@ import {
   StopTwoTone,
   CalendarTwoTone,
   InteractionTwoTone,
+  WalletTwoTone,
 } from "@ant-design/icons";
 import { Operation, ModalType } from "@/types";
 import { getCustomersList } from "@/restApi/customer";
@@ -50,6 +51,8 @@ import dayjs from "dayjs";
 import RejectModal from "@/components/RejectModal";
 import { formatNumber } from "@/utils";
 import BuildTitle from "./DragM";
+import YSDrawer from "./YSDrawer";
+import YFDrawer from "./YFDrawer";
 
 const Item = ({ projectId, onClose, modalType }) => {
   const [data, setData] = useState();
@@ -75,6 +78,9 @@ const Item = ({ projectId, onClose, modalType }) => {
 
   const [rejectId, setRejectId] = useState();
   const [rejectType, setRejectType] = useState();
+
+  const [YSRecord, setYSRecord] = useState(undefined);
+  const [YFRecord, setYFRecord] = useState(undefined);
 
   useEffect(() => {
     (async () => {
@@ -653,7 +659,8 @@ const Item = ({ projectId, onClose, modalType }) => {
                 return (
                   <Space size="middle" className="flex flex-row !gap-x-1">
                     {modalType === ModalType.Submit &&
-                      projectState === "未完结" && (
+                      (projectState === "未完结" ||
+                        projectState === "已退回") && (
                         <>
                           {record?.state !== "审批通过" && (
                             <Tooltip title="编辑">
@@ -669,7 +676,8 @@ const Item = ({ projectId, onClose, modalType }) => {
                               </Button>
                             </Tooltip>
                           )}
-                          {record?.state === "未提交" && (
+                          {(record?.state === "未提交" ||
+                            record?.state === "已退回") && (
                             <Tooltip title="提交至业务审核">
                               <Button
                                 style={{
@@ -683,6 +691,7 @@ const Item = ({ projectId, onClose, modalType }) => {
                               </Button>
                             </Tooltip>
                           )}
+
                           {record?.state !== "审批通过" && (
                             <Tooltip title="删除">
                               <Popconfirm
@@ -706,6 +715,21 @@ const Item = ({ projectId, onClose, modalType }) => {
                             </Tooltip>
                           )}
                         </>
+                      )}
+                    {modalType === ModalType.Submit &&
+                      record?.yfCollection === "1" && (
+                        <Tooltip title={<span>付款申请</span>}>
+                          <Button
+                            onClick={() => setYFRecord(record)}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              padding: "3px 5px",
+                            }}
+                          >
+                            <WalletTwoTone twoToneColor="#198348" />
+                          </Button>
+                        </Tooltip>
                       )}
                     {modalType === ModalType.Approve &&
                       record.state !== "审批通过" && (
@@ -736,7 +760,8 @@ const Item = ({ projectId, onClose, modalType }) => {
                       )}
 
                     {modalType === ModalType.Approve &&
-                      record.state !== "未提交" && (
+                      record.state !== "未提交" &&
+                      record?.state !== "已退回" && (
                         <Tooltip title="退回">
                           <Popconfirm
                             title="是否退回申请？"
@@ -1003,7 +1028,8 @@ const Item = ({ projectId, onClose, modalType }) => {
                 <Space size="middle" className="flex flex-row !gap-x-1">
                   {modalType === ModalType.Submit && (
                     <>
-                      {projectState === "未完结" &&
+                      {(projectState === "未完结" ||
+                        projectState === "已退回") &&
                         record?.state !== "审批通过" && (
                           <Tooltip title="编辑">
                             <Button
@@ -1018,7 +1044,8 @@ const Item = ({ projectId, onClose, modalType }) => {
                             </Button>
                           </Tooltip>
                         )}
-                      {projectState === "未完结" && (
+                      {(projectState === "未完结" ||
+                        projectState === "已退回") && (
                         <Tooltip title="添加应付">
                           <Button
                             style={{
@@ -1032,22 +1059,34 @@ const Item = ({ projectId, onClose, modalType }) => {
                           </Button>
                         </Tooltip>
                       )}
-                      {projectState === "未完结" &&
-                        record?.state === "未提交" && (
+                      {(projectState === "未完结" ||
+                        projectState === "已退回") &&
+                        (record?.state === "未提交" ||
+                          record?.state === "已退回") && (
                           <Tooltip title="提交至业务审核">
-                            <Button
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                padding: "3px 5px",
+                            <Popconfirm
+                              title="提交至业务审核？"
+                              okButtonProps={{
+                                style: { backgroundColor: "#198348" },
                               }}
-                              onClick={() => handleSubmitYS(record)}
+                              getPopupContainer={(node) => node.parentElement}
+                              onConfirm={() => handleSubmitYS(record)}
                             >
-                              <InteractionTwoTone twoToneColor="#198348" />
-                            </Button>
+                              <Button
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  padding: "3px 5px",
+                                }}
+                                // onClick={() => handleSubmitYS(record)}
+                              >
+                                <InteractionTwoTone twoToneColor="#198348" />
+                              </Button>
+                            </Popconfirm>
                           </Tooltip>
                         )}
-                      {projectState === "未完结" &&
+                      {(projectState === "未完结" ||
+                        projectState === "已退回") &&
                         record?.state !== "审批通过" && (
                           <Tooltip title="删除">
                             <Popconfirm
@@ -1097,7 +1136,8 @@ const Item = ({ projectId, onClose, modalType }) => {
                       </Tooltip>
                     )}
                   {modalType === ModalType.Approve &&
-                    record.state !== "未提交" && (
+                    record.state !== "未提交" &&
+                    record.state !== "已退回" && (
                       <Tooltip title="退回">
                         <Popconfirm
                           title="是否退回申请？"
@@ -1120,6 +1160,21 @@ const Item = ({ projectId, onClose, modalType }) => {
                             <StopTwoTone twoToneColor="#198348" />
                           </Button>
                         </Popconfirm>
+                      </Tooltip>
+                    )}
+                  {modalType === ModalType.Submit &&
+                    record?.ysInvoice === "1" && (
+                      <Tooltip title={<span>开票申请</span>}>
+                        <Button
+                          onClick={() => setYSRecord(record)}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            padding: "3px 5px",
+                          }}
+                        >
+                          <WalletTwoTone twoToneColor="#198348" />
+                        </Button>
                       </Tooltip>
                     )}
                   <Tooltip title={<span>查看审核日志</span>}>
@@ -1215,22 +1270,23 @@ const Item = ({ projectId, onClose, modalType }) => {
         styles={{ body: { height: "800px", overflowY: "auto" } }}
         maskClosable={false}
       >
-        {modalType === ModalType.Submit && projectState === "未完结" && (
-          <>
-            <Button
-              onClick={handleYsAddClick}
-              type="primary"
-              style={{
-                marginBottom: 16,
-                marginTop: 16,
-                background: "#198348",
-                width: "100px",
-              }}
-            >
-              添加应收
-            </Button>
-          </>
-        )}
+        {modalType === ModalType.Submit &&
+          (projectState === "未完结" || projectState === "已退回") && (
+            <>
+              <Button
+                onClick={handleYsAddClick}
+                type="primary"
+                style={{
+                  marginBottom: 16,
+                  marginTop: 16,
+                  background: "#198348",
+                  width: "100px",
+                }}
+              >
+                添加应收
+              </Button>
+            </>
+          )}
 
         <Table
           bordered
@@ -1295,13 +1351,25 @@ const Item = ({ projectId, onClose, modalType }) => {
               />
             </Form.Item>
             <Form.Item label="人民币" name="ysRmb">
-              <InputNumber placeholder="请输入金额" style={{ width: "100%" }} />
+              <InputNumber
+                defaultValue={0}
+                placeholder="请输入金额"
+                style={{ width: "100%" }}
+              />
             </Form.Item>
             <Form.Item label="美金" name="ysDollar">
-              <InputNumber placeholder="请输入金额" style={{ width: "100%" }} />
+              <InputNumber
+                defaultValue={0}
+                placeholder="请输入金额"
+                style={{ width: "100%" }}
+              />
             </Form.Item>
             <Form.Item label="汇率" name="ysExrate">
-              <InputNumber placeholder="请输入汇率" style={{ width: "100%" }} />
+              <InputNumber
+                defaultValue={0}
+                placeholder="请输入汇率"
+                style={{ width: "100%" }}
+              />
             </Form.Item>
             <Form.Item
               label="明细"
@@ -1358,10 +1426,18 @@ const Item = ({ projectId, onClose, modalType }) => {
               />
             </Form.Item>
             <Form.Item label="人民币" labelCol={{ span: 5 }} name="yfRmb">
-              <InputNumber placeholder="请输入金额" style={{ width: "100%" }} />
+              <InputNumber
+                defaultValue={0}
+                placeholder="请输入金额"
+                style={{ width: "100%" }}
+              />
             </Form.Item>
             <Form.Item label="美金" labelCol={{ span: 5 }} name="yfDollar">
-              <InputNumber placeholder="请输入金额" style={{ width: "100%" }} />
+              <InputNumber
+                defaultValue={0}
+                placeholder="请输入金额"
+                style={{ width: "100%" }}
+              />
             </Form.Item>
             <Form.Item
               label="明细"
@@ -1373,7 +1449,11 @@ const Item = ({ projectId, onClose, modalType }) => {
               <Input.TextArea placeholder="明细" maxLength={100} />
             </Form.Item>
             <Form.Item label="汇率" labelCol={{ span: 5 }} name="yfExrate">
-              <InputNumber placeholder="请输入汇率" style={{ width: "100%" }} />
+              <InputNumber
+                defaultValue={0}
+                placeholder="请输入汇率"
+                style={{ width: "100%" }}
+              />
             </Form.Item>
 
             <Form.Item
@@ -1388,7 +1468,11 @@ const Item = ({ projectId, onClose, modalType }) => {
               labelCol={{ span: 5 }}
               name="ylProfitMoney"
             >
-              <InputNumber placeholder="预留利润金额" className="w-full" />
+              <InputNumber
+                defaultValue={0}
+                placeholder="预留利润金额"
+                className="w-full"
+              />
             </Form.Item>
             <Form.Item label="备注" labelCol={{ span: 5 }} name="remark">
               <Input.TextArea placeholder="备注" maxLength={100} />
@@ -1434,6 +1518,14 @@ const Item = ({ projectId, onClose, modalType }) => {
           onClose={() => setRejectId(undefined)}
           onReject={(value) => handleRejectOne(rejectId, value)}
         />
+      )}
+
+      {!!YSRecord && (
+        <YSDrawer ysRecord={YSRecord} onClose={() => setYSRecord(undefined)} />
+      )}
+
+      {!!YFRecord && (
+        <YFDrawer yfRecord={YFRecord} onClose={() => setYFRecord(undefined)} />
       )}
     </>
   );

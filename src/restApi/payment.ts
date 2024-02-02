@@ -6,12 +6,14 @@ export const getPaymentList = async (
   projectName?: string,
   supplierId?: string,
   projectState?: string,
-  userName?: string
+  userName?: string,
+  projectNum?: string
 ) => {
   const res = await axiosInstance.get(`/zc/payment/list`, {
     params: {
       pageNo,
       pageSize,
+      projectNum,
       projectName,
       supplierId,
       projectState,
@@ -23,6 +25,16 @@ export const getPaymentList = async (
 
 export const addPayment = async (info) => {
   const res = await axiosInstance.post("/zc/payment/add", info, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  return res.data;
+};
+
+export const addAndSubmitPayment = async (info) => {
+  const res = await axiosInstance.post("/zc/payment/addSubmit", info, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
@@ -46,7 +58,8 @@ export const getPaymentYWList = async (
   projectName?: string,
   supplierId?: string,
   projectState?: string,
-  userName?: string
+  userName?: string,
+  projectNum?: string
 ) => {
   const res = await axiosInstance.get(`/zc/payment/yw/list`, {
     params: {
@@ -56,6 +69,7 @@ export const getPaymentYWList = async (
       supplierId,
       projectState,
       userName,
+      projectNum,
     },
   });
   return res.data;
@@ -67,7 +81,8 @@ export const getPaymentCWList = async (
   projectName?: string,
   supplierId?: string,
   projectState?: string,
-  userName?: string
+  userName?: string,
+  projectNum?: string
 ) => {
   const res = await axiosInstance.get(`/zc/payment/cw/list`, {
     params: {
@@ -77,6 +92,7 @@ export const getPaymentCWList = async (
       supplierId,
       projectState,
       userName,
+      projectNum,
     },
   });
   return res.data;
@@ -88,7 +104,8 @@ export const getPaymentLDList = async (
   projectName?: string,
   supplierId?: string,
   projectState?: string,
-  userName?: string
+  userName?: string,
+  projectNum?: string
 ) => {
   const res = await axiosInstance.get(`/zc/payment/ld/list`, {
     params: {
@@ -98,6 +115,7 @@ export const getPaymentLDList = async (
       supplierId,
       projectState,
       userName,
+      projectNum,
     },
   });
   return res.data;

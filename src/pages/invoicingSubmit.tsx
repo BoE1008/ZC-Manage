@@ -58,6 +58,7 @@ const InvoicingSubmit = () => {
   const [pageSize, setPageSize] = useState(10);
   const [searchValue, setSearchValue] = useState("");
   const [userName, setUserName] = useState("");
+  const [projectNum, setProjectNum] = useState("");
 
   const [modalOpen, setModalOpen] = useState(false);
   const [operation, setOperation] = useState<Operation>(Operation.Add);
@@ -103,13 +104,22 @@ const InvoicingSubmit = () => {
           searchValue,
           customerId,
           projectState,
-          userName
+          userName,
+          projectNum
         );
         setData(res);
         setLoading(false);
       } catch {}
     })();
-  }, [page, pageSize, searchValue, customerId, projectState, userName]);
+  }, [
+    page,
+    pageSize,
+    searchValue,
+    customerId,
+    projectState,
+    userName,
+    projectNum,
+  ]);
 
   const handleAdd = async () => {
     setOperation(Operation.Add);
@@ -190,13 +200,23 @@ const InvoicingSubmit = () => {
                 customer?.find((a) => a.name === values.customName)?.id ||
                 "",
               customName: values.customName?.label || values.customName || "",
-              bankCard: values.bankCard?.value || values.bankCard || "",
-              bank: values.bank?.value || values.bank || "",
+              bankCard:
+                values.bankCard?.value ||
+                (JSON.stringify(values.bankCard) === "{}"
+                  ? ""
+                  : values.bankCard) ||
+                "",
+              bank:
+                values.bank?.value ||
+                (JSON.stringify(values.bank) === "{}" ? "" : values.bank) ||
+                "",
               taxationNumber: selectCustomer?.taxationNumber || "",
               content: values.content?.value || values.content || "",
               fee: values.fee || "",
               remark: values.remark || "",
             };
+
+      console.log(params, "parmas");
 
       if (operation === Operation.Add) {
         const formData = new FormData();
@@ -332,6 +352,10 @@ const InvoicingSubmit = () => {
       text: "审批通过",
       value: "4",
     },
+    {
+      text: "已退回",
+      value: "-1",
+    },
   ];
 
   const columns = [
@@ -465,7 +489,8 @@ const InvoicingSubmit = () => {
       align: "center",
       key: "action",
       render: (_, record) => {
-        const isFinished = record.state !== "未提交";
+        const isFinished =
+          record.state !== "未提交" && record.state !== "已退回";
         return (
           <Space size="middle" className="flex flex-row !gap-x-1">
             <Tooltip title={<span>查看应收应付</span>}>
@@ -613,6 +638,11 @@ const InvoicingSubmit = () => {
             onChange={(e) => setSearchValue(e.target.value)}
           />
           <Input
+            placeholder="按项目编号搜索"
+            value={projectNum}
+            onChange={(e) => setProjectNum(e.target.value)}
+          />
+          <Input
             placeholder="按申请人搜索"
             value={userName}
             onChange={(e) => setUserName(e.target.value)}
@@ -744,7 +774,6 @@ const InvoicingSubmit = () => {
               }))}
             ></Select>
           </Form.Item>
-
           <Form.Item
             label="开票内容"
             name="content"

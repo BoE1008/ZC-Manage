@@ -79,7 +79,7 @@ const Project = () => {
   const [rejectId, setRejectId] = useState();
   const [detail, setDetail] = useState();
 
-  const [projectDateSort, setProjectDateSort] = useState("1");
+  const [projectDateSort, setProjectDateSort] = useState();
   const [productId, setProductId] = useState();
   const [projectType, setProjectType] = useState();
   const [projectBrand, setProjectBrand] = useState();
@@ -253,6 +253,10 @@ const Project = () => {
     {
       text: "已完结",
       value: "2",
+    },
+    {
+      text: "已退回",
+      value: "-1",
     },
   ];
 
@@ -463,7 +467,8 @@ const Project = () => {
         fixed: "right",
         key: "action",
         render: (_, record: Company) => {
-          const unSubmit = record.state === "未完结";
+          const unSubmit =
+            record.state === "未完结" || record.state === "已退回";
           const isApprove = record.state === "待完结审批";
           // const isFinished = record.state === "已完结";
           return (
