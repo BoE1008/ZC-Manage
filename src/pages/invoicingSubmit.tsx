@@ -131,6 +131,7 @@ const InvoicingSubmit = () => {
   };
 
   const handleEditOne = async (record) => {
+    console.log(record);
     setOperation(Operation.Edit);
     setEditId(record.id);
     const projectCustom = await getCustomersYSList(record.projectId);
@@ -191,9 +192,7 @@ const InvoicingSubmit = () => {
               moneyType: values.moneyType?.value || values.moneyType || "",
               projectNum: values.projectNum.label || values.projectNum || "",
               projectId:
-                values.projectNum?.value ||
-                project?.find((c) => c.name === values.projectName)?.id ||
-                "",
+                project?.find((c) => c.name === selectProject?.name)?.id || "",
               projectName: selectProject?.name,
               customId:
                 values.customName?.value ||

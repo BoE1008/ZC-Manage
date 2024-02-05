@@ -186,9 +186,7 @@ const Payment = () => {
               moneyType: values.moneyType.value || values.moneyType || "",
               projectNum: values.projectNum.label || values.projectNum || "",
               projectId:
-                values.projectNum?.value ||
-                project?.find((c) => c.name === values.projectName)?.id ||
-                "",
+                project?.find((c) => c.name === selectProject?.name)?.id || "",
               projectName: selectProject?.name,
               supplierName:
                 values.supplierName?.label || values.supplierName || "",
