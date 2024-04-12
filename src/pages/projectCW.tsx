@@ -80,6 +80,8 @@ const Project = () => {
 
   const [staticModal, setStaticModal] = useState(false);
 
+  const [exportEnabled, setExportEnabled] = useState(true);
+
   useEffect(() => {
     (async () => {
       const res = await getDictById();
@@ -158,10 +160,14 @@ const Project = () => {
   };
 
   const handleExport = async () => {
-    const file = await exportProject();
-    window.open(
-      `http://123.60.88.8/zc/common/download?fileName=${file.msg}&delete=false`
-    );
+    setExportEnabled(false);
+    try {
+      const file = await exportProject();
+      setExportEnabled(true);
+      window.open(
+        `http://123.60.88.8/zc/common/download?fileName=${file.msg}&delete=false`
+      );
+    } catch {}
   };
 
   const stateFilters = [
@@ -464,6 +470,7 @@ const Project = () => {
         <div className="flex flex-row gap-x-10">
           <div className="flex flex-row gap-x-4">
             <Button
+              disabled={!exportEnabled}
               onClick={handleExport}
               type="primary"
               style={{

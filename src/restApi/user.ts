@@ -65,6 +65,12 @@ export const updatePassword = async (info) => {
   return res.data;
 };
 
+export const resetPassword = async (id) => {
+  const res = await axiosInstance.post(`/zc/user/reset/pwd?id=${id}`);
+
+  return res.data;
+};
+
 export const getCodeImage = async () => {
   const res = await axios.get(`/zc/captcha/captchaImage`, {
     responseType: "blob",

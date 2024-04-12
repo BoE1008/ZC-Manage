@@ -12,8 +12,19 @@ import {
   Tree,
   Select,
 } from "antd";
-import { EditTwoTone, DeleteTwoTone, DownOutlined } from "@ant-design/icons";
-import { getUserList, updateUser, addUser, deleteUser } from "@/restApi/user";
+import {
+  EditTwoTone,
+  DeleteTwoTone,
+  DownOutlined,
+  ThunderboltTwoTone,
+} from "@ant-design/icons";
+import {
+  getUserList,
+  updateUser,
+  addUser,
+  deleteUser,
+  resetPassword,
+} from "@/restApi/user";
 import { Company, Operation } from "@/types";
 import { useRouter } from "next/router";
 import { getDeptList, getDeptTree } from "@/restApi/dept";
@@ -111,6 +122,11 @@ const User = () => {
     setData(data);
   };
 
+  const handleResetPwd = async (id) => {
+    await resetPassword(id);
+    message.success("重置密码成功");
+  };
+
   const columns = [
     {
       title: "用户编号",
@@ -169,6 +185,24 @@ const User = () => {
               >
                 <EditTwoTone twoToneColor="#198348" />
               </Button>
+            </Tooltip>
+            <Tooltip title="重置密码">
+              <Popconfirm
+                title="确定重置密码？"
+                getPopupContainer={(node) => node.parentElement}
+                okButtonProps={{ style: { backgroundColor: "#198348" } }}
+                onConfirm={() => handleResetPwd(record.id)}
+              >
+                <Button
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    padding: "3px 5px",
+                  }}
+                >
+                  <ThunderboltTwoTone twoToneColor="#198348" />
+                </Button>
+              </Popconfirm>
             </Tooltip>
             <Tooltip title="删除">
               <Popconfirm
@@ -326,12 +360,7 @@ const User = () => {
           >
             <Input placeholder="请输入用户编号" />
           </Form.Item>
-          <Form.Item
-            label="所属部门"
-            name="deptId"
-            validateTrigger="onBlur"
-            rules={[{ required: true, message: "所属部门不能为空" }]}
-          >
+          <Form.Item label="所属部门" name="deptId">
             <div className="min-w-[150px]">
               {depts.length > 0 && (
                 <Tree

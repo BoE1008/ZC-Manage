@@ -10,12 +10,14 @@ import {
   Popconfirm,
   List,
   Avatar,
+  Statistic,
 } from "antd";
 import {
   CheckCircleTwoTone,
   StopTwoTone,
   ProfileTwoTone,
   CalendarTwoTone,
+  AccountBookTwoTone,
 } from "@ant-design/icons";
 import {
   getPaymentCWList,
@@ -31,6 +33,7 @@ import { formatNumber } from "@/utils";
 import PaymentDetailModal from "@/components/PaymentDetailModal";
 import { ModalType } from "@/types";
 import YSYFModal from "@/components/YSYFModal";
+import { getDictById } from "@/restApi/dict";
 
 const Role = () => {
   const [data, setData] = useState();
@@ -53,13 +56,17 @@ const Role = () => {
 
   const [supplierId, setSupplierId] = useState();
   const [projectState, setProjectState] = useState();
+  const [moneyType, setMoneyType] = useState("");
 
   const [projectId, setProjectId] = useState();
+  const [dict, setDict] = useState();
 
   useEffect(() => {
     (async () => {
       const supplierData = await getSuppliersList(1, 10000);
       setSupplier(supplierData.entity.data);
+      const res = await getDictById();
+      setDict(res.entity);
     })();
   }, []);
 
@@ -74,7 +81,8 @@ const Role = () => {
           supplierId,
           projectState,
           userName,
-          projectNum
+          projectNum,
+          moneyType
         );
         setData(res);
         setLoading(false);
@@ -88,7 +96,16 @@ const Role = () => {
     projectState,
     userName,
     projectNum,
+    moneyType,
   ]);
+
+  const totalFee = useMemo(() => {
+    return (
+      data?.entity.data.reduce((acc, cur) => {
+        return acc + cur.fee * 100;
+      }, 0) / 100
+    );
+  }, [data]);
 
   const handleDetail = async (id) => {
     const res = await getPaymentDetailById(id);
@@ -155,6 +172,13 @@ const Role = () => {
     },
   ];
 
+  const moneyTypeFilters = dict
+    ?.find((item) => item.id === "5")
+    .childList.map((con) => ({
+      text: con.dictLabel,
+      value: con.dictLabel,
+    }));
+
   const columns = [
     {
       title: "项目编号",
@@ -193,6 +217,9 @@ const Role = () => {
       dataIndex: "moneyType",
       align: "center",
       key: "moneyType",
+      filterMultiple: false,
+      filters: moneyTypeFilters,
+      onFilter: (value: string, record) => record.moneyType === value,
     },
     {
       title: "金额",
@@ -331,28 +358,46 @@ const Role = () => {
   const handleTableChange = (pagination, filters, sorter) => {
     setProjectState(filters.state?.[0]);
     setSupplierId(filters.supplierName?.[0]);
+    setMoneyType(filters.moneyType?.[0]);
   };
+
+  console.log(data?.entity.data);
 
   return (
     <div className="p-2">
       <div className="flex flex-row gap-y-3 justify-between mb-4">
-        <div className="flex flex-row gap-x-4">
+        <div className="flex flex-row gap-x-4 items-center">
           <Input
+            style={{ height: "40px" }}
             placeholder="按项目名称搜索"
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
           />
           <Input
+            style={{ height: "40px" }}
             placeholder="按项目编号搜索"
             value={projectNum}
             onChange={(e) => setProjectNum(e.target.value)}
           />
           <Input
+            style={{ height: "40px" }}
             placeholder="按申请人搜索"
             value={userName}
             onChange={(e) => setUserName(e.target.value)}
           />
         </div>
+        <Statistic
+          style={{
+            marginRight: "20px",
+            border: "1px solid #ccc",
+            borderRadius: "8px",
+            padding: "10px",
+          }}
+          title="当前页总金额"
+          prefix={<AccountBookTwoTone twoToneColor="#198348" />}
+          value={totalFee}
+          precision={2}
+        />
       </div>
 
       <Table

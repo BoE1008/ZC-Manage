@@ -188,8 +188,17 @@ const InvoicingSubmit = () => {
           : {
               ...values,
               invoicingType:
-                values.invoicingType?.value || values.invoicingType || "",
-              moneyType: values.moneyType?.value || values.moneyType || "",
+                values.invoicingType?.value ||
+                (JSON.stringify(values.invoicingType) === "{}"
+                  ? ""
+                  : values.invoicingType) ||
+                "",
+              moneyType:
+                values.moneyType?.value ||
+                (JSON.stringify(values.moneyType) === "{}"
+                  ? ""
+                  : values.moneyType) ||
+                "",
               projectNum: values.projectNum.label || values.projectNum || "",
               projectId:
                 project?.find((c) => c.name === selectProject?.name)?.id || "",

@@ -13,6 +13,7 @@ import {
   Col,
   Row,
   Card,
+  Flex,
 } from "antd";
 import { updatePassword } from "@/restApi/user";
 import { sm2 } from "sm-crypto";
@@ -33,6 +34,7 @@ const User = () => {
   const [passModal, setPassModal] = useState(false);
   const [badges, setBadges] = useState();
   const [noticeModal, setNoticeModal] = useState(false);
+  const [resetModal, setResetModal] = useState(false);
 
   const noticeContainerRef = useRef();
 

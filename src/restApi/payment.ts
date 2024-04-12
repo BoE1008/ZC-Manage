@@ -5,7 +5,7 @@ export const getPaymentList = async (
   pageSize: number,
   projectName?: string,
   supplierId?: string,
-  projectState?: string,
+  state?: string,
   userName?: string,
   projectNum?: string
 ) => {
@@ -16,7 +16,7 @@ export const getPaymentList = async (
       projectNum,
       projectName,
       supplierId,
-      projectState,
+      state,
       userName,
     },
   });
@@ -57,7 +57,7 @@ export const getPaymentYWList = async (
   pageSize: number,
   projectName?: string,
   supplierId?: string,
-  projectState?: string,
+  state?: string,
   userName?: string,
   projectNum?: string
 ) => {
@@ -67,7 +67,7 @@ export const getPaymentYWList = async (
       pageSize,
       projectName,
       supplierId,
-      projectState,
+      state,
       userName,
       projectNum,
     },
@@ -80,9 +80,10 @@ export const getPaymentCWList = async (
   pageSize: number,
   projectName?: string,
   supplierId?: string,
-  projectState?: string,
+  state?: string,
   userName?: string,
-  projectNum?: string
+  projectNum?: string,
+  moneyType?: string
 ) => {
   const res = await axiosInstance.get(`/zc/payment/cw/list`, {
     params: {
@@ -90,9 +91,10 @@ export const getPaymentCWList = async (
       pageSize,
       projectName,
       supplierId,
-      projectState,
+      state,
       userName,
       projectNum,
+      moneyType,
     },
   });
   return res.data;
@@ -103,7 +105,7 @@ export const getPaymentLDList = async (
   pageSize: number,
   projectName?: string,
   supplierId?: string,
-  projectState?: string,
+  state?: string,
   userName?: string,
   projectNum?: string
 ) => {
@@ -113,7 +115,7 @@ export const getPaymentLDList = async (
       pageSize,
       projectName,
       supplierId,
-      projectState,
+      state,
       userName,
       projectNum,
     },

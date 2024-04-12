@@ -183,7 +183,12 @@ const Payment = () => {
             }
           : {
               ...values,
-              moneyType: values.moneyType.value || values.moneyType || "",
+              moneyType:
+                values.moneyType.value ||
+                (JSON.stringify(values.moneyType) === "{}"
+                  ? ""
+                  : values.bankCard) ||
+                "",
               projectNum: values.projectNum.label || values.projectNum || "",
               projectId:
                 project?.find((c) => c.name === selectProject?.name)?.id || "",
