@@ -11,6 +11,7 @@ import {
   List,
   Avatar,
   Statistic,
+  DatePicker,
 } from "antd";
 import {
   CheckCircleTwoTone,
@@ -43,6 +44,7 @@ const Role = () => {
   const [searchValue, setSearchValue] = useState("");
   const [userName, setUserName] = useState("");
   const [projectNum, setProjectNum] = useState("");
+  const [date, setDate] = useState("");
 
   const [supplier, setSupplier] = useState();
   const [logs, setLogs] = useState();
@@ -82,7 +84,8 @@ const Role = () => {
           projectState,
           userName,
           projectNum,
-          moneyType
+          moneyType,
+          date
         );
         setData(res);
         setLoading(false);
@@ -97,6 +100,7 @@ const Role = () => {
     userName,
     projectNum,
     moneyType,
+    date,
   ]);
 
   const totalFee = useMemo(() => {
@@ -361,7 +365,10 @@ const Role = () => {
     setMoneyType(filters.moneyType?.[0]);
   };
 
-  console.log(data?.entity.data);
+  const handleDateChange = (date, dateString) => {
+    console.log(dateString);
+    setDate(dateString);
+  };
 
   return (
     <div className="p-2">
@@ -384,6 +391,12 @@ const Role = () => {
             placeholder="按申请人搜索"
             value={userName}
             onChange={(e) => setUserName(e.target.value)}
+          />
+          <DatePicker
+            style={{ minWidth: "180px" }}
+            picker="month"
+            placeholder="按应付日期搜索"
+            onChange={handleDateChange}
           />
         </div>
         <Statistic

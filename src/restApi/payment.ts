@@ -7,7 +7,8 @@ export const getPaymentList = async (
   supplierId?: string,
   state?: string,
   userName?: string,
-  projectNum?: string
+  projectNum?: string,
+  yfDate?: string
 ) => {
   const res = await axiosInstance.get(`/zc/payment/list`, {
     params: {
@@ -18,6 +19,7 @@ export const getPaymentList = async (
       supplierId,
       state,
       userName,
+      yfDate,
     },
   });
   return res.data;
@@ -59,7 +61,8 @@ export const getPaymentYWList = async (
   supplierId?: string,
   state?: string,
   userName?: string,
-  projectNum?: string
+  projectNum?: string,
+  yfDate?: string
 ) => {
   const res = await axiosInstance.get(`/zc/payment/yw/list`, {
     params: {
@@ -70,6 +73,7 @@ export const getPaymentYWList = async (
       state,
       userName,
       projectNum,
+      yfDate,
     },
   });
   return res.data;
@@ -83,7 +87,8 @@ export const getPaymentCWList = async (
   state?: string,
   userName?: string,
   projectNum?: string,
-  moneyType?: string
+  moneyType?: string,
+  yfDate?: string
 ) => {
   const res = await axiosInstance.get(`/zc/payment/cw/list`, {
     params: {
@@ -95,6 +100,7 @@ export const getPaymentCWList = async (
       userName,
       projectNum,
       moneyType,
+      yfDate,
     },
   });
   return res.data;
@@ -107,7 +113,8 @@ export const getPaymentLDList = async (
   supplierId?: string,
   state?: string,
   userName?: string,
-  projectNum?: string
+  projectNum?: string,
+  yfDate?: string
 ) => {
   const res = await axiosInstance.get(`/zc/payment/ld/list`, {
     params: {
@@ -118,6 +125,7 @@ export const getPaymentLDList = async (
       state,
       userName,
       projectNum,
+      yfDate,
     },
   });
   return res.data;

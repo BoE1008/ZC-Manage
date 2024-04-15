@@ -57,6 +57,7 @@ const Payment = () => {
   const [searchValue, setSearchValue] = useState("");
   const [userName, setUserName] = useState("");
   const [projectNum, setProjectNum] = useState("");
+  const [date, setDate] = useState("");
 
   const [project, setProject] = useState();
   const [supplier, setSupplier] = useState();
@@ -105,7 +106,8 @@ const Payment = () => {
           supplierId,
           projectState,
           userName,
-          projectNum
+          projectNum,
+          date
         );
         setData(res);
         setLoading(false);
@@ -119,6 +121,7 @@ const Payment = () => {
     projectState,
     userName,
     projectNum,
+    date,
   ]);
 
   const handleAdd = async () => {
@@ -601,6 +604,11 @@ const Payment = () => {
     setSupplierId(filters.supplierName?.[0]);
   };
 
+  const handleDateChange = (date, dateString) => {
+    console.log(dateString);
+    setDate(dateString);
+  };
+
   return (
     <div className="p-2">
       <div className="flex flex-row gap-3 items-center mb-4">
@@ -629,6 +637,12 @@ const Payment = () => {
             placeholder="按申请人搜索"
             value={userName}
             onChange={(e) => setUserName(e.target.value)}
+          />
+          <DatePicker
+            style={{ minWidth: "180px" }}
+            picker="month"
+            placeholder="按应付日期搜索"
+            onChange={handleDateChange}
           />
         </div>
       </div>

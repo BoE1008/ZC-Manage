@@ -10,6 +10,7 @@ import {
   Popconfirm,
   List,
   Avatar,
+  DatePicker,
 } from "antd";
 import {
   CheckCircleTwoTone,
@@ -40,6 +41,7 @@ const Role = () => {
   const [searchValue, setSearchValue] = useState("");
   const [userName, setUserName] = useState("");
   const [projectNum, setProjectNum] = useState("");
+  const [date, setDate] = useState("");
 
   const [supplier, setSupplier] = useState();
   const [logs, setLogs] = useState();
@@ -74,7 +76,8 @@ const Role = () => {
           supplierId,
           projectState,
           userName,
-          projectNum
+          projectNum,
+          date
         );
         setData(res);
         setLoading(false);
@@ -88,6 +91,7 @@ const Role = () => {
     projectState,
     userName,
     projectNum,
+    date,
   ]);
 
   const handleDetail = async (id) => {
@@ -333,6 +337,11 @@ const Role = () => {
     setSupplierId(filters.supplierName?.[0]);
   };
 
+  const handleDateChange = (date, dateString) => {
+    console.log(dateString);
+    setDate(dateString);
+  };
+
   return (
     <div className="p-2">
       <div className="flex flex-row gap-y-3 justify-between mb-4">
@@ -351,6 +360,12 @@ const Role = () => {
             placeholder="按申请人搜索"
             value={userName}
             onChange={(e) => setUserName(e.target.value)}
+          />
+          <DatePicker
+            style={{ minWidth: "180px" }}
+            picker="month"
+            placeholder="按应付日期搜索"
+            onChange={handleDateChange}
           />
         </div>
       </div>
