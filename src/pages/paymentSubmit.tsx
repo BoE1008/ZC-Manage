@@ -190,7 +190,7 @@ const Payment = () => {
                 values.moneyType.value ||
                 (JSON.stringify(values.moneyType) === "{}"
                   ? ""
-                  : values.bankCard) ||
+                  : values.moneyType) ||
                 "",
               projectNum: values.projectNum.label || values.projectNum || "",
               projectId:
@@ -251,7 +251,16 @@ const Payment = () => {
       setOldFiles([]);
       setFiles([]);
       setModalOpen(false);
-      const data = await getPaymentList(page, pageSize);
+      const data = await getPaymentList(
+        page,
+        pageSize,
+        searchValue,
+        supplierId,
+        projectState,
+        userName,
+        projectNum,
+        date
+      );
       setLoading(false);
       setData(data);
       message.success({
@@ -278,7 +287,16 @@ const Payment = () => {
 
   const handleDeleteOne = async (id: string) => {
     await deleteOne(id);
-    const data = await getPaymentList(page, pageSize);
+    const data = await getPaymentList(
+      page,
+      pageSize,
+      searchValue,
+      supplierId,
+      projectState,
+      userName,
+      projectNum,
+      date
+    );
     setData(data);
   };
 
@@ -286,7 +304,16 @@ const Payment = () => {
     await submitToYW(detail.id);
     message.success({ content: "提交成功", type: "success" });
     setDetail(undefined);
-    const data = await getPaymentList(page, pageSize);
+    const data = await getPaymentList(
+      page,
+      pageSize,
+      searchValue,
+      supplierId,
+      projectState,
+      userName,
+      projectNum,
+      date
+    );
     setData(data);
   };
 

@@ -77,6 +77,7 @@ const Project = () => {
   const [projectBrand, setProjectBrand] = useState();
   const [projectState, setProjectState] = useState();
   const [customerId, setCustomerId] = useState();
+  const [date, setDate] = useState("");
 
   const [staticModal, setStaticModal] = useState(false);
 
@@ -103,7 +104,8 @@ const Project = () => {
         projectType,
         projectBrand,
         projectState,
-        customerId
+        customerId,
+        date
       );
       const customer = await getCustomersList(1, 1000);
       const res = await getDictById();
@@ -126,6 +128,7 @@ const Project = () => {
     projectBrand,
     projectState,
     customerId,
+    date,
   ]);
 
   const handleOk = async () => {
@@ -464,6 +467,10 @@ const Project = () => {
     setCustomerId(filters.customName?.[0]);
   };
 
+  const handleDateChange = (date, dateString) => {
+    setDate(dateString);
+  };
+
   return (
     <div className="w-full p-2" style={{ color: "#000" }}>
       <div className="flex flex-row gap-y-3 justify-between my-4 pr-5">
@@ -494,6 +501,12 @@ const Project = () => {
               placeholder="按项目编号搜索"
               value={searchNumValue}
               onChange={(e) => setSearchNumValue(e.target.value)}
+            />
+            <DatePicker
+              style={{ minWidth: "180px" }}
+              picker="month"
+              placeholder="按发运日期搜索"
+              onChange={handleDateChange}
             />
           </div>
         </div>

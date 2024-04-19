@@ -117,7 +117,16 @@ const Role = () => {
     await submitToLD(detail.id);
     message.success({ content: "已提交至领导审核", type: "success" });
     setDetail(undefined);
-    const res = await getPaymentYWList(page, pageSize);
+    const res = await getPaymentYWList(
+      page,
+      pageSize,
+      searchValue,
+      supplierId,
+      projectState,
+      userName,
+      projectNum,
+      date
+    );
     setData(res);
   };
 
@@ -125,7 +134,16 @@ const Role = () => {
     await submitYWToCW(detail.id);
     message.success({ content: "已提交至财务审核", type: "success" });
     setDetail(undefined);
-    const res = await getPaymentYWList(page, pageSize);
+    const res = await getPaymentYWList(
+      page,
+      pageSize,
+      searchValue,
+      supplierId,
+      projectState,
+      userName,
+      projectNum,
+      date
+    );
     setData(res);
   };
 
@@ -133,7 +151,16 @@ const Role = () => {
     await rejectOne(id, remark, 1);
     setRejectId(undefined);
     message.success({ content: "申请已退回", type: "success" });
-    const res = await getPaymentYWList(page, pageSize);
+    const res = await getPaymentYWList(
+      page,
+      pageSize,
+      searchValue,
+      supplierId,
+      projectState,
+      userName,
+      projectNum,
+      date
+    );
     setData(res);
   };
 

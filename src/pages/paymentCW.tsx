@@ -123,7 +123,17 @@ const Role = () => {
 
   const handleApproveOne = async () => {
     await approveOne(detail.id);
-    const res = await getPaymentCWList(page, pageSize);
+    const res = await getPaymentCWList(
+      page,
+      pageSize,
+      searchValue,
+      supplierId,
+      projectState,
+      userName,
+      projectNum,
+      moneyType,
+      date
+    );
     setData(res);
     message.success({ content: "审批通过", type: "success" });
     setDetail(undefined);
@@ -132,7 +142,17 @@ const Role = () => {
   const handleRejectOne = async (id: string, remark) => {
     await rejectOne(id, remark, 3);
     setRejectId(undefined);
-    const res = await getPaymentCWList(page, pageSize);
+    const res = await getPaymentCWList(
+      page,
+      pageSize,
+      searchValue,
+      supplierId,
+      projectState,
+      userName,
+      projectNum,
+      moneyType,
+      date
+    );
     setData(res);
     message.success({ content: "申请已退回", type: "success" });
   };

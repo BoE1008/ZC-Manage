@@ -27,6 +27,7 @@ import {
   Typography,
   Upload,
   InputNumber,
+  DatePicker,
 } from "antd";
 import { Operation } from "@/types";
 import { getProjectsSubmitList } from "@/restApi/project";
@@ -256,7 +257,15 @@ const InvoicingSubmit = () => {
       setOldFiles([]);
       setFiles([]);
       setModalOpen(false);
-      const data = await getinvoicingList(page, pageSize);
+      const data = await getinvoicingList(
+        page,
+        pageSize,
+        searchValue,
+        customerId,
+        projectState,
+        userName,
+        projectNum
+      );
       setLoading(false);
       setData(data);
       message.success({
@@ -280,7 +289,15 @@ const InvoicingSubmit = () => {
     await submitToYw(detail.id);
     message.success({ content: "提交成功", type: "success" });
     setDetail(undefined);
-    const data = await getinvoicingList(page, pageSize);
+    const data = await getinvoicingList(
+      page,
+      pageSize,
+      searchValue,
+      customerId,
+      projectState,
+      userName,
+      projectNum
+    );
     setData(data);
   };
 
@@ -291,7 +308,15 @@ const InvoicingSubmit = () => {
 
   const handleDeleteOne = async (id: string) => {
     await deleteOne(id);
-    const data = await getinvoicingList(page, pageSize);
+    const data = await getinvoicingList(
+      page,
+      pageSize,
+      searchValue,
+      customerId,
+      projectState,
+      userName,
+      projectNum
+    );
     setData(data);
   };
 

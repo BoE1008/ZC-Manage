@@ -106,7 +106,16 @@ const Role = () => {
 
   const handleSubmitToCW = async () => {
     await submitLDToCW(detail.id);
-    const res = await getPaymentLDList(page, pageSize);
+    const res = await getPaymentLDList(
+      page,
+      pageSize,
+      searchValue,
+      supplierId,
+      projectState,
+      userName,
+      projectNum,
+      date
+    );
     setData(res);
     message.success({ content: "已提交至财务审核", type: "success" });
     setDetail(undefined);
@@ -115,7 +124,16 @@ const Role = () => {
   const handleRejectOne = async (id: string, remark) => {
     await rejectOne(id, remark, 2);
     setRejectId(undefined);
-    const res = await getPaymentLDList(page, pageSize);
+    const res = await getPaymentLDList(
+      page,
+      pageSize,
+      searchValue,
+      supplierId,
+      projectState,
+      userName,
+      projectNum,
+      date
+    );
     setData(res);
     message.success({ content: "申请已退回", type: "success" });
   };

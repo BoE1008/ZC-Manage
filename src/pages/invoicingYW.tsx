@@ -17,6 +17,7 @@ import {
   Avatar,
   Tooltip,
   Popconfirm,
+  DatePicker,
 } from "antd";
 import {
   CheckCircleTwoTone,
@@ -99,7 +100,15 @@ const InvoicingSubmit = () => {
     await rejectOne(invoicingId, remark, 1);
     setRejectId(undefined);
     message.success({ content: "申请已退回" });
-    const data = await getinvoicingYWList(page, pageSize);
+    const data = await getinvoicingYWList(
+      page,
+      pageSize,
+      searchValue,
+      customerId,
+      projectState,
+      userName,
+      projectNum
+    );
     setLoading(false);
     setData(data);
   };
@@ -118,7 +127,15 @@ const InvoicingSubmit = () => {
     await submitToCw(detail.id);
     message.success({ content: "已提交至财务审核" });
     setDetail(undefined);
-    const res = await getinvoicingYWList(page, pageSize);
+    const res = await getinvoicingYWList(
+      page,
+      pageSize,
+      searchValue,
+      customerId,
+      projectState,
+      userName,
+      projectNum
+    );
     setData(res);
   };
 

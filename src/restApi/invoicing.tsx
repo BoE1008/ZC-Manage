@@ -7,7 +7,8 @@ export const getinvoicingList = async (
   customId?: string,
   state?: string,
   userName?: string,
-  projectNum?: string
+  projectNum?: string,
+  date?: string
 ) => {
   const res = await axiosInstance.get(`/zc/invoicing/list`, {
     params: {
@@ -18,6 +19,7 @@ export const getinvoicingList = async (
       customId,
       state,
       userName,
+      // createTime: date,
     },
   });
   return res.data;
@@ -59,7 +61,8 @@ export const getinvoicingYWList = async (
   customId?: string,
   state?: string,
   userName?: string,
-  projectNum?: string
+  projectNum?: string,
+  date?: string
 ) => {
   const res = await axiosInstance.get(`/zc/invoicing/yw/list`, {
     params: {
@@ -70,6 +73,7 @@ export const getinvoicingYWList = async (
       state,
       userName,
       projectNum,
+      // createTime: date,
     },
   });
   return res.data;
@@ -82,7 +86,8 @@ export const getinvoicingCWList = async (
   customId?: string,
   state?: string,
   userName?: string,
-  projectNum?: string
+  projectNum?: string,
+  date?: string
 ) => {
   const res = await axiosInstance.get(`/zc/invoicing/cw/list`, {
     params: {
@@ -93,6 +98,7 @@ export const getinvoicingCWList = async (
       state,
       userName,
       projectNum,
+      // createTime: date,
     },
   });
   return res.data;
