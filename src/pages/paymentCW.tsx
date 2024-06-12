@@ -253,6 +253,14 @@ const Role = () => {
       render: (record) => formatNumber(record?.fee),
     },
     {
+      label: "班列号/船名",
+      value: "班列号/船名",
+      title: "班列号/船名",
+      dataIndex: "trainNumName",
+      align: "center",
+      key: "trainNumName",
+    },
+    {
       title: "审核状态",
       dataIndex: "state",
       align: "center",

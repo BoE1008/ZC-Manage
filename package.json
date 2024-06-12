@@ -12,6 +12,9 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@tsparticles/engine": "^3.4.0",
+    "@tsparticles/react": "^3.0.0",
+    "@tsparticles/slim": "^3.4.0",
     "ahooks": "^3.7.8",
     "antd": "^5.10.1",
     "axios": "^1.5.1",
@@ -28,11 +31,11 @@
   },
   "devDependencies": {
     "@types/lodash": "^4.14.202",
-    "@types/qs": "^6.9.10",
-    "@types/sm-crypto": "^0.3.4",
     "@types/node": "^20",
+    "@types/qs": "^6.9.10",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/sm-crypto": "^0.3.4",
     "autoprefixer": "^10",
     "echarts": "^5.4.3",
     "echarts-for-react": "^3.0.2",
