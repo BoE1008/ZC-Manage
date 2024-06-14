@@ -161,11 +161,13 @@ const Payment = () => {
     setModalOpen(true);
   };
 
+  console.log(selectProject, 'selectPro')
+
   const handleOk = async () => {
     form.validateFields().then(async () => {
       const values = form.getFieldsValue();
 
-      console.log(values, "values");
+      // console.log(values, "values");
 
       const params =
         operation === Operation.Add
@@ -194,7 +196,7 @@ const Payment = () => {
                 "",
               projectNum: values.projectNum.label || values.projectNum || "",
               projectId:
-                project?.find((c) => c.name === selectProject?.name)?.id || "",
+                project?.find((c) => c.id === selectProject?.id)?.id || "",
               projectName: selectProject?.name,
               supplierName:
                 values.supplierName?.label || values.supplierName || "",
@@ -219,6 +221,8 @@ const Payment = () => {
               // files,
             };
 
+          console.log(params)
+
       if (operation === Operation.Add) {
         const formData = new FormData();
         for (const name in params) {
@@ -234,12 +238,12 @@ const Payment = () => {
         const formData = new FormData();
         formData.append("paymentId", editId);
 
-        console.log(files, "files");
-        console.log(oldFiles, "oldFiles");
+        // console.log(files, "files");
+        // console.log(oldFiles, "oldFiles");
         const fileList = files.filter(
           (itemA) => !oldFiles.some((itemB) => itemA.name === itemB.name)
         );
-        console.log(fileList, "fileList");
+        // console.log(fileList, "fileList");
 
         if (fileList.length > 0) {
           fileList.forEach((file) => {

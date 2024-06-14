@@ -202,7 +202,7 @@ const InvoicingSubmit = () => {
                 "",
               projectNum: values.projectNum.label || values.projectNum || "",
               projectId:
-                project?.find((c) => c.name === selectProject?.name)?.id || "",
+                project?.find((c) => c.id === selectProject?.id)?.id || "",
               projectName: selectProject?.name,
               customId:
                 values.customName?.value ||
