@@ -6,7 +6,9 @@ import locale from "antd/locale/zh_CN";
 import Head from "next/head";
 import "dayjs/locale/zh-cn";
 
-export default function App({ Component, pageProps }: AppProps) {
+export default function App({ Component, pageProps, router }: AppProps) {
+  const { asPath } = router;
+
   return (
     <>
       <Head>

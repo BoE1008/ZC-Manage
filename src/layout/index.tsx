@@ -15,7 +15,6 @@ const AppLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
 
   const [menu, setMenu] = useState();
   const [userName, setUserName] = useState("");
-  // const [badges, setBadges] = useState();
 
   const [openKeys, setOpenKeys] = useState([]);
   const [collapsed, setCollapsed] = useState(false);
@@ -44,7 +43,7 @@ const AppLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
     router.push(`/${props.key}`);
   };
 
-  return asPath !== "/login" ? (
+  return asPath !== "/login" && asPath !== "/" ? (
     <Layout className="h-full" style={{ minHeight: "100vh" }}>
       <Watermark
         content={`甄察供应链（${userName}）`}
@@ -68,7 +67,13 @@ const AppLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
           className="w-full h-[50px]"
         >
           <Link href="/" className="flex flex-row items-center">
-            <Image src={logo} alt="logo" width={200} height={60} />
+            <Image
+              src={logo}
+              alt="logo"
+              width={200}
+              height={60}
+              priority={false}
+            />
             <h2
               style={{
                 color: "#198348",

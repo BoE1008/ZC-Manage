@@ -207,7 +207,7 @@ const Login = () => {
         />
 
         <div className="p-20 w-full h-screen flex flex-col items-center justify-center gap-y-20">
-          <Image src={logo} alt="logo" width={400} height={60} />
+          <Image src={logo} alt="logo" width={400} height={60} priority />
           <Form form={form} className="w-1/4 min-w-40 text-center">
             <Form.Item name="username">
               <Input
