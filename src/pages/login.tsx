@@ -11,12 +11,14 @@ import logo from "@/assets/images/loginLogo.png";
 import Image from "next/image";
 import * as SM from "sm-crypto";
 import { SM_PUBLIC_KEY } from "@/utils/const";
+import styles from "./styles.module.scss";
 
 import Particles, { initParticlesEngine } from "@tsparticles/react";
 import type { Container, Engine } from "@tsparticles/engine";
 // import { loadAll } from "@/tsparticles/all"; // if you are going to use `loadAll`, install the "@tsparticles/all" package too.
 // import { loadFull } from "tsparticles"; // if you are going to use `loadFull`, install the "tsparticles" package too.
 import { loadSlim } from "@tsparticles/slim"; // if you are going to use `loadSlim`, install the "@tsparticles/slim" package too.
+import clsx from "clsx";
 // import { loadBasic } from "@tsparticles/basic"; // if
 
 const CIPHER_MODE = 0;
@@ -235,7 +237,10 @@ const Login = () => {
             <Form.Item>
               <Button
                 size="large"
-                className="!bg-[#198348] !text-white w-1/3"
+                className={clsx(
+                  "!bg-[#198348] !text-white w-1/3",
+                  styles.loginbutton
+                )}
                 onClick={userLogin}
               >
                 {"登录"}

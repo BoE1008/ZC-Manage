@@ -5,15 +5,15 @@ import { ConfigProvider } from "antd";
 import locale from "antd/locale/zh_CN";
 import Head from "next/head";
 import "dayjs/locale/zh-cn";
+import NextNProgress from "nextjs-progressbar";
 
 export default function App({ Component, pageProps, router }: AppProps) {
-  const { asPath } = router;
-
   return (
     <>
       <Head>
         <link rel="ico" type="image" href="/favicon.ico" />
       </Head>
+      <NextNProgress color="#198348" height={4} />
       <ConfigProvider
         locale={locale}
         theme={{
