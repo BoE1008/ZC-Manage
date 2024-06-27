@@ -39,6 +39,7 @@ import { getCustomersList } from "@/restApi/customer";
 import YSYFModal from "@/components/YSYFModal";
 import { formatNumber } from "@/utils";
 import clsx from "clsx";
+import ResizeTable from "@/components/ResizeTable";
 
 const initialValues = {
   name: "",
@@ -635,7 +636,7 @@ const Project = () => {
       </div>
 
       {
-        <Table
+        <ResizeTable
           virtual
           bordered
           loading={loading}

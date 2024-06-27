@@ -43,6 +43,7 @@ import YSYFModal from "@/components/YSYFModal";
 import RejectModal from "@/components/RejectModal";
 import { formatNumber } from "@/utils";
 import ProjectYWStaticModal from "@/components/ProjectYWStaticModal";
+import ResizeTable from "@/components/ResizeTable";
 
 const initialValues = {
   name: "",
@@ -666,7 +667,7 @@ const Project = () => {
         </Space>
       </div>
 
-      <Table
+      <ResizeTable
         bordered
         loading={loading}
         dataSource={data?.entity?.data}

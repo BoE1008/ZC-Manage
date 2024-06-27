@@ -35,6 +35,7 @@ import YSYFModal from "@/components/YSYFModal";
 import RejectModal from "@/components/RejectModal";
 import { formatNumber } from "@/utils";
 import ProjectCWStaticModal from "@/components/ProjectCWStaticModal";
+import ResizeTable from "@/components/ResizeTable";
 
 const initialValues = {
   name: "",
@@ -459,7 +460,6 @@ const Project = () => {
       setProjectDateSort("");
     }
 
-    console.log(filters, "filters");
     setProductId(filters.productName?.[0]);
     setProjectType(filters.typeName?.[0]);
     setProjectBrand(filters.brandName?.[0]);
@@ -545,7 +545,7 @@ const Project = () => {
         </Space>
       </div>
 
-      <Table
+      <ResizeTable
         bordered
         loading={loading}
         dataSource={data?.entity?.data}

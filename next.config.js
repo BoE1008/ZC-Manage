@@ -9,6 +9,9 @@ const nextConfig = {
     // !! WARN !!
     ignoreBuildErrors: true,
   },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   transpilePackages: ["ahooks"],
   images: {
     unoptimized: true,

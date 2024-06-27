@@ -6,6 +6,7 @@ import locale from "antd/locale/zh_CN";
 import Head from "next/head";
 import "dayjs/locale/zh-cn";
 import NextNProgress from "nextjs-progressbar";
+import Loading from "@/components/Loading";
 
 export default function App({ Component, pageProps, router }: AppProps) {
   return (
@@ -13,6 +14,7 @@ export default function App({ Component, pageProps, router }: AppProps) {
       <Head>
         <link rel="ico" type="image" href="/favicon.ico" />
       </Head>
+      <Loading />
       <NextNProgress color="#198348" height={4} />
       <ConfigProvider
         locale={locale}
