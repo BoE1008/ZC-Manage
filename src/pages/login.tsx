@@ -208,45 +208,60 @@ const Login = () => {
           }}
         />
 
-        <div className="p-20 w-full h-screen flex flex-col items-center justify-center gap-y-20">
-          <Image src={logo} alt="logo" width={400} height={60} priority />
-          <Form form={form} className="w-1/4 min-w-40 text-center">
-            <Form.Item name="username">
-              <Input
-                size="large"
-                placeholder="请输入用户名"
-                prefix={<UserOutlined />}
+        <div className="p-20 w-full h-screen flex items-center justify-center">
+          <div
+            className={clsx(
+              "flex flex-col items-center justify-center gap-y-20 p-10 rounded-[10px]  backdrop-blur-[4px] shadow-lg shadow-light-500 border-slate-100 relative bg-white-500/10",
+              styles.loginContainer
+            )}
+          >
+            <section className="w-[300px] height-[80px] relative">
+              <Image
+                src={logo}
+                alt="logo"
+                className="object-contain"
+                priority
               />
-            </Form.Item>
-            <Form.Item name="password">
-              <Input.Password size="large" placeholder="请输入密码" />
-            </Form.Item>
-            <Form.Item name="validateCode">
-              <Space style={{ display: "flex", flexDirection: "row" }}>
-                <Input size="middle" placeholder="验证码" />
-                <Image
-                  src={imgSrc}
-                  width={100}
-                  height={40}
-                  onClick={() => setClickTimes((pre) => pre + 1)}
-                  style={{ cursor: "pointer" }}
-                  alt="code"
+            </section>
+
+            <Form form={form} className="min-w-40 text-center ">
+              <Form.Item name="username">
+                <Input
+                  size="large"
+                  placeholder="请输入用户名"
+                  prefix={<UserOutlined />}
                 />
-              </Space>
-            </Form.Item>
-            <Form.Item>
-              <Button
-                size="large"
-                className={clsx(
-                  "!bg-[#198348] !text-white w-1/3",
-                  styles.loginbutton
-                )}
-                onClick={userLogin}
-              >
-                {"登录"}
-              </Button>
-            </Form.Item>
-          </Form>
+              </Form.Item>
+              <Form.Item name="password">
+                <Input.Password size="large" placeholder="请输入密码" />
+              </Form.Item>
+              <Form.Item name="validateCode">
+                <Space style={{ display: "flex", flexDirection: "row" }}>
+                  <Input size="middle" placeholder="验证码" />
+                  <Image
+                    src={imgSrc}
+                    width={100}
+                    height={40}
+                    onClick={() => setClickTimes((pre) => pre + 1)}
+                    style={{ cursor: "pointer" }}
+                    alt="code"
+                  />
+                </Space>
+              </Form.Item>
+              <Form.Item style={{ marginTop: "40px" }}>
+                <Button
+                  size="large"
+                  className={clsx(
+                    "!bg-[#198348] !text-white w-1/3",
+                    styles.loginbutton
+                  )}
+                  onClick={userLogin}
+                >
+                  {"登录"}
+                </Button>
+              </Form.Item>
+            </Form>
+          </div>
 
           <Modal
             centered
