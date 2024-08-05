@@ -27,7 +27,13 @@ export default function App({ Component, pageProps, router }: AppProps) {
           },
           components: {
             Menu: {
+              itemHoverBg: "#106b39",
               itemSelectedBg: "#fff",
+              itemColor: "#fff",
+              itemHoverColor: "#fff",
+              popupBg: "#198348",
+              subMenuItemBg: "#198348",
+              itemSelectedColor: "#198348",
             },
             Table: {
               colorText: "#000",
@@ -37,6 +43,8 @@ export default function App({ Component, pageProps, router }: AppProps) {
               colorBgBase: "#198348",
               colorBgContainer: "#198348",
             },
+            Switch: {},
+            Layout: { triggerBg: "#198348", siderBg: "#198348" },
           },
         }}
       >

@@ -1,6 +1,11 @@
 .loginbutton {
-  animation: ripple 1s linear infinite;
+  animation: ripple 2s linear infinite;
   border-radius: 50px;
+
+  &:hover {
+    animation: none;
+    transform: scale(1.08);
+  }
 }
 
 @keyframes ripple {

@@ -211,7 +211,7 @@ const Login = () => {
         <div className="p-20 w-full h-screen flex items-center justify-center">
           <div
             className={clsx(
-              "flex flex-col items-center justify-center gap-y-20 p-10 rounded-[10px]  backdrop-blur-[4px] shadow-lg shadow-light-500 border-slate-100 relative bg-white-500/10",
+              "flex flex-col items-center justify-center gap-y-20 px-10 py-[60px] rounded-[10px]  backdrop-blur-[4px] shadow-lg shadow-light-500 border-slate-100 relative bg-white-500/10",
               styles.loginContainer
             )}
           >
