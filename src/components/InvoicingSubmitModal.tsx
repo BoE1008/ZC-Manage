@@ -59,7 +59,7 @@ const InvoicingDetailModal = ({ onClose, data, onConfirm }) => {
     },
     showUploadList: {
       showDownloadIcon: true,
-      showRemoveIcon: false,
+      showRemoveIcon: true,
       showPreviewIcon: true,
     },
     onRemove: async (file) => {
@@ -72,6 +72,10 @@ const InvoicingDetailModal = ({ onClose, data, onConfirm }) => {
     beforeUpload: (file) => {
       setFiles([...files, file]);
       return false;
+    },
+    onChange: (info) => {
+      console.log("onchange", info);
+      setFiles([...info.fileList]);
     },
     onDownload: async (file) => {
       window.open(

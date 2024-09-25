@@ -1,6 +1,6 @@
 import { memo, useEffect, useState } from "react";
 import { Modal, Upload } from "antd";
-import { getFilesById } from "@/restApi/payment";
+import { getFilesById, deleteFileById } from "@/restApi/payment";
 import { formatNumber } from "@/utils";
 
 const PaymentDetailModal = ({ onClose, data }) => {
@@ -33,12 +33,23 @@ const PaymentDetailModal = ({ onClose, data }) => {
     },
     showUploadList: {
       showDownloadIcon: true,
-      showRemoveIcon: false,
+      showRemoveIcon: true,
+    },
+    onRemove: async (file) => {
+      await deleteFileById(file?.id);
+      const index = files.indexOf(file);
+      const newFiles = files.slice();
+      newFiles.splice(index, 1);
+      setFiles(newFiles);
     },
 
     beforeUpload: (file) => {
       setFiles([...files, file]);
       return false;
+    },
+    onChange: (info) => {
+      console.log("onchange", info);
+      setFiles([...info.fileList]);
     },
     onDownload: async (file) => {
       window.open(

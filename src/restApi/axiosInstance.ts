@@ -6,20 +6,18 @@ const axiosInstance = axios.create({
   paramsSerializer: (params) => qs.stringify(params, { arrayFormat: "repeat" }),
 });
 
-if (typeof window === undefined) {
-} else {
+if (typeof window !== "undefined") {
   axiosInstance.interceptors.response.use(
-    (value) => {
-      if (value.data.code !== 200) {
-        if (value.data.code === 401) {
-          window.location.href = "/login";
-          return Promise.reject();
-        }
-        notification.error({ message: value.data.message });
-        return Promise.reject(null);
+    (response) => {
+      const { code, message } = response.data;
+      if (code === 200) return response;
+
+      if (code === 401) {
+        window.location.href = "/login";
       } else {
-        return value;
+        notification.error({ message });
       }
+      return Promise.reject(new Error(message));
     },
     (err) => {
       notification.error({ message: "服务器异常" });

@@ -20,6 +20,10 @@ const nextConfig = {
     return {
       fallback: [
         {
+          source: "/api/:path*",
+          destination: "http://localhost:3000/api/:path*",
+        },
+        {
           source: "/:path*",
           destination: `http://123.60.88.8/:path*`,
         },

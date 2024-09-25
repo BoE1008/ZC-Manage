@@ -1,6 +1,6 @@
 import { memo, useEffect, useState } from "react";
 import { Modal, Upload } from "antd";
-import { getFilesById } from "@/restApi/invoicing";
+import { getFilesById, deleteFileById } from "@/restApi/invoicing";
 import { formatNumber } from "@/utils";
 
 const InvoicingDetailModal = ({ onClose, data }) => {
@@ -36,8 +36,23 @@ const InvoicingDetailModal = ({ onClose, data }) => {
     },
     showUploadList: {
       showDownloadIcon: true,
-      showRemoveIcon: false,
+      showRemoveIcon: true,
       showPreviewIcon: true,
+    },
+    onRemove: async (file) => {
+      await deleteFileById(file?.id);
+      const index = files.indexOf(file);
+      const newFiles = files.slice();
+      newFiles.splice(index, 1);
+      setFiles(newFiles);
+    },
+    beforeUpload: (file) => {
+      setFiles([...files, file]);
+      return false;
+    },
+    onChange: (info) => {
+      console.log("onchange", info);
+      setFiles([...info.fileList]);
     },
     onDownload: async (file) => {
       window.open(

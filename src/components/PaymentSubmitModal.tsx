@@ -62,7 +62,7 @@ const PaymentDetailModal = ({ onClose, data, onConfirm }) => {
     },
     showUploadList: {
       showDownloadIcon: true,
-      showRemoveIcon: false,
+      showRemoveIcon: true,
     },
     onRemove: async (file) => {
       await deleteFileById(file?.id);
@@ -74,6 +74,10 @@ const PaymentDetailModal = ({ onClose, data, onConfirm }) => {
     beforeUpload: (file) => {
       setFiles([...files, file]);
       return false;
+    },
+    onChange: (info) => {
+      console.log("onchange", info);
+      setFiles([...info.fileList]);
     },
     onDownload: async (file) => {
       window.open(
