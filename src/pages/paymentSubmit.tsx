@@ -161,7 +161,7 @@ const Payment = () => {
     setModalOpen(true);
   };
 
-  console.log(selectProject, 'selectPro')
+  console.log(selectProject, "selectPro");
 
   const handleOk = async () => {
     form.validateFields().then(async () => {
@@ -221,7 +221,7 @@ const Payment = () => {
               // files,
             };
 
-          console.log(params)
+      console.log(params);
 
       if (operation === Operation.Add) {
         const formData = new FormData();
@@ -249,6 +249,8 @@ const Payment = () => {
           fileList.forEach((file) => {
             formData.append("files", file?.originFileObj);
           });
+
+          console.log(formData, "formData");
           await updateFileById(formData);
         }
       }

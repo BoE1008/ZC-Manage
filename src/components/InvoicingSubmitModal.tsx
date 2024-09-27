@@ -39,7 +39,7 @@ const InvoicingDetailModal = ({ onClose, data, onConfirm }) => {
 
     if (fileList.length > 0) {
       fileList.forEach((file) => {
-        formData.append("files", file);
+        formData.append("files", file?.originFileObj);
       });
       await updateFileById(formData);
     }
