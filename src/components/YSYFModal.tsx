@@ -458,7 +458,7 @@ const Item = ({ projectId, onClose, modalType }) => {
                     checked={record.yfCollection === "0"}
                     onChange={(value) => handleYFCollection(record.id, value)}
                   />
-                ) : record.yfInvoice === "0" ? (
+                ) : record.yfCollection === "0" ? (
                   "√"
                 ) : (
                   "×"
