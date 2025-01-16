@@ -49,7 +49,7 @@ const Login = () => {
     });
   }, []);
 
-  const particlesLoaded = (container) => {
+  const particlesLoaded = (container: Container) => {
     console.log(container);
   };
 
@@ -71,7 +71,6 @@ const Login = () => {
         if (res) {
           sessionStorage.setItem("username", res.entity?.userName);
           sessionStorage.setItem("userInfo", JSON.stringify(res.entity));
-          sessionStorage.setItem;
           const data = await getMenu();
           sessionStorage.setItem(
             "menu",

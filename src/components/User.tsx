@@ -34,13 +34,12 @@ const User = () => {
   const [passModal, setPassModal] = useState(false);
   const [badges, setBadges] = useState();
   const [noticeModal, setNoticeModal] = useState(false);
-  const [resetModal, setResetModal] = useState(false);
 
   const noticeContainerRef = useRef();
 
   useEffect(() => {
     setUsername(sessionStorage.getItem("username")!);
-    const res = JSON.parse(sessionStorage.getItem("userInfo"));
+    const res = JSON.parse(sessionStorage.getItem("userInfo") || "");
     setSession(res);
   }, []);
 

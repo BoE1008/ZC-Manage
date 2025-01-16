@@ -1,6 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
 import {
-  Table,
   Space,
   Button,
   Input,
@@ -31,6 +30,7 @@ import PaymentSubmitModal from "@/components/PaymentSubmitModal";
 import { formatNumber } from "@/utils";
 import PaymentDetailModal from "@/components/PaymentDetailModal";
 import { ModalType } from "@/types";
+import ResizeTable from "@/components/ResizeTable";
 import YSYFModal from "@/components/YSYFModal";
 
 const Role = () => {
@@ -388,7 +388,7 @@ const Role = () => {
         </div>
       </div>
 
-      <Table
+      <ResizeTable
         bordered
         loading={loading}
         dataSource={data?.entity.data}

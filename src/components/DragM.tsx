@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import DragM from "dragm";
 
 const BuildTitle = ({ title }) => {
-  const [dom, setDom] = useState();
+  const [dom, setDom] = useState(null);
 
   useEffect(() => {
     setDom(document.getElementsByClassName("ant-modal-wrap")[0]);

@@ -26,6 +26,7 @@ import {
   deleteBank,
 } from "@/restApi/account";
 import { getDictByCode } from "@/restApi/dict";
+import ResizeTable from "@/components/ResizeTable";
 
 const initialValues = {
   name: "",
@@ -350,7 +351,7 @@ const Supplyer = () => {
         </Space>
       </div>
 
-      <Table
+      <ResizeTable
         bordered
         loading={loading}
         dataSource={data?.entity.data}

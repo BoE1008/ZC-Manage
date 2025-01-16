@@ -1,6 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
 import {
-  Table,
   Button,
   Modal,
   Form,
@@ -30,6 +29,7 @@ import { useRouter } from "next/router";
 import { getDeptList, getDeptTree } from "@/restApi/dept";
 import { getRoleList } from "@/restApi/role";
 import { formatMenu } from "@/utils/index";
+import ResizeTable from "@/components/ResizeTable";
 
 const initialValues = {
   name: "",
@@ -292,7 +292,7 @@ const User = () => {
               />
             </Space>
           </div>
-          <Table
+          <ResizeTable
             bordered
             loading={loading}
             dataSource={data?.entity.data}

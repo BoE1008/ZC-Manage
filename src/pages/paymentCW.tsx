@@ -1,6 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
 import {
-  Table,
   Space,
   Button,
   Input,
@@ -35,6 +34,7 @@ import PaymentDetailModal from "@/components/PaymentDetailModal";
 import { ModalType } from "@/types";
 import YSYFModal from "@/components/YSYFModal";
 import { getDictById } from "@/restApi/dict";
+import ResizeTable from "@/components/ResizeTable";
 
 const Role = () => {
   const [data, setData] = useState();
@@ -441,7 +441,7 @@ const Role = () => {
         />
       </div>
 
-      <Table
+      <ResizeTable
         bordered
         loading={loading}
         dataSource={data?.entity.data}

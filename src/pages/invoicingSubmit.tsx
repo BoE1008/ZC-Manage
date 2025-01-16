@@ -12,7 +12,6 @@ import {
 } from "@/restApi/invoicing";
 import { useEffect, useState, useMemo } from "react";
 import {
-  Table,
   Space,
   Button,
   Input,
@@ -47,6 +46,7 @@ import InvoicingDetailModal from "@/components/InvoicingDetailModal";
 import { formatNumber } from "@/utils";
 import { ModalType } from "@/types";
 import YSYFModal from "@/components/YSYFModal";
+import ResizeTable from "@/components/ResizeTable";
 
 const InvoicingSubmit = () => {
   const [form] = Form.useForm();
@@ -682,7 +682,7 @@ const InvoicingSubmit = () => {
           />
         </div>
       </div>
-      <Table
+      <ResizeTable
         bordered
         loading={loading}
         dataSource={data?.entity.data}

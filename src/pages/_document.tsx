@@ -5,7 +5,14 @@ import type { DocumentContext } from "next/document";
 
 const MyDocument = () => (
   <Html lang="en">
-    <Head />
+    <Head>
+      {/* <script
+        async
+        src="https://unpkg.com/react-scan/dist/auto.global.js"
+      ></script> */}
+
+      {/* rest of your scripts go under */}
+    </Head>
     <body>
       <Main />
       <NextScript />

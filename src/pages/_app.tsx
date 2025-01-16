@@ -1,3 +1,4 @@
+// import { scan } from "react-scan";
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import AppLayout from "@/layout";
@@ -7,6 +8,14 @@ import Head from "next/head";
 import "dayjs/locale/zh-cn";
 import NextNProgress from "nextjs-progressbar";
 import Loading from "@/components/Loading";
+// import { Monitoring } from "react-scan/monitoring";
+
+// if (typeof window !== "undefined") {
+//   scan({
+//     enabled: true,
+//     log: true, // logs render info to console (default: false)
+//   });
+// }
 
 export default function App({ Component, pageProps, router }: AppProps) {
   return (
@@ -52,6 +61,10 @@ export default function App({ Component, pageProps, router }: AppProps) {
           <Component {...pageProps} />
         </AppLayout>
       </ConfigProvider>
+      {/* <Monitoring
+        apiKey="demo"
+        url="https://monitoring.react-scan.com/api/v1/ingest"
+      /> */}
     </>
   );
 }
