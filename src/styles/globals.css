@@ -54,10 +54,6 @@ body {
   color: white !important;
 }
 
-/* .ant-layout .ant-layout-sider {
-  background-color: #198348 !important;
-} */
-
 .ant-upload-wrapper
   .ant-upload-list
   .ant-upload-list-item
@@ -69,16 +65,3 @@ body {
 :global(.ant-table-thead > tr > th) {
   text-align: center !important;
 }
-
-/* .ant-switch {
-  background-color: gray;
-} */
-
-/* .ant-layout-sider-trigger {
-  background-color: #198348 !important;
-} */
-
-/* .ant-menu-submenu-popup.ant-menu-submenu > ul {
-  background-color: #198348 !important;
-  color: white;
-} */

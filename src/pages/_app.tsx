@@ -22,6 +22,7 @@ export default function App({ Component, pageProps, router }: AppProps) {
     <>
       <Head>
         <link rel="ico" type="image" href="/favicon.ico" />
+        <title>上海甄察供应链业务管理系统</title>
       </Head>
       <Loading />
       <NextNProgress color="#198348" height={4} />
