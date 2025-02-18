@@ -5,9 +5,9 @@ import { getProjectsApproveList } from "@/restApi/project";
 import _ from "lodash";
 
 const StaticModal = ({ open, onCancel }) => {
-  const typeChartRef = useRef();
-  const productChartRef = useRef();
-  const brandChartRef = useRef();
+  const typeChartRef = useRef(null);
+  const productChartRef = useRef(null);
+  const brandChartRef = useRef(null);
 
   const [data, setData] = useState([]);
 

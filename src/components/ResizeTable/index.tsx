@@ -3,7 +3,11 @@ import ReactDOM from "react-dom";
 import { Table } from "antd";
 
 class ResizeTable extends React.Component {
-  constructor(props) {
+  private table: HTMLTableElement | null;
+  private column: HTMLTableCellElement | null;
+  private tableWidth: number;
+
+  constructor(props: any) {
     super(props);
 
     this.table = null;

@@ -19,7 +19,8 @@ import type { Container, Engine } from "@tsparticles/engine";
 // import { loadFull } from "tsparticles"; // if you are going to use `loadFull`, install the "tsparticles" package too.
 import { loadSlim } from "@tsparticles/slim"; // if you are going to use `loadSlim`, install the "@tsparticles/slim" package too.
 import clsx from "clsx";
-// import { loadBasic } from "@tsparticles/basic"; // if
+// import { loadBasic } from "@tsparticles/basic";
+import ShinyText from "@/components/ShinyText";
 
 const CIPHER_MODE = 0;
 
@@ -214,7 +215,7 @@ const Login = () => {
               styles.loginContainer
             )}
           >
-            <section className="w-[300px] height-[80px] relative">
+            <section className="w-[300px] h-[80px] relative">
               <Image
                 src={logo}
                 alt="logo"
@@ -256,7 +257,7 @@ const Login = () => {
                   )}
                   onClick={userLogin}
                 >
-                  {"登录"}
+                  <ShinyText text="登录" speed={1} />
                 </Button>
               </Form.Item>
             </Form>
