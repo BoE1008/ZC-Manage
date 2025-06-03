@@ -48,7 +48,7 @@ const User = () => {
       const badges = await getBadge();
       setBadges(badges?.entity);
     };
-    const timer = setInterval(func, 600000);
+    const timer = setInterval(func, 60000);
     func();
 
     return () => {
@@ -179,6 +179,51 @@ const User = () => {
                   <Link href="/paymentCW" onClick={() => setNoticeModal(false)}>
                     <Card size="small">
                       <Statistic title="付款财务审核" value={badges?.pcwNum} />
+                    </Card>
+                  </Link>
+                </Col>
+              )}
+              {!!badges?.projectThNum && (
+                <Col>
+                  <Link
+                    href="/projectSubmit"
+                    onClick={() => setNoticeModal(false)}
+                  >
+                    <Card size="small">
+                      <Statistic
+                        title="项目退回代办数"
+                        value={badges?.projectThNum}
+                      />
+                    </Card>
+                  </Link>
+                </Col>
+              )}
+              {!!badges?.ithNum && (
+                <Col>
+                  <Link
+                    href="/invoicingSubmit"
+                    onClick={() => setNoticeModal(false)}
+                  >
+                    <Card size="small">
+                      <Statistic
+                        title="开票退回代办数"
+                        value={badges?.ithNum}
+                      />
+                    </Card>
+                  </Link>
+                </Col>
+              )}
+              {!!badges?.pthNum && (
+                <Col>
+                  <Link
+                    href="/paymentSubmit"
+                    onClick={() => setNoticeModal(false)}
+                  >
+                    <Card size="small">
+                      <Statistic
+                        title="付款退回代办数"
+                        value={badges?.pthNum}
+                      />
                     </Card>
                   </Link>
                 </Col>

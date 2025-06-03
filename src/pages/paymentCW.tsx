@@ -63,6 +63,8 @@ const Role = () => {
   const [projectId, setProjectId] = useState();
   const [dict, setDict] = useState();
 
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+
   useEffect(() => {
     (async () => {
       const supplierData = await getSuppliersList(1, 10000);
@@ -103,13 +105,11 @@ const Role = () => {
     date,
   ]);
 
-  const totalFee = useMemo(() => {
-    return (
-      data?.entity.data.reduce((acc, cur) => {
-        return acc + cur.fee * 100;
-      }, 0) / 100
-    );
-  }, [data]);
+  const selectedFee = useMemo(() => {
+    return selectedRowKeys.reduce((acc, cur) => {
+      return acc + cur;
+    }, 0);
+  }, [selectedRowKeys]);
 
   const handleDetail = async (id) => {
     const res = await getPaymentDetailById(id);
@@ -434,14 +434,15 @@ const Role = () => {
             borderRadius: "8px",
             padding: "10px",
           }}
-          title="当前页总金额"
+          title="选中项总金额"
           prefix={<AccountBookTwoTone twoToneColor="#198348" />}
-          value={totalFee}
+          value={selectedFee}
           precision={2}
         />
       </div>
 
       <ResizeTable
+        rowKey="fee"
         bordered
         loading={loading}
         dataSource={data?.entity.data}
@@ -466,6 +467,13 @@ const Role = () => {
           },
         }}
         onChange={handleTableChange}
+        rowSelection={{
+          type: "checkbox",
+          selectedRowKeys: selectedRowKeys,
+          onChange: (selectedRowKeys) => {
+            setSelectedRowKeys([...selectedRowKeys]);
+          },
+        }}
       />
 
       <Modal

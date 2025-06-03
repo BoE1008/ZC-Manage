@@ -25,6 +25,7 @@ import {
   InteractionTwoTone,
   UploadOutlined,
   ProfileTwoTone,
+  StopTwoTone,
 } from "@ant-design/icons";
 import {
   getPaymentList,
@@ -37,6 +38,7 @@ import {
   getFilesById,
   updateFileById,
   deleteFileById,
+  withDrawPayment,
 } from "@/restApi/payment";
 import { getProjectsSubmitList } from "@/restApi/project";
 import { getSuppliersYFList, getSuppliersList } from "@/restApi/supplyer";
@@ -306,6 +308,22 @@ const Payment = () => {
     setData(data);
   };
 
+  const handleWithdraw = async (id: string) => {
+    await withDrawPayment(id);
+    message.success({ content: "撤回成功", type: "success" });
+    const data = await getPaymentList(
+      page,
+      pageSize,
+      searchValue,
+      supplierId,
+      projectState,
+      userName,
+      projectNum,
+      date
+    );
+    setData(data);
+  };
+
   const handleSubmitOne = async () => {
     await submitToYW(detail.id);
     message.success({ content: "提交成功", type: "success" });
@@ -556,6 +574,26 @@ const Payment = () => {
                 >
                   <EditTwoTone twoToneColor="#198348" />
                 </Button>
+              </Tooltip>
+            )}
+            {record.state === "待业务审批" && (
+              <Tooltip title="撤回">
+                <Popconfirm
+                  title="是否撤回？"
+                  getPopupContainer={(node) => node.parentElement}
+                  okButtonProps={{ style: { backgroundColor: "#198348" } }}
+                  onConfirm={() => handleWithdraw(record.id)}
+                >
+                  <Button
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      padding: "3px 5px",
+                    }}
+                  >
+                    <StopTwoTone twoToneColor="#198348" />
+                  </Button>
+                </Popconfirm>
               </Tooltip>
             )}
             <Tooltip title="查看审核日志">

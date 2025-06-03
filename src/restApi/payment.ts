@@ -224,3 +224,10 @@ export const deleteFileById = async (id) => {
 
   return res.data;
 };
+
+export const withDrawPayment = async (paymentId) => {
+  const res = await axiosInstance.post("/zc/payment/withdraw", {
+    paymentId,
+  });
+  return res.data;
+};

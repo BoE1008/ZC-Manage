@@ -191,3 +191,10 @@ export const deleteFileById = async (id) => {
 
   return res.data;
 };
+
+export const withDrawInvoicing = async (invoicingId: string) => {
+  const res = await axiosInstance.post("/zc/invoicing/withdraw", {
+    invoicingId,
+  });
+  return res.data;
+};

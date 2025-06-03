@@ -9,6 +9,7 @@ import {
   getFilesById,
   updateFileById,
   deleteFileById,
+  withDrawInvoicing,
 } from "@/restApi/invoicing";
 import { useEffect, useState, useMemo } from "react";
 import {
@@ -37,6 +38,7 @@ import {
   InteractionTwoTone,
   UploadOutlined,
   ProfileTwoTone,
+  StopTwoTone,
 } from "@ant-design/icons";
 import { getCustomersYSList, getCustomersList } from "@/restApi/customer";
 import { InvoicingTypeArr } from "@/utils/const";
@@ -304,6 +306,21 @@ const InvoicingSubmit = () => {
   const handleLogsOne = async (id: string) => {
     const res = await logsOne(id);
     setLogs(res.entity.data);
+  };
+
+  const handleWithdraw = async (id: string) => {
+    await withDrawInvoicing(id);
+    message.success({ content: "撤回成功", type: "success" });
+    const data = await getinvoicingList(
+      page,
+      pageSize,
+      searchValue,
+      customerId,
+      projectState,
+      userName,
+      projectNum
+    );
+    setData(data);
   };
 
   const handleDeleteOne = async (id: string) => {
@@ -584,6 +601,26 @@ const InvoicingSubmit = () => {
                 <CalendarTwoTone twoToneColor="#198348" />
               </Button>
             </Tooltip>
+            {record.state === "待业务审批" && (
+              <Tooltip title="撤回">
+                <Popconfirm
+                  title="是否撤回？"
+                  getPopupContainer={(node) => node.parentElement}
+                  okButtonProps={{ style: { backgroundColor: "#198348" } }}
+                  onConfirm={() => handleWithdraw(record.id)}
+                >
+                  <Button
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      padding: "3px 5px",
+                    }}
+                  >
+                    <StopTwoTone twoToneColor="#198348" />
+                  </Button>
+                </Popconfirm>
+              </Tooltip>
+            )}
             {!isFinished && (
               <Tooltip title="删除">
                 <Popconfirm

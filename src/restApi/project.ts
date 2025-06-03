@@ -278,3 +278,19 @@ export const getProjectCWStatic = async () => {
   const res = await axiosInstance.get("/zc/reports/project/bar/income");
   return res.data;
 };
+
+export const withDrawYS = async (projectId, projectYsfId) => {
+  const res = await axiosInstance.post("/zc/project/ys/withdraw", {
+    projectId,
+    projectYsfId,
+  });
+  return res.data;
+};
+
+export const withDrawYF = async (projectId, projectYsfId) => {
+  const res = await axiosInstance.post("/zc/project/yf/withdraw", {
+    projectId,
+    projectYsfId,
+  });
+  return res.data;
+};
