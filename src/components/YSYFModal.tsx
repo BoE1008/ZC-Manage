@@ -16,6 +16,8 @@ import {
   deleteYS,
   updateYFThreeStatus,
   updateYSThreeStatus,
+  withDrawYS,
+  withDrawYF,
 } from "@/restApi/project";
 import { useEffect, useState } from "react";
 import {
@@ -205,6 +207,36 @@ const Item = ({ projectId, onClose, modalType }) => {
       },
     });
   };
+
+  const handleWithdrawYS = async (id) => {
+    await withDrawYS(projectId, id);
+    const data = await getProjectYSList(projectId as string, page, pageSize);
+    setData({
+      ...data,
+      entity: {
+        ...data.entity,
+        data: data.entity.data.map((item, index) => ({
+          key: index,
+          ...item,
+        })),
+      },
+    });
+  }
+
+  const handleWithdrawYF = async (id) => {
+    await withDrawYF(projectId, id);
+    const data = await getProjectYSList(projectId as string, page, pageSize);
+    setData({
+      ...data,
+      entity: {
+        ...data.entity,
+        data: data.entity.data.map((item, index) => ({
+          key: index,
+          ...item,
+        })),
+      },
+    });
+  }
 
   const handleSubmitYF = async (record) => {
     await submitYF(projectId, record?.id);
@@ -734,6 +766,21 @@ const Item = ({ projectId, onClose, modalType }) => {
                           </Button>
                         </Tooltip>
                       )}
+                       {modalType === ModalType.Submit &&
+                      record?.state === "待业务审批" && (
+                        <Tooltip title={<span>撤回</span>}>
+                          <Button
+                            onClick={() => handleWithdrawYF(record.id)}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              padding: "3px 5px",
+                            }}
+                          >
+                            <StopTwoTone twoToneColor="#198348" />
+                          </Button>
+                        </Tooltip>
+                      )}
                     {modalType === ModalType.Approve &&
                       record.state !== "审批通过" && (
                         <>
@@ -1089,18 +1136,43 @@ const Item = ({ projectId, onClose, modalType }) => {
                             </Popconfirm>
                           </Tooltip>
                         )}
-                      {(projectState === "未完结" ||
+                         {(projectState === "未完结" ||
                         projectState === "已退回") &&
-                        record?.state !== "审批通过" &&
-                        record?.state !== "待审批" && (
-                          <Tooltip title="删除">
+                        (record?.state === "未提交" ||
+                          record?.state === "已退回") && (
+                          <Tooltip title="提交至业务审核">
                             <Popconfirm
-                              title="是否删除？"
+                              title="提交至业务审核？"
                               okButtonProps={{
                                 style: { backgroundColor: "#198348" },
                               }}
                               getPopupContainer={(node) => node.parentElement}
-                              onConfirm={() => handleDeleteYS(record.id)}
+                              onConfirm={() => handleSubmitYS(record)}
+                            >
+                              <Button
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  padding: "3px 5px",
+                                }}
+                                // onClick={() => handleSubmitYS(record)}
+                              >
+                                <InteractionTwoTone twoToneColor="#198348" />
+                              </Button>
+                            </Popconfirm>
+                          </Tooltip>
+                        )}
+                      {(projectState === "未完结" ||
+                        projectState === "已退回") &&
+                        record?.state === "待业务审批" && (
+                          <Tooltip title="撤回">
+                            <Popconfirm
+                              title="是否撤回？"
+                              okButtonProps={{
+                                style: { backgroundColor: "#198348" },
+                              }}
+                              getPopupContainer={(node) => node.parentElement}
+                              onConfirm={() => handleWithdrawYS(record.id)}
                             >
                               <Button
                                 style={{
@@ -1109,7 +1181,7 @@ const Item = ({ projectId, onClose, modalType }) => {
                                   padding: "3px 5px",
                                 }}
                               >
-                                <DeleteTwoTone twoToneColor="#198348" />
+                                <StopTwoTone twoToneColor="#198348" />
                               </Button>
                             </Popconfirm>
                           </Tooltip>

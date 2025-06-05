@@ -63,7 +63,7 @@ const Role = () => {
   const [projectId, setProjectId] = useState();
   const [dict, setDict] = useState();
 
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [selectedRows, setSelectedRows] = useState([]);
 
   useEffect(() => {
     (async () => {
@@ -106,10 +106,10 @@ const Role = () => {
   ]);
 
   const selectedFee = useMemo(() => {
-    return selectedRowKeys.reduce((acc, cur) => {
-      return acc + cur;
+    return selectedRows.reduce((acc, cur) => {
+      return acc + cur.fee;
     }, 0);
-  }, [selectedRowKeys]);
+  }, [selectedRows]);
 
   const handleDetail = async (id) => {
     const res = await getPaymentDetailById(id);
@@ -442,7 +442,7 @@ const Role = () => {
       </div>
 
       <ResizeTable
-        rowKey="fee"
+        rowKey={(record) => record.id}
         bordered
         loading={loading}
         dataSource={data?.entity.data}
@@ -469,9 +469,8 @@ const Role = () => {
         onChange={handleTableChange}
         rowSelection={{
           type: "checkbox",
-          selectedRowKeys: selectedRowKeys,
-          onChange: (selectedRowKeys) => {
-            setSelectedRowKeys([...selectedRowKeys]);
+          onChange: (selectedRowKeys,selectedRows) => {
+            setSelectedRows([...selectedRows]);
           },
         }}
       />
