@@ -1,29 +1,7 @@
-import {
-  getinvoicingYWList,
-  submitToCw,
-  rejectOne,
-  logsOne,
-  getInvoicingDetailById,
-} from "@/restApi/invoicing";
+import { getinvoicingYWList, submitToCw, rejectOne, logsOne, getInvoicingDetailById } from "@/restApi/invoicing";
 import { useEffect, useState, useMemo } from "react";
-import {
-  Space,
-  Button,
-  Input,
-  Modal,
-  message,
-  List,
-  Avatar,
-  Tooltip,
-  Popconfirm,
-  DatePicker,
-} from "antd";
-import {
-  CheckCircleTwoTone,
-  CalendarTwoTone,
-  StopTwoTone,
-  ProfileTwoTone,
-} from "@ant-design/icons";
+import { Space, Button, Input, Modal, message, List, Avatar, Tooltip, Popconfirm, DatePicker } from "antd";
+import { CheckCircleTwoTone, CalendarTwoTone, StopTwoTone, ProfileTwoTone } from "@ant-design/icons";
 import { getCustomersList } from "@/restApi/customer";
 import RejectModal from "@/components/RejectModal";
 import InvoicingSubmitModal from "@/components/InvoicingSubmitModal";
@@ -57,6 +35,8 @@ const InvoicingSubmit = () => {
 
   const [projectId, setProjectId] = useState();
 
+  const [updateTimeSort, setUpdateTimeSort] = useState();
+
   useEffect(() => {
     (async () => {
       const customer = await getCustomersList(1, 1000);
@@ -68,28 +48,12 @@ const InvoicingSubmit = () => {
     (async () => {
       setLoading(true);
       try {
-        const res = await getinvoicingYWList(
-          page,
-          pageSize,
-          searchValue,
-          customerId,
-          projectState,
-          userName,
-          projectNum
-        );
+        const res = await getinvoicingYWList(page, pageSize, searchValue, customerId, projectState, userName, projectNum, updateTimeSort);
         setData(res);
         setLoading(false);
       } catch {}
     })();
-  }, [
-    page,
-    pageSize,
-    searchValue,
-    customerId,
-    projectState,
-    userName,
-    projectNum,
-  ]);
+  }, [page, pageSize, searchValue, customerId, projectState, userName, projectNum, updateTimeSort]);
 
   const handleLogsOne = async (id: string) => {
     const res = await logsOne(id);
@@ -100,25 +64,17 @@ const InvoicingSubmit = () => {
     await rejectOne(invoicingId, remark, 1);
     setRejectId(undefined);
     message.success({ content: "申请已退回" });
-    const data = await getinvoicingYWList(
-      page,
-      pageSize,
-      searchValue,
-      customerId,
-      projectState,
-      userName,
-      projectNum
-    );
+    const data = await getinvoicingYWList(page, pageSize, searchValue, customerId, projectState, userName, projectNum);
     setLoading(false);
     setData(data);
   };
 
-  const handleDetail = async (id) => {
+  const handleDetail = async id => {
     const res = await getInvoicingDetailById(id);
     setDetail(res.entity.data);
   };
 
-  const handleCheck = async (id) => {
+  const handleCheck = async id => {
     const res = await getInvoicingDetailById(id);
     setCheck(res.entity.data);
   };
@@ -127,20 +83,12 @@ const InvoicingSubmit = () => {
     await submitToCw(detail.id);
     message.success({ content: "已提交至财务审核" });
     setDetail(undefined);
-    const res = await getinvoicingYWList(
-      page,
-      pageSize,
-      searchValue,
-      customerId,
-      projectState,
-      userName,
-      projectNum
-    );
+    const res = await getinvoicingYWList(page, pageSize, searchValue, customerId, projectState, userName, projectNum);
     setData(res);
   };
 
   const customerFilters = useMemo(() => {
-    return customer?.map((item) => ({
+    return customer?.map(item => ({
       text: item.name,
       value: item.id,
     }));
@@ -180,12 +128,9 @@ const InvoicingSubmit = () => {
       title: "项目名称",
       align: "center",
       key: "projectName",
-      render: (record) => {
+      render: record => {
         return (
-          <span
-            className="cursor-pointer text-[#198348]"
-            onClick={() => handleCheck(record.id)}
-          >
+          <span className="cursor-pointer text-[#198348]" onClick={() => handleCheck(record.id)}>
             {record.projectName}
           </span>
         );
@@ -199,7 +144,7 @@ const InvoicingSubmit = () => {
       ellipsis: {
         showTitle: false,
       },
-      render: (customName) => (
+      render: customName => (
         <Tooltip placement="topLeft" title={customName}>
           {customName}
         </Tooltip>
@@ -232,7 +177,7 @@ const InvoicingSubmit = () => {
       // dataIndex: "fee",
       align: "center",
       key: "fee",
-      render: (record) => formatNumber(record?.fee),
+      render: record => formatNumber(record?.fee),
     },
 
     {
@@ -278,6 +223,14 @@ const InvoicingSubmit = () => {
       key: "createTime",
     },
     {
+      title: "最后操作时间",
+      dataIndex: "updateTime",
+      align: "center",
+      key: "updateTime",
+      sortDirections: ["ascend", "descend"],
+      sorter: true,
+    },
+    {
       title: "审核状态",
       dataIndex: "state",
       align: "center",
@@ -285,9 +238,7 @@ const InvoicingSubmit = () => {
       filterMultiple: false,
       filters: stateFilters,
       filterSearch: true,
-      onFilter: (value: string, record) =>
-        record.state ===
-        stateFilters.find((item) => value === item.value)?.text,
+      onFilter: (value: string, record) => record.state === stateFilters.find(item => value === item.value)?.text,
     },
     {
       title: "备注",
@@ -320,7 +271,7 @@ const InvoicingSubmit = () => {
               <Tooltip title="提交至财务审核">
                 <Popconfirm
                   title="提交至财务审核？"
-                  getPopupContainer={(node) => node.parentElement}
+                  getPopupContainer={node => node.parentElement}
                   okButtonProps={{ style: { backgroundColor: "#198348" } }}
                   // onConfirm={() => handleSubmitToCW(record.id)}
                   onConfirm={() => handleDetail(record.id)}
@@ -341,7 +292,7 @@ const InvoicingSubmit = () => {
               <Tooltip title="退回申请">
                 <Popconfirm
                   title="是否退回申请？"
-                  getPopupContainer={(node) => node.parentElement}
+                  getPopupContainer={node => node.parentElement}
                   okButtonProps={{ style: { backgroundColor: "#198348" } }}
                   onConfirm={() => setRejectId(record.id)}
                 >
@@ -376,6 +327,14 @@ const InvoicingSubmit = () => {
   ];
 
   const handleTableChange = (pagination, filters, sorter) => {
+    if (sorter.order === "ascend") {
+      setUpdateTimeSort("0");
+    } else if (sorter.order === "descend") {
+      setUpdateTimeSort("1");
+    } else {
+      setUpdateTimeSort("");
+    }
+
     setProjectState(filters.state?.[0]);
     setCustomerId(filters.customName?.[0]);
   };
@@ -384,21 +343,9 @@ const InvoicingSubmit = () => {
     <div className="p-2">
       <div className="flex flex-row gap-y-3 justify-between mb-4">
         <Space>
-          <Input
-            placeholder="按项目名称搜索"
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-          />
-          <Input
-            placeholder="按项目编号搜索"
-            value={projectNum}
-            onChange={(e) => setProjectNum(e.target.value)}
-          />
-          <Input
-            placeholder="按申请人搜索"
-            value={userName}
-            onChange={(e) => setUserName(e.target.value)}
-          />
+          <Input placeholder="按项目名称搜索" value={searchValue} onChange={e => setSearchValue(e.target.value)} />
+          <Input placeholder="按项目编号搜索" value={projectNum} onChange={e => setProjectNum(e.target.value)} />
+          <Input placeholder="按申请人搜索" value={userName} onChange={e => setUserName(e.target.value)} />
         </Space>
       </div>
       <ResizeTable
@@ -411,12 +358,12 @@ const InvoicingSubmit = () => {
           // 设置总条数
           total: data?.entity.total,
           // 显示总条数
-          showTotal: (total) => `共 ${total} 条`,
+          showTotal: total => `共 ${total} 条`,
           // 是否可以改变 pageSize
           showSizeChanger: true,
 
           // 改变页码时
-          onChange: async (page) => {
+          onChange: async page => {
             setPage(page);
           },
           // pageSize 变化的回调
@@ -444,51 +391,24 @@ const InvoicingSubmit = () => {
           renderItem={(item, index) => (
             <List.Item>
               <List.Item.Meta
-                avatar={
-                  <Avatar
-                    src={`https://xsgames.co/randomusers/avatar.php?g=pixel&key=${index}`}
-                  />
-                }
+                avatar={<Avatar src={`https://xsgames.co/randomusers/avatar.php?g=pixel&key=${index}`} />}
                 title={item.state}
-                description={`${item.userName} ${item.createTime} 备注：${
-                  item.remark || ""
-                } `}
+                description={`${item.userName} ${item.createTime} 备注：${item.remark || ""} `}
               />
             </List.Item>
           )}
         />
       </Modal>
 
-      {!!check && (
-        <InvoicingDetailModal
-          data={check}
-          onClose={() => setCheck(undefined)}
-        />
-      )}
+      {!!check && <InvoicingDetailModal data={check} onClose={() => setCheck(undefined)} />}
 
-      {!!detail && (
-        <InvoicingSubmitModal
-          data={detail}
-          onConfirm={handleSubmitToCW}
-          onClose={() => setDetail(undefined)}
-        />
-      )}
+      {!!detail && <InvoicingSubmitModal data={detail} onConfirm={handleSubmitToCW} onClose={() => setDetail(undefined)} />}
 
       {!!rejectId && (
-        <RejectModal
-          open={!!rejectId}
-          onClose={() => setRejectId(undefined)}
-          onReject={(value) => handleReject(rejectId, value)}
-        />
+        <RejectModal open={!!rejectId} onClose={() => setRejectId(undefined)} onReject={value => handleReject(rejectId, value)} />
       )}
 
-      {!!projectId && (
-        <YSYFModal
-          modalType={ModalType.OTHERS}
-          projectId={projectId}
-          onClose={() => setProjectId(undefined)}
-        />
-      )}
+      {!!projectId && <YSYFModal modalType={ModalType.OTHERS} projectId={projectId} onClose={() => setProjectId(undefined)} />}
     </div>
   );
 };

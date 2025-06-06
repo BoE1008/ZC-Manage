@@ -88,6 +88,9 @@ const InvoicingSubmit = () => {
 
   const [projectId, setProjectId] = useState();
 
+  const [updateTimeSort, setUpdateTimeSort] = useState();
+
+
   useEffect(() => {
     (async () => {
       const customer = await getCustomersList(1, 1000);
@@ -318,7 +321,8 @@ const InvoicingSubmit = () => {
       customerId,
       projectState,
       userName,
-      projectNum
+      projectNum,
+      updateTimeSort
     );
     setData(data);
   };
@@ -332,7 +336,8 @@ const InvoicingSubmit = () => {
       customerId,
       projectState,
       userName,
-      projectNum
+      projectNum,
+      updateTimeSort
     );
     setData(data);
   };
@@ -517,6 +522,14 @@ const InvoicingSubmit = () => {
       key: "createTime",
     },
     {
+      title: "最后操作时间",
+      dataIndex: "updateTime",
+      align: "center",
+      key: "updateTime",
+      sortDirections: ["ascend", "descend"],
+      sorter: true,
+    },
+    {
       title: "审核状态",
       dataIndex: "state",
       align: "center",
@@ -684,6 +697,14 @@ const InvoicingSubmit = () => {
   };
 
   const handleTableChange = (pagination, filters, sorter) => {
+    if (sorter.order === "ascend") {
+      setUpdateTimeSort("0");
+    } else if (sorter.order === "descend") {
+      setUpdateTimeSort("1");
+    } else {
+      setUpdateTimeSort("");
+    }
+
     setProjectState(filters.state?.[0]);
     setCustomerId(filters.customName?.[0]);
   };

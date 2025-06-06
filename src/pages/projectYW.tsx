@@ -462,6 +462,14 @@ const Project = () => {
           stateFilters.find((item) => value === item.value)?.text,
       },
       {
+        label: "操作人",
+        value: "操作人",
+        title: "操作人",
+        dataIndex: "userName",
+        align: "center",
+        key: "userName",
+      },
+      {
         label: "备注",
         value: "备注",
         title: "备注",

@@ -88,6 +88,8 @@ const Payment = () => {
 
   const [projectId, setProjectId] = useState();
 
+  const [updateTimeSort, setUpdateTimeSort] = useState();
+
   useEffect(() => {
     (async () => {
       const projectCustom = await getSuppliersList(1, 1000);
@@ -101,30 +103,12 @@ const Payment = () => {
     (async () => {
       setLoading(true);
       try {
-        const res = await getPaymentList(
-          page,
-          pageSize,
-          searchValue,
-          supplierId,
-          projectState,
-          userName,
-          projectNum,
-          date
-        );
+        const res = await getPaymentList(page, pageSize, searchValue, supplierId, projectState, userName, projectNum, date, updateTimeSort);
         setData(res);
         setLoading(false);
       } catch {}
     })();
-  }, [
-    page,
-    pageSize,
-    searchValue,
-    supplierId,
-    projectState,
-    userName,
-    projectNum,
-    date,
-  ]);
+  }, [page, pageSize, searchValue, supplierId, projectState, userName, projectNum, date, updateTimeSort]);
 
   const handleAdd = async () => {
     setOperation(Operation.Add);
@@ -133,23 +117,19 @@ const Payment = () => {
     setModalOpen(true);
   };
 
-  const handleEditOne = async (record) => {
+  const handleEditOne = async record => {
     setOperation(Operation.Edit);
     setEditId(record.id);
     const projectCustom = await getSuppliersYFList(record.projectId);
     console.log(projectCustom, "projectCustom");
     setSupplier(projectCustom.entity.data);
-    setSelectSupplier(
-      projectCustom.entity?.data?.find((c) => record.supplierId === c.id)
-    );
-    const selectProject = project?.find(
-      (c) => c.projectNum === record.projectNum
-    );
+    setSelectSupplier(projectCustom.entity?.data?.find(c => record.supplierId === c.id));
+    const selectProject = project?.find(c => c.projectNum === record.projectNum);
     setSelectProject(selectProject);
     const res = await getDictByCode("sys_money_type");
     setDict(res.entity);
     const rawFilelist = await getFilesById(record.id);
-    const fileList = rawFilelist?.entity.data.map((item) => ({
+    const fileList = rawFilelist?.entity.data.map(item => ({
       name: item.originalFileName,
       url: item.url,
       uid: item.uid,
@@ -190,32 +170,14 @@ const Payment = () => {
             }
           : {
               ...values,
-              moneyType:
-                values.moneyType.value ||
-                (JSON.stringify(values.moneyType) === "{}"
-                  ? ""
-                  : values.moneyType) ||
-                "",
+              moneyType: values.moneyType.value || (JSON.stringify(values.moneyType) === "{}" ? "" : values.moneyType) || "",
               projectNum: values.projectNum.label || values.projectNum || "",
-              projectId:
-                project?.find((c) => c.id === selectProject?.id)?.id || "",
+              projectId: project?.find(c => c.id === selectProject?.id)?.id || "",
               projectName: selectProject?.name,
-              supplierName:
-                values.supplierName?.label || values.supplierName || "",
-              supplierId:
-                values.supplierName?.value ||
-                supplier?.find((a) => a.name === values.supplierName)?.id ||
-                "",
-              bank:
-                values.bank?.value ||
-                (JSON.stringify(values.bank) === "{}" ? "" : values.bank) ||
-                "",
-              bankCard:
-                values.bankCard?.value ||
-                (JSON.stringify(values.bankCard) === "{}"
-                  ? ""
-                  : values.bankCard) ||
-                "",
+              supplierName: values.supplierName?.label || values.supplierName || "",
+              supplierId: values.supplierName?.value || supplier?.find(a => a.name === values.supplierName)?.id || "",
+              bank: values.bank?.value || (JSON.stringify(values.bank) === "{}" ? "" : values.bank) || "",
+              bankCard: values.bankCard?.value || (JSON.stringify(values.bankCard) === "{}" ? "" : values.bankCard) || "",
               taxationNumber: selectSupplier?.taxationNumber || "",
               fee: values.fee || "",
               remark: values.remark || "",
@@ -230,7 +192,7 @@ const Payment = () => {
         for (const name in params) {
           formData.append(name, params[name]);
         }
-        files.forEach((file) => {
+        files.forEach(file => {
           formData.append("files", file?.originFileObj);
         });
         await addPayment(formData);
@@ -242,13 +204,11 @@ const Payment = () => {
 
         // console.log(files, "files");
         // console.log(oldFiles, "oldFiles");
-        const fileList = files.filter(
-          (itemA) => !oldFiles.some((itemB) => itemA.name === itemB.name)
-        );
+        const fileList = files.filter(itemA => !oldFiles.some(itemB => itemA.name === itemB.name));
         // console.log(fileList, "fileList");
 
         if (fileList.length > 0) {
-          fileList.forEach((file) => {
+          fileList.forEach(file => {
             formData.append("files", file?.originFileObj);
           });
 
@@ -259,16 +219,7 @@ const Payment = () => {
       setOldFiles([]);
       setFiles([]);
       setModalOpen(false);
-      const data = await getPaymentList(
-        page,
-        pageSize,
-        searchValue,
-        supplierId,
-        projectState,
-        userName,
-        projectNum,
-        date
-      );
+      const data = await getPaymentList(page, pageSize, searchValue, supplierId, projectState, userName, projectNum, date);
       setLoading(false);
       setData(data);
       message.success({
@@ -278,12 +229,12 @@ const Payment = () => {
     });
   };
 
-  const handleDetail = async (id) => {
+  const handleDetail = async id => {
     const res = await getPaymentDetailById(id);
     setDetail(res.entity.data);
   };
 
-  const handleCheck = async (id) => {
+  const handleCheck = async id => {
     const res = await getPaymentDetailById(id);
     setCheck(res.entity.data);
   };
@@ -295,32 +246,14 @@ const Payment = () => {
 
   const handleDeleteOne = async (id: string) => {
     await deleteOne(id);
-    const data = await getPaymentList(
-      page,
-      pageSize,
-      searchValue,
-      supplierId,
-      projectState,
-      userName,
-      projectNum,
-      date
-    );
+    const data = await getPaymentList(page, pageSize, searchValue, supplierId, projectState, userName, projectNum, date);
     setData(data);
   };
 
   const handleWithdraw = async (id: string) => {
     await withDrawPayment(id);
     message.success({ content: "撤回成功", type: "success" });
-    const data = await getPaymentList(
-      page,
-      pageSize,
-      searchValue,
-      supplierId,
-      projectState,
-      userName,
-      projectNum,
-      date
-    );
+    const data = await getPaymentList(page, pageSize, searchValue, supplierId, projectState, userName, projectNum, date);
     setData(data);
   };
 
@@ -328,52 +261,41 @@ const Payment = () => {
     await submitToYW(detail.id);
     message.success({ content: "提交成功", type: "success" });
     setDetail(undefined);
-    const data = await getPaymentList(
-      page,
-      pageSize,
-      searchValue,
-      supplierId,
-      projectState,
-      userName,
-      projectNum,
-      date
-    );
+    const data = await getPaymentList(page, pageSize, searchValue, supplierId, projectState, userName, projectNum, date);
     setData(data);
   };
 
-  const handleProjectChanged = async (param) => {
+  const handleProjectChanged = async param => {
     form.setFieldValue("projectName", {});
     form.setFieldValue("supplierName", {});
     form.setFieldValue("moneyType", {});
     form.setFieldValue("bankCard", {});
     form.setFieldValue("bank", {});
-    const data = project?.find((c) => c.projectNum === param.label);
+    const data = project?.find(c => c.projectNum === param.label);
     setSelectProject(data);
     const projectCustom = await getSuppliersYFList(param.value);
     setSupplier(projectCustom.entity.data);
   };
 
-  const handleSupplierChange = async (value) => {
+  const handleSupplierChange = async value => {
     form.setFieldValue("moneyType", {});
     form.setFieldValue("bankCard", {});
     form.setFieldValue("bank", {});
-    setSelectSupplier(supplier?.find((c) => c.id === value.value));
+    setSelectSupplier(supplier?.find(c => c.id === value.value));
   };
 
   const onSearch = () => {};
 
-  const handleMoneyTypeChnage = (value) => {
+  const handleMoneyTypeChnage = value => {
     form.setFieldValue("bankCard", {});
     form.setFieldValue("bank", {});
-    const res = selectSupplier?.accountList?.filter(
-      (c) => c.moneyType === value.value
-    );
+    const res = selectSupplier?.accountList?.filter(c => c.moneyType === value.value);
     setBankcards(res);
   };
 
-  const handleBankCardChange = (value) => {
+  const handleBankCardChange = value => {
     form.setFieldValue("bank", {});
-    const res = bankcards?.filter((c) => c.bankCard === value.value);
+    const res = bankcards?.filter(c => c.bankCard === value.value);
     setBank(res);
   };
 
@@ -388,13 +310,11 @@ const Payment = () => {
     };
   };
 
-  const customerFilterOption = (
-    input: string,
-    option?: { label: string; value: string }
-  ) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
+  const customerFilterOption = (input: string, option?: { label: string; value: string }) =>
+    (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
 
   const supplierFilters = useMemo(() => {
-    return supplier?.map((item) => ({
+    return supplier?.map(item => ({
       text: item.name,
       value: item.id,
     }));
@@ -439,12 +359,9 @@ const Payment = () => {
       // dataIndex: "projectName",
       align: "center",
       key: "projectName",
-      render: (record) => {
+      render: record => {
         return (
-          <span
-            className="cursor-pointer text-[#198348]"
-            onClick={() => handleCheck(record.id)}
-          >
+          <span className="cursor-pointer text-[#198348]" onClick={() => handleCheck(record.id)}>
             {record.projectName}
           </span>
         );
@@ -471,7 +388,7 @@ const Payment = () => {
       // dataIndex: "fee",
       align: "center",
       key: "fee",
-      render: (record) => formatNumber(record?.fee),
+      render: record => formatNumber(record?.fee),
     },
     {
       title: "审核状态",
@@ -481,9 +398,7 @@ const Payment = () => {
       filterMultiple: false,
       filters: stateFilters,
       filterSearch: true,
-      onFilter: (value: string, record) =>
-        record.state ===
-        stateFilters.find((item) => value === item.value)?.text,
+      onFilter: (value: string, record) => record.state === stateFilters.find(item => value === item.value)?.text,
     },
     {
       title: "税号",
@@ -516,6 +431,14 @@ const Payment = () => {
       key: "yfDate",
     },
     {
+      title: "最后操作时间",
+      dataIndex: "updateTime",
+      align: "center",
+      key: "updateTime",
+      sortDirections: ["ascend", "descend"],
+      sorter: true,
+    },
+    {
       title: "备注",
       dataIndex: "remark",
       align: "center",
@@ -526,8 +449,7 @@ const Payment = () => {
       align: "center",
       key: "action",
       render: (_, record) => {
-        const isFinished =
-          record.state !== "未提交" && record.state !== "已退回";
+        const isFinished = record.state !== "未提交" && record.state !== "已退回";
         return (
           <Space size="middle" className="flex flex-row !gap-x-1">
             <Tooltip title={<span>查看应收应付</span>}>
@@ -546,7 +468,7 @@ const Payment = () => {
               <Tooltip title={<span>提交业务审核</span>}>
                 <Popconfirm
                   title="是否提交审核？"
-                  getPopupContainer={(node) => node.parentElement}
+                  getPopupContainer={node => node.parentElement}
                   okButtonProps={{ style: { backgroundColor: "#198348" } }}
                   onConfirm={() => handleDetail(record.id)}
                 >
@@ -580,7 +502,7 @@ const Payment = () => {
               <Tooltip title="撤回">
                 <Popconfirm
                   title="是否撤回？"
-                  getPopupContainer={(node) => node.parentElement}
+                  getPopupContainer={node => node.parentElement}
                   okButtonProps={{ style: { backgroundColor: "#198348" } }}
                   onConfirm={() => handleWithdraw(record.id)}
                 >
@@ -612,7 +534,7 @@ const Payment = () => {
               <Tooltip title="删除">
                 <Popconfirm
                   title="是否删除？"
-                  getPopupContainer={(node) => node.parentElement}
+                  getPopupContainer={node => node.parentElement}
                   okButtonProps={{ style: { backgroundColor: "#198348" } }}
                   onConfirm={() => handleDeleteOne(record.id)}
                 >
@@ -648,29 +570,35 @@ const Payment = () => {
       showDownloadIcon: true,
       showPreviewIcon: true,
     },
-    onRemove: async (file) => {
+    onRemove: async file => {
       await deleteFileById(file?.id);
       const index = files.indexOf(file);
       const newFiles = files.slice();
       newFiles.splice(index, 1);
       setFiles(newFiles);
     },
-    beforeUpload: (file) => {
+    beforeUpload: file => {
       setFiles([...files, file]);
       return false;
     },
-    onChange: (info) => {
+    onChange: info => {
       console.log("onchange", info);
       setFiles([...info.fileList]);
     },
-    onDownload: async (file) => {
-      window.open(
-        `http://123.60.88.8/zc/common/download/resource?resource=${file?.url}`
-      );
+    onDownload: async file => {
+      window.open(`http://123.60.88.8/zc/common/download/resource?resource=${file?.url}`);
     },
   };
 
   const handleTableChange = (pagination, filters, sorter) => {
+    if (sorter.order === "ascend") {
+      setUpdateTimeSort("0");
+    } else if (sorter.order === "descend") {
+      setUpdateTimeSort("1");
+    } else {
+      setUpdateTimeSort("");
+    }
+
     setProjectState(filters.state?.[0]);
     setSupplierId(filters.supplierName?.[0]);
   };
@@ -684,37 +612,16 @@ const Payment = () => {
     <div className="p-2">
       <div className="flex flex-row gap-3 items-center mb-4">
         <Space>
-          <Button
-            onClick={handleAdd}
-            type="primary"
-            style={{ background: "#198348", width: "100px" }}
-          >
+          <Button onClick={handleAdd} type="primary" style={{ background: "#198348", width: "100px" }}>
             添加
           </Button>
         </Space>
 
         <div className="flex flex-row gap-x-4">
-          <Input
-            placeholder="按项目名称搜索"
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-          />
-          <Input
-            placeholder="按项目编号搜索"
-            value={projectNum}
-            onChange={(e) => setProjectNum(e.target.value)}
-          />
-          <Input
-            placeholder="按申请人搜索"
-            value={userName}
-            onChange={(e) => setUserName(e.target.value)}
-          />
-          <DatePicker
-            style={{ minWidth: "180px" }}
-            picker="month"
-            placeholder="按应付日期搜索"
-            onChange={handleDateChange}
-          />
+          <Input placeholder="按项目名称搜索" value={searchValue} onChange={e => setSearchValue(e.target.value)} />
+          <Input placeholder="按项目编号搜索" value={projectNum} onChange={e => setProjectNum(e.target.value)} />
+          <Input placeholder="按申请人搜索" value={userName} onChange={e => setUserName(e.target.value)} />
+          <DatePicker style={{ minWidth: "180px" }} picker="month" placeholder="按应付日期搜索" onChange={handleDateChange} />
         </div>
       </div>
       <ResizeTable
@@ -727,12 +634,12 @@ const Payment = () => {
           // 设置总条数
           total: data?.entity.total,
           // 显示总条数
-          showTotal: (total) => `共 ${total} 条`,
+          showTotal: total => `共 ${total} 条`,
           // 是否可以改变 pageSize
           showSizeChanger: true,
 
           // 改变页码时
-          onChange: async (page) => {
+          onChange: async page => {
             setPage(page);
           },
           // pageSize 变化的回调
@@ -761,19 +668,8 @@ const Payment = () => {
         style={{ minWidth: "650px" }}
         maskClosable={false}
       >
-        <Form
-          labelCol={{ span: 4 }}
-          wrapperCol={{ span: 20 }}
-          layout={"horizontal"}
-          form={form}
-          style={{ minWidth: 600, color: "#000" }}
-        >
-          <Form.Item
-            label="项目编号"
-            name="projectNum"
-            validateTrigger="onBlur"
-            rules={[{ required: true, message: "项目编号不能为空" }]}
-          >
+        <Form labelCol={{ span: 4 }} wrapperCol={{ span: 20 }} layout={"horizontal"} form={form} style={{ minWidth: 600, color: "#000" }}>
+          <Form.Item label="项目编号" name="projectNum" validateTrigger="onBlur" rules={[{ required: true, message: "项目编号不能为空" }]}>
             <Select
               showSearch
               labelInValue
@@ -782,18 +678,14 @@ const Payment = () => {
               filterOption={customerFilterOption}
               onSearch={onSearch}
               optionLabelProp="label"
-              options={project?.map((con) => ({
+              options={project?.map(con => ({
                 label: con.projectNum,
                 value: con.id,
               }))}
               onChange={handleProjectChanged}
             />
           </Form.Item>
-          <Form.Item
-            label="项目名称"
-            name="projectName"
-            rules={[{ required: true, message: "项目名称不能为空" }]}
-          >
+          <Form.Item label="项目名称" name="projectName" rules={[{ required: true, message: "项目名称不能为空" }]}>
             <Typography>
               <code
                 style={{
@@ -807,12 +699,7 @@ const Payment = () => {
               </code>
             </Typography>
           </Form.Item>
-          <Form.Item
-            label="供应商"
-            name="supplierName"
-            validateTrigger="onBlur"
-            rules={[{ required: true, message: "供应商不能为空" }]}
-          >
+          <Form.Item label="供应商" name="supplierName" validateTrigger="onBlur" rules={[{ required: true, message: "供应商不能为空" }]}>
             <Select
               showSearch
               onSearch={onSearch}
@@ -821,19 +708,14 @@ const Payment = () => {
               optionFilterProp="children"
               filterOption={customerFilterOption}
               onChange={handleSupplierChange}
-              options={supplier?.map((con) => ({
+              options={supplier?.map(con => ({
                 label: con.name,
                 value: con.id,
               }))}
             />
           </Form.Item>
 
-          <Form.Item
-            label="金额"
-            name="fee"
-            validateTrigger="onBlur"
-            rules={[{ required: true, message: "金额不能为空" }]}
-          >
+          <Form.Item label="金额" name="fee" validateTrigger="onBlur" rules={[{ required: true, message: "金额不能为空" }]}>
             <InputNumber placeholder="金额" className="w-full" />
           </Form.Item>
           <Form.Item label="税号" name="taxationNumber">
@@ -852,12 +734,7 @@ const Payment = () => {
             </Typography>
           </Form.Item>
 
-          <Form.Item
-            label="币种"
-            name="moneyType"
-            validateTrigger="onBlur"
-            rules={[{ required: true, message: "币种不能为空" }]}
-          >
+          <Form.Item label="币种" name="moneyType" validateTrigger="onBlur" rules={[{ required: true, message: "币种不能为空" }]}>
             <Select
               showSearch
               labelInValue
@@ -865,7 +742,7 @@ const Payment = () => {
               optionFilterProp="children"
               filterOption={customerFilterOption}
               onChange={handleMoneyTypeChnage}
-              options={dict?.map((con) => ({
+              options={dict?.map(con => ({
                 label: con.dictLabel,
                 value: con.dictLabel,
               }))}
@@ -879,7 +756,7 @@ const Payment = () => {
               optionFilterProp="children"
               filterOption={customerFilterOption}
               onChange={handleBankCardChange}
-              options={bankcards?.map((con) => ({
+              options={bankcards?.map(con => ({
                 label: con.bankCard,
                 value: con.bankCard,
               }))}
@@ -894,18 +771,14 @@ const Payment = () => {
               filterOption={customerFilterOption}
               defaultActiveFirstOption
               defaultValue={{ label: bank?.[0].bank, value: bank?.[0].bank }}
-              options={bank?.map((con) => ({
+              options={bank?.map(con => ({
                 label: con.bank,
                 value: con.bank,
               }))}
             ></Select>
           </Form.Item>
 
-          <Form.Item
-            label="应付日期"
-            name="yfDate"
-            getValueProps={(i) => ({ value: dayjs(i) })}
-          >
+          <Form.Item label="应付日期" name="yfDate" getValueProps={i => ({ value: dayjs(i) })}>
             <DatePicker allowClear={false} />
           </Form.Item>
           <Form.Item label="备注" name="remark">
@@ -940,40 +813,20 @@ const Payment = () => {
           renderItem={(item, index) => (
             <List.Item>
               <List.Item.Meta
-                avatar={
-                  <Avatar
-                    src={`https://xsgames.co/randomusers/avatar.php?g=pixel&key=${index}`}
-                  />
-                }
+                avatar={<Avatar src={`https://xsgames.co/randomusers/avatar.php?g=pixel&key=${index}`} />}
                 title={item.state}
-                description={`${item.userName} ${item.createTime} 备注：${
-                  item.remark || ""
-                } `}
+                description={`${item.userName} ${item.createTime} 备注：${item.remark || ""} `}
               />
             </List.Item>
           )}
         />
       </Modal>
 
-      {!!check && (
-        <PaymentDetailModal data={check} onClose={() => setCheck(undefined)} />
-      )}
+      {!!check && <PaymentDetailModal data={check} onClose={() => setCheck(undefined)} />}
 
-      {!!detail && (
-        <PaymentSubmitModal
-          data={detail}
-          onConfirm={handleSubmitOne}
-          onClose={() => setDetail(undefined)}
-        />
-      )}
+      {!!detail && <PaymentSubmitModal data={detail} onConfirm={handleSubmitOne} onClose={() => setDetail(undefined)} />}
 
-      {!!projectId && (
-        <YSYFModal
-          modalType={ModalType.OTHERS}
-          projectId={projectId}
-          onClose={() => setProjectId(undefined)}
-        />
-      )}
+      {!!projectId && <YSYFModal modalType={ModalType.OTHERS} projectId={projectId} onClose={() => setProjectId(undefined)} />}
     </div>
   );
 };
