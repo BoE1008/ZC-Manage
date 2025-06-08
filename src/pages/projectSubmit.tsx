@@ -717,6 +717,44 @@ const Project = () => {
             />
           </Form.Item>
           <Form.Item
+            label="业务组"
+            name="businessGroup"
+            rules={[{ required: true, message: "请选择业务组" }]}
+            hasFeedback
+          >
+            <Select
+              showSearch
+              placeholder="选择业务组"
+              optionFilterProp="children"
+              filterOption={filterOption}
+              options={dict
+                ?.find((con) => con.code === "sys_business_group")
+                .childList?.map((con) => ({
+                  value: con.id,
+                  label: con.dictLabel,
+                }))}
+            />
+          </Form.Item>
+          <Form.Item
+            label="业务条线"
+            name="businessLine"
+            rules={[{ required: true, message: "请选择业务条线" }]}
+            hasFeedback
+          >
+            <Select
+              showSearch
+              placeholder="选择业务条线"
+              optionFilterProp="children"
+              filterOption={filterOption}
+              options={dict
+                ?.find((con) => con.code === "sys_business_line")
+                .childList?.map((con) => ({
+                  value: con.id,
+                  label: con.dictLabel,
+                }))}
+            />
+          </Form.Item>
+          <Form.Item
             label="产品"
             name="typeId"
             validateTrigger="onBlur"

@@ -27,6 +27,8 @@ import {
 } from "@/restApi/account";
 import { getDictByCode } from "@/restApi/dict";
 import ResizeTable from "@/components/ResizeTable";
+import { adminUserIds } from "@/utils/const";
+import { addCustomer } from "@/restApi/customer";
 
 const initialValues = {
   name: "",
@@ -52,6 +54,13 @@ const Supplyer = () => {
 
   const [form] = Form.useForm();
   const [form1] = Form.useForm();
+
+  const [userId, setUserId] = useState();
+
+  useEffect(() => {
+    const res = JSON.parse(sessionStorage.getItem("userInfo") || "");
+    setUserId(res?.id);
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -89,6 +98,29 @@ const Supplyer = () => {
         content: operation === Operation.Add ? "添加成功" : "编辑成功",
         type: "success",
       });
+    }
+  };
+
+  const handleSaveAsCusomer = async () => {
+    form.validateFields();
+    const values = form.getFieldsValue();
+    const { code } =
+      operation === Operation.Add
+        ? await addSupplyer(values)
+        : await updateSupplyer(editId, values);
+
+    const { code: code1 } = await addCustomer(values);
+
+    if (code === 200 && code1 === 200) {
+      setModalOpen(false);
+      const data = await getSuppliersList(page, pageSize, searchValue);
+      setData(data);
+      message.success({
+        content: operation === Operation.Add ? "添加成功" : "编辑成功",
+        type: "success",
+      });
+    } else {
+      message.error("添加失败");
     }
   };
 
@@ -184,19 +216,19 @@ const Supplyer = () => {
       key: "name",
     },
     {
-      title: "供应商地址",
+      title: "地址",
       dataIndex: "address",
       align: "center",
       key: "address",
     },
     {
-      title: "供应商联系人",
+      title: "联系人",
       dataIndex: "contactsName",
       align: "center",
       key: "contactsName",
     },
     {
-      title: "供应商联系人电话",
+      title: "联系人电话",
       dataIndex: "contactsMobile",
       align: "center",
       key: "contactsMobile",
@@ -206,6 +238,12 @@ const Supplyer = () => {
       dataIndex: "taxationNumber",
       align: "center",
       key: "taxationNumber",
+    },
+    {
+      title: "创建人",
+      dataIndex: "userName",
+      align: "center",
+      key: "userName",
     },
     {
       title: "备注",
@@ -220,16 +258,19 @@ const Supplyer = () => {
       render: (_, record: Company) => {
         return (
           <Space size="middle" className="flex flex-row !gap-x-1">
-            <Button
-              style={{
-                display: "flex",
-                alignItems: "center",
-                padding: "3px 5px",
-              }}
-              onClick={() => handleEditOne(record)}
-            >
-              <EditTwoTone twoToneColor="#198348" />
-            </Button>
+            {
+              // record.createBy in [...adminUserIds, userId] &&
+              <Button
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  padding: "3px 5px",
+                }}
+                onClick={() => handleEditOne(record)}
+              >
+                <EditTwoTone twoToneColor="#198348" />
+              </Button>
+            }
             <Tooltip title={<span>查看银行账户信息</span>}>
               <Button
                 onClick={() => handleCheckBank(record.id)}
@@ -242,24 +283,27 @@ const Supplyer = () => {
                 <ProfileTwoTone twoToneColor="#198348" />
               </Button>
             </Tooltip>
-            <Tooltip title="删除">
-              <Popconfirm
-                title="是否删除？"
-                okButtonProps={{ style: { backgroundColor: "#198348" } }}
-                getPopupContainer={(node) => node.parentElement}
-                onConfirm={() => handleDeleteOne(record.id)}
-              >
-                <Button
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    padding: "3px 5px",
-                  }}
+            {
+              // record.createBy in [...adminUserIds, userId] &&
+              <Tooltip title="删除">
+                <Popconfirm
+                  title="是否删除？"
+                  okButtonProps={{ style: { backgroundColor: "#198348" } }}
+                  getPopupContainer={(node) => node.parentElement}
+                  onConfirm={() => handleDeleteOne(record.id)}
                 >
-                  <DeleteTwoTone twoToneColor="#198348" />
-                </Button>
-              </Popconfirm>
-            </Tooltip>
+                  <Button
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      padding: "3px 5px",
+                    }}
+                  >
+                    <DeleteTwoTone twoToneColor="#198348" />
+                  </Button>
+                </Popconfirm>
+              </Tooltip>
+            }
           </Space>
         );
       },
@@ -387,6 +431,15 @@ const Supplyer = () => {
         afterClose={() => form.resetFields()}
         style={{ minWidth: "650px" }}
         maskClosable={false}
+        footer={(_, { OkBtn, CancelBtn }) => (
+          <>
+            <CancelBtn />
+            <OkBtn />
+            <Button type="primary" onClick={handleSaveAsCusomer}>
+              同时保存为客户
+            </Button>
+          </>
+        )}
       >
         <Form
           labelCol={{ span: 3 }}

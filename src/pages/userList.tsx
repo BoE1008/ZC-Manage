@@ -30,6 +30,7 @@ import { getDeptList, getDeptTree } from "@/restApi/dept";
 import { getRoleList } from "@/restApi/role";
 import { formatMenu } from "@/utils/index";
 import ResizeTable from "@/components/ResizeTable";
+import { getDictById } from "@/restApi/dict";
 
 const initialValues = {
   name: "",
@@ -61,6 +62,8 @@ const User = () => {
 
   const [deptId, setDeptId] = useState("100");
 
+  const [dict, setDict] = useState();
+
   useEffect(() => {
     (async () => {
       if (!!sessionStorage.getItem("username")) {
@@ -76,8 +79,10 @@ const User = () => {
           searchValue,
           selectDeptId
         );
+        const dictRes = await getDictById();
         setLoading(false);
         setData(data);
+        setDict(dictRes.entity);
       } else {
         router.push("/login");
       }
@@ -257,6 +262,11 @@ const User = () => {
     setDeptId(keys[0]);
   };
 
+  const filterOption = (
+    input: string,
+    option?: { label: string; value: string }
+  ) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
+
   return (
     <div className="w-full p-2" style={{ color: "#000" }}>
       <div className="w-full flex flex-row gap-x-10">
@@ -377,6 +387,34 @@ const User = () => {
                 />
               )}
             </div>
+          </Form.Item>
+          <Form.Item label="业务组" name="businessGroup" hasFeedback>
+            <Select
+              showSearch
+              placeholder="选择业务组"
+              optionFilterProp="children"
+              filterOption={filterOption}
+              options={dict
+                ?.find((con) => con.code === "sys_business_group")
+                .childList?.map((con) => ({
+                  value: con.id,
+                  label: con.dictLabel,
+                }))}
+            />
+          </Form.Item>
+          <Form.Item label="业务条线" name="businessLine" hasFeedback>
+            <Select
+              showSearch
+              placeholder="选择业务条线"
+              optionFilterProp="children"
+              filterOption={filterOption}
+              options={dict
+                ?.find((con) => con.code === "sys_business_line")
+                .childList?.map((con) => ({
+                  value: con.id,
+                  label: con.dictLabel,
+                }))}
+            />
           </Form.Item>
           <Form.Item label="用户角色" name="userRole">
             <Tree
