@@ -55,6 +55,7 @@ import { formatNumber } from "@/utils";
 import BuildTitle from "./DragM";
 import YSDrawer from "./YSDrawer";
 import YFDrawer from "./YFDrawer";
+import { getDictByCode } from "@/restApi/dict";
 
 const Item = ({ projectId, onClose, modalType }) => {
   const [data, setData] = useState();
@@ -84,12 +85,15 @@ const Item = ({ projectId, onClose, modalType }) => {
   const [YSRecord, setYSRecord] = useState(undefined);
   const [YFRecord, setYFRecord] = useState(undefined);
 
+  const [moneyTypes, setMoneyTypes] = useState();
+
   useEffect(() => {
     (async () => {
       const data = await getProjectYSList(projectId as string, page, pageSize);
       const customerData = await getCustomersList(1, 10000);
       const supplierData = await getSuppliersList(1, 10000);
       const state = await getProjectDetailById(projectId);
+      const res = await getDictByCode("sys_money_type");
       setLoading(false);
       setData({
         ...data,
@@ -101,6 +105,7 @@ const Item = ({ projectId, onClose, modalType }) => {
           })),
         },
       });
+      setMoneyTypes(res.entity);
       setCustomer(customerData.entity.data);
       setSuppliers(supplierData.entity.data);
       setProjectState(state.entity.data.state);
@@ -221,7 +226,7 @@ const Item = ({ projectId, onClose, modalType }) => {
         })),
       },
     });
-  }
+  };
 
   const handleWithdrawYF = async (id) => {
     await withDrawYF(projectId, id);
@@ -236,7 +241,7 @@ const Item = ({ projectId, onClose, modalType }) => {
         })),
       },
     });
-  }
+  };
 
   const handleSubmitYF = async (record) => {
     await submitYF(projectId, record?.id);
@@ -417,28 +422,40 @@ const Item = ({ projectId, onClose, modalType }) => {
               key: "supplierName",
               align: "center",
             },
+            // {
+            //   title: "人民币",
+            //   key: "yfRmb",
+            //   align: "center",
+            //   render: (record) => formatNumber(record?.yfRmb),
+            // },
+            // {
+            //   title: "美金",
+            //   key: "yfDollar",
+            //   align: "center",
+            //   render: (record) => formatNumber(record?.yfDollar),
+            // },
             {
-              title: "人民币",
-              key: "yfRmb",
+              title: "金额",
+              dataIndex: "fee",
+              key: "fee",
               align: "center",
-              render: (record) => formatNumber(record?.yfRmb),
             },
             {
-              title: "美金",
-              key: "yfDollar",
-              align: "center",
-              render: (record) => formatNumber(record?.yfDollar),
-            },
-            {
-              title: "明细",
-              dataIndex: "yfPurpose",
-              key: "yfPurpose",
+              title: "币种",
+              dataIndex: "moneyType",
+              key: "moneyType",
               align: "center",
             },
             {
               title: "汇率",
               dataIndex: "yfExrate",
               key: "yfExrate",
+              align: "center",
+            },
+            {
+              title: "明细",
+              dataIndex: "yfPurpose",
+              key: "yfPurpose",
               align: "center",
             },
             {
@@ -556,28 +573,40 @@ const Item = ({ projectId, onClose, modalType }) => {
               key: "supplierName",
               align: "center",
             },
+            // {
+            //   title: "人民币",
+            //   key: "yfRmb",
+            //   align: "center",
+            //   render: (record) => formatNumber(record?.yfRmb),
+            // },
+            // {
+            //   title: "美金",
+            //   key: "yfDollar",
+            //   align: "center",
+            //   render: (record) => formatNumber(record?.yfDollar),
+            // },
             {
-              title: "人民币",
-              key: "yfRmb",
+              title: "金额",
+              dataIndex: "fee",
+              key: "fee",
               align: "center",
-              render: (record) => formatNumber(record?.yfRmb),
             },
             {
-              title: "美金",
-              key: "yfDollar",
-              align: "center",
-              render: (record) => formatNumber(record?.yfDollar),
-            },
-            {
-              title: "明细",
-              dataIndex: "yfPurpose",
-              key: "yfPurpose",
+              title: "币种",
+              dataIndex: "moneyType",
+              key: "moneyType",
               align: "center",
             },
             {
               title: "汇率",
               dataIndex: "yfExrate",
               key: "yfExrate",
+              align: "center",
+            },
+            {
+              title: "明细",
+              dataIndex: "yfPurpose",
+              key: "yfPurpose",
               align: "center",
             },
             {
@@ -766,7 +795,7 @@ const Item = ({ projectId, onClose, modalType }) => {
                           </Button>
                         </Tooltip>
                       )}
-                       {modalType === ModalType.Submit &&
+                    {modalType === ModalType.Submit &&
                       record?.state === "待业务审批" && (
                         <Tooltip title={<span>撤回</span>}>
                           <Button
@@ -877,30 +906,42 @@ const Item = ({ projectId, onClose, modalType }) => {
             key: "customName",
             align: "center",
           },
+          // {
+          //   title: "人民币",
+          //   // dataIndex: "ysRmb",
+          //   key: "ysRmb",
+          //   align: "center",
+          //   render: (record) => formatNumber(record?.ysRmb),
+          // },
+          // {
+          //   title: "美金",
+          //   // dataIndex: "ysDollar",
+          //   key: "ysDollar",
+          //   align: "center",
+          //   render: (record) => formatNumber(record?.ysDollar),
+          // },
           {
-            title: "人民币",
-            // dataIndex: "ysRmb",
-            key: "ysRmb",
+            title: "金额",
+            dataIndex: "fee",
+            key: "fee",
             align: "center",
-            render: (record) => formatNumber(record?.ysRmb),
           },
           {
-            title: "美金",
-            // dataIndex: "ysDollar",
-            key: "ysDollar",
-            align: "center",
-            render: (record) => formatNumber(record?.ysDollar),
-          },
-          {
-            title: "明细",
-            dataIndex: "ysPurpose",
-            key: "ysPurpose",
+            title: "币种",
+            dataIndex: "moneyType",
+            key: "moneyType",
             align: "center",
           },
           {
             title: "汇率",
             dataIndex: "ysExrate",
             key: "ysExrate",
+            align: "center",
+          },
+          {
+            title: "明细",
+            dataIndex: "ysPurpose",
+            key: "ysPurpose",
             align: "center",
           },
           {
@@ -977,30 +1018,42 @@ const Item = ({ projectId, onClose, modalType }) => {
             key: "customName",
             align: "center",
           },
+          // {
+          //   title: "人民币",
+          //   // dataIndex: "ysRmb",
+          //   key: "ysRmb",
+          //   align: "center",
+          //   render: (record) => formatNumber(record?.ysRmb),
+          // },
+          // {
+          //   title: "美金",
+          //   // dataIndex: "ysDollar",
+          //   key: "ysDollar",
+          //   align: "center",
+          //   render: (record) => formatNumber(record?.ysDollar),
+          // },
           {
-            title: "人民币",
-            // dataIndex: "ysRmb",
-            key: "ysRmb",
+            title: "金额",
+            dataIndex: "fee",
+            key: "fee",
             align: "center",
-            render: (record) => formatNumber(record?.ysRmb),
           },
           {
-            title: "美金",
-            // dataIndex: "ysDollar",
-            key: "ysDollar",
-            align: "center",
-            render: (record) => formatNumber(record?.ysDollar),
-          },
-          {
-            title: "明细",
-            dataIndex: "ysPurpose",
-            key: "ysPurpose",
+            title: "币种",
+            dataIndex: "moneyType",
+            key: "moneyType",
             align: "center",
           },
           {
             title: "汇率",
             dataIndex: "ysExrate",
             key: "ysExrate",
+            align: "center",
+          },
+          {
+            title: "明细",
+            dataIndex: "ysPurpose",
+            key: "ysPurpose",
             align: "center",
           },
           {
@@ -1136,7 +1189,7 @@ const Item = ({ projectId, onClose, modalType }) => {
                             </Popconfirm>
                           </Tooltip>
                         )}
-                         {(projectState === "未完结" ||
+                      {(projectState === "未完结" ||
                         projectState === "已退回") &&
                         (record?.state === "未提交" ||
                           record?.state === "已退回") && (
@@ -1427,7 +1480,7 @@ const Item = ({ projectId, onClose, modalType }) => {
                 }))}
               />
             </Form.Item>
-            <Form.Item label="人民币" name="ysRmb">
+            {/* <Form.Item label="人民币" name="ysRmb">
               <InputNumber
                 defaultValue={0}
                 placeholder="请输入金额"
@@ -1440,6 +1493,26 @@ const Item = ({ projectId, onClose, modalType }) => {
                 placeholder="请输入金额"
                 style={{ width: "100%" }}
               />
+            </Form.Item> */}
+            <Form.Item label="金额" name="fee">
+              <InputNumber
+                defaultValue={0}
+                placeholder="请输入金额"
+                style={{ width: "100%" }}
+              />
+            </Form.Item>
+            <Form.Item label="币种" name="moneyType">
+              <Select
+                showSearch
+                labelInValue
+                placeholder="币种"
+                optionFilterProp="children"
+                filterOption={customerFilterOption}
+                options={moneyTypes?.map((con) => ({
+                  label: con.dictLabel,
+                  value: con.id,
+                }))}
+              ></Select>
             </Form.Item>
             <Form.Item label="汇率" name="ysExrate">
               <InputNumber
@@ -1484,7 +1557,6 @@ const Item = ({ projectId, onClose, modalType }) => {
           >
             <Form.Item
               label="供应商"
-              labelCol={{ span: 5 }}
               name="supplierId"
               validateTrigger="onBlur"
               rules={[{ required: true, message: "供应商名称不能为空" }]}
@@ -1502,7 +1574,7 @@ const Item = ({ projectId, onClose, modalType }) => {
                 }))}
               />
             </Form.Item>
-            <Form.Item label="人民币" labelCol={{ span: 5 }} name="yfRmb">
+            {/* <Form.Item label="人民币" labelCol={{ span: 5 }} name="yfRmb">
               <InputNumber
                 defaultValue={0}
                 placeholder="请输入金额"
@@ -1515,24 +1587,45 @@ const Item = ({ projectId, onClose, modalType }) => {
                 placeholder="请输入金额"
                 style={{ width: "100%" }}
               />
+            </Form.Item> */}
+            <Form.Item label="金额" name="fee">
+              <InputNumber
+                defaultValue={0}
+                placeholder="请输入金额"
+                style={{ width: "100%" }}
+              />
             </Form.Item>
-            <Form.Item
-              label="明细"
-              labelCol={{ span: 5 }}
-              name="yfPurpose"
-              validateTrigger="onBlur"
-              rules={[{ required: true, message: "明细不能为空" }]}
-            >
-              <Input.TextArea placeholder="明细" maxLength={100} />
+            <Form.Item label="币种" name="moneyType">
+              <Select
+                showSearch
+                labelInValue
+                placeholder="币种"
+                optionFilterProp="children"
+                filterOption={customerFilterOption}
+                options={moneyTypes?.map((con) => ({
+                  label: con.dictLabel,
+                  value: con.id,
+                }))}
+              ></Select>
             </Form.Item>
-            <Form.Item label="汇率" labelCol={{ span: 5 }} name="yfExrate">
+            <Form.Item label="汇率" name="yfExrate">
               <InputNumber
                 defaultValue={0}
                 placeholder="请输入汇率"
                 style={{ width: "100%" }}
               />
             </Form.Item>
-
+            <Form.Item
+              label="明细"
+              name="yfPurpose"
+              validateTrigger="onBlur"
+              rules={[{ required: true, message: "明细不能为空" }]}
+            >
+              <Input.TextArea placeholder="明细" maxLength={100} />
+            </Form.Item>
+            <Form.Item label="备注" name="remark">
+              <Input.TextArea placeholder="备注" maxLength={100} />
+            </Form.Item>
             <Form.Item
               label="预留利润名称"
               labelCol={{ span: 5 }}
@@ -1550,9 +1643,6 @@ const Item = ({ projectId, onClose, modalType }) => {
                 placeholder="预留利润金额"
                 className="w-full"
               />
-            </Form.Item>
-            <Form.Item label="备注" labelCol={{ span: 5 }} name="remark">
-              <Input.TextArea placeholder="备注" maxLength={100} />
             </Form.Item>
           </Form>
         </Modal>
