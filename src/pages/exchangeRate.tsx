@@ -1,0 +1,272 @@
+import { useEffect, useMemo, useState } from "react";
+import {
+  Table,
+  Space,
+  Button,
+  Input,
+  Modal,
+  Form,
+  message,
+  TreeSelect,
+  Tooltip,
+  Popconfirm,
+  Select,
+  DatePicker,
+  InputNumber,
+} from "antd";
+import { Operation } from "@/types";
+import { EditTwoTone, DeleteTwoTone } from "@ant-design/icons";
+import {
+  addExchangeRate,
+  updateExchangeRate,
+  deleteExchangeRate,
+  getExchangeRateList,
+} from "@/restApi/exchangeRate";
+import ResizeTable from "@/components/ResizeTable";
+import { getDictByCode } from "@/restApi/dict";
+
+const ExchangeRate = () => {
+  const [data, setData] = useState();
+  const [moneyTypes, setMoneyTypes] = useState();
+  const [editId, setEditId] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [form] = Form.useForm();
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [operation, setOperation] = useState<Operation>(Operation.Add);
+
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      //   const data = await getExchangeRateList(page, pageSize);
+      //   setData(data);
+      const res = await getDictByCode("sys_money_type");
+      setMoneyTypes(res.entity);
+    })();
+  }, [page, pageSize]);
+
+  const handleAdd = async () => {
+    setOperation(Operation.Add);
+    setModalOpen(true);
+  };
+
+  const handleEditOne = (record) => {
+    setOperation(Operation.Edit);
+    setEditId(record.id);
+    form.setFieldsValue(record);
+    setModalOpen(true);
+  };
+
+  const handleOk = async () => {
+    form.validateFields().then(async () => {
+      const values = form.getFieldsValue();
+      setLoading(true);
+      const { code } =
+        operation === Operation.Add
+          ? await addExchangeRate(values)
+          : await updateExchangeRate(editId, values);
+      if (code === 200) {
+        setModalOpen(false);
+        const data = await getExchangeRateList(page, pageSize);
+        setLoading(false);
+        setData(data);
+        message.success({
+          content: operation === Operation.Add ? "添加成功" : "编辑成功",
+        });
+      }
+    });
+  };
+
+  const handleDeleteOne = async (id: string) => {
+    await deleteExchangeRate(id);
+    const data = await getExchangeRateList(page, pageSize);
+    setLoading(false);
+    setData(data);
+  };
+
+  const customerFilterOption = (
+    input: string,
+    option?: { label: string; value: string }
+  ) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
+
+  const columns = [
+    {
+      title: "币种",
+      dataIndex: "moneyType",
+      align: "center",
+      key: "moneyType",
+    },
+    {
+      title: "归属年月",
+      dataIndex: "yearMonth",
+      align: "center",
+      key: "yearMonth",
+    },
+    {
+      title: "汇率",
+      dataIndex: "exchangeRate",
+      align: "center",
+      key: "exchangeRate",
+    },
+    {
+      title: "备注",
+      dataIndex: "remark",
+      align: "center",
+      key: "remark",
+    },
+    {
+      title: "操作",
+      align: "center",
+      key: "action",
+      render: (_, record) => {
+        return (
+          <Space size="middle" className="flex flex-row justify-center">
+            <Tooltip title="编辑">
+              <Button
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  padding: "3px 5px",
+                }}
+                onClick={() => handleEditOne(record)}
+              >
+                <EditTwoTone twoToneColor="#198348" />
+              </Button>
+            </Tooltip>
+
+            <Tooltip title="删除">
+              <Popconfirm
+                title="是否删除？"
+                getPopupContainer={(node) => node.parentElement}
+                okButtonProps={{ style: { backgroundColor: "#198348" } }}
+                onConfirm={() => handleDeleteOne(record.id)}
+              >
+                <Button
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    padding: "3px 5px",
+                  }}
+                >
+                  <DeleteTwoTone twoToneColor="#198348" />
+                </Button>
+              </Popconfirm>
+            </Tooltip>
+          </Space>
+        );
+      },
+    },
+  ];
+
+  return (
+    <div className="p-2">
+      <div className="flex flex-row gap-y-3 justify-between">
+        <Space>
+          <Button
+            onClick={handleAdd}
+            type="primary"
+            style={{ marginBottom: 16, background: "#198348", width: "100px" }}
+          >
+            添加
+          </Button>
+        </Space>
+      </div>
+      <ResizeTable
+        bordered
+        loading={loading}
+        dataSource={data?.entity.data}
+        columns={columns}
+        pagination={{
+          // 设置总条数
+          total: data?.entity.total,
+          // 显示总条数
+          showTotal: (total) => `共 ${total} 条`,
+          // 是否可以改变 pageSize
+          showSizeChanger: true,
+
+          // 改变页码时
+          onChange: async (page) => {
+            setPage(page);
+          },
+          // pageSize 变化的回调
+          onShowSizeChange: async (page, size) => {
+            setPage(page);
+            setPageSize(size);
+          },
+        }}
+      />
+
+      <Modal
+        centered
+        destroyOnClose
+        title={operation === Operation.Add ? "添加汇率" : "编辑汇率"}
+        open={modalOpen}
+        onOk={handleOk}
+        okButtonProps={{ style: { background: "#198348" } }}
+        // confirmLoading={confirmLoading}
+        onCancel={() => setModalOpen(false)}
+        afterClose={() => form.resetFields()}
+        style={{ minWidth: "650px" }}
+        maskClosable={false}
+      >
+        <Form
+          labelCol={{ span: 4 }}
+          wrapperCol={{ span: 20 }}
+          layout={"horizontal"}
+          form={form}
+          style={{ minWidth: 600, color: "#000" }}
+        >
+          <Form.Item
+            label="币种"
+            name="moneyType"
+            validateTrigger="onBlur"
+            rules={[{ required: true, message: "币种不能为空" }]}
+          >
+            <Select
+              labelInValue
+              placeholder="币种"
+              optionFilterProp="children"
+              filterOption={customerFilterOption}
+              options={moneyTypes?.map((con) => ({
+                label: con.dictLabel,
+                value: con.id,
+              }))}
+            ></Select>
+          </Form.Item>
+
+          <Form.Item
+            required
+            label="归属年月"
+            name="yearMonth"
+            validateTrigger="onBlur"
+            rules={[{ required: true, message: "归属年月不能为空" }]}
+          >
+            <DatePicker
+              style={{ minWidth: "180px" }}
+              picker="month"
+              //   onChange={handleDateChange}
+            />
+          </Form.Item>
+          <Form.Item
+            label="汇率"
+            name="exchangeRate"
+            rules={[{ required: true, message: "汇率不能为空" }]}
+          >
+            <InputNumber
+              defaultValue={0}
+              placeholder="请输入汇率"
+              style={{ width: "100%" }}
+            />
+          </Form.Item>
+          <Form.Item label="备注" name="remark">
+            <Input.TextArea placeholder="备注" maxLength={100} />
+          </Form.Item>
+        </Form>
+      </Modal>
+    </div>
+  );
+};
+
+export default ExchangeRate;

@@ -258,8 +258,7 @@ const Supplyer = () => {
       render: (_, record: Company) => {
         return (
           <Space size="middle" className="flex flex-row !gap-x-1">
-            {
-              // record.createBy in [...adminUserIds, userId] &&
+            {record.createBy in [...adminUserIds, userId] && (
               <Button
                 style={{
                   display: "flex",
@@ -270,7 +269,7 @@ const Supplyer = () => {
               >
                 <EditTwoTone twoToneColor="#198348" />
               </Button>
-            }
+            )}
             <Tooltip title={<span>查看银行账户信息</span>}>
               <Button
                 onClick={() => handleCheckBank(record.id)}
@@ -283,8 +282,7 @@ const Supplyer = () => {
                 <ProfileTwoTone twoToneColor="#198348" />
               </Button>
             </Tooltip>
-            {
-              // record.createBy in [...adminUserIds, userId] &&
+            {record.createBy in [...adminUserIds, userId] && (
               <Tooltip title="删除">
                 <Popconfirm
                   title="是否删除？"
@@ -303,7 +301,7 @@ const Supplyer = () => {
                   </Button>
                 </Popconfirm>
               </Tooltip>
-            }
+            )}
           </Space>
         );
       },
