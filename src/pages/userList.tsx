@@ -161,6 +161,18 @@ const User = () => {
       },
     },
     {
+      title: "业务条线",
+      dataIndex: "businessLine",
+      align: "center",
+      key: "businessLine",
+    },
+    {
+      title: "业务组",
+      dataIndex: "businessGroup",
+      align: "center",
+      key: "businessGroup",
+    },
+    {
       title: "邮箱",
       dataIndex: "email",
       align: "center",
@@ -388,7 +400,7 @@ const User = () => {
               )}
             </div>
           </Form.Item>
-          <Form.Item label="业务组" name="businessGroup" hasFeedback>
+          <Form.Item label="业务组" name="businessGroupId" hasFeedback>
             <Select
               showSearch
               placeholder="选择业务组"
@@ -402,7 +414,7 @@ const User = () => {
                 }))}
             />
           </Form.Item>
-          <Form.Item label="业务条线" name="businessLine" hasFeedback>
+          <Form.Item label="业务条线" name="businessLineId" hasFeedback>
             <Select
               showSearch
               placeholder="选择业务条线"

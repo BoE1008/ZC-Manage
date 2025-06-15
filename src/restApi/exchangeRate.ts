@@ -1,8 +1,13 @@
 import axiosInstance from "./axiosInstance";
 
-export const getExchangeRateList = async (pageNo: number, pageSize: number) => {
+export const getExchangeRateList = async (
+  date: string,
+  pageNo: number,
+  pageSize: number
+) => {
   const res = await axiosInstance.get(`/zc/exchangeRate/list`, {
     params: {
+      date,
       pageNo,
       pageSize,
     },

@@ -26,6 +26,7 @@ const nextConfig = {
         {
           source: "/:path*",
           destination: `http://123.60.88.8/:path*`,
+          // destination: 'http://192.168.0.103:8080/:path*',
         },
       ],
     };

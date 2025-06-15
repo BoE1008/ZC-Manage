@@ -24,6 +24,7 @@ import {
 } from "@/restApi/exchangeRate";
 import ResizeTable from "@/components/ResizeTable";
 import { getDictByCode } from "@/restApi/dict";
+import dayjs from "dayjs";
 
 const ExchangeRate = () => {
   const [data, setData] = useState();
@@ -36,16 +37,20 @@ const ExchangeRate = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [operation, setOperation] = useState<Operation>(Operation.Add);
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+
+  const [searchDate, setSearchDate] = useState(dayjs().format("YYYY-MM"));
+
+  const [date, setDate] = useState(dayjs().format("YYYY-MM"));
 
   useEffect(() => {
     (async () => {
-      //   const data = await getExchangeRateList(page, pageSize);
-      //   setData(data);
+      const data = await getExchangeRateList(searchDate, page, pageSize);
+      setData(data);
       const res = await getDictByCode("sys_money_type");
       setMoneyTypes(res.entity);
     })();
-  }, [page, pageSize]);
+  }, [page, pageSize, searchDate]);
 
   const handleAdd = async () => {
     setOperation(Operation.Add);
@@ -55,21 +60,37 @@ const ExchangeRate = () => {
   const handleEditOne = (record) => {
     setOperation(Operation.Edit);
     setEditId(record.id);
-    form.setFieldsValue(record);
+
+    const findM = moneyTypes?.find(
+      (item) => item.dictLabel === record.moneyType
+    );
+
+    const formData = {
+      ...record,
+      date: dayjs(record.date, "YYYY-MM"),
+      moneyType: { label: findM?.dictLabel, value: findM?.id },
+    };
+
+    form.setFieldsValue(formData);
     setModalOpen(true);
   };
 
   const handleOk = async () => {
     form.validateFields().then(async () => {
       const values = form.getFieldsValue();
+      const params = {
+        ...values,
+        moneyType: values.moneyType.label,
+        date: date,
+      };
       setLoading(true);
       const { code } =
         operation === Operation.Add
-          ? await addExchangeRate(values)
-          : await updateExchangeRate(editId, values);
+          ? await addExchangeRate(params)
+          : await updateExchangeRate(editId, params);
       if (code === 200) {
         setModalOpen(false);
-        const data = await getExchangeRateList(page, pageSize);
+        const data = await getExchangeRateList(searchDate, page, pageSize);
         setLoading(false);
         setData(data);
         message.success({
@@ -81,7 +102,7 @@ const ExchangeRate = () => {
 
   const handleDeleteOne = async (id: string) => {
     await deleteExchangeRate(id);
-    const data = await getExchangeRateList(page, pageSize);
+    const data = await getExchangeRateList(searchDate, page, pageSize);
     setLoading(false);
     setData(data);
   };
@@ -90,6 +111,14 @@ const ExchangeRate = () => {
     input: string,
     option?: { label: string; value: string }
   ) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
+
+  const handleSearchDateChange = (date, dateString) => {
+    setSearchDate(dateString);
+  };
+
+  const handleDateChange = (date, dateString) => {
+    setDate(dateString);
+  };
 
   const columns = [
     {
@@ -100,9 +129,9 @@ const ExchangeRate = () => {
     },
     {
       title: "归属年月",
-      dataIndex: "yearMonth",
+      dataIndex: "date",
       align: "center",
-      key: "yearMonth",
+      key: "date",
     },
     {
       title: "汇率",
@@ -162,8 +191,16 @@ const ExchangeRate = () => {
 
   return (
     <div className="p-2">
-      <div className="flex flex-row gap-y-3 justify-between">
+      <div className="flex flex-row gap-y-3 justify-between items-center">
         <Space>
+          <DatePicker
+            allowClear={false}
+            defaultValue={dayjs()}
+            style={{ minWidth: "180px" }}
+            picker="month"
+            placeholder="按发运日期搜索"
+            onChange={handleSearchDateChange}
+          />
           <Button
             onClick={handleAdd}
             type="primary"
@@ -239,16 +276,27 @@ const ExchangeRate = () => {
           <Form.Item
             required
             label="归属年月"
-            name="yearMonth"
+            name="date"
             validateTrigger="onBlur"
             rules={[{ required: true, message: "归属年月不能为空" }]}
           >
             <DatePicker
               style={{ minWidth: "180px" }}
               picker="month"
-              //   onChange={handleDateChange}
+              format="YYYY-MM"
+              onChange={handleDateChange}
             />
           </Form.Item>
+          {/* <Form.Item
+            required
+            label="归属年月"
+            name="date"
+            validateTrigger="onBlur"
+            rules={[{ required: true, message: "归属年月不能为空" }]}
+            getValueProps={(i) => ({ value: dayjs(i).format("YYYY-MM") })}
+          >
+            <DatePicker allowClear={false} picker="month" />
+          </Form.Item> */}
           <Form.Item
             label="汇率"
             name="exchangeRate"

@@ -265,6 +265,22 @@ const Project = () => {
         onFilter: (value: string, record) => record.customId === value,
       },
       {
+        title: "业务组",
+        label: "业务组",
+        value: "业务组",
+        dataIndex: "businessGroup",
+        align: "center",
+        key: "businessGroup",
+      },
+      {
+        title: "业务条线",
+        label: "业务条线",
+        value: "业务条线",
+        dataIndex: "businessLine",
+        align: "center",
+        key: "businessLine",
+      },
+      {
         label: "品牌",
         value: "品牌",
         title: "品牌",

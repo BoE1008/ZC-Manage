@@ -30,7 +30,11 @@ import {
   DatePicker,
 } from "antd";
 import { Operation } from "@/types";
-import { getProjectsSubmitList } from "@/restApi/project";
+import {
+  getProjectsSubmitList,
+  getProjectYSList,
+  getYSFByProjectId,
+} from "@/restApi/project";
 import {
   EditTwoTone,
   DeleteTwoTone,
@@ -90,6 +94,7 @@ const InvoicingSubmit = () => {
 
   const [updateTimeSort, setUpdateTimeSort] = useState();
 
+  const [projectYS, setProjectYS] = useState();
 
   useEffect(() => {
     (async () => {
@@ -111,7 +116,8 @@ const InvoicingSubmit = () => {
           customerId,
           projectState,
           userName,
-          projectNum
+          projectNum,
+          updateTimeSort
         );
         setData(res);
         setLoading(false);
@@ -125,6 +131,7 @@ const InvoicingSubmit = () => {
     projectState,
     userName,
     projectNum,
+    updateTimeSort,
   ]);
 
   const handleAdd = async () => {
@@ -153,6 +160,8 @@ const InvoicingSubmit = () => {
     setDict(res.entity);
     const data = await getDictByCode("sys_invoicing_content");
     setinvoicingContent(data.entity);
+    const ys = await getYSFByProjectId(record.projectId, "ys");
+    setProjectYS(ys.entity.data);
     const rawFilelist = await getFilesById(record.id);
     const fileList = rawFilelist?.entity.data.map((item) => ({
       name: item.originalFileName,
@@ -165,6 +174,12 @@ const InvoicingSubmit = () => {
     setOldFiles(fileList);
     setFiles(fileList);
     form.setFieldsValue(record);
+
+    const selectYS = ys.entity.data.find((c) => c.id === record.ysId);
+    form.setFieldValue("ysId", {
+      value: record.ysId,
+      label: `${selectYS.name}(${selectYS.moneyType}:${selectYS.fee})`,
+    });
     setModalOpen(true);
   };
 
@@ -190,6 +205,7 @@ const InvoicingSubmit = () => {
               content: values.content?.value || "",
               fee: values.fee || "",
               remark: values.remark || "",
+              ysId: values.ysId.value || "",
             }
           : {
               ...values,
@@ -228,6 +244,7 @@ const InvoicingSubmit = () => {
               content: values.content?.value || values.content || "",
               fee: values.fee || "",
               remark: values.remark || "",
+              ysId: values.ysId.value || "",
             };
 
       console.log(params, "parmas");
@@ -352,6 +369,8 @@ const InvoicingSubmit = () => {
     setSelectProject(data);
     const projectCustom = await getCustomersYSList(param.value);
     setCustomer(projectCustom.entity.data);
+    const YS = await getYSFByProjectId(param.value, "ys");
+    setProjectYS(YS.entity.data);
   };
 
   const handleCustomerChange = async (value) => {
@@ -843,6 +862,26 @@ const InvoicingSubmit = () => {
               onChange={handleCustomerChange}
               options={customer?.map((con) => ({
                 label: con.name,
+                value: con.id,
+              }))}
+            />
+          </Form.Item>
+          <Form.Item
+            label="应收"
+            name="ysId"
+            dependencies={["projectName"]}
+            validateTrigger="onBlur"
+            rules={[{ required: true, message: "应收不能为空" }]}
+          >
+            <Select
+              showSearch
+              labelInValue
+              placeholder="选择应收"
+              optionFilterProp="children"
+              filterOption={customerFilterOption}
+              // onChange={handleCustomerChange}
+              options={projectYS?.map((con) => ({
+                label: `${con.name}(${con.moneyType}:${con.fee})`,
                 value: con.id,
               }))}
             />

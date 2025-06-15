@@ -131,6 +131,7 @@ const Item = ({ projectId, onClose, modalType }) => {
       const params = {
         ...values,
         yfDate: dayjs(values.yfDate).format("YYYY-MM-DD"),
+        moneyType: values.moneyType.label,
       };
 
       const { code } =
@@ -1340,9 +1341,11 @@ const Item = ({ projectId, onClose, modalType }) => {
   const handleYsOk = async () => {
     form.validateFields().then(async () => {
       const values = form.getFieldsValue();
+      console.log(values);
       const params = {
         ...values,
         ysDate: dayjs(values.ysDate).format("YYYY-MM-DD"),
+        moneyType: values.moneyType?.label,
       };
       const { code } =
         operation === Operation.Add
@@ -1494,14 +1497,23 @@ const Item = ({ projectId, onClose, modalType }) => {
                 style={{ width: "100%" }}
               />
             </Form.Item> */}
-            <Form.Item label="金额" name="fee">
+
+            <Form.Item
+              label="金额"
+              name="fee"
+              rules={[{ required: true, message: "金额不能为空" }]}
+            >
               <InputNumber
                 defaultValue={0}
                 placeholder="请输入金额"
                 style={{ width: "100%" }}
               />
             </Form.Item>
-            <Form.Item label="币种" name="moneyType">
+            <Form.Item
+              label="币种"
+              name="moneyType"
+              rules={[{ required: true, message: "币种不能为空" }]}
+            >
               <Select
                 showSearch
                 labelInValue
@@ -1588,14 +1600,22 @@ const Item = ({ projectId, onClose, modalType }) => {
                 style={{ width: "100%" }}
               />
             </Form.Item> */}
-            <Form.Item label="金额" name="fee">
+            <Form.Item
+              label="金额"
+              name="fee"
+              rules={[{ required: true, message: "金额不能为空" }]}
+            >
               <InputNumber
                 defaultValue={0}
                 placeholder="请输入金额"
                 style={{ width: "100%" }}
               />
             </Form.Item>
-            <Form.Item label="币种" name="moneyType">
+            <Form.Item
+              label="币种"
+              name="moneyType"
+              rules={[{ required: true, message: "币种不能为空" }]}
+            >
               <Select
                 showSearch
                 labelInValue

@@ -290,6 +290,22 @@ const Project = () => {
         onFilter: (value: string, record) => record.customId === value,
       },
       {
+        title: "业务组",
+        label: "业务组",
+        value: "业务组",
+        dataIndex: "businessGroup",
+        align: "center",
+        key: "businessGroup",
+      },
+      {
+        title: "业务条线",
+        label: "业务条线",
+        value: "业务条线",
+        dataIndex: "businessLine",
+        align: "center",
+        key: "businessLine",
+      },
+      {
         title: "品牌",
         label: "品牌",
         value: "品牌",
@@ -718,7 +734,7 @@ const Project = () => {
           </Form.Item>
           <Form.Item
             label="业务组"
-            name="businessGroup"
+            name="businessGroupId"
             rules={[{ required: true, message: "请选择业务组" }]}
             hasFeedback
           >
@@ -737,7 +753,7 @@ const Project = () => {
           </Form.Item>
           <Form.Item
             label="业务条线"
-            name="businessLine"
+            name="businessLineId"
             rules={[{ required: true, message: "请选择业务条线" }]}
             hasFeedback
           >

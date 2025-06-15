@@ -294,3 +294,13 @@ export const withDrawYF = async (projectId, projectYsfId) => {
   });
   return res.data;
 };
+
+export const getYSFByProjectId = async (projectId, type) => {
+  const res = await axiosInstance.get("/zc/project/ysf/tree", {
+    params: {
+      projectId,
+      type,
+    },
+  });
+  return res.data;
+};
