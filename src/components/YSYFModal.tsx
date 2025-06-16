@@ -56,6 +56,7 @@ import BuildTitle from "./DragM";
 import YSDrawer from "./YSDrawer";
 import YFDrawer from "./YFDrawer";
 import { getDictByCode } from "@/restApi/dict";
+import { getExchangeRateList } from "@/restApi/exchangeRate";
 
 const Item = ({ projectId, onClose, modalType }) => {
   const [data, setData] = useState();
@@ -87,6 +88,8 @@ const Item = ({ projectId, onClose, modalType }) => {
 
   const [moneyTypes, setMoneyTypes] = useState();
 
+  const [projectDate, setProjectDate] = useState();
+
   useEffect(() => {
     (async () => {
       const data = await getProjectYSList(projectId as string, page, pageSize);
@@ -109,6 +112,7 @@ const Item = ({ projectId, onClose, modalType }) => {
       setCustomer(customerData.entity.data);
       setSuppliers(supplierData.entity.data);
       setProjectState(state.entity.data.state);
+      setProjectDate(state.entity.data.projectDate);
     })();
   }, [projectId, page, pageSize]);
 
@@ -1388,6 +1392,26 @@ const Item = ({ projectId, onClose, modalType }) => {
     option?: { label: string; value: string }
   ) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
 
+  const handleYSMoneyTypeChange = async ({ value }) => {
+    const res = await getExchangeRateList(
+      dayjs(projectDate).format("YYYY-MM"),
+      1,
+      1,
+      value
+    );
+    form.setFieldValue("ysExrate", res?.entity?.data[0]?.exchangeRate);
+  };
+
+  const handleYFMoneyTypeChange = async ({ value }) => {
+    const res = await getExchangeRateList(
+      dayjs(projectDate).format("YYYY-MM"),
+      1,
+      1,
+      value
+    );
+    form1.setFieldValue("yfExrate", res?.entity?.data[0]?.exchangeRate);
+  };
+
   const title = <BuildTitle title="应收应付列表" />;
 
   return (
@@ -1512,23 +1536,25 @@ const Item = ({ projectId, onClose, modalType }) => {
             <Form.Item
               label="币种"
               name="moneyType"
+              validateTrigger="onBlur"
               rules={[{ required: true, message: "币种不能为空" }]}
             >
               <Select
                 showSearch
                 labelInValue
-                placeholder="币种"
+                placeholder="选择币种"
                 optionFilterProp="children"
                 filterOption={customerFilterOption}
+                onChange={handleYSMoneyTypeChange}
                 options={moneyTypes?.map((con) => ({
                   label: con.dictLabel,
-                  value: con.id,
+                  value: con.dictLabel,
                 }))}
               ></Select>
             </Form.Item>
             <Form.Item label="汇率" name="ysExrate">
               <InputNumber
-                defaultValue={0}
+                defaultValue={1}
                 placeholder="请输入汇率"
                 style={{ width: "100%" }}
               />
@@ -1614,23 +1640,25 @@ const Item = ({ projectId, onClose, modalType }) => {
             <Form.Item
               label="币种"
               name="moneyType"
+              validateTrigger="onBlur"
               rules={[{ required: true, message: "币种不能为空" }]}
             >
               <Select
                 showSearch
                 labelInValue
-                placeholder="币种"
+                placeholder="选择币种"
                 optionFilterProp="children"
                 filterOption={customerFilterOption}
+                onChange={handleYFMoneyTypeChange}
                 options={moneyTypes?.map((con) => ({
                   label: con.dictLabel,
-                  value: con.id,
+                  value: con.dictLabel,
                 }))}
               ></Select>
             </Form.Item>
             <Form.Item label="汇率" name="yfExrate">
               <InputNumber
-                defaultValue={0}
+                defaultValue={1}
                 placeholder="请输入汇率"
                 style={{ width: "100%" }}
               />

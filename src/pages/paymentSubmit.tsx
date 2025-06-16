@@ -154,7 +154,7 @@ const Payment = () => {
     setSelectProject(selectProject);
     const res = await getDictByCode("sys_money_type");
     setDict(res.entity);
-    const yf = await getYSFByProjectId(record.projectId, "yf");
+    const yf = await getYSFByProjectId(record.projectId, "YF");
     setProjectYF(yf.entity.data);
     const rawFilelist = await getFilesById(record.id);
     const fileList = rawFilelist?.entity.data.map((item) => ({
@@ -366,7 +366,7 @@ const Payment = () => {
     setSelectProject(data);
     const projectCustom = await getSuppliersYFList(param.value);
     setSupplier(projectCustom.entity.data);
-    const YF = await getYSFByProjectId(param.value, "yf");
+    const YF = await getYSFByProjectId(param.value, "YF");
     setProjectYF(YF.entity.data);
   };
 

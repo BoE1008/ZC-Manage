@@ -3,13 +3,15 @@ import axiosInstance from "./axiosInstance";
 export const getExchangeRateList = async (
   date: string,
   pageNo: number,
-  pageSize: number
+  pageSize: number,
+  moneyType?: string
 ) => {
   const res = await axiosInstance.get(`/zc/exchangeRate/list`, {
     params: {
       date,
       pageNo,
       pageSize,
+      moneyType,
     },
   });
   return res.data;

@@ -160,7 +160,7 @@ const InvoicingSubmit = () => {
     setDict(res.entity);
     const data = await getDictByCode("sys_invoicing_content");
     setinvoicingContent(data.entity);
-    const ys = await getYSFByProjectId(record.projectId, "ys");
+    const ys = await getYSFByProjectId(record.projectId, "YS");
     setProjectYS(ys.entity.data);
     const rawFilelist = await getFilesById(record.id);
     const fileList = rawFilelist?.entity.data.map((item) => ({
@@ -369,7 +369,7 @@ const InvoicingSubmit = () => {
     setSelectProject(data);
     const projectCustom = await getCustomersYSList(param.value);
     setCustomer(projectCustom.entity.data);
-    const YS = await getYSFByProjectId(param.value, "ys");
+    const YS = await getYSFByProjectId(param.value, "YS");
     setProjectYS(YS.entity.data);
   };
 
