@@ -1194,7 +1194,7 @@ const Item = ({ projectId, onClose, modalType }) => {
                             </Popconfirm>
                           </Tooltip>
                         )}
-                      {(projectState === "未完结" ||
+                      {/* {(projectState === "未完结" ||
                         projectState === "已退回") &&
                         (record?.state === "未提交" ||
                           record?.state === "已退回") && (
@@ -1219,7 +1219,7 @@ const Item = ({ projectId, onClose, modalType }) => {
                               </Button>
                             </Popconfirm>
                           </Tooltip>
-                        )}
+                        )} */}
                       {(projectState === "未完结" ||
                         projectState === "已退回") &&
                         record?.state === "待业务审批" && (

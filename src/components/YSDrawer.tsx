@@ -120,6 +120,7 @@ const YSDrawer = ({ ysRecord, onClose }) => {
         content: values.content?.value || "",
         fee: values.fee || 0,
         remark: values.remark || "",
+        ysId: project?.id,
       };
 
       const formData = new FormData();

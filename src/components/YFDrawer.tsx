@@ -118,6 +118,7 @@ const YFDrawer = ({ yfRecord, onClose }) => {
         fee: values.fee || 0,
         remark: values.remark || "",
         yfDate: dayjs(values.yfDate).format("YYYY-MM-DD"),
+        yfId: yfRecord?.id,
       };
 
       const formData = new FormData();

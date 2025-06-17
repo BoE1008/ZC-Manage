@@ -121,6 +121,21 @@ const User = () => {
                   </Link>
                 </Col>
               )}
+              {!!badges?.projectThNum && (
+                <Col>
+                  <Link
+                    href="/projectSubmit"
+                    onClick={() => setNoticeModal(false)}
+                  >
+                    <Card size="small">
+                      <Statistic
+                        title="项目退回代办数"
+                        value={badges?.projectThNum}
+                      />
+                    </Card>
+                  </Link>
+                </Col>
+              )}
             </Row>
             <Row gutter={[16, 16]}>
               {!!badges?.iywNum && (
@@ -143,6 +158,21 @@ const User = () => {
                   >
                     <Card size="small">
                       <Statistic title="开票财务审核" value={badges?.icwNum} />
+                    </Card>
+                  </Link>
+                </Col>
+              )}
+              {!!badges?.ithNum && (
+                <Col>
+                  <Link
+                    href="/invoicingSubmit"
+                    onClick={() => setNoticeModal(false)}
+                  >
+                    <Card size="small">
+                      <Statistic
+                        title="开票退回代办数"
+                        value={badges?.ithNum}
+                      />
                     </Card>
                   </Link>
                 </Col>
@@ -179,36 +209,6 @@ const User = () => {
                   <Link href="/paymentCW" onClick={() => setNoticeModal(false)}>
                     <Card size="small">
                       <Statistic title="付款财务审核" value={badges?.pcwNum} />
-                    </Card>
-                  </Link>
-                </Col>
-              )}
-              {!!badges?.projectThNum && (
-                <Col>
-                  <Link
-                    href="/projectSubmit"
-                    onClick={() => setNoticeModal(false)}
-                  >
-                    <Card size="small">
-                      <Statistic
-                        title="项目退回代办数"
-                        value={badges?.projectThNum}
-                      />
-                    </Card>
-                  </Link>
-                </Col>
-              )}
-              {!!badges?.ithNum && (
-                <Col>
-                  <Link
-                    href="/invoicingSubmit"
-                    onClick={() => setNoticeModal(false)}
-                  >
-                    <Card size="small">
-                      <Statistic
-                        title="开票退回代办数"
-                        value={badges?.ithNum}
-                      />
                     </Card>
                   </Link>
                 </Col>

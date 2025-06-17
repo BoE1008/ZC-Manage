@@ -13,7 +13,9 @@ export const getProjectsSubmitList = async (
   projectBrand?: string,
   state?: string,
   customId?: string,
-  date?: string
+  date?: string,
+  businessGroupId?: string,
+  businessLineId?: string
 ) => {
   const res = await axiosInstance.get("/zc/project/submit/list", {
     params: {
@@ -28,6 +30,8 @@ export const getProjectsSubmitList = async (
       state,
       customId,
       projectDate: date,
+      businessGroupId,
+      businessLineId,
     },
   });
 
@@ -45,7 +49,9 @@ export const getProjectsApproveList = async (
   projectBrand?: string,
   state?: string,
   customId?: string,
-  date?: string
+  date?: string,
+  businessGroupId?: string,
+  businessLineId?: string
 ) => {
   const res = await axiosInstance.get("/zc/project/approve/list", {
     params: {
@@ -60,6 +66,8 @@ export const getProjectsApproveList = async (
       state,
       customId,
       projectDate: date,
+      businessGroupId,
+      businessLineId,
     },
   });
 

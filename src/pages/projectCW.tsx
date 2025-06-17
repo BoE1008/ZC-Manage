@@ -83,6 +83,9 @@ const Project = () => {
 
   const [exportEnabled, setExportEnabled] = useState(true);
 
+  const [businessGroupId, setBusinessGroupId] = useState();
+  const [businessLineId, setBusinessLineId] = useState();
+
   useEffect(() => {
     (async () => {
       const res = await getDictById();
@@ -105,7 +108,9 @@ const Project = () => {
         projectBrand,
         projectState,
         customerId,
-        date
+        date,
+        businessGroupId,
+        businessLineId
       );
       const customer = await getCustomersList(1, 1000);
       const res = await getDictById();
@@ -129,6 +134,8 @@ const Project = () => {
     projectState,
     customerId,
     date,
+    businessGroupId,
+    businessLineId,
   ]);
 
   const handleOk = async () => {
@@ -271,6 +278,15 @@ const Project = () => {
         dataIndex: "businessGroup",
         align: "center",
         key: "businessGroup",
+        filterMultiple: false,
+        filters: dict
+          ?.find((con) => con.code === "sys_business_group")
+          .childList?.map((con) => ({
+            value: con.id,
+            text: con.dictLabel,
+          })),
+        filterSearch: true,
+        onFilter: (value: string, record) => record.businessGroupId === value,
       },
       {
         title: "业务条线",
@@ -279,6 +295,15 @@ const Project = () => {
         dataIndex: "businessLine",
         align: "center",
         key: "businessLine",
+        filterMultiple: false,
+        filters: dict
+          ?.find((con) => con.code === "sys_business_line")
+          .childList?.map((con) => ({
+            value: con.id,
+            text: con.dictLabel,
+          })),
+        filterSearch: true,
+        onFilter: (value: string, record) => record.businessLineId === value,
       },
       {
         label: "品牌",
@@ -480,6 +505,8 @@ const Project = () => {
     setProjectBrand(filters.brandName?.[0]);
     setProjectState(filters.state?.[0]);
     setCustomerId(filters.customName?.[0]);
+    setBusinessGroupId(filters.businessGroup?.[0]);
+    setBusinessLineId(filters.businessLine?.[0]);
   };
 
   const handleDateChange = (date, dateString) => {
