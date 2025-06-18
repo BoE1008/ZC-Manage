@@ -27,7 +27,7 @@ export const getPaymentList = async (
   return res.data;
 };
 
-export const addPayment = async info => {
+export const addPayment = async (info) => {
   const res = await axiosInstance.post("/zc/payment/add", info, {
     headers: {
       "Content-Type": "multipart/form-data",
@@ -37,7 +37,7 @@ export const addPayment = async info => {
   return res.data;
 };
 
-export const addAndSubmitPayment = async info => {
+export const addAndSubmitPayment = async (info) => {
   const res = await axiosInstance.post("/zc/payment/addSubmit", info, {
     headers: {
       "Content-Type": "multipart/form-data",
@@ -179,7 +179,11 @@ export const approveOne = async (paymentId: string) => {
   return res.data;
 };
 
-export const rejectOne = async (paymentId: string, remark, approveState) => {
+export const rejectOne = async (
+  paymentId: string,
+  remark: string,
+  approveState
+) => {
   const res = await axiosInstance.post(`/zc/payment/reject`, {
     paymentId,
     remark,
@@ -199,17 +203,19 @@ export const deleteOne = async (id: string) => {
 };
 
 export const logsOne = async (paymentId: string) => {
-  const res = await axiosInstance.get(`/zc/payment/log/list?paymentId=${paymentId}`);
+  const res = await axiosInstance.get(
+    `/zc/payment/log/list?paymentId=${paymentId}`
+  );
   return res.data;
 };
 
-export const getPaymentDetailById = async id => {
+export const getPaymentDetailById = async (id: string) => {
   const res = await axiosInstance.get("/zc/payment/detail", { params: { id } });
 
   return res.data;
 };
 
-export const getFilesById = async id => {
+export const getFilesById = async (id: string) => {
   const res = await axiosInstance.get("/zc/payment/file/list", {
     params: { id },
   });
@@ -217,13 +223,13 @@ export const getFilesById = async id => {
   return res.data;
 };
 
-export const updateFileById = async info => {
+export const updateFileById = async (info) => {
   const res = await axiosInstance.post(`/zc/payment/file/update`, info);
 
   return res.data;
 };
 
-export const deleteFileById = async id => {
+export const deleteFileById = async (id: string) => {
   const formData = new FormData();
   formData.append("id", id);
   const res = await axiosInstance.post(`/zc/payment/file/del`, formData);
@@ -231,7 +237,7 @@ export const deleteFileById = async id => {
   return res.data;
 };
 
-export const withDrawPayment = async paymentId => {
+export const withDrawPayment = async (paymentId: string) => {
   const res = await axiosInstance.post("/zc/payment/withdraw", {
     paymentId,
   });

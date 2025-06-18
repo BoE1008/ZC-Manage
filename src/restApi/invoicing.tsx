@@ -67,7 +67,6 @@ export const getinvoicingYWList = async (
   // date?: string,
   updateTimeSort?: string
 ) => {
-  console.log(updateTimeSort, "111");
   const res = await axiosInstance.get(`/zc/invoicing/yw/list`, {
     params: {
       pageNo,
@@ -165,7 +164,7 @@ export const logsOne = async (invoicingId: string) => {
   return res.data;
 };
 
-export const getInvoicingDetailById = async (id) => {
+export const getInvoicingDetailById = async (id: string) => {
   const res = await axiosInstance.get("/zc/invoicing/detail", {
     params: { id },
   });
@@ -173,7 +172,7 @@ export const getInvoicingDetailById = async (id) => {
   return res.data;
 };
 
-export const getFilesById = async (id) => {
+export const getFilesById = async (id: string) => {
   const res = await axiosInstance.get("/zc/invoicing/file/list", {
     params: { id },
   });
@@ -191,7 +190,7 @@ export const updateFileById = async (info) => {
   return res.data;
 };
 
-export const deleteFileById = async (id) => {
+export const deleteFileById = async (id: string) => {
   const formData = new FormData();
   formData.append("id", id);
   const res = await axiosInstance.post(`/zc/invoicing/file/del`, formData);

@@ -8,7 +8,7 @@ export const downloadFile = async (filename: string) => {
   return res.data;
 };
 
-export const downloadUploadFile = async (url) => {
+export const downloadUploadFile = async (url: string) => {
   const res = await axiosInstance.get(
     `/zc/common/download/resource?resource=${url}`
   );

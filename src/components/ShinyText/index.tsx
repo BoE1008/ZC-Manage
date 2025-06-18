@@ -4,9 +4,9 @@ import clsx from "clsx";
 
 const ShinyText: React.FC<{
   text: string;
-  disabled: boolean;
+  disabled?: boolean;
   speed: number;
-  className: string;
+  className?: string;
 }> = ({ text, disabled = false, speed = 5, className = "" }) => {
   const animationDuration = `${speed}s`;
 

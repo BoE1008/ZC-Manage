@@ -27,7 +27,7 @@ export const updateDept = async (id: string, info) => {
   return res.data;
 };
 
-export const deleteDept = async (id) => {
+export const deleteDept = async (id: string) => {
   const res = await axiosInstance.get(`/zc/dept/del`, {
     params: { id },
   });

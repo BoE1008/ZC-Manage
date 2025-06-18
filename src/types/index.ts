@@ -29,10 +29,13 @@ export interface User {
 }
 
 export enum ModalType {
-  Submit,
-  Approve,
-  CW,
-  OTHERS,
+  Submit, //项目管理中项目填报
+  Approve, //项目管理中业务审核
+  CW, //项目管理中财务审核
+  OTHERS, // 其他管理模块
 }
 
-enum DictRecord {}
+export enum InvoicingType {
+  NORMAL = "普票",
+  SPECIAL = "专票",
+}

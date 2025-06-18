@@ -2,6 +2,7 @@ import { memo, useEffect, useState } from "react";
 import { Modal, Upload } from "antd";
 import { getFilesById, deleteFileById } from "@/restApi/invoicing";
 import { formatNumber } from "@/utils";
+import Image from "next/image";
 
 const InvoicingDetailModal = ({ onClose, data }) => {
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -376,7 +377,7 @@ const InvoicingDetailModal = ({ onClose, data }) => {
         footer={null}
         onCancel={handleCancel}
       >
-        <img
+        <Image
           alt="file"
           style={{ width: "100%", padding: "40px" }}
           src={previewImage}

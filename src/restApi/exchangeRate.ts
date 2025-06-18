@@ -34,7 +34,7 @@ export const updateExchangeRate = async (id: string, info) => {
   return res.data;
 };
 
-export const deleteExchangeRate = async (id) => {
+export const deleteExchangeRate = async (id: string) => {
   const res = await axiosInstance.get(`/zc/exchangeRate/del`, {
     params: { id },
   });

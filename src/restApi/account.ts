@@ -1,6 +1,6 @@
 import axiosInstance from "./axiosInstance";
 
-export const getCustomBankList = async (customSupplierId) => {
+export const getCustomBankList = async (customSupplierId: string) => {
   const res = await axiosInstance.get(`/zc/account/custom/list`, {
     params: {
       customSupplierId,
@@ -12,7 +12,7 @@ export const getCustomBankList = async (customSupplierId) => {
   return res.data;
 };
 
-export const addCustomBank = async (customSupplierId, info) => {
+export const addCustomBank = async (customSupplierId: string, info) => {
   const res = await axiosInstance.post(`/zc/account/custom/add`, {
     ...info,
     customSupplierId,
@@ -21,7 +21,11 @@ export const addCustomBank = async (customSupplierId, info) => {
   return res.data;
 };
 
-export const updateCustomBank = async (customSupplierId, id, info) => {
+export const updateCustomBank = async (
+  customSupplierId: string,
+  id: string,
+  info
+) => {
   const res = await axiosInstance.post(`/zc/account/custom/update`, {
     ...info,
     id,
@@ -31,7 +35,7 @@ export const updateCustomBank = async (customSupplierId, id, info) => {
   return res.data;
 };
 
-export const getSupplierBankList = async (customSupplierId) => {
+export const getSupplierBankList = async (customSupplierId: string) => {
   const res = await axiosInstance.get(`/zc/account/supplier/list`, {
     params: {
       customSupplierId,
@@ -43,7 +47,7 @@ export const getSupplierBankList = async (customSupplierId) => {
   return res.data;
 };
 
-export const addSupplierBank = async (customSupplierId, info) => {
+export const addSupplierBank = async (customSupplierId: string, info) => {
   const res = await axiosInstance.post(`/zc/account/supplier/add`, {
     ...info,
     customSupplierId,
@@ -52,7 +56,11 @@ export const addSupplierBank = async (customSupplierId, info) => {
   return res.data;
 };
 
-export const updateSupplierBank = async (customSupplierId, id, info) => {
+export const updateSupplierBank = async (
+  customSupplierId: string,
+  id: string,
+  info
+) => {
   const res = await axiosInstance.post(`/zc/account/supplier/update`, {
     ...info,
     id,

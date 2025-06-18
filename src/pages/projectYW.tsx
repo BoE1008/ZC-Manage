@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef, useMemo } from "react";
 import {
-  Table,
   Button,
   Modal,
   Form,
@@ -18,7 +17,6 @@ import {
 } from "antd";
 import {
   ProfileTwoTone,
-  CalendarTwoTone,
   StopTwoTone,
   CheckCircleTwoTone,
   AppstoreTwoTone,
@@ -28,12 +26,9 @@ import {
   getProjectsApproveList,
   addProject,
   updateProject,
-  deleteProject,
   exportProject,
   approveOne,
   rejectOne,
-  logsOne,
-  getProjectDetailById,
 } from "@/restApi/project";
 import { Company, ModalType, Operation } from "@/types";
 import dayjs from "dayjs";

@@ -52,7 +52,7 @@ export const deleteCustomer = async (id: string) => {
   return res.data;
 };
 
-export const getCustomerDetailById = async (id) => {
+export const getCustomerDetailById = async (id: string) => {
   const res = await axiosInstance.get("/zc/custom/detail", { params: { id } });
 
   return res.data;
