@@ -435,6 +435,22 @@ const Project = () => {
         render: (record) => formatNumber(record?.deductProfit),
       },
       {
+        title: "备注",
+        label: "备注",
+        value: "备注",
+        dataIndex: "remark",
+        align: "center",
+        key: "remark",
+        ellipsis: {
+          showTitle: false,
+        },
+        render: (remark) => (
+          <Tooltip placement="topLeft" title={remark}>
+            {remark}
+          </Tooltip>
+        ),
+      },
+      {
         title: "项目状态",
         label: "项目状态",
         value: "项目状态",
@@ -452,14 +468,6 @@ const Project = () => {
         onFilter: (value: string, record) =>
           record.state ===
           stateFilters.find((item) => value === item.value)?.text,
-      },
-      {
-        title: "备注",
-        label: "备注",
-        value: "备注",
-        dataIndex: "remark",
-        align: "center",
-        key: "remark",
       },
       {
         title: "操作",

@@ -39,6 +39,7 @@ import RejectModal from "@/components/RejectModal";
 import { formatNumber } from "@/utils";
 import ProjectYWStaticModal from "@/components/ProjectYWStaticModal";
 import ResizeTable from "@/components/ResizeTable";
+import clsx from "clsx";
 
 const initialValues = {
   name: "",
@@ -483,21 +484,6 @@ const Project = () => {
         render: (record) => formatNumber(record?.deductProfit),
       },
       {
-        label: "项目状态",
-        value: "项目状态",
-        title: "项目状态",
-        // dataIndex: "state",
-        align: "center",
-        key: "state",
-        render: (record) => `${record?.state}(${record?.waitApproveNum})`,
-        filterMultiple: false,
-        filters: stateFilters,
-        filterSearch: true,
-        onFilter: (value: string, record) =>
-          record.state ===
-          stateFilters.find((item) => value === item.value)?.text,
-      },
-      {
         label: "操作人",
         value: "操作人",
         title: "操作人",
@@ -506,12 +492,39 @@ const Project = () => {
         key: "userName",
       },
       {
+        title: "备注",
         label: "备注",
         value: "备注",
-        title: "备注",
         dataIndex: "remark",
         align: "center",
         key: "remark",
+        ellipsis: {
+          showTitle: false,
+        },
+        render: (remark) => (
+          <Tooltip placement="topLeft" title={remark}>
+            {remark}
+          </Tooltip>
+        ),
+      },
+      {
+        title: "项目状态",
+        label: "项目状态",
+        value: "项目状态",
+        // dataIndex: "state",
+        align: "center",
+        key: "state",
+        render: (record) => (
+          <span className={clsx(record.returnNum > 0 && "text-red-500")}>
+            {`${record?.state}(${record?.waitApproveNum})`}
+          </span>
+        ),
+        filterMultiple: false,
+        filters: stateFilters,
+        filterSearch: true,
+        onFilter: (value: string, record) =>
+          record.state ===
+          stateFilters.find((item) => value === item.value)?.text,
       },
       {
         label: "操作",
