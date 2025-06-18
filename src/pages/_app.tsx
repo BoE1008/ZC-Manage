@@ -2,7 +2,7 @@
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import AppLayout from "@/layout";
-import { ConfigProvider } from "antd";
+import { ConfigProvider, theme } from "antd";
 import locale from "antd/locale/zh_CN";
 import Head from "next/head";
 import "dayjs/locale/zh-cn";
@@ -29,6 +29,7 @@ export default function App({ Component, pageProps, router }: AppProps) {
       <ConfigProvider
         locale={locale}
         theme={{
+          algorithm: theme.compactAlgorithm,
           token: {
             fontSize: 16,
             colorTextBase: "#000",
