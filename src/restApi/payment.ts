@@ -243,3 +243,30 @@ export const withDrawPayment = async (paymentId: string) => {
   });
   return res.data;
 };
+
+export const getPaymentOthersList = async (
+  pageNo: number,
+  pageSize: number,
+  projectName?: string,
+  supplierId?: string,
+  state?: string,
+  userName?: string,
+  projectNum?: string,
+  yfDate?: string,
+  updateTimeSort?: string
+) => {
+  const res = await axiosInstance.get(`/zc/payment/list/others`, {
+    params: {
+      pageNo,
+      pageSize,
+      projectNum,
+      projectName,
+      supplierId,
+      state,
+      userName,
+      yfDate,
+      updateTimeSort,
+    },
+  });
+  return res.data;
+};

@@ -28,7 +28,7 @@ import {
   StopTwoTone,
 } from "@ant-design/icons";
 import {
-  getPaymentList,
+  getPaymentOthersList,
   addPayment,
   updatePayment,
   logsOne,
@@ -105,7 +105,7 @@ const Payment = () => {
     (async () => {
       setLoading(true);
       try {
-        const res = await getPaymentList(
+        const res = await getPaymentOthersList(
           page,
           pageSize,
           searchValue,
