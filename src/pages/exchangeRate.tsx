@@ -31,7 +31,7 @@ const ExchangeRate = () => {
   const [moneyTypes, setMoneyTypes] = useState();
   const [editId, setEditId] = useState("");
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(20);
   const [form] = Form.useForm();
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -191,7 +191,7 @@ const ExchangeRate = () => {
 
   return (
     <div className="p-2">
-      <div className="flex flex-row gap-y-3 justify-between items-center">
+      <div className="flex flex-row gap-y-3 justify-between items-center mb-4">
         <Space>
           <DatePicker
             allowClear={false}
@@ -204,7 +204,7 @@ const ExchangeRate = () => {
           <Button
             onClick={handleAdd}
             type="primary"
-            style={{ marginBottom: 16, background: "#198348", width: "100px" }}
+            style={{ background: "#198348", width: "100px" }}
           >
             添加
           </Button>
@@ -222,6 +222,7 @@ const ExchangeRate = () => {
           showTotal: (total) => `共 ${total} 条`,
           // 是否可以改变 pageSize
           showSizeChanger: true,
+          pageSize: pageSize,
 
           // 改变页码时
           onChange: async (page) => {

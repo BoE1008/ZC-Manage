@@ -53,6 +53,7 @@ import { formatNumber } from "@/utils";
 import { ModalType } from "@/types";
 import YSYFModal from "@/components/YSYFModal";
 import ResizeTable from "@/components/ResizeTable";
+import SearchInput from "@/components/SearchInput";
 
 const InvoicingSubmit = () => {
   const [form] = Form.useForm();
@@ -62,7 +63,7 @@ const InvoicingSubmit = () => {
   const [logs, setLogs] = useState();
 
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(20);
   const [searchValue, setSearchValue] = useState("");
   const [userName, setUserName] = useState("");
   const [projectNum, setProjectNum] = useState("");
@@ -742,21 +743,9 @@ const InvoicingSubmit = () => {
         </Space>
 
         <div className="flex flex-row gap-x-4">
-          <Input
-            placeholder="按项目名称搜索"
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-          />
-          <Input
-            placeholder="按项目编号搜索"
-            value={projectNum}
-            onChange={(e) => setProjectNum(e.target.value)}
-          />
-          <Input
-            placeholder="按申请人搜索"
-            value={userName}
-            onChange={(e) => setUserName(e.target.value)}
-          />
+          <SearchInput placeholder="按项目名称搜索" onSearch={setSearchValue} />
+          <SearchInput placeholder="按项目编号搜索" onSearch={setProjectNum} />
+          <SearchInput placeholder="按申请人搜索" onSearch={setUserName} />
         </div>
       </div>
       <ResizeTable
@@ -769,6 +758,7 @@ const InvoicingSubmit = () => {
           total: data?.entity.total,
           showTotal: (total) => `共 ${total} 条`,
           showSizeChanger: true,
+          pageSize: pageSize,
           onChange: async (page) => {
             setPage(page);
           },

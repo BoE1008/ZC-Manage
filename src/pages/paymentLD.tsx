@@ -1,7 +1,29 @@
 import { useEffect, useState, useMemo } from "react";
-import { Space, Button, Input, Modal, message, Tooltip, Popconfirm, List, Avatar, DatePicker } from "antd";
-import { CheckCircleTwoTone, StopTwoTone, CalendarTwoTone, ProfileTwoTone } from "@ant-design/icons";
-import { getPaymentLDList, submitLDToCW, rejectOne, logsOne, getPaymentDetailById } from "@/restApi/payment";
+import {
+  Space,
+  Button,
+  Input,
+  Modal,
+  message,
+  Tooltip,
+  Popconfirm,
+  List,
+  Avatar,
+  DatePicker,
+} from "antd";
+import {
+  CheckCircleTwoTone,
+  StopTwoTone,
+  CalendarTwoTone,
+  ProfileTwoTone,
+} from "@ant-design/icons";
+import {
+  getPaymentLDList,
+  submitLDToCW,
+  rejectOne,
+  logsOne,
+  getPaymentDetailById,
+} from "@/restApi/payment";
 import { getSuppliersList } from "@/restApi/supplyer";
 import RejectModal from "@/components/RejectModal";
 import PaymentSubmitModal from "@/components/PaymentSubmitModal";
@@ -10,12 +32,13 @@ import PaymentDetailModal from "@/components/PaymentDetailModal";
 import { ModalType } from "@/types";
 import ResizeTable from "@/components/ResizeTable";
 import YSYFModal from "@/components/YSYFModal";
+import SearchInput from "@/components/SearchInput";
 
 const Role = () => {
   const [data, setData] = useState();
 
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(20);
   const [searchValue, setSearchValue] = useState("");
   const [userName, setUserName] = useState("");
   const [projectNum, setProjectNum] = useState("");
@@ -64,21 +87,40 @@ const Role = () => {
         setLoading(false);
       } catch {}
     })();
-  }, [page, pageSize, searchValue, supplierId, projectState, userName, projectNum, date, updateTimeSort]);
+  }, [
+    page,
+    pageSize,
+    searchValue,
+    supplierId,
+    projectState,
+    userName,
+    projectNum,
+    date,
+    updateTimeSort,
+  ]);
 
-  const handleDetail = async id => {
+  const handleDetail = async (id) => {
     const res = await getPaymentDetailById(id);
     setDetail(res.entity.data);
   };
 
-  const handleCheck = async id => {
+  const handleCheck = async (id) => {
     const res = await getPaymentDetailById(id);
     setCheck(res.entity.data);
   };
 
   const handleSubmitToCW = async () => {
     await submitLDToCW(detail.id);
-    const res = await getPaymentLDList(page, pageSize, searchValue, supplierId, projectState, userName, projectNum, date);
+    const res = await getPaymentLDList(
+      page,
+      pageSize,
+      searchValue,
+      supplierId,
+      projectState,
+      userName,
+      projectNum,
+      date
+    );
     setData(res);
     message.success({ content: "已提交至财务审核", type: "success" });
     setDetail(undefined);
@@ -87,7 +129,16 @@ const Role = () => {
   const handleRejectOne = async (id: string, remark) => {
     await rejectOne(id, remark, 2);
     setRejectId(undefined);
-    const res = await getPaymentLDList(page, pageSize, searchValue, supplierId, projectState, userName, projectNum, date);
+    const res = await getPaymentLDList(
+      page,
+      pageSize,
+      searchValue,
+      supplierId,
+      projectState,
+      userName,
+      projectNum,
+      date
+    );
     setData(res);
     message.success({ content: "申请已退回", type: "success" });
   };
@@ -98,7 +149,7 @@ const Role = () => {
   };
 
   const supplierFilters = useMemo(() => {
-    return supplier?.map(item => ({
+    return supplier?.map((item) => ({
       text: item.name,
       value: item.id,
     }));
@@ -143,9 +194,12 @@ const Role = () => {
       // dataIndex: "projectName",
       align: "center",
       key: "projectName",
-      render: record => {
+      render: (record) => {
         return (
-          <span className="cursor-pointer text-[#198348]" onClick={() => handleCheck(record.id)}>
+          <span
+            className="cursor-pointer text-[#198348]"
+            onClick={() => handleCheck(record.id)}
+          >
             {record.projectName}
           </span>
         );
@@ -172,7 +226,7 @@ const Role = () => {
       // dataIndex: "fee",
       align: "center",
       key: "fee",
-      render: record => formatNumber(record?.fee),
+      render: (record) => formatNumber(record?.fee),
     },
     {
       title: "审核状态",
@@ -182,7 +236,9 @@ const Role = () => {
       filterMultiple: false,
       filters: stateFilters,
       filterSearch: true,
-      onFilter: (value: string, record) => record.state === stateFilters.find(item => value === item.value)?.text,
+      onFilter: (value: string, record) =>
+        record.state ===
+        stateFilters.find((item) => value === item.value)?.text,
     },
     {
       title: "税号",
@@ -253,7 +309,7 @@ const Role = () => {
               <Tooltip title="审核通过">
                 <Popconfirm
                   title="是否批准？"
-                  getPopupContainer={node => node.parentElement}
+                  getPopupContainer={(node) => node.parentElement}
                   okButtonProps={{ style: { backgroundColor: "#198348" } }}
                   onConfirm={() => handleDetail(record.id)}
                 >
@@ -273,7 +329,7 @@ const Role = () => {
               <Tooltip title="退回申请">
                 <Popconfirm
                   title="是否退回？"
-                  getPopupContainer={node => node.parentElement}
+                  getPopupContainer={(node) => node.parentElement}
                   okButtonProps={{ style: { backgroundColor: "#198348" } }}
                   onConfirm={() => setRejectId(record.id)}
                 >
@@ -329,10 +385,15 @@ const Role = () => {
     <div className="p-2">
       <div className="flex flex-row gap-y-3 justify-between mb-4">
         <div className="flex flex-row gap-x-4">
-          <Input placeholder="按项目名称搜索" value={searchValue} onChange={e => setSearchValue(e.target.value)} />
-          <Input placeholder="按项目编号搜索" value={projectNum} onChange={e => setProjectNum(e.target.value)} />
-          <Input placeholder="按申请人搜索" value={userName} onChange={e => setUserName(e.target.value)} />
-          <DatePicker style={{ minWidth: "180px" }} picker="month" placeholder="按应付日期搜索" onChange={handleDateChange} />
+          <SearchInput placeholder="按项目名称搜索" onSearch={setSearchValue} />
+          <SearchInput placeholder="按项目编号搜索" onSearch={setProjectNum} />
+          <SearchInput placeholder="按申请人搜索" onSearch={setUserName} />
+          <DatePicker
+            style={{ minWidth: "180px" }}
+            picker="month"
+            placeholder="按应付日期搜索"
+            onChange={handleDateChange}
+          />
         </div>
       </div>
 
@@ -346,12 +407,12 @@ const Role = () => {
           // 设置总条数
           total: data?.entity.total,
           // 显示总条数
-          showTotal: total => `共 ${total} 条`,
+          showTotal: (total) => `共 ${total} 条`,
           // 是否可以改变 pageSize
-          showSizeChanger: true,
+          pageSize: pageSize,
 
           // 改变页码时
-          onChange: async page => {
+          onChange: async (page) => {
             setPage(page);
           },
           // pageSize 变化的回调
@@ -379,24 +440,48 @@ const Role = () => {
           renderItem={(item, index) => (
             <List.Item>
               <List.Item.Meta
-                avatar={<Avatar src={`https://xsgames.co/randomusers/avatar.php?g=pixel&key=${index}`} />}
+                avatar={
+                  <Avatar
+                    src={`https://xsgames.co/randomusers/avatar.php?g=pixel&key=${index}`}
+                  />
+                }
                 title={item.state}
-                description={`${item.userName} ${item.createTime} 备注：${item.remark || ""} `}
+                description={`${item.userName} ${item.createTime} 备注：${
+                  item.remark || ""
+                } `}
               />
             </List.Item>
           )}
         />
       </Modal>
 
-      {!!check && <PaymentDetailModal data={check} onClose={() => setCheck(undefined)} />}
-
-      {!!detail && <PaymentSubmitModal data={detail} onConfirm={handleSubmitToCW} onClose={() => setDetail(undefined)} />}
-
-      {!!rejectId && (
-        <RejectModal open={!!rejectId} onClose={() => setRejectId(undefined)} onReject={value => handleRejectOne(rejectId, value)} />
+      {!!check && (
+        <PaymentDetailModal data={check} onClose={() => setCheck(undefined)} />
       )}
 
-      {!!projectId && <YSYFModal modalType={ModalType.OTHERS} projectId={projectId} onClose={() => setProjectId(undefined)} />}
+      {!!detail && (
+        <PaymentSubmitModal
+          data={detail}
+          onConfirm={handleSubmitToCW}
+          onClose={() => setDetail(undefined)}
+        />
+      )}
+
+      {!!rejectId && (
+        <RejectModal
+          open={!!rejectId}
+          onClose={() => setRejectId(undefined)}
+          onReject={(value) => handleRejectOne(rejectId, value)}
+        />
+      )}
+
+      {!!projectId && (
+        <YSYFModal
+          modalType={ModalType.OTHERS}
+          projectId={projectId}
+          onClose={() => setProjectId(undefined)}
+        />
+      )}
     </div>
   );
 };

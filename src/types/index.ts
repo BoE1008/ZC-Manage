@@ -39,3 +39,8 @@ export enum InvoicingType {
   NORMAL = "普票",
   SPECIAL = "专票",
 }
+
+export enum PaymentOthersType {
+  SW = "SW",
+  ZH = "ZH",
+}

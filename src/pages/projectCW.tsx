@@ -36,6 +36,7 @@ import { formatNumber } from "@/utils";
 import ProjectCWStaticModal from "@/components/ProjectCWStaticModal";
 import ResizeTable from "@/components/ResizeTable";
 import clsx from "clsx";
+import SearchInput from "@/components/SearchInput";
 
 const initialValues = {
   name: "",
@@ -49,7 +50,7 @@ const Project = () => {
   const [data, setData] = useState([]);
   const [editId, setEditId] = useState("");
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(20);
   const [searchValue, setSearchValue] = useState("");
   const [searchNumValue, setSearchNumValue] = useState("");
 
@@ -547,15 +548,13 @@ const Project = () => {
           </div>
 
           <div className="flex flex-row gap-x-4">
-            <Input
+            <SearchInput
               placeholder="按项目名称搜索"
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
+              onSearch={setSearchValue}
             />
-            <Input
+            <SearchInput
               placeholder="按项目编号搜索"
-              value={searchNumValue}
-              onChange={(e) => setSearchNumValue(e.target.value)}
+              onSearch={setSearchNumValue}
             />
             <DatePicker
               style={{ minWidth: "180px" }}
@@ -613,6 +612,7 @@ const Project = () => {
           showTotal: (total) => `共 ${total} 条`,
           // 是否可以改变 pageSize
           showSizeChanger: true,
+          pageSize: pageSize,
 
           // 改变页码时
           onChange: async (page) => {

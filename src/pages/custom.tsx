@@ -30,6 +30,7 @@ import { getDictByCode } from "@/restApi/dict";
 import ResizeTable from "@/components/ResizeTable";
 import { adminUserIds } from "@/utils/const";
 import { addSupplyer } from "@/restApi/supplyer";
+import SearchInput from "@/components/SearchInput";
 
 const initialValues = {
   name: "",
@@ -44,7 +45,7 @@ const Customer = () => {
   const [data, setData] = useState();
   const [editId, setEditId] = useState("");
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(20);
   const [searchValue, setSearchValue] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [operation, setOperation] = useState<Operation>(Operation.Add);
@@ -381,11 +382,12 @@ const Customer = () => {
           添加
         </Button>
         <Space>
-          <Input
+          {/* <Input
             placeholder="名称"
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
-          />
+          /> */}
+          <SearchInput onSearch={setSearchValue} placeholder="名称" />
           {/* <Button onClick={handleSearch}>查询</Button> */}
         </Space>
       </div>
@@ -402,6 +404,7 @@ const Customer = () => {
           showTotal: (total) => `共 ${total} 条`,
           // 是否可以改变 pageSize
           showSizeChanger: true,
+          pageSize: pageSize,
 
           // 改变页码时
           onChange: async (page) => {

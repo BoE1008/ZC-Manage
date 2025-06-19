@@ -24,7 +24,7 @@ const Role = () => {
   const [data, setData] = useState();
 
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(20);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [operation, setOperation] = useState<Operation>(Operation.Add);
@@ -265,6 +265,7 @@ const Role = () => {
           showTotal: (total) => `共 ${total} 条`,
           // 是否可以改变 pageSize
           showSizeChanger: true,
+          pageSize: pageSize,
 
           // 改变页码时
           onChange: async (page) => {

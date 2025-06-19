@@ -1,7 +1,29 @@
-import { getinvoicingCWList, approveOne, rejectOne, logsOne, getInvoicingDetailById } from "@/restApi/invoicing";
+import {
+  getinvoicingCWList,
+  approveOne,
+  rejectOne,
+  logsOne,
+  getInvoicingDetailById,
+} from "@/restApi/invoicing";
 import { useEffect, useState, useMemo } from "react";
-import { Space, Button, Input, Modal, message, List, Avatar, Tooltip, Popconfirm, DatePicker } from "antd";
-import { CheckCircleTwoTone, StopTwoTone, CalendarTwoTone, ProfileTwoTone } from "@ant-design/icons";
+import {
+  Space,
+  Button,
+  Input,
+  Modal,
+  message,
+  List,
+  Avatar,
+  Tooltip,
+  Popconfirm,
+  DatePicker,
+} from "antd";
+import {
+  CheckCircleTwoTone,
+  StopTwoTone,
+  CalendarTwoTone,
+  ProfileTwoTone,
+} from "@ant-design/icons";
 import { getCustomersList } from "@/restApi/customer";
 import RejectModal from "@/components/RejectModal";
 import InvoicingSubmitModal from "@/components/InvoicingSubmitModal";
@@ -10,13 +32,14 @@ import { formatNumber } from "@/utils";
 import { ModalType } from "@/types";
 import YSYFModal from "@/components/YSYFModal";
 import ResizeTable from "@/components/ResizeTable";
+import SearchInput from "@/components/SearchInput";
 
 const InvoicingSubmit = () => {
   const [data, setData] = useState();
   const [customer, setCustomer] = useState();
 
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(20);
   const [searchValue, setSearchValue] = useState("");
   const [userName, setUserName] = useState("");
   const [projectNum, setProjectNum] = useState("");
@@ -48,24 +71,42 @@ const InvoicingSubmit = () => {
     (async () => {
       setLoading(true);
       try {
-        const res = await getinvoicingCWList(page, pageSize, searchValue, customerId, projectState, userName, projectNum, updateTimeSort);
+        const res = await getinvoicingCWList(
+          page,
+          pageSize,
+          searchValue,
+          customerId,
+          projectState,
+          userName,
+          projectNum,
+          updateTimeSort
+        );
         setData(res);
         setLoading(false);
       } catch {}
     })();
-  }, [page, pageSize, searchValue, customerId, projectState, userName, projectNum, updateTimeSort]);
+  }, [
+    page,
+    pageSize,
+    searchValue,
+    customerId,
+    projectState,
+    userName,
+    projectNum,
+    updateTimeSort,
+  ]);
 
   const handleLogsOne = async (id: string) => {
     const res = await logsOne(id);
     setLogs(res.entity.data);
   };
 
-  const handleDetail = async id => {
+  const handleDetail = async (id) => {
     const res = await getInvoicingDetailById(id);
     setDetail(res.entity.data);
   };
 
-  const handleCheck = async id => {
+  const handleCheck = async (id) => {
     const res = await getInvoicingDetailById(id);
     setCheck(res.entity.data);
   };
@@ -74,7 +115,15 @@ const InvoicingSubmit = () => {
     await approveOne(detail.id);
     message.success({ content: "审核完成", type: "success" });
     setDetail(undefined);
-    const data = await getinvoicingCWList(page, pageSize, searchValue, customerId, projectState, userName, projectNum);
+    const data = await getinvoicingCWList(
+      page,
+      pageSize,
+      searchValue,
+      customerId,
+      projectState,
+      userName,
+      projectNum
+    );
     setLoading(false);
     setData(data);
   };
@@ -83,13 +132,21 @@ const InvoicingSubmit = () => {
     await rejectOne(invoicingId, remark, 3);
     message.success({ content: "申请已退回", type: "success" });
     setRejectId(undefined);
-    const data = await getinvoicingCWList(page, pageSize, searchValue, customerId, projectState, userName, projectNum);
+    const data = await getinvoicingCWList(
+      page,
+      pageSize,
+      searchValue,
+      customerId,
+      projectState,
+      userName,
+      projectNum
+    );
     setLoading(false);
     setData(data);
   };
 
   const customerFilters = useMemo(() => {
-    return customer?.map(item => ({
+    return customer?.map((item) => ({
       text: item.name,
       value: item.id,
     }));
@@ -130,9 +187,12 @@ const InvoicingSubmit = () => {
       // dataIndex: "projectName",
       align: "center",
       key: "projectName",
-      render: record => {
+      render: (record) => {
         return (
-          <span className="cursor-pointer text-[#198348]" onClick={() => handleCheck(record.id)}>
+          <span
+            className="cursor-pointer text-[#198348]"
+            onClick={() => handleCheck(record.id)}
+          >
             {record.projectName}
           </span>
         );
@@ -146,7 +206,7 @@ const InvoicingSubmit = () => {
       ellipsis: {
         showTitle: false,
       },
-      render: customName => (
+      render: (customName) => (
         <Tooltip placement="topLeft" title={customName}>
           {customName}
         </Tooltip>
@@ -179,7 +239,7 @@ const InvoicingSubmit = () => {
       align: "center",
       // dataIndex: "fee",
       key: "fee",
-      render: record => formatNumber(record?.fee),
+      render: (record) => formatNumber(record?.fee),
     },
 
     {
@@ -240,7 +300,9 @@ const InvoicingSubmit = () => {
       filterMultiple: false,
       filters: stateFilters,
       filterSearch: true,
-      onFilter: (value: string, record) => record.state === stateFilters.find(item => value === item.value)?.text,
+      onFilter: (value: string, record) =>
+        record.state ===
+        stateFilters.find((item) => value === item.value)?.text,
     },
     {
       title: "备注",
@@ -272,7 +334,7 @@ const InvoicingSubmit = () => {
               <Tooltip title="申请通过">
                 <Popconfirm
                   title="是否通过申请？"
-                  getPopupContainer={node => node.parentElement}
+                  getPopupContainer={(node) => node.parentElement}
                   okButtonProps={{ style: { backgroundColor: "#198348" } }}
                   onConfirm={() => {
                     handleDetail(record.id);
@@ -295,7 +357,7 @@ const InvoicingSubmit = () => {
                 <Popconfirm
                   title="是否退回申请？"
                   okButtonProps={{ style: { backgroundColor: "#198348" } }}
-                  getPopupContainer={node => node.parentElement}
+                  getPopupContainer={(node) => node.parentElement}
                   onConfirm={() => setRejectId(record.id)}
                 >
                   <Button
@@ -345,9 +407,9 @@ const InvoicingSubmit = () => {
     <div className="p-2">
       <div className="flex flex-row gap-y-3 justify-between mb-4">
         <Space>
-          <Input placeholder="按项目名称搜索" value={searchValue} onChange={e => setSearchValue(e.target.value)} />
-          <Input placeholder="按项目编号搜索" value={projectNum} onChange={e => setProjectNum(e.target.value)} />
-          <Input placeholder="按申请人搜索" value={userName} onChange={e => setUserName(e.target.value)} />
+          <SearchInput placeholder="按项目名称搜索" onSearch={setSearchValue} />
+          <SearchInput placeholder="按项目编号搜索" onSearch={setProjectNum} />
+          <SearchInput placeholder="按申请人搜索" onSearch={setUserName} />
         </Space>
       </div>
       <ResizeTable
@@ -360,12 +422,13 @@ const InvoicingSubmit = () => {
           // 设置总条数
           total: data?.entity.total,
           // 显示总条数
-          showTotal: total => `共 ${total} 条`,
+          showTotal: (total) => `共 ${total} 条`,
           // 是否可以改变 pageSize
           showSizeChanger: true,
+          pageSize: pageSize,
 
           // 改变页码时
-          onChange: async page => {
+          onChange: async (page) => {
             setPage(page);
           },
           // pageSize 变化的回调
@@ -393,16 +456,27 @@ const InvoicingSubmit = () => {
           renderItem={(item, index) => (
             <List.Item>
               <List.Item.Meta
-                avatar={<Avatar src={`https://xsgames.co/randomusers/avatar.php?g=pixel&key=${index}`} />}
+                avatar={
+                  <Avatar
+                    src={`https://xsgames.co/randomusers/avatar.php?g=pixel&key=${index}`}
+                  />
+                }
                 title={item.state}
-                description={`${item.userName} ${item.createTime} 备注：${item.remark || ""} `}
+                description={`${item.userName} ${item.createTime} 备注：${
+                  item.remark || ""
+                } `}
               />
             </List.Item>
           )}
         />
       </Modal>
 
-      {!!check && <InvoicingDetailModal data={check} onClose={() => setCheck(undefined)} />}
+      {!!check && (
+        <InvoicingDetailModal
+          data={check}
+          onClose={() => setCheck(undefined)}
+        />
+      )}
 
       {!!detail && (
         <InvoicingSubmitModal
@@ -415,10 +489,20 @@ const InvoicingSubmit = () => {
       )}
 
       {!!rejectId && (
-        <RejectModal open={!!rejectId} onClose={() => setRejectId(undefined)} onReject={value => handleReject(rejectId, value)} />
+        <RejectModal
+          open={!!rejectId}
+          onClose={() => setRejectId(undefined)}
+          onReject={(value) => handleReject(rejectId, value)}
+        />
       )}
 
-      {!!projectId && <YSYFModal modalType={ModalType.OTHERS} projectId={projectId} onClose={() => setProjectId(undefined)} />}
+      {!!projectId && (
+        <YSYFModal
+          modalType={ModalType.OTHERS}
+          projectId={projectId}
+          onClose={() => setProjectId(undefined)}
+        />
+      )}
     </div>
   );
 };

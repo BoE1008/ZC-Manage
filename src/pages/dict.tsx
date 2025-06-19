@@ -38,7 +38,7 @@ const Dict = () => {
   const [editId, setEditId] = useState("");
   const [dataEditId, setDataEditId] = useState("");
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(20);
   const [searchValue, setSearchValue] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [operation, setOperation] = useState<Operation>(Operation.Add);
@@ -310,6 +310,7 @@ const Dict = () => {
           total: data?.entity.total,
           showTotal: (total) => `共 ${total} 条`,
           showSizeChanger: true,
+          pageSize: pageSize,
           onChange: async (page) => {
             setPage(page);
           },

@@ -31,6 +31,7 @@ import { getRoleList } from "@/restApi/role";
 import { formatMenu } from "@/utils/index";
 import ResizeTable from "@/components/ResizeTable";
 import { getDictById } from "@/restApi/dict";
+import SearchInput from "@/components/SearchInput";
 
 const initialValues = {
   name: "",
@@ -46,7 +47,7 @@ const User = () => {
   const [depts, setDepts] = useState([]);
   const [editId, setEditId] = useState("");
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(20);
   const [searchValue, setSearchValue] = useState("");
   const [selectDeptId, setSelectDeptId] = useState("100");
 
@@ -307,11 +308,7 @@ const User = () => {
               添加
             </Button>
             <Space>
-              <Input
-                placeholder="用户名"
-                value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
-              />
+              <SearchInput placeholder="用户名" onSearch={setSearchValue} />
             </Space>
           </div>
           <ResizeTable
@@ -326,6 +323,7 @@ const User = () => {
               showTotal: (total) => `共 ${total} 条`,
               // 是否可以改变 pageSize
               showSizeChanger: true,
+              pageSize: pageSize,
 
               // 改变页码时
               onChange: async (page) => {

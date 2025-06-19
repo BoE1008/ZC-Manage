@@ -49,13 +49,14 @@ import PaymentDetailModal from "@/components/PaymentDetailModal";
 import { ModalType } from "@/types";
 import YSYFModal from "@/components/YSYFModal";
 import ResizeTable from "@/components/ResizeTable";
+import SearchInput from "@/components/SearchInput";
 
 const Payment = () => {
   const [form] = Form.useForm();
   const [data, setData] = useState();
 
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(20);
   const [searchValue, setSearchValue] = useState("");
   const [userName, setUserName] = useState("");
   const [projectNum, setProjectNum] = useState("");
@@ -727,21 +728,9 @@ const Payment = () => {
         </Space>
 
         <div className="flex flex-row gap-x-4">
-          <Input
-            placeholder="按项目名称搜索"
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-          />
-          <Input
-            placeholder="按项目编号搜索"
-            value={projectNum}
-            onChange={(e) => setProjectNum(e.target.value)}
-          />
-          <Input
-            placeholder="按申请人搜索"
-            value={userName}
-            onChange={(e) => setUserName(e.target.value)}
-          />
+          <SearchInput placeholder="按项目名称搜索" onSearch={setSearchValue} />
+          <SearchInput placeholder="按项目编号搜索" onSearch={setProjectNum} />
+          <SearchInput placeholder="按申请人搜索" onSearch={setUserName} />
           <DatePicker
             style={{ minWidth: "180px" }}
             picker="month"
@@ -763,6 +752,7 @@ const Payment = () => {
           showTotal: (total) => `共 ${total} 条`,
           // 是否可以改变 pageSize
           showSizeChanger: true,
+          pageSize: pageSize,
 
           // 改变页码时
           onChange: async (page) => {

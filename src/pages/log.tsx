@@ -1,12 +1,13 @@
 import { getLogs } from "@/restApi/log";
 import { useEffect, useState } from "react";
 import { Table, Space, Input } from "antd";
+import SearchInput from "@/components/SearchInput";
 
 const System = () => {
   const [data, setData] = useState();
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(20);
   const [userName, setUserName] = useState("");
 
   useEffect(() => {
@@ -47,11 +48,7 @@ const System = () => {
   return (
     <div>
       <Space className="my-4 ml-4">
-        <Input
-          placeholder="按用户名搜索"
-          value={userName}
-          onChange={(e) => setUserName(e.target.value)}
-        />
+        <SearchInput placeholder="按用户名搜索" onSearch={setUserName} />
       </Space>
       <Table
         bordered
@@ -65,6 +62,7 @@ const System = () => {
           showTotal: (total) => `共 ${total} 条`,
           // 是否可以改变 pageSize
           showSizeChanger: true,
+          pageSize: pageSize,
 
           // 改变页码时
           onChange: async (page) => {

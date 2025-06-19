@@ -49,13 +49,20 @@ import PaymentDetailModal from "@/components/PaymentDetailModal";
 import { ModalType } from "@/types";
 import YSYFModal from "@/components/YSYFModal";
 import ResizeTable from "@/components/ResizeTable";
+import { PaymentOthersType } from "@/types";
+import SearchInput from "@/components/SearchInput";
+
+const PaymentType = [
+  { label: "商务", value: PaymentOthersType.SW },
+  { label: "综合", value: PaymentOthersType.ZH },
+];
 
 const Payment = () => {
   const [form] = Form.useForm();
   const [data, setData] = useState();
 
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(20);
   const [searchValue, setSearchValue] = useState("");
   const [userName, setUserName] = useState("");
   const [projectNum, setProjectNum] = useState("");
@@ -89,8 +96,6 @@ const Payment = () => {
   const [projectId, setProjectId] = useState();
 
   const [updateTimeSort, setUpdateTimeSort] = useState();
-
-  const [projectYF, setProjectYF] = useState();
 
   useEffect(() => {
     (async () => {
@@ -142,20 +147,8 @@ const Payment = () => {
   const handleEditOne = async (record) => {
     setOperation(Operation.Edit);
     setEditId(record.id);
-    const projectCustom = await getSuppliersYFList(record.projectId);
-    console.log(projectCustom, "projectCustom");
-    setSupplier(projectCustom.entity.data);
-    setSelectSupplier(
-      projectCustom.entity?.data?.find((c) => record.supplierId === c.id)
-    );
-    const selectProject = project?.find(
-      (c) => c.projectNum === record.projectNum
-    );
-    setSelectProject(selectProject);
     const res = await getDictByCode("sys_money_type");
     setDict(res.entity);
-    const yf = await getYSFByProjectId(record.projectId, "YF");
-    setProjectYF(yf.entity.data);
     const rawFilelist = await getFilesById(record.id);
     const fileList = rawFilelist?.entity.data.map((item) => ({
       name: item.originalFileName,
@@ -168,15 +161,8 @@ const Payment = () => {
     setFiles(fileList);
     setOldFiles(fileList);
     form.setFieldsValue(record);
-    const selectYF = yf.entity.data.find((c) => c.id === record.yfId);
-    form.setFieldValue("yfId", {
-      value: record.yfId,
-      label: `${selectYF.name}(${selectYF.moneyType}:${selectYF.fee})`,
-    });
     setModalOpen(true);
   };
-
-  console.log(selectProject, "selectPro");
 
   const handleOk = async () => {
     form.validateFields().then(async () => {
@@ -188,32 +174,33 @@ const Payment = () => {
         operation === Operation.Add
           ? {
               ...values,
+              paymentType: values.paymentType.value || "",
               moneyType: values.moneyType.value || "",
-              projectNum: values.projectNum.label || "",
               projectId: values.projectNum?.value || "",
-              projectName: selectProject?.name || "",
               supplierName: values.supplierName.label || "",
               supplierId: values.supplierName.value || "",
               bank: values.bank.value || "",
               bankCard: values.bankCard.value || "",
-              taxationNumber: selectSupplier?.taxationNumber || "",
               fee: values.fee || "",
               remark: values.remark || "",
               yfDate: dayjs(values.yfDate).format("YYYY-MM-DD"),
-              yfId: values.yfId.value || "",
             }
           : {
               ...values,
+              paymentType:
+                values.paymentType.value ||
+                (JSON.stringify(values.paymentType) === "{}"
+                  ? ""
+                  : values.paymentType) ||
+                "",
               moneyType:
                 values.moneyType.value ||
                 (JSON.stringify(values.moneyType) === "{}"
                   ? ""
                   : values.moneyType) ||
                 "",
-              projectNum: values.projectNum.label || values.projectNum || "",
               projectId:
                 project?.find((c) => c.id === selectProject?.id)?.id || "",
-              projectName: selectProject?.name,
               supplierName:
                 values.supplierName?.label || values.supplierName || "",
               supplierId:
@@ -230,11 +217,9 @@ const Payment = () => {
                   ? ""
                   : values.bankCard) ||
                 "",
-              taxationNumber: selectSupplier?.taxationNumber || "",
               fee: values.fee || "",
               remark: values.remark || "",
               yfDate: dayjs(values.yfDate).format("YYYY-MM-DD"),
-              yfId: values.yfId.value || "",
               // files,
             };
 
@@ -274,7 +259,7 @@ const Payment = () => {
       setOldFiles([]);
       setFiles([]);
       setModalOpen(false);
-      const data = await getPaymentList(
+      const data = await getPaymentOthersList(
         page,
         pageSize,
         searchValue,
@@ -310,7 +295,7 @@ const Payment = () => {
 
   const handleDeleteOne = async (id: string) => {
     await deleteOne(id);
-    const data = await getPaymentList(
+    const data = await getPaymentOthersList(
       page,
       pageSize,
       searchValue,
@@ -326,7 +311,7 @@ const Payment = () => {
   const handleWithdraw = async (id: string) => {
     await withDrawPayment(id);
     message.success({ content: "撤回成功", type: "success" });
-    const data = await getPaymentList(
+    const data = await getPaymentOthersList(
       page,
       pageSize,
       searchValue,
@@ -343,7 +328,7 @@ const Payment = () => {
     await submitToYW(detail.id);
     message.success({ content: "提交成功", type: "success" });
     setDetail(undefined);
-    const data = await getPaymentList(
+    const data = await getPaymentOthersList(
       page,
       pageSize,
       searchValue,
@@ -354,20 +339,6 @@ const Payment = () => {
       date
     );
     setData(data);
-  };
-
-  const handleProjectChanged = async (param) => {
-    form.setFieldValue("projectName", {});
-    form.setFieldValue("supplierName", {});
-    form.setFieldValue("moneyType", {});
-    form.setFieldValue("bankCard", {});
-    form.setFieldValue("bank", {});
-    const data = project?.find((c) => c.projectNum === param.label);
-    setSelectProject(data);
-    const projectCustom = await getSuppliersYFList(param.value);
-    setSupplier(projectCustom.entity.data);
-    const YF = await getYSFByProjectId(param.value, "YF");
-    setProjectYF(YF.entity.data);
   };
 
   const handleSupplierChange = async (value) => {
@@ -452,7 +423,7 @@ const Payment = () => {
       key: "projectNum",
     },
     {
-      title: "项目名称",
+      title: "付款事由",
       // dataIndex: "projectName",
       align: "center",
       key: "projectName",
@@ -463,6 +434,23 @@ const Payment = () => {
             onClick={() => handleCheck(record.id)}
           >
             {record.projectName}
+          </span>
+        );
+      },
+    },
+    {
+      title: "付款类型",
+      dataIndex: "paymentType",
+      align: "center",
+      key: "paymentType",
+      render: (value) => {
+        return (
+          <span>
+            {value === PaymentOthersType.SW
+              ? "商务"
+              : value === "ZH"
+              ? "综合"
+              : ""}
           </span>
         );
       },
@@ -727,21 +715,9 @@ const Payment = () => {
         </Space>
 
         <div className="flex flex-row gap-x-4">
-          <Input
-            placeholder="按项目名称搜索"
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-          />
-          <Input
-            placeholder="按项目编号搜索"
-            value={projectNum}
-            onChange={(e) => setProjectNum(e.target.value)}
-          />
-          <Input
-            placeholder="按申请人搜索"
-            value={userName}
-            onChange={(e) => setUserName(e.target.value)}
-          />
+          <SearchInput placeholder="按项目名称搜索" onSearch={setSearchValue} />
+          <SearchInput placeholder="按项目编号搜索" onSearch={setProjectNum} />
+          <SearchInput placeholder="按申请人搜索" onSearch={setUserName} />
           <DatePicker
             style={{ minWidth: "180px" }}
             picker="month"
@@ -763,6 +739,7 @@ const Payment = () => {
           showTotal: (total) => `共 ${total} 条`,
           // 是否可以改变 pageSize
           showSizeChanger: true,
+          pageSize: pageSize,
 
           // 改变页码时
           onChange: async (page) => {
@@ -802,43 +779,31 @@ const Payment = () => {
           style={{ minWidth: 600, color: "#000" }}
         >
           <Form.Item
-            label="项目编号"
-            name="projectNum"
+            label="付款类型"
+            name="paymentType"
             validateTrigger="onBlur"
-            rules={[{ required: true, message: "项目编号不能为空" }]}
+            rules={[{ required: true, message: "付款类型不能为空" }]}
           >
             <Select
               showSearch
               labelInValue
-              placeholder="选择项目"
+              placeholder="选择付款类型"
               optionFilterProp="children"
               filterOption={customerFilterOption}
               onSearch={onSearch}
               optionLabelProp="label"
-              options={project?.map((con) => ({
-                label: con.projectNum,
-                value: con.id,
+              options={PaymentType?.map((con) => ({
+                label: con.label,
+                value: con.value,
               }))}
-              onChange={handleProjectChanged}
             />
           </Form.Item>
           <Form.Item
-            label="项目名称"
+            label="付款事由"
             name="projectName"
-            rules={[{ required: true, message: "项目名称不能为空" }]}
+            rules={[{ required: true, message: "付款事由不能为空" }]}
           >
-            <Typography>
-              <code
-                style={{
-                  display: "inline-block",
-                  width: "100%",
-                  padding: "5px 4px",
-                  fontSize: "16px",
-                }}
-              >
-                {selectProject?.name}
-              </code>
-            </Typography>
+            <Input.TextArea placeholder="付款事由" maxLength={100} />
           </Form.Item>
           <Form.Item
             label="供应商"
@@ -861,26 +826,6 @@ const Payment = () => {
             />
           </Form.Item>
           <Form.Item
-            label="应付"
-            name="yfId"
-            dependencies={["projectName"]}
-            validateTrigger="onBlur"
-            rules={[{ required: true, message: "应付不能为空" }]}
-          >
-            <Select
-              showSearch
-              labelInValue
-              placeholder="选择应付"
-              optionFilterProp="children"
-              filterOption={customerFilterOption}
-              // onChange={handleSupplierChange}
-              options={projectYF?.map((con) => ({
-                label: `${con.name}(${con.moneyType}:${con.fee})`,
-                value: con.id,
-              }))}
-            />
-          </Form.Item>
-          <Form.Item
             label="金额"
             name="fee"
             validateTrigger="onBlur"
@@ -888,22 +833,6 @@ const Payment = () => {
           >
             <InputNumber placeholder="金额" className="w-full" />
           </Form.Item>
-          <Form.Item label="税号" name="taxationNumber">
-            {/* <Input placeholder="税号" /> */}
-            <Typography>
-              <code
-                style={{
-                  display: "inline-block",
-                  width: "100%",
-                  padding: "5px 4px",
-                  fontSize: "16px",
-                }}
-              >
-                {selectSupplier?.taxationNumber}
-              </code>
-            </Typography>
-          </Form.Item>
-
           <Form.Item
             label="币种"
             name="moneyType"
