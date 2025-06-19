@@ -50,9 +50,7 @@ const Login = () => {
     });
   }, []);
 
-  const particlesLoaded = (container: Container) => {
-    console.log(container);
-  };
+  const particlesLoaded = (container: Container) => {};
 
   const userLogin = async () => {
     const values = form.getFieldsValue();

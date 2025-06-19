@@ -22,8 +22,6 @@ import dayjs from "dayjs";
 const YFDrawer = ({ yfRecord, onClose }) => {
   const [form] = Form.useForm();
 
-  console.log(yfRecord);
-
   const [dict, setDict] = useState();
   const [bank, setBank] = useState();
   const [bankcards, setBankcards] = useState();
@@ -88,7 +86,6 @@ const YFDrawer = ({ yfRecord, onClose }) => {
       return false;
     },
     onChange: (info) => {
-      console.log("onchange", info);
       setFiles([...info.fileList]);
     },
     onDownload: async (file) => {
@@ -101,8 +98,6 @@ const YFDrawer = ({ yfRecord, onClose }) => {
   const handleOk = async () => {
     form.validateFields().then(async () => {
       const values = form.getFieldsValue();
-
-      console.log(values, "values");
 
       const params = {
         ...values,

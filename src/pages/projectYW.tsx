@@ -636,7 +636,6 @@ const Project = () => {
       setProjectDateSort("");
     }
 
-    console.log(filters, "filters");
     setProductId(filters.productName?.[0]);
     setProjectType(filters.typeName?.[0]);
     setProjectBrand(filters.brandName?.[0]);

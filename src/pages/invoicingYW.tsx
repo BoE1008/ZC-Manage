@@ -400,8 +400,6 @@ const InvoicingYW = () => {
     setCustomerId(filters.customName?.[0]);
   };
 
-  console.log(updateTimeSort);
-
   return (
     <div className="p-2">
       <div className="flex flex-row gap-y-3 justify-between mb-4">

@@ -145,7 +145,6 @@ const InvoicingSubmit = () => {
   };
 
   const handleEditOne = async (record) => {
-    console.log(record);
     setOperation(Operation.Edit);
     setEditId(record.id);
     const projectCustom = await getCustomersYSList(record.projectId);
@@ -187,7 +186,6 @@ const InvoicingSubmit = () => {
   const handleOk = async () => {
     form.validateFields().then(async () => {
       const values = form.getFieldsValue();
-      console.log(values, "values");
 
       const params =
         operation === Operation.Add
@@ -247,8 +245,6 @@ const InvoicingSubmit = () => {
               remark: values.remark || "",
               ysId: values.ysId.value || "",
             };
-
-      console.log(params, "parmas");
 
       if (operation === Operation.Add) {
         const formData = new FormData();
@@ -706,7 +702,6 @@ const InvoicingSubmit = () => {
       return false;
     },
     onChange: (info) => {
-      console.log("onchange", info);
       setFiles([...info.fileList]);
     },
     onDownload: async (file) => {

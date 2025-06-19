@@ -144,7 +144,6 @@ const Payment = () => {
     setOperation(Operation.Edit);
     setEditId(record.id);
     const projectCustom = await getSuppliersYFList(record.projectId);
-    console.log(projectCustom, "projectCustom");
     setSupplier(projectCustom.entity.data);
     setSelectSupplier(
       projectCustom.entity?.data?.find((c) => record.supplierId === c.id)
@@ -177,13 +176,9 @@ const Payment = () => {
     setModalOpen(true);
   };
 
-  console.log(selectProject, "selectPro");
-
   const handleOk = async () => {
     form.validateFields().then(async () => {
       const values = form.getFieldsValue();
-
-      console.log(values, "values");
 
       const params =
         operation === Operation.Add
@@ -239,8 +234,6 @@ const Payment = () => {
               // files,
             };
 
-      console.log(params);
-
       if (operation === Operation.Add) {
         const formData = new FormData();
         for (const name in params) {
@@ -256,19 +249,15 @@ const Payment = () => {
         const formData = new FormData();
         formData.append("paymentId", editId);
 
-        // console.log(files, "files");
-        // console.log(oldFiles, "oldFiles");
         const fileList = files.filter(
           (itemA) => !oldFiles.some((itemB) => itemA.name === itemB.name)
         );
-        // console.log(fileList, "fileList");
 
         if (fileList.length > 0) {
           fileList.forEach((file) => {
             formData.append("files", file?.originFileObj);
           });
 
-          console.log(formData, "formData");
           await updateFileById(formData);
         }
       }
@@ -710,7 +699,6 @@ const Payment = () => {
       return false;
     },
     onChange: (info) => {
-      console.log("onchange", info);
       setFiles([...info.fileList]);
     },
     onDownload: async (file) => {
@@ -734,7 +722,6 @@ const Payment = () => {
   };
 
   const handleDateChange = (date, dateString) => {
-    console.log(dateString);
     setDate(dateString);
   };
 

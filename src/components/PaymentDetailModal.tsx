@@ -48,7 +48,6 @@ const PaymentDetailModal = ({ onClose, data }) => {
       return false;
     },
     onChange: (info) => {
-      console.log("onchange", info);
       setFiles([...info.fileList]);
     },
     onDownload: async (file) => {

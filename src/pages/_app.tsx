@@ -15,7 +15,7 @@ import { AntdRegistry } from "@ant-design/nextjs-registry";
 // if (typeof window !== "undefined") {
 //   scan({
 //     enabled: true,
-//     log: true, // logs render info to console (default: false)
+//     log: true,
 //   });
 // }
 

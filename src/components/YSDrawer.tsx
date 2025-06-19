@@ -21,8 +21,6 @@ import { getCustomerDetailById } from "@/restApi/customer";
 const YSDrawer = ({ ysRecord, onClose }) => {
   const [form] = Form.useForm();
 
-  console.log(ysRecord);
-
   const [invoicingContent, setinvoicingContent] = useState();
   const [dict, setDict] = useState();
   const [bank, setBank] = useState();
@@ -90,7 +88,6 @@ const YSDrawer = ({ ysRecord, onClose }) => {
       return false;
     },
     onChange: (info) => {
-      console.log("onchange", info);
       setFiles([...info.fileList]);
     },
     onDownload: async (file) => {
@@ -103,7 +100,6 @@ const YSDrawer = ({ ysRecord, onClose }) => {
   const handleOk = async () => {
     form.validateFields().then(async () => {
       const values = form.getFieldsValue();
-      console.log(values, "values");
 
       const params = {
         ...values,

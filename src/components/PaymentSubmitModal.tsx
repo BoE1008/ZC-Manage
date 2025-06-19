@@ -29,13 +29,10 @@ const PaymentDetailModal = ({ onClose, data, onConfirm }) => {
   }, [data?.id]);
 
   const handleConfirm = async () => {
-    console.log(oldFiles, "oldFiles");
-    console.log(files, "files");
     const fileList = files.filter(
       (itemA) => !oldFiles.some((itemB) => itemA.name === itemB.name)
     );
 
-    console.log(fileList, "fileList");
     const formData = new FormData();
 
     formData.append("paymentId", data?.id);
@@ -45,7 +42,6 @@ const PaymentDetailModal = ({ onClose, data, onConfirm }) => {
         formData.append("files", file?.originFileObj);
       });
 
-      console.log(formData, "formData");
       await updateFileById(formData);
     }
 
@@ -78,7 +74,6 @@ const PaymentDetailModal = ({ onClose, data, onConfirm }) => {
       return false;
     },
     onChange: (info) => {
-      console.log("onchange", info);
       setFiles([...info.fileList]);
     },
     onDownload: async (file) => {

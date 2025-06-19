@@ -454,7 +454,6 @@ const PaymentYW = () => {
   };
 
   const handleDateChange = (date, dateString) => {
-    console.log(dateString);
     setDate(dateString);
   };
 

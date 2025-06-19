@@ -11,7 +11,6 @@ const Loading = () => {
     document.readyState === "complete" && setLoading(false);
 
     const handleLoad = () => {
-      console.log("%cloaded", "font-size: 100px;");
       setLoading(false);
     };
 

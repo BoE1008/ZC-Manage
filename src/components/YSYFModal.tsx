@@ -1379,7 +1379,6 @@ const Item = ({ projectId, onClose, modalType }) => {
   const handleYsOk = async () => {
     form.validateFields().then(async () => {
       const values = form.getFieldsValue();
-      console.log(values);
       const params = {
         ...values,
         ysDate: dayjs(values.ysDate).format("YYYY-MM-DD"),
