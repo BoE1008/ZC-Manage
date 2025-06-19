@@ -240,6 +240,14 @@ const Role = () => {
       filters: supplierFilters,
       filterSearch: true,
       onFilter: (value: string, record) => record.supplierId === value,
+      ellipsis: {
+        showTitle: false,
+      },
+      render: (supplierName) => (
+        <Tooltip placement="topLeft" title={supplierName}>
+          {supplierName}
+        </Tooltip>
+      ),
     },
     {
       title: "币种",
@@ -283,6 +291,14 @@ const Role = () => {
       dataIndex: "bank",
       align: "center",
       key: "bank",
+      ellipsis: {
+        showTitle: false,
+      },
+      render: (bank) => (
+        <Tooltip placement="topLeft" title={bank}>
+          {bank}
+        </Tooltip>
+      ),
     },
     {
       title: "申请人",
@@ -309,6 +325,14 @@ const Role = () => {
       dataIndex: "remark",
       align: "center",
       key: "remark",
+      ellipsis: {
+        showTitle: false,
+      },
+      render: (remark) => (
+        <Tooltip placement="topLeft" title={remark}>
+          {remark}
+        </Tooltip>
+      ),
     },
     {
       title: "操作",
