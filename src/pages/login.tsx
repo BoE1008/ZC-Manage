@@ -207,17 +207,17 @@ const Login = () => {
           }}
         /> */}
 
-        <div className="w-screen h-screen flex items-center justify-center">
-          <div className="relative w-3/4 h-full">
+        <div className="w-screen h-screen relative flex items-center justify-center">
+          <div className="relative w-full h-full">
             <Image src={Background2} alt="" layout="fill" />
           </div>
           <div
             className={clsx(
-              "w-1/4 h-full flex flex-col gap-y-20 px-10 py-[60px] rounded-[10px]  backdrop-blur-[4px] shadow-lg shadow-light-500 border-slate-100 relative bg-[#fff] items-center justify-center"
-              // styles.loginContainer
+              "flex flex-col gap-y-20 px-10 py-[60px] rounded-[10px]  backdrop-blur-[4px] shadow-lg shadow-light-500 border-slate-100 bg-white-500/10 items-center justify-center absolute right-[8%]",
+              styles.loginContainer
             )}
           >
-            <section className="w-[300px] h-[80px] absolute left-0 top-20">
+            <section className="w-[300px] h-[80px]">
               <Image
                 src={logo}
                 alt="logo"
