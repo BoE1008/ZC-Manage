@@ -36,7 +36,7 @@ import YSYFModal from "@/components/YSYFModal";
 import ResizeTable from "@/components/ResizeTable";
 import SearchInput from "@/components/SearchInput";
 
-const Role = () => {
+const PaymentYW = () => {
   const [data, setData] = useState();
 
   const [page, setPage] = useState(1);
@@ -565,4 +565,4 @@ const Role = () => {
   );
 };
 
-export default Role;
+export default PaymentYW;

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Table, Space, Input } from "antd";
 import SearchInput from "@/components/SearchInput";
 
-const System = () => {
+const Log = () => {
   const [data, setData] = useState();
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -79,4 +79,4 @@ const System = () => {
   );
 };
 
-export default System;
+export default Log;

@@ -34,7 +34,7 @@ import YSYFModal from "@/components/YSYFModal";
 import ResizeTable from "@/components/ResizeTable";
 import SearchInput from "@/components/SearchInput";
 
-const InvoicingSubmit = () => {
+const InvoicingCW = () => {
   const [data, setData] = useState();
   const [customer, setCustomer] = useState();
 
@@ -507,4 +507,4 @@ const InvoicingSubmit = () => {
   );
 };
 
-export default InvoicingSubmit;
+export default InvoicingCW;

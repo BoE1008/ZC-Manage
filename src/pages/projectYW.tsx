@@ -118,11 +118,6 @@ const Project = () => {
         businessGroupId,
         businessLineId
       );
-      const customer = await getCustomersList(1, 1000);
-      const res = await getDictById();
-      setDict(res.entity);
-      setDict;
-      setCustomer(customer.entity.data);
       // const file = await exportProject();
       setLoading(false);
       setData(data);

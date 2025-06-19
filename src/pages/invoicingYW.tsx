@@ -33,7 +33,7 @@ import { ModalType } from "@/types";
 import YSYFModal from "@/components/YSYFModal";
 import ResizeTable from "@/components/ResizeTable";
 
-const InvoicingSubmit = () => {
+const InvoicingYW = () => {
   const [data, setData] = useState();
   const [customer, setCustomer] = useState();
 
@@ -516,4 +516,4 @@ const InvoicingSubmit = () => {
   );
 };
 
-export default InvoicingSubmit;
+export default InvoicingYW;
