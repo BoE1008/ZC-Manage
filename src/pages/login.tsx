@@ -213,7 +213,7 @@ const Login = () => {
           </div>
           <div
             className={clsx(
-              "flex flex-col gap-y-20 px-10 py-[60px] rounded-[10px]  backdrop-blur-[4px] shadow-lg shadow-light-500 border-slate-100 bg-white-500/10 items-center justify-center absolute right-[8%]",
+              "flex flex-col gap-y-20 px-10 py-[60px] rounded-[10px]  backdrop-blur-[4px] shadow-lg shadow-light-500 border-slate-100 bg-white-500/10 items-center justify-center absolute md:right-[1%] lg:right-[5%] xl:right-[8%] 2xl:right-[12%]",
               styles.loginContainer
             )}
           >
