@@ -3,11 +3,12 @@ import { UserOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Background from "@/assets/images/bg.jpg";
+import Background2 from "@/assets/images/bg2.jpg";
 import { login, getCodeImage, updatePassword } from "@/restApi/user";
 import { message } from "antd";
 import { menuHandler } from "@/utils";
 import { getMenu } from "@/restApi/menu";
-import logo from "@/assets/images/loginLogo.png";
+import logo from "@/assets/images/logo.png";
 import Image from "next/image";
 import * as SM from "sm-crypto";
 import { SM_PUBLIC_KEY } from "@/utils/const";
@@ -130,13 +131,13 @@ const Login = () => {
   return (
     init && (
       <>
-        <Particles
+        {/* <Particles
           id="tsparticles"
           particlesLoaded={particlesLoaded}
           options={{
             fullScreen: true,
             background: {
-              image: `url(${Background.src})`,
+              image: `url(${Background2.src})`,
               position: "center",
               size: "100% 100%",
               repeat: "no-repeat",
@@ -204,16 +205,19 @@ const Login = () => {
             },
             detectRetina: true,
           }}
-        />
+        /> */}
 
-        <div className="p-20 w-full h-screen flex items-center justify-center">
+        <div className="w-screen h-screen flex items-center justify-center">
+          <div className="relative w-3/4 h-full">
+            <Image src={Background2} alt="" layout="fill" />
+          </div>
           <div
             className={clsx(
-              "flex flex-col items-center justify-center gap-y-20 px-10 py-[60px] rounded-[10px]  backdrop-blur-[4px] shadow-lg shadow-light-500 border-slate-100 relative bg-white-500/10",
-              styles.loginContainer
+              "w-1/4 h-full flex flex-col gap-y-20 px-10 py-[60px] rounded-[10px]  backdrop-blur-[4px] shadow-lg shadow-light-500 border-slate-100 relative bg-[#fff] items-center justify-center"
+              // styles.loginContainer
             )}
           >
-            <section className="w-[300px] h-[80px] relative">
+            <section className="w-[300px] h-[80px] absolute left-0 top-20">
               <Image
                 src={logo}
                 alt="logo"
@@ -222,20 +226,31 @@ const Login = () => {
               />
             </section>
 
-            <Form form={form} className="min-w-40 text-center ">
+            <section className="absolute bottom-2 text-[12px]">{`CopyRight © 2023 上海甄察供应链管理有限公司 版权所有`}</section>
+
+            <Form form={form} className="min-w-40 text-center w-2/3">
               <Form.Item name="username">
                 <Input
                   size="large"
                   placeholder="请输入用户名"
                   prefix={<UserOutlined />}
+                  className="h-[45px]"
                 />
               </Form.Item>
               <Form.Item name="password">
-                <Input.Password size="large" placeholder="请输入密码" />
+                <Input.Password
+                  size="large"
+                  placeholder="请输入密码"
+                  className="h-[45px]"
+                />
               </Form.Item>
               <Form.Item name="validateCode">
-                <Space style={{ display: "flex", flexDirection: "row" }}>
-                  <Input size="middle" placeholder="验证码" />
+                <div className="flex flex-row gap-x-2">
+                  <Input
+                    size="middle"
+                    placeholder="验证码"
+                    className="flex-1 h-[45px]"
+                  />
                   <Image
                     src={imgSrc}
                     width={100}
@@ -244,13 +259,13 @@ const Login = () => {
                     style={{ cursor: "pointer" }}
                     alt="code"
                   />
-                </Space>
+                </div>
               </Form.Item>
               <Form.Item style={{ marginTop: "40px" }}>
                 <Button
                   size="large"
                   className={clsx(
-                    "!bg-[#198348] !text-white w-1/3",
+                    "!bg-[#198348] !text-white w-full",
                     styles.loginbutton
                   )}
                   onClick={userLogin}
