@@ -2,13 +2,12 @@ import { Input, Button, Form, Space, Modal } from "antd";
 import { UserOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import Background from "@/assets/images/bg.jpg";
 import Background2 from "@/assets/images/bg2.jpg";
 import { login, getCodeImage, updatePassword } from "@/restApi/user";
 import { message } from "antd";
 import { menuHandler } from "@/utils";
 import { getMenu } from "@/restApi/menu";
-import logo from "@/assets/images/logo.png";
+import logo from "@/assets/images/loginLogo.png";
 import Image from "next/image";
 import * as SM from "sm-crypto";
 import { SM_PUBLIC_KEY } from "@/utils/const";
@@ -213,11 +212,11 @@ const Login = () => {
           </div>
           <div
             className={clsx(
-              "flex flex-col gap-y-20 px-10 py-[60px] rounded-[10px]  backdrop-blur-[4px] shadow-lg shadow-light-500 border-slate-100 bg-white-500/10 items-center justify-center absolute md:right-[1%] lg:right-[5%] xl:right-[8%] 2xl:right-[12%]",
+              "flex flex-col gap-y-20 px-10 py-[80px] rounded-[10px]  backdrop-blur-[4px] shadow-lg shadow-light-500 border-slate-100 bg-white-500/10 items-center justify-center absolute md:right-[1%] lg:right-[5%] xl:right-[8%] 2xl:right-[10%]",
               styles.loginContainer
             )}
           >
-            <section className="w-[300px] h-[80px]">
+            <section className="md:w-[300px] 2xl:w-[350px] md:h-[80px] 2xl:h-[120px]">
               <Image
                 src={logo}
                 alt="logo"
@@ -228,7 +227,7 @@ const Login = () => {
 
             <section className="absolute bottom-2 text-[12px]">{`CopyRight © 2023 上海甄察供应链管理有限公司 版权所有`}</section>
 
-            <Form form={form} className="min-w-40 text-center w-2/3">
+            <Form form={form} className="min-w-40 text-center w-full">
               <Form.Item name="username">
                 <Input
                   size="large"
@@ -264,10 +263,7 @@ const Login = () => {
               <Form.Item style={{ marginTop: "40px" }}>
                 <Button
                   size="large"
-                  className={clsx(
-                    "!bg-[#198348] !text-white w-full",
-                    styles.loginbutton
-                  )}
+                  className={clsx("!bg-[#198348] !text-white w-full h-[45px]")}
                   onClick={userLogin}
                 >
                   <ShinyText text="登录" speed={1} />
