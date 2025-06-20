@@ -32,6 +32,7 @@ export enum ModalType {
   Submit, //项目管理中项目填报
   Approve, //项目管理中业务审核
   CW, //项目管理中财务审核
+  PAYMENTCW, //付款管理下财务审核
   OTHERS, // 其他管理模块
 }
 
@@ -41,6 +42,7 @@ export enum InvoicingType {
 }
 
 export enum PaymentOthersType {
-  SW = "SW",
   ZH = "ZH",
+  ESW = "ESW",
+  FESW = "FESW",
 }

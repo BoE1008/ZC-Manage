@@ -871,23 +871,20 @@ const Item = ({ projectId, onClose, modalType }) => {
                         </Tooltip>
                       )}
 
-                    {modalType === ModalType.CW &&
-                      (projectState === "未完结" ||
-                        projectState === "已退回") &&
-                      record?.state === "待财务审批" && (
-                        <Tooltip title="编辑">
-                          <Button
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              padding: "3px 5px",
-                            }}
-                            onClick={() => handleEditYfOne(record)}
-                          >
-                            <EditTwoTone twoToneColor="#198348" />
-                          </Button>
-                        </Tooltip>
-                      )}
+                    {modalType === ModalType.PAYMENTCW && (
+                      <Tooltip title="编辑">
+                        <Button
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            padding: "3px 5px",
+                          }}
+                          onClick={() => handleEditYfOne(record)}
+                        >
+                          <EditTwoTone twoToneColor="#198348" />
+                        </Button>
+                      </Tooltip>
+                    )}
 
                     <Tooltip title={<span>查看审核日志</span>}>
                       <Button
@@ -1264,22 +1261,20 @@ const Item = ({ projectId, onClose, modalType }) => {
                         )}
                     </>
                   )}
-                  {modalType === ModalType.CW &&
-                    (projectState === "未完结" || projectState === "已退回") &&
-                    record?.state !== "审批通过" && (
-                      <Tooltip title="编辑">
-                        <Button
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            padding: "3px 5px",
-                          }}
-                          onClick={() => handleEditYsOne(record)}
-                        >
-                          <EditTwoTone twoToneColor="#198348" />
-                        </Button>
-                      </Tooltip>
-                    )}
+                  {modalType === ModalType.PAYMENTCW && (
+                    <Tooltip title="编辑">
+                      <Button
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          padding: "3px 5px",
+                        }}
+                        onClick={() => handleEditYsOne(record)}
+                      >
+                        <EditTwoTone twoToneColor="#198348" />
+                      </Button>
+                    </Tooltip>
+                  )}
                   {modalType === ModalType.Approve &&
                     record.state !== "审批通过" &&
                     record?.state === "待业务审批" && (

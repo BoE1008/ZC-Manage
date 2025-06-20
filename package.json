@@ -12,8 +12,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@ant-design/cssinjs": "^1.23.0",
-    "@ant-design/nextjs-registry": "^1.0.2",
+    "@ant-design/cssinjs": "^1.21.0",
     "@tsparticles/engine": "^3.4.0",
     "@tsparticles/react": "^3.0.0",
     "@tsparticles/slim": "^3.4.0",

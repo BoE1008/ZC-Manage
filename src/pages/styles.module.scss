@@ -1,10 +1,7 @@
 .loginbutton {
-  animation: ripple 2s linear infinite;
-  border-radius: 10px;
-
   &:hover {
-    animation: none;
-    transform: scale(1.08);
+    animation: ripple 2s linear infinite;
+    border-radius: 10px;
   }
 }
 

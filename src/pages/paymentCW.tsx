@@ -558,7 +558,7 @@ const Payment = () => {
 
       {!!projectId && (
         <YSYFModal
-          modalType={ModalType.OTHERS}
+          modalType={ModalType.PAYMENTCW}
           projectId={projectId}
           onClose={() => setProjectId(undefined)}
         />

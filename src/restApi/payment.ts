@@ -1,3 +1,4 @@
+import { PaymentOthersType } from "@/types";
 import axiosInstance from "./axiosInstance";
 
 export const getPaymentList = async (
@@ -268,5 +269,17 @@ export const getPaymentOthersList = async (
       updateTimeSort,
     },
   });
+  return res.data;
+};
+
+export const submitOthers = async (
+  paymentId: string,
+  paymentType: PaymentOthersType
+) => {
+  const res = await axiosInstance.post(`/zc/payment/others/submit`, {
+    paymentId,
+    paymentType,
+  });
+
   return res.data;
 };

@@ -263,7 +263,10 @@ const Login = () => {
               <Form.Item style={{ marginTop: "40px" }}>
                 <Button
                   size="large"
-                  className={clsx("!bg-[#198348] !text-white w-full h-[45px]")}
+                  className={clsx(
+                    "!bg-[#198348] !text-white w-full h-[45px]",
+                    styles.loginbutton
+                  )}
                   onClick={userLogin}
                 >
                   <ShinyText text="登录" speed={1} />

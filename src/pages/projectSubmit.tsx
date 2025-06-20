@@ -770,6 +770,7 @@ const Project = () => {
           <Form.Item
             label="业务组"
             name="businessGroupId"
+            validateTrigger="onBlur"
             rules={[{ required: true, message: "请选择业务组" }]}
             hasFeedback
           >
@@ -789,6 +790,7 @@ const Project = () => {
           <Form.Item
             label="业务条线"
             name="businessLineId"
+            validateTrigger="onBlur"
             rules={[{ required: true, message: "请选择业务条线" }]}
             hasFeedback
           >

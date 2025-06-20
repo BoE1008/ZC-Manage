@@ -53,7 +53,8 @@ import { PaymentOthersType } from "@/types";
 import SearchInput from "@/components/SearchInput";
 
 const PaymentType = [
-  { label: "商务", value: PaymentOthersType.SW },
+  { label: "商务(俄线)", value: PaymentOthersType.ESW },
+  { label: "商务(非俄线)", value: PaymentOthersType.FESW },
   { label: "综合", value: PaymentOthersType.ZH },
 ];
 

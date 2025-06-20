@@ -259,7 +259,7 @@ const Supplyer = () => {
       render: (_, record: Company) => {
         return (
           <Space size="middle" className="flex flex-row !gap-x-1">
-            {userId in [...adminUserIds, record.createBy] && (
+            {userId && [...adminUserIds, record.createBy].includes(userId) && (
               <Button
                 style={{
                   display: "flex",
@@ -283,7 +283,7 @@ const Supplyer = () => {
                 <ProfileTwoTone twoToneColor="#198348" />
               </Button>
             </Tooltip>
-            {userId in [...adminUserIds, record.createBy] && (
+            {userId && [...adminUserIds, record.createBy].includes(userId) && (
               <Tooltip title="删除">
                 <Popconfirm
                   title="是否删除？"
