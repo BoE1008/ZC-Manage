@@ -8,6 +8,9 @@ import Head from "next/head";
 import "dayjs/locale/zh-cn";
 import NextNProgress from "nextjs-progressbar";
 import Loading from "@/components/Loading";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import { isLogged } from "@/utils";
 // import { Monitoring } from "react-scan/monitoring";
 
 // if (typeof window !== "undefined") {
@@ -17,7 +20,35 @@ import Loading from "@/components/Loading";
 //   });
 // }
 
-export default function App({ Component, pageProps, router }: AppProps) {
+const NO_LAYOUT_ROUTES = ["/login"];
+
+export default function App({ Component, pageProps }: AppProps) {
+  const router = useRouter();
+  const isNoLayout = NO_LAYOUT_ROUTES.includes(router.pathname);
+
+  // 统一登录校验
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    const checkLogin = () => {
+      const authed = isLogged();
+
+      if (!isNoLayout && !authed) {
+        router.replace("/login");
+      } else {
+        setIsReady(true);
+      }
+    };
+
+    checkLogin();
+  }, [router.pathname, isNoLayout, router]);
+
+  // 防止未授权时组件提前渲染
+  if (!isNoLayout && !isReady) return null;
+
+  const page = <Component {...pageProps} />;
+  const content = isNoLayout ? page : <AppLayout>{page}</AppLayout>;
+
   return (
     <ConfigProvider
       locale={locale}
@@ -61,9 +92,7 @@ export default function App({ Component, pageProps, router }: AppProps) {
         </Head>
         <Loading />
         <NextNProgress color="#198348" height={4} />
-        <AppLayout>
-          <Component {...pageProps} />
-        </AppLayout>
+        {content}
       </AntdApp>
     </ConfigProvider>
   );

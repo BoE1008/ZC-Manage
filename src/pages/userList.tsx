@@ -1,29 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
-import {
-  Button,
-  Modal,
-  Form,
-  Input,
-  Space,
-  message,
-  Tooltip,
-  Popconfirm,
-  Tree,
-  Select,
-} from "antd";
-import {
-  EditTwoTone,
-  DeleteTwoTone,
-  DownOutlined,
-  ThunderboltTwoTone,
-} from "@ant-design/icons";
-import {
-  getUserList,
-  updateUser,
-  addUser,
-  deleteUser,
-  resetPassword,
-} from "@/restApi/user";
+import { Button, Modal, Form, Input, Space, message, Tooltip, Popconfirm, Tree, Select } from "antd";
+import { EditTwoTone, DeleteTwoTone, DownOutlined, ThunderboltTwoTone } from "@ant-design/icons";
+import { getUserList, updateUser, addUser, deleteUser, resetPassword } from "@/restApi/user";
 import { Company, Operation } from "@/types";
 import { useRouter } from "next/router";
 import { getDeptList, getDeptTree } from "@/restApi/dept";
@@ -67,26 +45,17 @@ const User = () => {
 
   useEffect(() => {
     (async () => {
-      if (!!sessionStorage.getItem("username")) {
-        const res = await getDeptTree();
-        setDepts(res.entity.data);
-        const allDept = await getDeptList(1, 1000);
-        setAllDept(allDept?.entity.data);
-        const allRole = await getRoleList(1, 100);
-        setAllRole(allRole?.entity.data);
-        const data = await getUserList(
-          page,
-          pageSize,
-          searchValue,
-          selectDeptId
-        );
-        const dictRes = await getDictById();
-        setLoading(false);
-        setData(data);
-        setDict(dictRes.entity);
-      } else {
-        router.push("/login");
-      }
+      const res = await getDeptTree();
+      setDepts(res.entity.data);
+      const allDept = await getDeptList(1, 1000);
+      setAllDept(allDept?.entity.data);
+      const allRole = await getRoleList(1, 100);
+      setAllRole(allRole?.entity.data);
+      const data = await getUserList(page, pageSize, searchValue, selectDeptId);
+      const dictRes = await getDictById();
+      setLoading(false);
+      setData(data);
+      setDict(dictRes.entity);
     })();
   }, [page, pageSize, searchValue, router, selectDeptId]);
 
@@ -122,13 +91,13 @@ const User = () => {
     });
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async id => {
     await deleteUser(id);
     const data = await getUserList(page, pageSize, searchValue, selectDeptId);
     setData(data);
   };
 
-  const handleResetPwd = async (id) => {
+  const handleResetPwd = async id => {
     await resetPassword(id);
     message.success("重置密码成功");
   };
@@ -157,8 +126,8 @@ const User = () => {
       // dataIndex: "loginName",
       align: "center",
       key: "dept",
-      render: (record) => {
-        return allDept.find((c) => c.id === record.deptId)?.name;
+      render: record => {
+        return allDept.find(c => c.id === record.deptId)?.name;
       },
     },
     {
@@ -207,7 +176,7 @@ const User = () => {
             <Tooltip title="重置密码">
               <Popconfirm
                 title="确定重置密码？"
-                getPopupContainer={(node) => node.parentElement}
+                getPopupContainer={node => node.parentElement}
                 okButtonProps={{ style: { backgroundColor: "#198348" } }}
                 onConfirm={() => handleResetPwd(record.id)}
               >
@@ -225,7 +194,7 @@ const User = () => {
             <Tooltip title="删除">
               <Popconfirm
                 title="是否删除？"
-                getPopupContainer={(node) => node.parentElement}
+                getPopupContainer={node => node.parentElement}
                 okButtonProps={{ style: { backgroundColor: "#198348" } }}
                 onConfirm={() => handleDelete(record.id)}
               >
@@ -259,7 +228,7 @@ const User = () => {
   };
 
   const defaultCheckedKeys = useMemo(() => {
-    return data?.entity.data.find((c) => c.id === editId)?.roleIds;
+    return data?.entity.data.find(c => c.id === editId)?.roleIds;
   }, [data, editId]);
 
   useEffect(() => {
@@ -275,10 +244,8 @@ const User = () => {
     setDeptId(keys[0]);
   };
 
-  const filterOption = (
-    input: string,
-    option?: { label: string; value: string }
-  ) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
+  const filterOption = (input: string, option?: { label: string; value: string }) =>
+    (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
 
   return (
     <div className="w-full p-2" style={{ color: "#000" }}>
@@ -320,13 +287,13 @@ const User = () => {
               // 设置总条数
               total: data?.entity.total,
               // 显示总条数
-              showTotal: (total) => `共 ${total} 条`,
+              showTotal: total => `共 ${total} 条`,
               // 是否可以改变 pageSize
               showSizeChanger: true,
               pageSize: pageSize,
 
               // 改变页码时
-              onChange: async (page) => {
+              onChange: async page => {
                 setPage(page);
               },
               // pageSize 变化的回调
@@ -359,12 +326,7 @@ const User = () => {
           initialValues={initialValues}
           style={{ minWidth: 600, color: "#000" }}
         >
-          <Form.Item
-            label="用户名"
-            name="userName"
-            validateTrigger="onBlur"
-            rules={[{ required: true, message: "用户名不能为空" }]}
-          >
+          <Form.Item label="用户名" name="userName" validateTrigger="onBlur" rules={[{ required: true, message: "用户名不能为空" }]}>
             <Input placeholder="请输入用户名" />
           </Form.Item>
           {operation === Operation.Add && (
@@ -372,12 +334,7 @@ const User = () => {
               <Input placeholder="请输入登录名" />
             </Form.Item>
           )}
-          <Form.Item
-            label="用户编号"
-            name="userNum"
-            validateTrigger="onBlur"
-            rules={[{ required: true, message: "用户编号不能为空" }]}
-          >
+          <Form.Item label="用户编号" name="userNum" validateTrigger="onBlur" rules={[{ required: true, message: "用户编号不能为空" }]}>
             <Input placeholder="请输入用户编号" />
           </Form.Item>
           <Form.Item label="所属部门" name="deptId">
@@ -386,11 +343,7 @@ const User = () => {
                 <Tree
                   defaultExpandAll={true}
                   // defaultExpandedKeys={["100"]}
-                  defaultSelectedKeys={
-                    operation === Operation.Add
-                      ? ["100"]
-                      : [form.getFieldValue("deptId")]
-                  }
+                  defaultSelectedKeys={operation === Operation.Add ? ["100"] : [form.getFieldValue("deptId")]}
                   switcherIcon={<DownOutlined />}
                   onSelect={onDeptSelect}
                   treeData={depts}
@@ -405,8 +358,8 @@ const User = () => {
               optionFilterProp="children"
               filterOption={filterOption}
               options={dict
-                ?.find((con) => con.code === "sys_business_group")
-                .childList?.map((con) => ({
+                ?.find(con => con.code === "sys_business_group")
+                .childList?.map(con => ({
                   value: con.id,
                   label: con.dictLabel,
                 }))}
@@ -419,8 +372,8 @@ const User = () => {
               optionFilterProp="children"
               filterOption={filterOption}
               options={dict
-                ?.find((con) => con.code === "sys_business_line")
-                .childList?.map((con) => ({
+                ?.find(con => con.code === "sys_business_line")
+                .childList?.map(con => ({
                   value: con.id,
                   label: con.dictLabel,
                 }))}

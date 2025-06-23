@@ -35,13 +35,9 @@ const Dict = () => {
 
   useEffect(() => {
     (async () => {
-      if (!!sessionStorage.getItem("username")) {
-        const data = await getDictList(page, pageSize);
-        setLoading(false);
-        setData(data);
-      } else {
-        router.push("/login");
-      }
+      const data = await getDictList(page, pageSize);
+      setLoading(false);
+      setData(data);
     })();
   }, [page, pageSize, searchValue, router]);
 

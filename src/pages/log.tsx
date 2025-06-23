@@ -1,6 +1,6 @@
 import { getLogs } from "@/restApi/log";
 import { useEffect, useState } from "react";
-import { Table, Space, Input } from "antd";
+import { Table, Space } from "antd";
 import SearchInput from "@/components/SearchInput";
 
 const Log = () => {
@@ -59,13 +59,13 @@ const Log = () => {
           // 设置总条数
           total: data?.entity.total,
           // 显示总条数
-          showTotal: (total) => `共 ${total} 条`,
+          showTotal: total => `共 ${total} 条`,
           // 是否可以改变 pageSize
           showSizeChanger: true,
           pageSize: pageSize,
 
           // 改变页码时
-          onChange: async (page) => {
+          onChange: async page => {
             setPage(page);
           },
           // pageSize 变化的回调
