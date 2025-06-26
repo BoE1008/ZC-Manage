@@ -37,7 +37,7 @@ const Login = () => {
   const [init, setInit] = useState(false);
 
   useEffect(() => {
-    initParticlesEngine(async engine => {
+    initParticlesEngine(async (engine) => {
       // you can initiate the tsParticles instance (engine) here, adding custom shapes or presets
       // this loads the tsparticles package bundle, it's the easiest method for getting everything ready
       // starting from v2 you can add only the features you need reducing the bundle size
@@ -66,12 +66,15 @@ const Login = () => {
         const url = URL.createObjectURL(codeData);
         setImgSrc(url);
       })
-      .then(async res => {
+      .then(async (res) => {
         if (res) {
           sessionStorage.setItem("username", res.entity?.userName);
           sessionStorage.setItem("userInfo", JSON.stringify(res.entity));
           const data = await getMenu();
-          sessionStorage.setItem("menu", JSON.stringify(menuHandler(data.entity.data)));
+          sessionStorage.setItem(
+            "menu",
+            JSON.stringify(menuHandler(data.entity.data))
+          );
 
           if (res.entity?.changePassword === "0") {
             setPassModal(true);
@@ -82,7 +85,7 @@ const Login = () => {
       });
   };
 
-  const handleEnter = async e => {
+  const handleEnter = async (e) => {
     if (e.key === "Enter") {
       userLogin();
     }
@@ -205,7 +208,12 @@ const Login = () => {
 
         <div className="w-screen h-screen relative flex items-center justify-center">
           <div className="relative w-full h-full">
-            <Image src={Background2} alt="" layout="fill" />
+            <Image
+              src={Background2}
+              alt=""
+              layout="fill"
+              className="transform rotate-180"
+            />
           </div>
           <div
             className={clsx(
@@ -214,33 +222,58 @@ const Login = () => {
             )}
           >
             <section className="md:w-[300px] 2xl:w-[350px] md:h-[80px] 2xl:h-[120px]">
-              <Image src={logo} alt="logo" className="object-contain" priority />
+              <Image
+                src={logo}
+                alt="logo"
+                className="object-contain"
+                priority
+              />
             </section>
 
             <section className="absolute bottom-2 text-[12px]">{`CopyRight © 2023 上海甄察供应链管理有限公司 版权所有`}</section>
 
             <Form form={form} className="min-w-40 text-center w-full">
               <Form.Item name="username">
-                <Input size="large" placeholder="请输入用户名" prefix={<UserOutlined />} className="h-[45px]" />
+                <Input
+                  size="large"
+                  placeholder="请输入用户名"
+                  prefix={<UserOutlined />}
+                  className="h-[45px]"
+                />
               </Form.Item>
               <Form.Item name="password">
-                <Input.Password size="large" placeholder="请输入密码" className="h-[45px]" />
+                <Input.Password
+                  size="large"
+                  placeholder="请输入密码"
+                  className="h-[45px]"
+                />
               </Form.Item>
               <Form.Item name="validateCode">
                 <div className="flex flex-row gap-x-2">
-                  <Input size="middle" placeholder="验证码" className="flex-1 h-[45px]" />
+                  <Input
+                    size="middle"
+                    placeholder="验证码"
+                    className="flex-1 h-[45px]"
+                  />
                   <Image
                     src={imgSrc}
                     width={100}
                     height={40}
-                    onClick={() => setClickTimes(pre => pre + 1)}
+                    onClick={() => setClickTimes((pre) => pre + 1)}
                     style={{ cursor: "pointer" }}
                     alt="code"
                   />
                 </div>
               </Form.Item>
               <Form.Item style={{ marginTop: "40px" }}>
-                <Button size="large" className={clsx("!bg-[#198348] !text-white w-full h-[45px]", styles.loginbutton)} onClick={userLogin}>
+                <Button
+                  size="large"
+                  className={clsx(
+                    "!bg-[#198348] !text-white w-full h-[45px]",
+                    styles.loginbutton
+                  )}
+                  onClick={userLogin}
+                >
                   <ShinyText text="登录" speed={1} />
                 </Button>
               </Form.Item>
@@ -258,7 +291,9 @@ const Login = () => {
             afterClose={() => form.resetFields()}
             maskClosable={false}
           >
-            <div style={{ color: "red", marginBottom: "20px" }}>注：须修改初始密码</div>
+            <div style={{ color: "red", marginBottom: "20px" }}>
+              注：须修改初始密码
+            </div>
             <Form form={form} className="w-full min-w-40 text-center">
               <Form.Item name="oldPassword">
                 <Input.Password size="large" placeholder="请输入初始密码" />
@@ -274,18 +309,28 @@ const Login = () => {
                         return Promise.reject();
                       }
                       const oNumber = "0123456789";
-                      const oLetter = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+                      const oLetter =
+                        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
                       const oSpecial = "!@#$%&*";
                       const oTher = oNumber + oLetter + oSpecial;
                       let total = 0;
                       const oSpeArr = value.split("");
-                      const oNumberItem = oSpeArr.find((item: any) => oNumber.indexOf(item) !== -1);
-                      const oLetterItem = oSpeArr.find((item: any) => oLetter.indexOf(item) !== -1);
-                      const oSpeItem = oSpeArr.find((item: any) => oSpecial.indexOf(item) !== -1);
-                      const oTherItem = oSpeArr.find((item: any) => oTher.indexOf(item) === -1);
+                      const oNumberItem = oSpeArr.find(
+                        (item: any) => oNumber.indexOf(item) !== -1
+                      );
+                      const oLetterItem = oSpeArr.find(
+                        (item: any) => oLetter.indexOf(item) !== -1
+                      );
+                      const oSpeItem = oSpeArr.find(
+                        (item: any) => oSpecial.indexOf(item) !== -1
+                      );
+                      const oTherItem = oSpeArr.find(
+                        (item: any) => oTher.indexOf(item) === -1
+                      );
 
                       if (value.length < 6 || oTherItem !== undefined) {
-                        rule.message = "密码不能小于六位，为字母（不区分大小写）、数字、特殊字符（!@#$%&*）的组合！";
+                        rule.message =
+                          "密码不能小于六位，为字母（不区分大小写）、数字、特殊字符（!@#$%&*）的组合！";
                         return Promise.reject();
                       }
                       if (oNumberItem !== undefined) {
@@ -300,13 +345,17 @@ const Login = () => {
                       if (total >= 3) {
                         return Promise.resolve();
                       }
-                      rule.message = "密码不能小于六位，为字母（不区分大小写）、数字、特殊字符（!@#$%&*）的组合！";
+                      rule.message =
+                        "密码不能小于六位，为字母（不区分大小写）、数字、特殊字符（!@#$%&*）的组合！";
                       return Promise.reject();
                     },
                   },
                 ]}
               >
-                <Input.Password size="large" placeholder="不能小于六位，为字母、数字、特殊字符的组合！" />
+                <Input.Password
+                  size="large"
+                  placeholder="不能小于六位，为字母、数字、特殊字符的组合！"
+                />
               </Form.Item>
             </Form>
           </Modal>

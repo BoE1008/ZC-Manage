@@ -83,7 +83,8 @@ const Project = () => {
   const [projectBrand, setProjectBrand] = useState();
   const [projectState, setProjectState] = useState();
   const [customerId, setCustomerId] = useState();
-  const [date, setDate] = useState("");
+  const [date, setDate] = useState(""); //发运日期
+  const [projectYear, setProjectYear] = useState(); //项目年份
 
   const [staticModal, setStaticModal] = useState(false);
 
@@ -116,7 +117,8 @@ const Project = () => {
         customerId,
         date,
         businessGroupId,
-        businessLineId
+        businessLineId,
+        projectYear
       );
       // const file = await exportProject();
       setLoading(false);
@@ -137,6 +139,7 @@ const Project = () => {
     date,
     businessGroupId,
     businessLineId,
+    projectYear,
   ]);
 
   const option = useMemo(() => {
@@ -649,6 +652,10 @@ const Project = () => {
     setDate(dateString);
   };
 
+  const handleProjectYearChange = (date, dateString) => {
+    setProjectYear(dateString);
+  };
+
   return (
     <div className="w-full p-2" style={{ color: "#000" }}>
       <div className="flex flex-row gap-y-3 justify-between my-4 pr-5">
@@ -671,18 +678,24 @@ const Project = () => {
 
           <div className="flex flex-row gap-x-4">
             <SearchInput
-              placeholder="按项目名称搜索"
-              onSearch={setSearchValue}
-            />
-            <SearchInput
               placeholder="按项目编号搜索"
               onSearch={setSearchNumValue}
+            />
+            <SearchInput
+              placeholder="按项目名称搜索"
+              onSearch={setSearchValue}
             />
             <DatePicker
               style={{ minWidth: "180px" }}
               picker="month"
               placeholder="按发运日期搜索"
               onChange={handleDateChange}
+            />
+            <DatePicker
+              style={{ minWidth: "180px" }}
+              picker="year"
+              placeholder="按项目年份搜索"
+              onChange={handleProjectYearChange}
             />
           </div>
         </div>

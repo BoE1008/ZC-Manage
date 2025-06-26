@@ -22,6 +22,7 @@ import {
   DeleteTwoTone,
   InteractionTwoTone,
   AppstoreTwoTone,
+  GiftTwoTone,
 } from "@ant-design/icons";
 import {
   getProjectsSubmitList,
@@ -31,12 +32,14 @@ import {
   exportMyProject,
   submitOne,
   logsOne,
+  transProject,
 } from "@/restApi/project";
 import { Company, ModalType, Operation } from "@/types";
 import dayjs from "dayjs";
 import { getDictById } from "@/restApi/dict";
 import { getCustomersList } from "@/restApi/customer";
 import YSYFModal from "@/components/YSYFModal";
+import TransModal from "@/components/TransModal";
 import { formatNumber } from "@/utils";
 import clsx from "clsx";
 import ResizeTable from "@/components/ResizeTable";
@@ -77,12 +80,15 @@ const Project = () => {
   const [projectBrand, setProjectBrand] = useState();
   const [projectState, setProjectState] = useState();
   const [customerId, setCustomerId] = useState();
-  const [date, setDate] = useState("");
+  const [date, setDate] = useState(""); //发运日期
+  const [projectYear, setProjectYear] = useState(); //项目年份
 
   const [exportEnabled, setExportEnabled] = useState(true);
 
   const [businessGroupId, setBusinessGroupId] = useState();
   const [businessLineId, setBusinessLineId] = useState();
+
+  const [transId, setTransId] = useState();
 
   useEffect(() => {
     (async () => {
@@ -108,7 +114,8 @@ const Project = () => {
         customerId,
         date,
         businessGroupId,
-        businessLineId
+        businessLineId,
+        projectYear
       );
       setData(data);
       setLoading(false);
@@ -127,6 +134,7 @@ const Project = () => {
     date,
     businessGroupId,
     businessLineId,
+    projectYear,
   ]);
 
   const handleAdd = async () => {
@@ -156,6 +164,7 @@ const Project = () => {
       const params = {
         ...values,
         projectDate: dayjs(values.projectDate).format("YYYY-MM-DD"),
+        endDate: dayjs(values.endDate).format("YYYY-MM-DD"),
       };
       const { code } =
         operation === Operation.Add
@@ -376,6 +385,16 @@ const Project = () => {
         sorter: true,
       },
       {
+        title: "结束日期",
+        label: "结束日期",
+        value: "结束日期",
+        dataIndex: "endDate",
+        align: "center",
+        key: "endDate",
+        // sortDirections: ["ascend", "descend"],
+        // sorter: true,
+      },
+      {
         title: "服务内容",
         label: "服务内容",
         value: "服务内容",
@@ -434,6 +453,14 @@ const Project = () => {
         align: "center",
         key: "deductProfit",
         render: (record) => formatNumber(record?.deductProfit),
+      },
+      {
+        label: "操作人",
+        value: "操作人",
+        title: "操作人",
+        dataIndex: "userName",
+        align: "center",
+        key: "userName",
       },
       {
         title: "备注",
@@ -552,6 +579,18 @@ const Project = () => {
                   </Popconfirm>
                 </Tooltip>
               )}
+              <Tooltip title={<span>转移项目</span>}>
+                <Button
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    padding: "3px 5px",
+                  }}
+                  onClick={() => setTransId(record.id)}
+                >
+                  <GiftTwoTone twoToneColor="#198348" />
+                </Button>
+              </Tooltip>
             </Space>
           );
         },
@@ -611,6 +650,23 @@ const Project = () => {
     setDate(dateString);
   };
 
+  const handleProjectYearChange = (date, dateString) => {
+    setProjectYear(dateString);
+  };
+
+  const handleTrans = async (transUserId) => {
+    await transProject(transId, transUserId);
+    const data = await getProjectsSubmitList(
+      page,
+      pageSize,
+      searchValue,
+      searchNumValue
+    );
+    setData(data);
+    setLoading(false);
+    setTransId("");
+  };
+
   return (
     <div className="w-full p-2" style={{ color: "#000" }}>
       <div className="flex flex-row gap-y-3 justify-between my-4 pr-5">
@@ -645,18 +701,24 @@ const Project = () => {
 
           <div className="flex flex-row gap-x-4">
             <SearchInput
-              placeholder="按项目名称搜索"
-              onSearch={setSearchValue}
-            />
-            <SearchInput
               placeholder="按项目编号搜索"
               onSearch={setSearchNumValue}
+            />
+            <SearchInput
+              placeholder="按项目名称搜索"
+              onSearch={setSearchValue}
             />
             <DatePicker
               style={{ minWidth: "180px" }}
               picker="month"
               placeholder="按发运日期搜索"
               onChange={handleDateChange}
+            />
+            <DatePicker
+              style={{ minWidth: "180px" }}
+              picker="year"
+              placeholder="按项目年份搜索"
+              onChange={handleProjectYearChange}
             />
           </div>
         </div>
@@ -882,6 +944,15 @@ const Project = () => {
           >
             <DatePicker allowClear={false} />
           </Form.Item>
+          {operation === Operation.Edit && (
+            <Form.Item
+              label="项目结束日期"
+              name="endDate"
+              getValueProps={(i) => ({ value: dayjs(i) })}
+            >
+              <DatePicker allowClear={false} />
+            </Form.Item>
+          )}
           <Form.Item label="备注" name="remark">
             <Input.TextArea placeholder="备注" maxLength={100} />
           </Form.Item>
@@ -924,6 +995,14 @@ const Project = () => {
           modalType={ModalType.Submit}
           projectId={projectId}
           onClose={() => setProjectId(undefined)}
+        />
+      )}
+
+      {!!transId && (
+        <TransModal
+          transId={transId}
+          onClose={() => setTransId(undefined)}
+          onConfirm={(userId) => handleTrans(userId)}
         />
       )}
     </div>

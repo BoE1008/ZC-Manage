@@ -22,8 +22,8 @@ export const logout = async () => {
 export const getUserList = async (
   pageNo: number,
   pageSize: number,
-  userName: string,
-  deptId: string
+  deptId: string,
+  userName?: string
 ) => {
   const res = await axiosInstance.get(
     `/zc/user/list?pageNo=${pageNo}&pageSize=${pageSize}&userName=${userName}&deptId=${deptId}`

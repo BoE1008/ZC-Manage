@@ -15,7 +15,8 @@ export const getProjectsSubmitList = async (
   customId?: string,
   date?: string,
   businessGroupId?: string,
-  businessLineId?: string
+  businessLineId?: string,
+  projectYear?: string
 ) => {
   const res = await axiosInstance.get("/zc/project/submit/list", {
     params: {
@@ -32,6 +33,7 @@ export const getProjectsSubmitList = async (
       projectDate: date,
       businessGroupId,
       businessLineId,
+      projectYear,
     },
   });
 
@@ -51,7 +53,8 @@ export const getProjectsApproveList = async (
   customId?: string,
   date?: string,
   businessGroupId?: string,
-  businessLineId?: string
+  businessLineId?: string,
+  projectYear?: string
 ) => {
   const res = await axiosInstance.get("/zc/project/approve/list", {
     params: {
@@ -68,6 +71,45 @@ export const getProjectsApproveList = async (
       projectDate: date,
       businessGroupId,
       businessLineId,
+      projectYear,
+    },
+  });
+
+  return res.data;
+};
+
+export const getProjectsCWList = async (
+  pageNo: number,
+  pageSize: number,
+  name?: string,
+  projectNum?: string,
+  projectDateSort?: string,
+  productId?: string,
+  projectType?: string,
+  projectBrand?: string,
+  state?: string,
+  customId?: string,
+  date?: string,
+  businessGroupId?: string,
+  businessLineId?: string,
+  projectYear?: string
+) => {
+  const res = await axiosInstance.get("/zc/project/cw/list", {
+    params: {
+      pageNo,
+      pageSize,
+      name,
+      projectNum,
+      projectDateSort,
+      productId,
+      typeId: projectType,
+      brandId: projectBrand,
+      state,
+      customId,
+      projectDate: date,
+      businessGroupId,
+      businessLineId,
+      projectYear,
     },
   });
 
@@ -318,5 +360,14 @@ export const getYSFByProjectId = async (projectId: string, type: string) => {
       type,
     },
   });
+  return res.data;
+};
+
+export const transProject = async (id: string, userId: string) => {
+  const res = await axiosInstance.post(`/zc/project/move`, {
+    id,
+    userId,
+  });
+
   return res.data;
 };

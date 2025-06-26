@@ -1,7 +1,26 @@
 import { useEffect, useState } from "react";
-import { Table, Button, Modal, Form, Input, Space, message, Tag, Select } from "antd";
+import {
+  Table,
+  Button,
+  Modal,
+  Form,
+  Input,
+  Space,
+  message,
+  Tag,
+  Select,
+} from "antd";
 import { EditTwoTone, DeleteTwoTone } from "@ant-design/icons";
-import { getDictList, addDict, addDictData, updateDict, updateDictData, getDictDetail, deleteDict, deleteDictData } from "@/restApi/dict";
+import {
+  getDictList,
+  addDict,
+  addDictData,
+  updateDict,
+  updateDictData,
+  getDictDetail,
+  deleteDict,
+  deleteDictData,
+} from "@/restApi/dict";
 import { Company, Operation } from "@/types";
 import { useRouter } from "next/router";
 
@@ -58,7 +77,10 @@ const Dict = () => {
     form.validateFields();
     const values = form.getFieldsValue();
     setLoading(true);
-    const { code } = operation === Operation.Add ? await addDict(values) : await updateDict(editId, values);
+    const { code } =
+      operation === Operation.Add
+        ? await addDict(values)
+        : await updateDict(editId, values);
     if (code === 200) {
       setModalOpen(false);
       const data = await getDictList(page, pageSize);
@@ -90,7 +112,7 @@ const Dict = () => {
     });
   };
 
-  const handleDetail = async id => {
+  const handleDetail = async (id) => {
     const res = await getDictDetail(id, 1, 20);
     setTypeId(id);
     setDictDetail(res.entity.data);
@@ -102,20 +124,20 @@ const Dict = () => {
     setDataOperation(Operation.Add);
   };
 
-  const handleDataEdit = record => {
+  const handleDataEdit = (record) => {
     setDataOperation(Operation.Edit);
     setDataEditId(record.id);
     form1.setFieldsValue(record);
     setDataModalOpen(true);
   };
 
-  const handleDeleteOne = async id => {
+  const handleDeleteOne = async (id) => {
     await deleteDict(id);
     const data = await getDictList(page, pageSize);
     setData(data);
   };
 
-  const handleDeleteDataOne = async id => {
+  const handleDeleteDataOne = async (id) => {
     await deleteDictData(id);
     const data = await getDictDetail(typeId, 1, 20);
     setDictDetail(data.entity.data);
@@ -128,7 +150,10 @@ const Dict = () => {
       key: "dictName",
       render: (_, record) => {
         return (
-          <span className="cursor-pointer text-[#198348]" onClick={() => handleDetail(record.id)}>
+          <span
+            className="cursor-pointer text-[#198348]"
+            onClick={() => handleDetail(record.id)}
+          >
             {record.dictName}
           </span>
         );
@@ -200,9 +225,9 @@ const Dict = () => {
     },
     {
       title: "字典code",
-      key: "dictVabel",
+      key: "dictValue",
       align: "center",
-      dataIndex: "dictVabel",
+      dataIndex: "dictValue",
     },
     {
       title: "字典标签",
@@ -270,7 +295,11 @@ const Dict = () => {
   return (
     <div className="w-full p-2" style={{ color: "#000" }}>
       <div className="flex flex-row gap-y-3 justify-between">
-        <Button onClick={handleAdd} type="primary" style={{ marginBottom: 16, background: "#198348", width: "100px" }}>
+        <Button
+          onClick={handleAdd}
+          type="primary"
+          style={{ marginBottom: 16, background: "#198348", width: "100px" }}
+        >
           添加
         </Button>
       </div>
@@ -281,10 +310,10 @@ const Dict = () => {
         columns={columns}
         pagination={{
           total: data?.entity.total,
-          showTotal: total => `共 ${total} 条`,
+          showTotal: (total) => `共 ${total} 条`,
           showSizeChanger: true,
           pageSize: pageSize,
-          onChange: async page => {
+          onChange: async (page) => {
             setPage(page);
           },
           onShowSizeChange: async (page, size) => {
@@ -324,7 +353,12 @@ const Dict = () => {
           >
             <Input placeholder="请输入字典名称" />
           </Form.Item>
-          <Form.Item label="code" name="code" validateTrigger="onBlur" rules={[{ required: true, message: "字典编码不能为空" }]}>
+          <Form.Item
+            label="code"
+            name="code"
+            validateTrigger="onBlur"
+            rules={[{ required: true, message: "字典编码不能为空" }]}
+          >
             <Input placeholder="请输入编码" />
           </Form.Item>
           <Form.Item label="状态" name="status">
@@ -362,7 +396,11 @@ const Dict = () => {
         footer={null}
         maskClosable={false}
       >
-        <Button onClick={handleDataAdd} type="primary" style={{ marginBottom: 16, background: "#198348", width: "100px" }}>
+        <Button
+          onClick={handleDataAdd}
+          type="primary"
+          style={{ marginBottom: 16, background: "#198348", width: "100px" }}
+        >
           添加
         </Button>
         <Table
@@ -395,7 +433,9 @@ const Dict = () => {
       <Modal
         centered
         destroyOnClose
-        title={dataOperation === Operation.Add ? "添加字典数据" : "编辑字典数据"}
+        title={
+          dataOperation === Operation.Add ? "添加字典数据" : "编辑字典数据"
+        }
         open={dataModalOpen}
         onOk={handleDataOk}
         okButtonProps={{ style: { background: "#198348" } }}
@@ -405,7 +445,13 @@ const Dict = () => {
         style={{ minWidth: "650px" }}
         maskClosable={false}
       >
-        <Form labelCol={{ span: 5 }} wrapperCol={{ span: 20 }} layout={"horizontal"} form={form1} style={{ minWidth: 600, color: "#000" }}>
+        <Form
+          labelCol={{ span: 5 }}
+          wrapperCol={{ span: 20 }}
+          layout={"horizontal"}
+          form={form1}
+          style={{ minWidth: 600, color: "#000" }}
+        >
           <Form.Item
             required
             label="数据标签"

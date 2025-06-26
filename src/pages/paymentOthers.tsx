@@ -32,13 +32,13 @@ import {
   addPayment,
   updatePayment,
   logsOne,
-  submitToYW,
   getPaymentDetailById,
   deleteOne,
   getFilesById,
   updateFileById,
   deleteFileById,
   withDrawPayment,
+  submitOthers,
 } from "@/restApi/payment";
 import { getProjectsSubmitList, getYSFByProjectId } from "@/restApi/project";
 import { getSuppliersYFList, getSuppliersList } from "@/restApi/supplyer";
@@ -97,6 +97,8 @@ const Payment = () => {
   const [projectId, setProjectId] = useState();
 
   const [updateTimeSort, setUpdateTimeSort] = useState();
+
+  const [paymentType, setPaymentType] = useState();
 
   useEffect(() => {
     (async () => {
@@ -271,9 +273,11 @@ const Payment = () => {
     });
   };
 
-  const handleDetail = async (id) => {
-    const res = await getPaymentDetailById(id);
+  const handleDetail = async (record) => {
+    console.log(record);
+    const res = await getPaymentDetailById(record.id);
     setDetail(res.entity.data);
+    setPaymentType(record.paymentType);
   };
 
   const handleCheck = async (id) => {
@@ -318,7 +322,7 @@ const Payment = () => {
   };
 
   const handleSubmitOne = async () => {
-    await submitToYW(detail.id);
+    await submitOthers(detail.id, paymentType);
     message.success({ content: "提交成功", type: "success" });
     setDetail(undefined);
     const data = await getPaymentOthersList(
@@ -439,8 +443,10 @@ const Payment = () => {
       render: (value) => {
         return (
           <span>
-            {value === PaymentOthersType.SW
-              ? "商务"
+            {value === PaymentOthersType.FESW
+              ? "非俄商务"
+              : value === PaymentOthersType.ESW
+              ? "俄商务"
               : value === "ZH"
               ? "综合"
               : ""}
@@ -573,12 +579,12 @@ const Payment = () => {
               </Button>
             </Tooltip>
             {!isFinished && (
-              <Tooltip title={<span>提交业务审核</span>}>
+              <Tooltip title={<span>提交审核</span>}>
                 <Popconfirm
                   title="是否提交审核？"
                   getPopupContainer={(node) => node.parentElement}
                   okButtonProps={{ style: { backgroundColor: "#198348" } }}
-                  onConfirm={() => handleDetail(record.id)}
+                  onConfirm={() => handleDetail(record)}
                 >
                   <Button
                     style={{

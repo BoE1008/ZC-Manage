@@ -132,10 +132,12 @@ const Item = ({ projectId, onClose, modalType }) => {
   const handleYfOk = async () => {
     form1.validateFields().then(async () => {
       const values = form1.getFieldsValue();
+
+      console.log(values);
       const params = {
         ...values,
         yfDate: dayjs(values.yfDate).format("YYYY-MM-DD"),
-        moneyType: values.moneyType.label,
+        moneyType: values.moneyType?.label || values.moneyType,
       };
 
       const { code } =
@@ -1377,7 +1379,7 @@ const Item = ({ projectId, onClose, modalType }) => {
       const params = {
         ...values,
         ysDate: dayjs(values.ysDate).format("YYYY-MM-DD"),
-        moneyType: values.moneyType?.label,
+        moneyType: values.moneyType?.label || values.moneyType,
       };
       const { code } =
         operation === Operation.Add

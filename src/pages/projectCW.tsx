@@ -20,7 +20,7 @@ import {
   FundTwoTone,
 } from "@ant-design/icons";
 import {
-  getProjectsApproveList,
+  getProjectsCWList,
   addProject,
   updateProject,
   exportProject,
@@ -79,7 +79,8 @@ const Project = () => {
   const [projectBrand, setProjectBrand] = useState();
   const [projectState, setProjectState] = useState();
   const [customerId, setCustomerId] = useState();
-  const [date, setDate] = useState("");
+  const [date, setDate] = useState(""); //发运日期
+  const [projectYear, setProjectYear] = useState(); //项目年份
 
   const [staticModal, setStaticModal] = useState(false);
 
@@ -99,7 +100,7 @@ const Project = () => {
 
   useEffect(() => {
     (async () => {
-      const data = await getProjectsApproveList(
+      const data = await getProjectsCWList(
         page,
         pageSize,
         searchValue,
@@ -112,7 +113,8 @@ const Project = () => {
         customerId,
         date,
         businessGroupId,
-        businessLineId
+        businessLineId,
+        projectYear
       );
       // const file = await exportProject();
       setLoading(false);
@@ -133,6 +135,7 @@ const Project = () => {
     date,
     businessGroupId,
     businessLineId,
+    projectYear,
   ]);
 
   const handleOk = async () => {
@@ -148,7 +151,7 @@ const Project = () => {
         : await updateProject(editId, params);
     if (code === 200) {
       setModalOpen(false);
-      const data = await getProjectsApproveList(page, pageSize, searchValue);
+      const data = await getProjectsCWList(page, pageSize, searchValue);
       setData(data);
       message.success({
         content: operation === Operation.Add ? "添加成功" : "编辑成功",
@@ -161,7 +164,7 @@ const Project = () => {
     await rejectOne(projectId, remark);
     message.success({ content: "审核退回", type: "success" });
     setRejectId(undefined);
-    const data = await getProjectsApproveList(page, pageSize, searchValue);
+    const data = await getProjectsCWList(page, pageSize, searchValue);
     setData(data);
     setLoading(false);
   };
@@ -407,6 +410,14 @@ const Project = () => {
         render: (record) => formatNumber(record?.deductProfit),
       },
       {
+        label: "操作人",
+        value: "操作人",
+        title: "操作人",
+        dataIndex: "userName",
+        align: "center",
+        key: "userName",
+      },
+      {
         title: "备注",
         label: "备注",
         value: "备注",
@@ -522,6 +533,10 @@ const Project = () => {
     setDate(dateString);
   };
 
+  const handleProjectYearChange = (date, dateString) => {
+    setProjectYear(dateString);
+  };
+
   return (
     <div className="w-full p-2" style={{ color: "#000" }}>
       <div className="flex flex-row gap-y-3 justify-between my-4 pr-5">
@@ -544,18 +559,24 @@ const Project = () => {
 
           <div className="flex flex-row gap-x-4">
             <SearchInput
-              placeholder="按项目名称搜索"
-              onSearch={setSearchValue}
-            />
-            <SearchInput
               placeholder="按项目编号搜索"
               onSearch={setSearchNumValue}
+            />
+            <SearchInput
+              placeholder="按项目名称搜索"
+              onSearch={setSearchValue}
             />
             <DatePicker
               style={{ minWidth: "180px" }}
               picker="month"
               placeholder="按发运日期搜索"
               onChange={handleDateChange}
+            />
+            <DatePicker
+              style={{ minWidth: "180px" }}
+              picker="year"
+              placeholder="按项目年份搜索"
+              onChange={handleProjectYearChange}
             />
           </div>
         </div>
