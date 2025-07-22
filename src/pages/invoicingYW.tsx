@@ -270,6 +270,14 @@ const InvoicingYW = () => {
       key: "phone",
     },
     {
+      title: "班列号/船名",
+      label: "班列号/船名",
+      value: "班列号/船名",
+      dataIndex: "trainNumName",
+      align: "center",
+      key: "trainNumName",
+    },
+    {
       title: "申请人",
       dataIndex: "userName",
       align: "center",
@@ -402,17 +410,17 @@ const InvoicingYW = () => {
 
   return (
     <div className="p-2">
-      <div className="flex flex-row gap-y-3 justify-between mb-4">
+      <div className="flex flex-row gap-y-3 justify-between mb-4 sticky top-[0px] z-[100] bg-[#fff]">
         <Space>
-          <Input
-            placeholder="按项目名称搜索"
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-          />
           <Input
             placeholder="按项目编号搜索"
             value={projectNum}
             onChange={(e) => setProjectNum(e.target.value)}
+          />
+          <Input
+            placeholder="按项目名称搜索"
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
           />
           <Input
             placeholder="按申请人搜索"

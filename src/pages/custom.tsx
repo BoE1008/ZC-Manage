@@ -1,10 +1,31 @@
 import { useEffect, useState } from "react";
-import { Table, Button, Modal, Form, Input, Space, message, Tooltip, Select, Popconfirm } from "antd";
+import {
+  Table,
+  Button,
+  Modal,
+  Form,
+  Input,
+  Space,
+  message,
+  Tooltip,
+  Select,
+  Popconfirm,
+} from "antd";
 import { EditTwoTone, DeleteTwoTone, ProfileTwoTone } from "@ant-design/icons";
-import { getCustomersList, addCustomer, updateCustomer, deleteCustomer } from "@/restApi/customer";
+import {
+  getCustomersList,
+  addCustomer,
+  updateCustomer,
+  deleteCustomer,
+} from "@/restApi/customer";
 import { Company, Operation } from "@/types";
 import { useRouter } from "next/router";
-import { addCustomBank, getCustomBankList, updateCustomBank, deleteBank } from "@/restApi/account";
+import {
+  addCustomBank,
+  getCustomBankList,
+  updateCustomBank,
+  deleteBank,
+} from "@/restApi/account";
 import { getDictByCode } from "@/restApi/dict";
 import ResizeTable from "@/components/ResizeTable";
 import { adminUserIds } from "@/utils/const";
@@ -67,7 +88,10 @@ const Customer = () => {
   const handleOk = async () => {
     form.validateFields();
     const values = form.getFieldsValue();
-    const { code } = operation === Operation.Add ? await addCustomer(values) : await updateCustomer(editId, values);
+    const { code } =
+      operation === Operation.Add
+        ? await addCustomer(values)
+        : await updateCustomer(editId, values);
     if (code === 200) {
       setModalOpen(false);
       const data = await getCustomersList(page, pageSize, searchValue);
@@ -79,7 +103,10 @@ const Customer = () => {
   const handleSaveAsSupplier = async () => {
     form.validateFields();
     const values = form.getFieldsValue();
-    const { code } = operation === Operation.Add ? await addCustomer(values) : await updateCustomer(editId, values);
+    const { code } =
+      operation === Operation.Add
+        ? await addCustomer(values)
+        : await updateCustomer(editId, values);
 
     const { code: code1 } = await addSupplyer(values);
 
@@ -111,15 +138,17 @@ const Customer = () => {
     };
   };
 
-  const customerFilterOption = (input: string, option?: { label: string; value: string }) =>
-    (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
+  const customerFilterOption = (
+    input: string,
+    option?: { label: string; value: string }
+  ) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
 
   const [bankOperation, setBankOperation] = useState<Operation>();
   const [bankModalState, setBankModalState] = useState<boolean>(false);
   const [moneyTypes, setMoneyTypes] = useState();
   const [bankId, setBankId] = useState();
 
-  const handleCheckBank = async id => {
+  const handleCheckBank = async (id) => {
     const data = await getCustomBankList(id);
     setBankData(data);
     setCustomId(id);
@@ -132,7 +161,7 @@ const Customer = () => {
     setMoneyTypes(res.entity);
   };
 
-  const handleEditBank = async record => {
+  const handleEditBank = async (record) => {
     const res = await getDictByCode("sys_money_type");
     setMoneyTypes(res.entity);
     setBankModalState(true);
@@ -150,17 +179,21 @@ const Customer = () => {
       moneyTypeId: values.moneyType.value,
     };
     const { code } =
-      bankOperation === Operation.Add ? await addCustomBank(customId, params) : await updateCustomBank(customId, bankId, params);
+      bankOperation === Operation.Add
+        ? await addCustomBank(customId, params)
+        : await updateCustomBank(customId, bankId, params);
     if (code === 200) {
       form1.resetFields();
       setBankModalState(false);
       const res = await getCustomBankList(customId);
       setBankData(res);
-      message.success(bankOperation === Operation.Add ? "添加成功" : "编辑成功");
+      message.success(
+        bankOperation === Operation.Add ? "添加成功" : "编辑成功"
+      );
     }
   };
 
-  const handleDeleteBank = async id => {
+  const handleDeleteBank = async (id) => {
     await deleteBank(id);
     const res = await getCustomBankList(customId);
     setBankData(res);
@@ -246,7 +279,7 @@ const Customer = () => {
                 <Popconfirm
                   title="是否删除？"
                   okButtonProps={{ style: { backgroundColor: "#198348" } }}
-                  getPopupContainer={node => node.parentElement}
+                  getPopupContainer={(node) => node.parentElement}
                   onConfirm={() => handleDeleteOne(record.id)}
                 >
                   <Button
@@ -313,7 +346,7 @@ const Customer = () => {
               <Popconfirm
                 title="是否删除？"
                 okButtonProps={{ style: { backgroundColor: "#198348" } }}
-                getPopupContainer={node => node.parentElement}
+                getPopupContainer={(node) => node.parentElement}
                 onConfirm={() => handleDeleteBank(record.id)}
               >
                 <Button
@@ -336,8 +369,12 @@ const Customer = () => {
 
   return (
     <div className="w-full p-2" style={{ color: "#000" }}>
-      <div className="flex flex-row gap-y-3 gap-x-3 items-center mb-4">
-        <Button onClick={handleAdd} type="primary" style={{ background: "#198348", width: "100px" }}>
+      <div className="flex flex-row gap-y-3 gap-x-3 items-center mb-4 sticky top-[0px] z-[100] bg-[#fff]">
+        <Button
+          onClick={handleAdd}
+          type="primary"
+          style={{ background: "#198348", width: "100px" }}
+        >
           添加
         </Button>
         <Space>
@@ -360,13 +397,13 @@ const Customer = () => {
           // 设置总条数
           total: data?.entity.total,
           // 显示总条数
-          showTotal: total => `共 ${total} 条`,
+          showTotal: (total) => `共 ${total} 条`,
           // 是否可以改变 pageSize
           showSizeChanger: true,
           pageSize: pageSize,
 
           // 改变页码时
-          onChange: async page => {
+          onChange: async (page) => {
             setPage(page);
           },
           // pageSize 变化的回调
@@ -406,7 +443,14 @@ const Customer = () => {
           initialValues={initialValues}
           style={{ minWidth: 600, color: "#000" }}
         >
-          <Form.Item required label="名称" name="name" rules={[validateName]} validateTrigger="onBlur" hasFeedback>
+          <Form.Item
+            required
+            label="名称"
+            name="name"
+            rules={[validateName]}
+            validateTrigger="onBlur"
+            hasFeedback
+          >
             <Input placeholder="请输入客户名称" />
           </Form.Item>
           <Form.Item label="地址" name="address">
@@ -441,10 +485,18 @@ const Customer = () => {
         footer={null}
         maskClosable={false}
       >
-        <Button onClick={handleAddBank} type="primary" style={{ marginBottom: 16, background: "#198348", width: "100px" }}>
+        <Button
+          onClick={handleAddBank}
+          type="primary"
+          style={{ marginBottom: 16, background: "#198348", width: "100px" }}
+        >
           添加
         </Button>
-        <Table bordered dataSource={bankData?.entity.data} columns={bankColumns} />
+        <Table
+          bordered
+          dataSource={bankData?.entity.data}
+          columns={bankColumns}
+        />
       </Modal>
 
       <Modal
@@ -481,7 +533,7 @@ const Customer = () => {
               placeholder="币种"
               optionFilterProp="children"
               filterOption={customerFilterOption}
-              options={moneyTypes?.map(con => ({
+              options={moneyTypes?.map((con) => ({
                 label: con.dictLabel,
                 value: con.id,
               }))}

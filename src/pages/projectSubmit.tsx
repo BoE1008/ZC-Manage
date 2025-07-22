@@ -83,6 +83,8 @@ const Project = () => {
   const [date, setDate] = useState(""); //发运日期
   const [projectYear, setProjectYear] = useState(); //项目年份
 
+  const [trainNumName, setTrainNumName] = useState("");
+
   const [exportEnabled, setExportEnabled] = useState(true);
 
   const [businessGroupId, setBusinessGroupId] = useState();
@@ -115,7 +117,8 @@ const Project = () => {
         date,
         businessGroupId,
         businessLineId,
-        projectYear
+        projectYear,
+        trainNumName
       );
       setData(data);
       setLoading(false);
@@ -135,6 +138,7 @@ const Project = () => {
     businessGroupId,
     businessLineId,
     projectYear,
+    trainNumName,
   ]);
 
   const handleAdd = async () => {
@@ -233,6 +237,9 @@ const Project = () => {
       value: "-1",
     },
   ];
+
+  const hasMoveRight = !!JSON.parse(sessionStorage.getItem("userInfo") || "")
+    ?.businessGroupId;
 
   const customerFilters = useMemo(() => {
     return customer?.map((item) => ({
@@ -579,18 +586,20 @@ const Project = () => {
                   </Popconfirm>
                 </Tooltip>
               )}
-              <Tooltip title={<span>转移项目</span>}>
-                <Button
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    padding: "3px 5px",
-                  }}
-                  onClick={() => setTransId(record.id)}
-                >
-                  <GiftTwoTone twoToneColor="#198348" />
-                </Button>
-              </Tooltip>
+              {hasMoveRight && (
+                <Tooltip title={<span>转移项目</span>}>
+                  <Button
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      padding: "3px 5px",
+                    }}
+                    onClick={() => setTransId(record.id)}
+                  >
+                    <GiftTwoTone twoToneColor="#198348" />
+                  </Button>
+                </Tooltip>
+              )}
             </Space>
           );
         },
@@ -669,7 +678,7 @@ const Project = () => {
 
   return (
     <div className="w-full p-2" style={{ color: "#000" }}>
-      <div className="flex flex-row gap-y-3 justify-between my-4 pr-5">
+      <div className="flex flex-row gap-y-3 justify-between my-4 pr-5 sticky top-[0px] z-[100] bg-[#fff]">
         <div className="flex flex-row gap-x-10">
           <div className="flex flex-row gap-x-4">
             <Button
@@ -720,6 +729,10 @@ const Project = () => {
               placeholder="按项目年份搜索"
               onChange={handleProjectYearChange}
             />
+            <SearchInput
+              placeholder="按班列号/船名搜索"
+              onSearch={setTrainNumName}
+            />
           </div>
         </div>
 
@@ -749,13 +762,13 @@ const Project = () => {
 
       {
         <ResizeTable
-          virtual
+          // virtual
           bordered
           loading={loading}
           dataSource={data?.entity.data}
           columns={displayColumn}
           rowKey={(record) => record.projectNum}
-          // scroll={{ scrollToFirstRowOnChange: true, x: true, y: "800px" }}
+          // scroll={{ scrollToFirstRowOnChange: true, y: 2000 }}
           pagination={{
             // 设置总条数
             total: data?.entity.total,
@@ -948,7 +961,9 @@ const Project = () => {
             <Form.Item
               label="项目结束日期"
               name="endDate"
-              getValueProps={(i) => ({ value: dayjs(i) })}
+              getValueProps={(i) => ({
+                value: dayjs(i).isValid() ? dayjs(i) : "",
+              })}
             >
               <DatePicker allowClear={false} />
             </Form.Item>

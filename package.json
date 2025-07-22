@@ -22,10 +22,10 @@
     "clsx": "^2.0.0",
     "dayjs": "^1.11.10",
     "dragm": "^0.0.5",
-    "lodash": "^4.17.21",
     "next": "13.5.4",
     "nextjs-progressbar": "^0.0.16",
     "qs": "^6.11.2",
+    "radash": "^12.1.1",
     "react": "^18",
     "react-dom": "^18",
     "sass": "^1.77.6",
@@ -33,7 +33,6 @@
     "sm-crypto": "^0.3.13"
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.202",
     "@types/node": "^20",
     "@types/qs": "^6.9.10",
     "@types/react": "^18",

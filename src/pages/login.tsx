@@ -208,12 +208,7 @@ const Login = () => {
 
         <div className="w-screen h-screen relative flex items-center justify-center">
           <div className="relative w-full h-full">
-            <Image
-              src={Background2}
-              alt=""
-              layout="fill"
-              className="transform rotate-180"
-            />
+            <Image src={Background2} alt="" layout="fill" />
           </div>
           <div
             className={clsx(

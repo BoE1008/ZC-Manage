@@ -19,8 +19,8 @@ const AppLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [openKeys, setOpenKeys] = useState([]);
   const [collapsed, setCollapsed] = useState(false);
 
-  const onOpenChange = keys => {
-    const latestOpenKey = keys.find(key => openKeys.indexOf(key) === -1);
+  const onOpenChange = (keys) => {
+    const latestOpenKey = keys.find((key) => openKeys.indexOf(key) === -1);
     if (openKeys.indexOf(latestOpenKey) === -1) {
       setOpenKeys(latestOpenKey ? [latestOpenKey] : []);
     } else {
@@ -39,19 +39,24 @@ const AppLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
     })();
   }, [asPath]);
 
-  const handleClick: MenuProps["onClick"] = props => {
+  const handleClick: MenuProps["onClick"] = (props) => {
     router.push(`/${props.key}`);
   };
 
   return (
     <Layout className="h-full" style={{ minHeight: "100vh" }}>
-      <Watermark content={`甄察供应链（${userName}）`} inherit={false} zIndex={0} gap={[150, 150]}>
+      <Watermark
+        content={`甄察供应链（${userName}）`}
+        inherit={false}
+        zIndex={101}
+        gap={[150, 150]}
+      >
         <Header
           style={{
             position: "fixed",
             top: 0,
             left: 0,
-            zIndex: 5,
+            zIndex: 101,
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
@@ -62,7 +67,13 @@ const AppLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
           className="w-full h-[50px]"
         >
           <Link href="/" className="flex flex-row items-center">
-            <Image src={logo} alt="logo" width={200} height={60} priority={false} />
+            <Image
+              src={logo}
+              alt="logo"
+              width={200}
+              height={60}
+              priority={false}
+            />
             <h2
               style={{
                 color: "#198348",
@@ -80,7 +91,7 @@ const AppLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
           <Sider
             collapsible
             collapsed={collapsed}
-            onCollapse={value => setCollapsed(value)}
+            onCollapse={(value) => setCollapsed(value)}
             style={{
               // position: "fixed",
               // top: 80,
@@ -106,7 +117,7 @@ const AppLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
                 color: "#fff",
               }}
               items={menu}
-              onClick={props => handleClick(props)}
+              onClick={(props) => handleClick(props)}
             />
           </Sider>
           <Layout

@@ -1,9 +1,26 @@
 import { useRouter } from "next/router";
 import { useState, useEffect, useRef, useMemo } from "react";
 import clsx from "clsx";
-import { DownOutlined, SoundTwoTone, SettingOutlined, EditOutlined, EllipsisOutlined } from "@ant-design/icons";
+import {
+  DownOutlined,
+  SoundTwoTone,
+  SettingOutlined,
+  EditOutlined,
+  EllipsisOutlined,
+} from "@ant-design/icons";
 import { logout } from "@/restApi/user";
-import { Modal, Form, Input, message, Badge, Statistic, Col, Row, Card, Avatar } from "antd";
+import {
+  Modal,
+  Form,
+  Input,
+  message,
+  Badge,
+  Statistic,
+  Col,
+  Row,
+  Card,
+  Avatar,
+} from "antd";
 import { updatePassword } from "@/restApi/user";
 import { sm2 } from "sm-crypto";
 import { SM_PUBLIC_KEY } from "@/utils/const";
@@ -78,12 +95,19 @@ const User = () => {
   };
 
   return (
-    <div className="pr-5 text-[#198348] flex flex-row items-center gap-x-10">
+    <div className="pr-5 text-[#198348] flex flex-row items-center gap-x-10 z-[101]">
       {count > 0 && (
-        <div ref={noticeContainerRef} className="relative w-[25px] h-[50px] cursor-pointer" onClick={() => setNoticeModal(true)}>
+        <div
+          ref={noticeContainerRef}
+          className="relative w-[25px] h-[50px] cursor-pointer"
+          onClick={() => setNoticeModal(true)}
+        >
           <div className="absolute inset-0 w-full h-full">
             <Badge size="small" color="red" count={badges ? count : 0}>
-              <SoundTwoTone twoToneColor="#198348" style={{ fontSize: "25px", cursor: "pointer" }} />
+              <SoundTwoTone
+                twoToneColor="#198348"
+                style={{ fontSize: "25px", cursor: "pointer" }}
+              />
             </Badge>
           </div>
 
@@ -98,16 +122,25 @@ const User = () => {
                 <Col>
                   <Link href="/projectYW" onClick={() => setNoticeModal(false)}>
                     <Card size="small">
-                      <Statistic title="项目业务审核" value={badges?.projectNum} />
+                      <Statistic
+                        title="项目业务审核"
+                        value={badges?.projectNum}
+                      />
                     </Card>
                   </Link>
                 </Col>
               )}
               {!!badges?.projectThNum && (
                 <Col>
-                  <Link href="/projectSubmit" onClick={() => setNoticeModal(false)}>
+                  <Link
+                    href="/projectSubmit"
+                    onClick={() => setNoticeModal(false)}
+                  >
                     <Card size="small">
-                      <Statistic title="项目退回代办数" value={badges?.projectThNum} />
+                      <Statistic
+                        title="项目退回代办数"
+                        value={badges?.projectThNum}
+                      />
                     </Card>
                   </Link>
                 </Col>
@@ -116,7 +149,10 @@ const User = () => {
             <Row gutter={[16, 16]}>
               {!!badges?.iywNum && (
                 <Col>
-                  <Link href="/invoicingYW" onClick={() => setNoticeModal(false)}>
+                  <Link
+                    href="/invoicingYW"
+                    onClick={() => setNoticeModal(false)}
+                  >
                     <Card size="small">
                       <Statistic title="开票业务审核" value={badges?.iywNum} />
                     </Card>
@@ -125,7 +161,10 @@ const User = () => {
               )}
               {!!badges?.icwNum && (
                 <Col>
-                  <Link href="/invoicingCW" onClick={() => setNoticeModal(false)}>
+                  <Link
+                    href="/invoicingCW"
+                    onClick={() => setNoticeModal(false)}
+                  >
                     <Card size="small">
                       <Statistic title="开票财务审核" value={badges?.icwNum} />
                     </Card>
@@ -134,9 +173,15 @@ const User = () => {
               )}
               {!!badges?.ithNum && (
                 <Col>
-                  <Link href="/invoicingSubmit" onClick={() => setNoticeModal(false)}>
+                  <Link
+                    href="/invoicingSubmit"
+                    onClick={() => setNoticeModal(false)}
+                  >
                     <Card size="small">
-                      <Statistic title="开票退回代办数" value={badges?.ithNum} />
+                      <Statistic
+                        title="开票退回代办数"
+                        value={badges?.ithNum}
+                      />
                     </Card>
                   </Link>
                 </Col>
@@ -179,9 +224,15 @@ const User = () => {
               )}
               {!!badges?.pthNum && (
                 <Col>
-                  <Link href="/paymentSubmit" onClick={() => setNoticeModal(false)}>
+                  <Link
+                    href="/paymentSubmit"
+                    onClick={() => setNoticeModal(false)}
+                  >
                     <Card size="small">
-                      <Statistic title="付款退回代办数" value={badges?.pthNum} />
+                      <Statistic
+                        title="付款退回代办数"
+                        value={badges?.pthNum}
+                      />
                     </Card>
                   </Link>
                 </Col>
@@ -198,18 +249,29 @@ const User = () => {
       >
         <div className="flex flex-row gap-x-3">
           <span className="text-[#198348]">{username}</span>
-          <DownOutlined className={clsx("w-5 stroke-white transform transition-transform", hovered && "rotate-180")} />
+          <DownOutlined
+            className={clsx(
+              "w-5 stroke-white transform transition-transform",
+              hovered && "rotate-180"
+            )}
+          />
         </div>
         <ul
           className={clsx(
-            "font-medium tracking-wider leading-8 <md:w-full min-w-20 w-max top-12 md:top-16 z-30 absolute border-[1px] px-5 py-2 bg-[#fff] flex flex-col gap-y-2",
+            "font-medium tracking-wider leading-8 <md:w-full min-w-20 w-max top-12 md:top-16 z-[102] absolute border-[1px] px-5 py-2 bg-[#fff] flex flex-col gap-y-2",
             !hovered && "hidden"
           )}
         >
-          <li onClick={() => setModalOpen(true)} className="cursor-pointer px-7.5 transform transition-all hover:scale-110 text-center">
+          <li
+            onClick={() => setModalOpen(true)}
+            className="cursor-pointer px-7.5 transform transition-all hover:scale-110 text-center"
+          >
             {"个人中心"}
           </li>
-          <li onClick={() => setPassModal(true)} className="cursor-pointer px-7.5 transform transition-all hover:scale-110 text-center">
+          <li
+            onClick={() => setPassModal(true)}
+            className="cursor-pointer px-7.5 transform transition-all hover:scale-110 text-center"
+          >
             {"修改密码"}
           </li>
           <li
@@ -279,18 +341,28 @@ const User = () => {
                     return Promise.reject();
                   }
                   const oNumber = "0123456789";
-                  const oLetter = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+                  const oLetter =
+                    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
                   const oSpecial = "!@#$%&*";
                   const oTher = oNumber + oLetter + oSpecial;
                   let total = 0;
                   const oSpeArr = value.split("");
-                  const oNumberItem = oSpeArr.find((item: any) => oNumber.indexOf(item) !== -1);
-                  const oLetterItem = oSpeArr.find((item: any) => oLetter.indexOf(item) !== -1);
-                  const oSpeItem = oSpeArr.find((item: any) => oSpecial.indexOf(item) !== -1);
-                  const oTherItem = oSpeArr.find((item: any) => oTher.indexOf(item) === -1);
+                  const oNumberItem = oSpeArr.find(
+                    (item: any) => oNumber.indexOf(item) !== -1
+                  );
+                  const oLetterItem = oSpeArr.find(
+                    (item: any) => oLetter.indexOf(item) !== -1
+                  );
+                  const oSpeItem = oSpeArr.find(
+                    (item: any) => oSpecial.indexOf(item) !== -1
+                  );
+                  const oTherItem = oSpeArr.find(
+                    (item: any) => oTher.indexOf(item) === -1
+                  );
 
                   if (value.length < 6 || oTherItem !== undefined) {
-                    rule.message = "密码不能小于六位，为字母（不区分大小写）、数字、特殊字符（!@#$%&*）的组合！";
+                    rule.message =
+                      "密码不能小于六位，为字母（不区分大小写）、数字、特殊字符（!@#$%&*）的组合！";
                     return Promise.reject();
                   }
                   if (oNumberItem !== undefined) {
@@ -305,13 +377,17 @@ const User = () => {
                   if (total >= 3) {
                     return Promise.resolve();
                   }
-                  rule.message = "密码不能小于六位，为字母（不区分大小写）、数字、特殊字符（!@#$%&*）的组合！";
+                  rule.message =
+                    "密码不能小于六位，为字母（不区分大小写）、数字、特殊字符（!@#$%&*）的组合！";
                   return Promise.reject();
                 },
               },
             ]}
           >
-            <Input.Password size="large" placeholder="不能小于六位，为字母、数字、特殊字符的组合！" />
+            <Input.Password
+              size="large"
+              placeholder="不能小于六位，为字母、数字、特殊字符的组合！"
+            />
           </Form.Item>
         </Form>
       </Modal>

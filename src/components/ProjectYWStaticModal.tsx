@@ -2,7 +2,7 @@ import { Modal } from "antd";
 import { memo, useRef, useMemo, useEffect, useState } from "react";
 import * as echarts from "echarts";
 import { getProjectsApproveList } from "@/restApi/project";
-import _ from "lodash";
+import { group } from "radash";
 
 const StaticModal = ({ open, onCancel }) => {
   const typeChartRef = useRef(null);
@@ -31,10 +31,12 @@ const StaticModal = ({ open, onCancel }) => {
           type: "pie",
           radius: "55%",
           center: ["50%", "50%"],
-          data: Object.entries(_.groupBy(data, "typeName")).map((i) => ({
-            name: i[0],
-            value: i[1].length,
-          })),
+          data: Object.entries(group(data, (item) => item.typeName)).map(
+            (i) => ({
+              name: i[0],
+              value: i[1].length,
+            })
+          ),
           itemStyle: {
             normal: {
               label: {
@@ -69,10 +71,12 @@ const StaticModal = ({ open, onCancel }) => {
               shadowColor: "rgba(0, 0, 0, 0.5)",
             },
           },
-          data: Object.entries(_.groupBy(data, "productName")).map((i) => ({
-            name: i[0],
-            value: i[1].length,
-          })),
+          data: Object.entries(group(data, (item) => item.productName)).map(
+            (i) => ({
+              name: i[0],
+              value: i[1].length,
+            })
+          ),
           itemStyle: {
             normal: {
               label: {
@@ -107,10 +111,12 @@ const StaticModal = ({ open, onCancel }) => {
               shadowColor: "rgba(0, 0, 0, 0.5)",
             },
           },
-          data: Object.entries(_.groupBy(data, "brandName")).map((i) => ({
-            name: i[0],
-            value: i[1].length,
-          })),
+          data: Object.entries(group(data, (item) => item.brandName)).map(
+            (i) => ({
+              name: i[0],
+              value: i[1].length,
+            })
+          ),
           itemStyle: {
             normal: {
               label: {

@@ -16,7 +16,8 @@ export const getProjectsSubmitList = async (
   date?: string,
   businessGroupId?: string,
   businessLineId?: string,
-  projectYear?: string
+  projectYear?: string,
+  trainNumName?: string
 ) => {
   const res = await axiosInstance.get("/zc/project/submit/list", {
     params: {
@@ -34,6 +35,7 @@ export const getProjectsSubmitList = async (
       businessGroupId,
       businessLineId,
       projectYear,
+      trainNumName,
     },
   });
 
@@ -54,7 +56,8 @@ export const getProjectsApproveList = async (
   date?: string,
   businessGroupId?: string,
   businessLineId?: string,
-  projectYear?: string
+  projectYear?: string,
+  trainNumName?: string
 ) => {
   const res = await axiosInstance.get("/zc/project/approve/list", {
     params: {
@@ -72,6 +75,7 @@ export const getProjectsApproveList = async (
       businessGroupId,
       businessLineId,
       projectYear,
+      trainNumName,
     },
   });
 
@@ -92,7 +96,8 @@ export const getProjectsCWList = async (
   date?: string,
   businessGroupId?: string,
   businessLineId?: string,
-  projectYear?: string
+  projectYear?: string,
+  trainNumName?: string
 ) => {
   const res = await axiosInstance.get("/zc/project/cw/list", {
     params: {
@@ -110,6 +115,7 @@ export const getProjectsCWList = async (
       businessGroupId,
       businessLineId,
       projectYear,
+      trainNumName,
     },
   });
 

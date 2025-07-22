@@ -1,6 +1,6 @@
 import { Input } from "antd";
 import { useCallback, useMemo } from "react";
-import debounce from "lodash/debounce";
+import { debounce } from "radash";
 
 const SearchInput = ({
   onSearch,

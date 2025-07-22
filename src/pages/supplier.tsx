@@ -377,7 +377,7 @@ const Supplyer = () => {
 
   return (
     <div className="w-full p-2" style={{ color: "#000" }}>
-      <div className="flex flex-row items-center gap-3 mb-4">
+      <div className="flex flex-row items-center gap-3 mb-4 sticky top-[0px] z-[100] bg-[#fff]">
         <Button
           onClick={handleAdd}
           type="primary"

@@ -57,3 +57,10 @@ body {
 :global(.ant-table-thead > tr > th) {
   text-align: center !important;
 }
+
+.ant-table-thead > tr > th {
+  position: sticky !important;
+  top: 40px !important;
+  z-index: 100 !important;
+  background: #fff !important;
+}

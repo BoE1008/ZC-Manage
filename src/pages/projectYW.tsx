@@ -85,6 +85,7 @@ const Project = () => {
   const [customerId, setCustomerId] = useState();
   const [date, setDate] = useState(""); //发运日期
   const [projectYear, setProjectYear] = useState(); //项目年份
+  const [trainNumName, setTrainNumName] = useState("");
 
   const [staticModal, setStaticModal] = useState(false);
 
@@ -118,7 +119,8 @@ const Project = () => {
         date,
         businessGroupId,
         businessLineId,
-        projectYear
+        projectYear,
+        trainNumName
       );
       // const file = await exportProject();
       setLoading(false);
@@ -140,6 +142,7 @@ const Project = () => {
     businessGroupId,
     businessLineId,
     projectYear,
+    trainNumName,
   ]);
 
   const option = useMemo(() => {
@@ -658,7 +661,7 @@ const Project = () => {
 
   return (
     <div className="w-full p-2" style={{ color: "#000" }}>
-      <div className="flex flex-row gap-y-3 justify-between my-4 pr-5">
+      <div className="flex flex-row gap-y-3 justify-between my-4 pr-5 sticky top-[0px] z-[100] bg-[#fff]">
         <div className="flex flex-row gap-x-10">
           <div className="flex flex-row gap-x-4">
             <Button
@@ -696,6 +699,10 @@ const Project = () => {
               picker="year"
               placeholder="按项目年份搜索"
               onChange={handleProjectYearChange}
+            />
+            <SearchInput
+              placeholder="按班列号/船名搜索"
+              onSearch={setTrainNumName}
             />
           </div>
         </div>

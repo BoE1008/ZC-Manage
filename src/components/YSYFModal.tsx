@@ -57,6 +57,7 @@ import YSDrawer from "./YSDrawer";
 import YFDrawer from "./YFDrawer";
 import { getDictByCode } from "@/restApi/dict";
 import { getExchangeRateList } from "@/restApi/exchangeRate";
+import clsx from "clsx";
 
 const Item = ({ projectId, onClose, modalType }) => {
   const [data, setData] = useState();
@@ -1498,6 +1499,7 @@ const Item = ({ projectId, onClose, modalType }) => {
               setPageSize(size);
             },
           }}
+          className={clsx(modalType !== ModalType.Submit && "mt-10")}
         />
 
         {/* 应收弹窗 */}
@@ -1598,7 +1600,11 @@ const Item = ({ projectId, onClose, modalType }) => {
               <Input.TextArea placeholder="明细" maxLength={100} />
             </Form.Item>
             <Form.Item label="备注" name="remark">
-              <Input.TextArea placeholder="备注" maxLength={100} />
+              <Input.TextArea
+                autoSize={{ minRows: 2, maxRows: 10 }}
+                placeholder="备注"
+                // maxLength={100}
+              />
             </Form.Item>
           </Form>
         </Modal>
@@ -1702,7 +1708,10 @@ const Item = ({ projectId, onClose, modalType }) => {
               <Input.TextArea placeholder="明细" maxLength={100} />
             </Form.Item>
             <Form.Item label="备注" name="remark">
-              <Input.TextArea placeholder="备注" maxLength={100} />
+              <Input.TextArea
+                autoSize={{ minRows: 2, maxRows: 10 }}
+                placeholder="备注"
+              />
             </Form.Item>
             <Form.Item
               label="预留利润名称"
