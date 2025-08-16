@@ -94,8 +94,13 @@ const Customer = () => {
         : await updateCustomer(editId, values);
     if (code === 200) {
       setModalOpen(false);
-      const data = await getCustomersList(page, pageSize, searchValue);
-      setData(data);
+      if (operation === Operation.Add) {
+        setPage(1);
+      } else {
+        const data = await getCustomersList(page, pageSize, searchValue);
+        setData(data);
+      }
+
       message.success(operation === Operation.Add ? "添加成功" : "编辑成功");
     }
   };
@@ -112,8 +117,13 @@ const Customer = () => {
 
     if (code === 200 && code1 === 200) {
       setModalOpen(false);
-      const data = await getCustomersList(page, pageSize, searchValue);
-      setData(data);
+      if (operation === Operation.Add) {
+        setPage(1);
+      } else {
+        const data = await getCustomersList(page, pageSize, searchValue);
+        setData(data);
+      }
+
       message.success(operation === Operation.Add ? "添加成功" : "编辑成功");
     } else {
       message.error("添加失败");
@@ -279,7 +289,8 @@ const Customer = () => {
                 <Popconfirm
                   title="是否删除？"
                   okButtonProps={{ style: { backgroundColor: "#198348" } }}
-                  getPopupContainer={(node) => node.parentElement}
+                  placement="bottom"
+                  getPopupContainer={() => document.body}
                   onConfirm={() => handleDeleteOne(record.id)}
                 >
                   <Button
@@ -346,7 +357,8 @@ const Customer = () => {
               <Popconfirm
                 title="是否删除？"
                 okButtonProps={{ style: { backgroundColor: "#198348" } }}
-                getPopupContainer={(node) => node.parentElement}
+                placement="bottom"
+                getPopupContainer={() => document.body}
                 onConfirm={() => handleDeleteBank(record.id)}
               >
                 <Button
@@ -401,6 +413,7 @@ const Customer = () => {
           // 是否可以改变 pageSize
           showSizeChanger: true,
           pageSize: pageSize,
+          current: page,
 
           // 改变页码时
           onChange: async (page) => {

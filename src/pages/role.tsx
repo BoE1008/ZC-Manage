@@ -169,7 +169,8 @@ const Role = () => {
                 okButtonProps={{
                   style: { backgroundColor: "#198348" },
                 }}
-                getPopupContainer={(node) => node.parentElement}
+                placement="bottom"
+                getPopupContainer={() => document.body}
                 onConfirm={() => handleDeleteOne(record.id)}
               >
                 <Button

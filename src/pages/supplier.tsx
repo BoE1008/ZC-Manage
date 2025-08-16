@@ -93,8 +93,14 @@ const Supplyer = () => {
         : await updateSupplyer(editId, values);
     if (code === 200) {
       setModalOpen(false);
-      const data = await getSuppliersList(page, pageSize, searchValue);
-      setData(data);
+
+      if (operation === Operation.Add) {
+        setPage(1);
+      } else {
+        const data = await getSuppliersList(page, pageSize, searchValue);
+        setData(data);
+      }
+
       message.success({
         content: operation === Operation.Add ? "添加成功" : "编辑成功",
         type: "success",
@@ -114,8 +120,13 @@ const Supplyer = () => {
 
     if (code === 200 && code1 === 200) {
       setModalOpen(false);
-      const data = await getSuppliersList(page, pageSize, searchValue);
-      setData(data);
+
+      if (operation === Operation.Add) {
+        setPage(1);
+      } else {
+        const data = await getSuppliersList(page, pageSize, searchValue);
+        setData(data);
+      }
       message.success({
         content: operation === Operation.Add ? "添加成功" : "编辑成功",
         type: "success",
@@ -288,7 +299,7 @@ const Supplyer = () => {
                 <Popconfirm
                   title="是否删除？"
                   okButtonProps={{ style: { backgroundColor: "#198348" } }}
-                  getPopupContainer={(node) => node.parentElement}
+                  placement="bottom"
                   onConfirm={() => handleDeleteOne(record.id)}
                 >
                   <Button
@@ -355,7 +366,7 @@ const Supplyer = () => {
               <Popconfirm
                 title="是否删除？"
                 okButtonProps={{ style: { backgroundColor: "#198348" } }}
-                getPopupContainer={(node) => node.parentElement}
+                getPopupContainer={() => document.body}
                 onConfirm={() => handleDeleteBank(record.id)}
               >
                 <Button
@@ -403,6 +414,7 @@ const Supplyer = () => {
           // 是否可以改变 pageSize
           showSizeChanger: true,
           pageSize: pageSize,
+          current: page,
 
           // 改变页码时
           onChange: async (page) => {

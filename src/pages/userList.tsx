@@ -198,7 +198,7 @@ const User = () => {
             <Tooltip title="重置密码">
               <Popconfirm
                 title="确定重置密码？"
-                getPopupContainer={(node) => node.parentElement}
+                placement="bottom"
                 okButtonProps={{ style: { backgroundColor: "#198348" } }}
                 onConfirm={() => handleResetPwd(record.id)}
               >
@@ -216,7 +216,7 @@ const User = () => {
             <Tooltip title="删除">
               <Popconfirm
                 title="是否删除？"
-                getPopupContainer={(node) => node.parentElement}
+                getPopupContainer={() => document.body}
                 okButtonProps={{ style: { backgroundColor: "#198348" } }}
                 onConfirm={() => handleDelete(record.id)}
               >

@@ -367,7 +367,8 @@ const PaymentYW = () => {
               <Tooltip title="提交至领导审核">
                 <Popconfirm
                   title="是否提交？"
-                  getPopupContainer={(node) => node.parentElement}
+                  placement="bottom"
+                  getPopupContainer={() => document.body}
                   okButtonProps={{ style: { backgroundColor: "#198348" } }}
                   onConfirm={() => {
                     setSubmitType(0);
@@ -390,7 +391,8 @@ const PaymentYW = () => {
               <Tooltip title="提交至财务审核">
                 <Popconfirm
                   title="是否提交？"
-                  getPopupContainer={(node) => node.parentElement}
+                  placement="bottom"
+                  getPopupContainer={() => document.body}
                   okButtonProps={{ style: { backgroundColor: "#198348" } }}
                   onConfirm={() => {
                     setSubmitType(1);
@@ -414,7 +416,8 @@ const PaymentYW = () => {
               <Tooltip title="退回申请">
                 <Popconfirm
                   title="是否退回？"
-                  getPopupContainer={(node) => node.parentElement}
+                  placement="bottom"
+                  getPopupContainer={() => document.body}
                   okButtonProps={{ style: { backgroundColor: "#198348" } }}
                   onConfirm={() => setRejectId(record.id)}
                 >

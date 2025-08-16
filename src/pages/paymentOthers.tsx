@@ -590,7 +590,8 @@ const Payment = () => {
               <Tooltip title={<span>提交审核</span>}>
                 <Popconfirm
                   title="是否提交审核？"
-                  getPopupContainer={(node) => node.parentElement}
+                  placement="bottom"
+                  getPopupContainer={() => document.body}
                   okButtonProps={{ style: { backgroundColor: "#198348" } }}
                   onConfirm={() => handleDetail(record)}
                 >
@@ -624,7 +625,8 @@ const Payment = () => {
               <Tooltip title="撤回">
                 <Popconfirm
                   title="是否撤回？"
-                  getPopupContainer={(node) => node.parentElement}
+                  placement="bottom"
+                  getPopupContainer={() => document.body}
                   okButtonProps={{ style: { backgroundColor: "#198348" } }}
                   onConfirm={() => handleWithdraw(record.id)}
                 >
@@ -656,7 +658,8 @@ const Payment = () => {
               <Tooltip title="删除">
                 <Popconfirm
                   title="是否删除？"
-                  getPopupContainer={(node) => node.parentElement}
+                  placement="bottom"
+                  getPopupContainer={() => document.body}
                   okButtonProps={{ style: { backgroundColor: "#198348" } }}
                   onConfirm={() => handleDeleteOne(record.id)}
                 >

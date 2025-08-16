@@ -113,7 +113,7 @@ const Dict = () => {
   };
 
   const handleDetail = async (id) => {
-    const res = await getDictDetail(id, 1, 20);
+    const res = await getDictDetail(id, 1, 50);
     setTypeId(id);
     setDictDetail(res.entity.data);
   };

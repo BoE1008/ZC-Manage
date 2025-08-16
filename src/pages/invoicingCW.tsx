@@ -17,12 +17,14 @@ import {
   Tooltip,
   Popconfirm,
   DatePicker,
+  Statistic,
 } from "antd";
 import {
   CheckCircleTwoTone,
   StopTwoTone,
   CalendarTwoTone,
   ProfileTwoTone,
+  AccountBookTwoTone,
 } from "@ant-design/icons";
 import { getCustomersList } from "@/restApi/customer";
 import RejectModal from "@/components/RejectModal";
@@ -33,10 +35,13 @@ import { ModalType } from "@/types";
 import YSYFModal from "@/components/YSYFModal";
 import ResizeTable from "@/components/ResizeTable";
 import SearchInput from "@/components/SearchInput";
+import { getDictById } from "@/restApi/dict";
 
 const InvoicingCW = () => {
   const [data, setData] = useState();
   const [customer, setCustomer] = useState();
+
+  const [dict, setDict] = useState();
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
@@ -59,11 +64,16 @@ const InvoicingCW = () => {
   const [projectId, setProjectId] = useState();
 
   const [updateTimeSort, setUpdateTimeSort] = useState();
+  const [moneyType, setMoneyType] = useState("");
+
+  const [selectedRows, setSelectedRows] = useState([]);
 
   useEffect(() => {
     (async () => {
       const customer = await getCustomersList(1, 1000);
       setCustomer(customer.entity.data);
+      const res = await getDictById();
+      setDict(res.entity);
     })();
   }, []);
 
@@ -79,7 +89,8 @@ const InvoicingCW = () => {
           projectState,
           userName,
           projectNum,
-          updateTimeSort
+          updateTimeSort,
+          moneyType
         );
         setData(res);
         setLoading(false);
@@ -94,6 +105,7 @@ const InvoicingCW = () => {
     userName,
     projectNum,
     updateTimeSort,
+    moneyType,
   ]);
 
   const handleLogsOne = async (id: string) => {
@@ -175,6 +187,13 @@ const InvoicingCW = () => {
     },
   ];
 
+  const moneyTypeFilters = dict
+    ?.find((item) => item.id === "5")
+    .childList.map((con) => ({
+      text: con.dictLabel,
+      value: con.dictLabel,
+    }));
+
   const columns = [
     {
       title: "项目编号",
@@ -233,6 +252,9 @@ const InvoicingCW = () => {
       dataIndex: "moneyType",
       align: "center",
       key: "moneyType",
+      filterMultiple: false,
+      filters: moneyTypeFilters,
+      onFilter: (value: string, record) => record.moneyType === value,
     },
     {
       title: "开票金额",
@@ -342,7 +364,8 @@ const InvoicingCW = () => {
               <Tooltip title="申请通过">
                 <Popconfirm
                   title="是否通过申请？"
-                  getPopupContainer={(node) => node.parentElement}
+                  placement="bottom"
+                  getPopupContainer={() => document.body}
                   okButtonProps={{ style: { backgroundColor: "#198348" } }}
                   onConfirm={() => {
                     handleDetail(record.id);
@@ -365,7 +388,8 @@ const InvoicingCW = () => {
                 <Popconfirm
                   title="是否退回申请？"
                   okButtonProps={{ style: { backgroundColor: "#198348" } }}
-                  getPopupContainer={(node) => node.parentElement}
+                  placement="bottom"
+                  getPopupContainer={() => document.body}
                   onConfirm={() => setRejectId(record.id)}
                 >
                   <Button
@@ -409,7 +433,16 @@ const InvoicingCW = () => {
 
     setProjectState(filters.state?.[0]);
     setCustomerId(filters.customName?.[0]);
+    setMoneyType(filters.moneyType?.[0]);
   };
+
+  const selectedFee = useMemo(() => {
+    return (
+      selectedRows.reduce((acc, cur) => {
+        return acc + Math.round(cur.fee * 100);
+      }, 0) / 100
+    ).toFixed(2);
+  }, [selectedRows]);
 
   return (
     <div className="p-2">
@@ -419,8 +452,21 @@ const InvoicingCW = () => {
           <SearchInput placeholder="按项目名称搜索" onSearch={setSearchValue} />
           <SearchInput placeholder="按申请人搜索" onSearch={setUserName} />
         </Space>
+        <Statistic
+          style={{
+            marginRight: "20px",
+            border: "1px solid #ccc",
+            borderRadius: "8px",
+            padding: "10px",
+          }}
+          title="选中项总金额"
+          prefix={<AccountBookTwoTone twoToneColor="#198348" />}
+          value={selectedFee}
+          precision={2}
+        />
       </div>
       <ResizeTable
+        rowKey={(record) => record.id}
         bordered
         loading={loading}
         dataSource={data?.entity.data}
@@ -446,6 +492,12 @@ const InvoicingCW = () => {
           },
         }}
         onChange={handleTableChange}
+        rowSelection={{
+          type: "checkbox",
+          onChange: (selectedRowKeys, selectedRows) => {
+            setSelectedRows([...selectedRows]);
+          },
+        }}
       />
 
       <Modal

@@ -58,9 +58,14 @@ body {
   text-align: center !important;
 }
 
-.ant-table-thead > tr > th {
+.ant-table-thead {
   position: sticky !important;
   top: 40px !important;
   z-index: 100 !important;
   background: #fff !important;
+}
+
+.ant-modal-content .ant-table-thead {
+  position: relative !important;
+  top: 0px !important;
 }

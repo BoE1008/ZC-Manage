@@ -93,14 +93,16 @@ const Project = () => {
   useEffect(() => {
     (async () => {
       const res = await getDictById();
-      setDict(res.entity);
       const customer = await getCustomersList(1, 1000);
+      setDict(res.entity);
       setCustomer(customer.entity.data);
     })();
   }, []);
 
   useEffect(() => {
     (async () => {
+      if (!customer || !Array.isArray(customer)) return;
+
       const data = await getProjectsCWList(
         page,
         pageSize,
@@ -139,6 +141,7 @@ const Project = () => {
     businessLineId,
     projectYear,
     trainNumName,
+    customer,
   ]);
 
   const handleOk = async () => {
@@ -238,9 +241,9 @@ const Project = () => {
         ),
       },
       {
-        label: "产品",
-        value: "产品",
-        title: "产品",
+        label: "业务品种",
+        value: "业务品种",
+        title: "业务品种",
         dataIndex: "typeName",
         align: "center",
         key: "typeName",
@@ -375,6 +378,14 @@ const Project = () => {
         dataIndex: "num",
         align: "center",
         key: "num",
+      },
+      {
+        title: "折合台数",
+        label: "折合台数",
+        value: "折合台数",
+        dataIndex: "eqUnits",
+        align: "center",
+        key: "eqUnits",
       },
       {
         label: "收入小计",

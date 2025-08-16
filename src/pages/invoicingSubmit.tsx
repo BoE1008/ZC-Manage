@@ -276,17 +276,22 @@ const InvoicingSubmit = () => {
       setOldFiles([]);
       setFiles([]);
       setModalOpen(false);
-      const data = await getinvoicingList(
-        page,
-        pageSize,
-        searchValue,
-        customerId,
-        projectState,
-        userName,
-        projectNum
-      );
-      setLoading(false);
-      setData(data);
+      if (operation === Operation.Add) {
+        setPage(1);
+      } else {
+        const data = await getinvoicingList(
+          page,
+          pageSize,
+          searchValue,
+          customerId,
+          projectState,
+          userName,
+          projectNum,
+          updateTimeSort
+        );
+        setLoading(false);
+        setData(data);
+      }
       message.success({
         content: operation === Operation.Add ? "添加成功" : "编辑成功",
         type: "success",
@@ -315,7 +320,8 @@ const InvoicingSubmit = () => {
       customerId,
       projectState,
       userName,
-      projectNum
+      projectNum,
+      updateTimeSort
     );
     setData(data);
   };
@@ -596,7 +602,8 @@ const InvoicingSubmit = () => {
               <Tooltip title={<span>提交业务审核</span>}>
                 <Popconfirm
                   title="是否提交审核？"
-                  getPopupContainer={(node) => node.parentElement}
+                  placement="bottom"
+                  getPopupContainer={() => document.body}
                   okButtonProps={{ style: { backgroundColor: "#198348" } }}
                   onConfirm={() => handleDetail(record.id)}
                 >
@@ -642,7 +649,8 @@ const InvoicingSubmit = () => {
               <Tooltip title="撤回">
                 <Popconfirm
                   title="是否撤回？"
-                  getPopupContainer={(node) => node.parentElement}
+                  placement="bottom"
+                  getPopupContainer={() => document.body}
                   okButtonProps={{ style: { backgroundColor: "#198348" } }}
                   onConfirm={() => handleWithdraw(record.id)}
                 >
@@ -662,7 +670,8 @@ const InvoicingSubmit = () => {
               <Tooltip title="删除">
                 <Popconfirm
                   title="是否删除？"
-                  getPopupContainer={(node) => node.parentElement}
+                  placement="bottom"
+                  getPopupContainer={() => document.body}
                   okButtonProps={{ style: { backgroundColor: "#198348" } }}
                   onConfirm={() => handleDeleteOne(record.id)}
                 >
@@ -762,6 +771,7 @@ const InvoicingSubmit = () => {
           showTotal: (total) => `共 ${total} 条`,
           showSizeChanger: true,
           pageSize: pageSize,
+          current: page,
           onChange: async (page) => {
             setPage(page);
           },

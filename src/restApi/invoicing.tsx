@@ -92,7 +92,8 @@ export const getinvoicingCWList = async (
   userName?: string,
   projectNum?: string,
   // date?: string,
-  updateTimeSort?: string
+  updateTimeSort?: string,
+  moneyType?: string
 ) => {
   const res = await axiosInstance.get(`/zc/invoicing/cw/list`, {
     params: {
@@ -105,6 +106,7 @@ export const getinvoicingCWList = async (
       projectNum,
       // createTime: date,
       updateTimeSort,
+      moneyType,
     },
   });
   return res.data;

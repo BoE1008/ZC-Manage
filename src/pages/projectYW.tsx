@@ -97,14 +97,15 @@ const Project = () => {
   useEffect(() => {
     (async () => {
       const res = await getDictById();
-      setDict(res.entity);
       const customer = await getCustomersList(1, 1000);
+      setDict(res.entity);
       setCustomer(customer.entity.data);
     })();
   }, []);
 
   useEffect(() => {
     (async () => {
+      if (!customer || !Array.isArray(customer)) return;
       const data = await getProjectsApproveList(
         page,
         pageSize,
@@ -143,6 +144,7 @@ const Project = () => {
     businessLineId,
     projectYear,
     trainNumName,
+    customer,
   ]);
 
   const option = useMemo(() => {
@@ -311,9 +313,9 @@ const Project = () => {
         ),
       },
       {
-        label: "产品",
-        value: "产品",
-        title: "产品",
+        label: "业务品种",
+        value: "业务品种",
+        title: "业务品种",
         dataIndex: "typeName",
         align: "center",
         key: "typeName",
@@ -450,6 +452,14 @@ const Project = () => {
         key: "num",
       },
       {
+        title: "折合台数",
+        label: "折合台数",
+        value: "折合台数",
+        dataIndex: "eqUnits",
+        align: "center",
+        key: "eqUnits",
+      },
+      {
         label: "收入小计",
         value: "收入小计",
         title: "收入小计",
@@ -558,9 +568,10 @@ const Project = () => {
               {isApprove && (
                 <Tooltip title="完成审核">
                   <Popconfirm
+                    placement="bottom"
+                    getPopupContainer={() => document.body}
                     title="是否通过审核？"
                     okButtonProps={{ style: { backgroundColor: "#198348" } }}
-                    getPopupContainer={(node) => node.parentElement}
                     onConfirm={() => handleApproveOne(record?.id)}
                   >
                     <Button
@@ -581,7 +592,8 @@ const Project = () => {
                   <Popconfirm
                     title="是否退回申请？"
                     okButtonProps={{ style: { backgroundColor: "#198348" } }}
-                    getPopupContainer={(node) => node.parentElement}
+                    placement="bottom"
+                    getPopupContainer={() => document.body}
                     onConfirm={() => setRejectId(record.id)}
                   >
                     <Button

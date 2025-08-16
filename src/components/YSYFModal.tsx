@@ -444,9 +444,12 @@ const Item = ({ projectId, onClose, modalType }) => {
             // },
             {
               title: "金额",
-              dataIndex: "fee",
+              // label: "金额",
+              // value: "金额",
+              // dataIndex: "fee",
               key: "fee",
               align: "center",
+              render: (record) => formatNumber(record?.fee),
             },
             {
               title: "币种",
@@ -595,9 +598,10 @@ const Item = ({ projectId, onClose, modalType }) => {
             // },
             {
               title: "金额",
-              dataIndex: "fee",
+              // dataIndex: "fee",
               key: "fee",
               align: "center",
+              render: (record) => formatNumber(record?.fee),
             },
             {
               title: "币种",
@@ -769,9 +773,8 @@ const Item = ({ projectId, onClose, modalType }) => {
                                   okButtonProps={{
                                     style: { backgroundColor: "#198348" },
                                   }}
-                                  getPopupContainer={(node) =>
-                                    node.parentElement
-                                  }
+                                  placement="bottom"
+                                  getPopupContainer={() => document.body}
                                   onConfirm={() => handleDeleteYF(record.id)}
                                 >
                                   <Button
@@ -828,7 +831,8 @@ const Item = ({ projectId, onClose, modalType }) => {
                                 okButtonProps={{
                                   style: { backgroundColor: "#198348" },
                                 }}
-                                getPopupContainer={(node) => node.parentElement}
+                                placement="bottom"
+                                getPopupContainer={() => document.body}
                                 onConfirm={() => handleApproveYF(record.id)}
                               >
                                 <Button
@@ -847,15 +851,18 @@ const Item = ({ projectId, onClose, modalType }) => {
                       )}
 
                     {modalType === ModalType.Approve &&
+                      (projectState === "未完结" ||
+                        projectState === "已退回") &&
                       record.state !== "未提交" &&
-                      record?.state !== "已退回" && (
+                      record.state !== "已退回" && (
                         <Tooltip title="退回">
                           <Popconfirm
                             title="是否退回申请？"
                             okButtonProps={{
                               style: { backgroundColor: "#198348" },
                             }}
-                            getPopupContainer={(node) => node.parentElement}
+                            placement="bottom"
+                            getPopupContainer={() => document.body}
                             onConfirm={() => {
                               setRejectId(record.id);
                               setRejectType("YF");
@@ -945,9 +952,10 @@ const Item = ({ projectId, onClose, modalType }) => {
           // },
           {
             title: "金额",
-            dataIndex: "fee",
+            // dataIndex: "fee",
             key: "fee",
             align: "center",
+            render: (record) => formatNumber(record?.fee),
           },
           {
             title: "币种",
@@ -1057,9 +1065,10 @@ const Item = ({ projectId, onClose, modalType }) => {
           // },
           {
             title: "金额",
-            dataIndex: "fee",
+            // dataIndex: "fee",
             key: "fee",
             align: "center",
+            render: (record) => formatNumber(record?.fee),
           },
           {
             title: "币种",
@@ -1196,7 +1205,8 @@ const Item = ({ projectId, onClose, modalType }) => {
                               okButtonProps={{
                                 style: { backgroundColor: "#198348" },
                               }}
-                              getPopupContainer={(node) => node.parentElement}
+                              placement="bottom"
+                              getPopupContainer={() => document.body}
                               onConfirm={() => handleSubmitYS(record)}
                             >
                               <Button
@@ -1212,32 +1222,6 @@ const Item = ({ projectId, onClose, modalType }) => {
                             </Popconfirm>
                           </Tooltip>
                         )}
-                      {/* {(projectState === "未完结" ||
-                        projectState === "已退回") &&
-                        (record?.state === "未提交" ||
-                          record?.state === "已退回") && (
-                          <Tooltip title="提交至业务审核">
-                            <Popconfirm
-                              title="提交至业务审核？"
-                              okButtonProps={{
-                                style: { backgroundColor: "#198348" },
-                              }}
-                              getPopupContainer={(node) => node.parentElement}
-                              onConfirm={() => handleSubmitYS(record)}
-                            >
-                              <Button
-                                style={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  padding: "3px 5px",
-                                }}
-                                // onClick={() => handleSubmitYS(record)}
-                              >
-                                <InteractionTwoTone twoToneColor="#198348" />
-                              </Button>
-                            </Popconfirm>
-                          </Tooltip>
-                        )} */}
                       {(projectState === "未完结" ||
                         projectState === "已退回") &&
                         record?.state === "待业务审批" && (
@@ -1247,7 +1231,8 @@ const Item = ({ projectId, onClose, modalType }) => {
                               okButtonProps={{
                                 style: { backgroundColor: "#198348" },
                               }}
-                              getPopupContainer={(node) => node.parentElement}
+                              placement="bottom"
+                              getPopupContainer={() => document.body}
                               onConfirm={() => handleWithdrawYS(record.id)}
                             >
                               <Button
@@ -1287,7 +1272,8 @@ const Item = ({ projectId, onClose, modalType }) => {
                           okButtonProps={{
                             style: { backgroundColor: "#198348" },
                           }}
-                          getPopupContainer={(node) => node.parentElement}
+                          placement="bottom"
+                          getPopupContainer={() => document.body}
                           onConfirm={() => handleApproveYS(record.id)}
                         >
                           <Button
@@ -1303,12 +1289,14 @@ const Item = ({ projectId, onClose, modalType }) => {
                       </Tooltip>
                     )}
                   {modalType === ModalType.Approve &&
+                    (projectState === "未完结" || projectState === "已退回") &&
                     record.state !== "未提交" &&
                     record.state !== "已退回" && (
                       <Tooltip title="退回">
                         <Popconfirm
                           title="是否退回申请？"
-                          getPopupContainer={(node) => node.parentElement}
+                          placement="bottom"
+                          getPopupContainer={() => document.body}
                           okButtonProps={{
                             style: { backgroundColor: "#198348" },
                           }}

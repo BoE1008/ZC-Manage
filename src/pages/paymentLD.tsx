@@ -341,7 +341,7 @@ const Payment = () => {
               <Tooltip title="审核通过">
                 <Popconfirm
                   title="是否批准？"
-                  getPopupContainer={(node) => node.parentElement}
+                  placement="bottom"
                   okButtonProps={{ style: { backgroundColor: "#198348" } }}
                   onConfirm={() => handleDetail(record.id)}
                 >
@@ -361,7 +361,7 @@ const Payment = () => {
               <Tooltip title="退回申请">
                 <Popconfirm
                   title="是否退回？"
-                  getPopupContainer={(node) => node.parentElement}
+                  getPopupContainer={() => document.body}
                   okButtonProps={{ style: { backgroundColor: "#198348" } }}
                   onConfirm={() => setRejectId(record.id)}
                 >

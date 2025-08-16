@@ -168,7 +168,8 @@ const ExchangeRate = () => {
             <Tooltip title="删除">
               <Popconfirm
                 title="是否删除？"
-                getPopupContainer={(node) => node.parentElement}
+                placement="bottom"
+                getPopupContainer={() => document.body}
                 okButtonProps={{ style: { backgroundColor: "#198348" } }}
                 onConfirm={() => handleDeleteOne(record.id)}
               >

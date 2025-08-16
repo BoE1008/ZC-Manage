@@ -264,18 +264,23 @@ const Payment = () => {
       setOldFiles([]);
       setFiles([]);
       setModalOpen(false);
-      const data = await getPaymentList(
-        page,
-        pageSize,
-        searchValue,
-        supplierId,
-        projectState,
-        userName,
-        projectNum,
-        date
-      );
-      setLoading(false);
-      setData(data);
+      if (operation === Operation.Add) {
+        setPage(1);
+      } else {
+        const data = await getPaymentList(
+          page,
+          pageSize,
+          searchValue,
+          supplierId,
+          projectState,
+          userName,
+          projectNum,
+          date,
+          updateTimeSort
+        );
+        setLoading(false);
+        setData(data);
+      }
       message.success({
         content: operation === Operation.Add ? "添加成功" : "编辑成功",
         type: "success",
@@ -324,7 +329,8 @@ const Payment = () => {
       projectState,
       userName,
       projectNum,
-      date
+      date,
+      updateTimeSort
     );
     setData(data);
   };
@@ -341,7 +347,8 @@ const Payment = () => {
       projectState,
       userName,
       projectNum,
-      date
+      date,
+      updateTimeSort
     );
     setData(data);
   };
@@ -593,7 +600,8 @@ const Payment = () => {
               <Tooltip title={<span>提交业务审核</span>}>
                 <Popconfirm
                   title="是否提交审核？"
-                  getPopupContainer={(node) => node.parentElement}
+                  placement="bottom"
+                  getPopupContainer={() => document.body}
                   okButtonProps={{ style: { backgroundColor: "#198348" } }}
                   onConfirm={() => handleDetail(record.id)}
                 >
@@ -627,7 +635,8 @@ const Payment = () => {
               <Tooltip title="撤回">
                 <Popconfirm
                   title="是否撤回？"
-                  getPopupContainer={(node) => node.parentElement}
+                  placement="bottom"
+                  getPopupContainer={() => document.body}
                   okButtonProps={{ style: { backgroundColor: "#198348" } }}
                   onConfirm={() => handleWithdraw(record.id)}
                 >
@@ -659,7 +668,8 @@ const Payment = () => {
               <Tooltip title="删除">
                 <Popconfirm
                   title="是否删除？"
-                  getPopupContainer={(node) => node.parentElement}
+                  placement="bottom"
+                  getPopupContainer={() => document.body}
                   okButtonProps={{ style: { backgroundColor: "#198348" } }}
                   onConfirm={() => handleDeleteOne(record.id)}
                 >
@@ -772,6 +782,7 @@ const Payment = () => {
           // 是否可以改变 pageSize
           showSizeChanger: true,
           pageSize: pageSize,
+          current: page,
 
           // 改变页码时
           onChange: async (page) => {

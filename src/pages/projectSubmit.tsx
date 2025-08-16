@@ -15,6 +15,7 @@ import {
   Tooltip,
   Popover,
   Checkbox,
+  InputNumber,
 } from "antd";
 import {
   EditTwoTone,
@@ -165,6 +166,7 @@ const Project = () => {
   const handleOk = async () => {
     form.validateFields().then(async () => {
       const values = form.getFieldsValue();
+      console.log(values);
       const params = {
         ...values,
         projectDate: dayjs(values.projectDate).format("YYYY-MM-DD"),
@@ -176,13 +178,29 @@ const Project = () => {
           : await updateProject(editId, params);
       if (code === 200) {
         setModalOpen(false);
-        const data = await getProjectsSubmitList(
-          page,
-          pageSize,
-          searchValue,
-          searchNumValue
-        );
-        setData(data);
+
+        if (operation === Operation.Add) {
+          setPage(1);
+        } else {
+          const data = await getProjectsSubmitList(
+            page,
+            pageSize,
+            searchValue,
+            searchNumValue,
+            projectDateSort,
+            productId,
+            projectType,
+            projectBrand,
+            projectState,
+            customerId,
+            date,
+            businessGroupId,
+            businessLineId,
+            projectYear,
+            trainNumName
+          );
+          setData(data);
+        }
         message.success({
           content: operation === Operation.Add ? "添加成功" : "编辑成功",
           type: "success",
@@ -197,7 +215,18 @@ const Project = () => {
       page,
       pageSize,
       searchValue,
-      searchNumValue
+      searchNumValue,
+      projectDateSort,
+      productId,
+      projectType,
+      projectBrand,
+      projectState,
+      customerId,
+      date,
+      businessGroupId,
+      businessLineId,
+      projectYear,
+      trainNumName
     );
     setData(data);
     setLoading(false);
@@ -277,9 +306,9 @@ const Project = () => {
         ),
       },
       {
-        title: "产品",
-        label: "产品",
-        value: "产品",
+        title: "业务品种",
+        label: "业务品种",
+        value: "业务品种",
         dataIndex: "typeName",
         align: "center",
         key: "typeName",
@@ -426,6 +455,14 @@ const Project = () => {
         key: "num",
       },
       {
+        title: "折合台数",
+        label: "折合台数",
+        value: "折合台数",
+        dataIndex: "eqUnits",
+        align: "center",
+        key: "eqUnits",
+      },
+      {
         title: "收入小计",
         label: "收入小计",
         value: "收入小计",
@@ -549,8 +586,9 @@ const Project = () => {
               {unFinished && (
                 <Tooltip title={<span>提交业务审核</span>}>
                   <Popconfirm
+                    placement="bottom"
+                    getPopupContainer={() => document.body}
                     title="是否提交审核？"
-                    getPopupContainer={(node) => node.parentElement}
                     okButtonProps={{ style: { backgroundColor: "#198348" } }}
                     onConfirm={() => handleSubmitOne(record.id)}
                   >
@@ -569,9 +607,10 @@ const Project = () => {
               {unFinished && (
                 <Tooltip title={<span>删除</span>}>
                   <Popconfirm
+                    placement="bottom"
+                    getPopupContainer={() => document.body}
                     title="是否删除？"
                     okButtonProps={{ style: { backgroundColor: "#198348" } }}
-                    getPopupContainer={(node) => node.parentElement}
                     onConfirm={() => handleDeleteOne(record.id)}
                   >
                     <Button
@@ -669,7 +708,18 @@ const Project = () => {
       page,
       pageSize,
       searchValue,
-      searchNumValue
+      searchNumValue,
+      projectDateSort,
+      productId,
+      projectType,
+      projectBrand,
+      projectState,
+      customerId,
+      date,
+      businessGroupId,
+      businessLineId,
+      projectYear,
+      trainNumName
     );
     setData(data);
     setLoading(false);
@@ -777,6 +827,7 @@ const Project = () => {
             // 是否可以改变 pageSize
             showSizeChanger: true,
             pageSize: pageSize,
+            current: page,
 
             // 改变页码时
             onChange: async (page) => {
@@ -883,23 +934,39 @@ const Project = () => {
             />
           </Form.Item>
           <Form.Item
-            label="产品"
+            label="业务品种"
             name="typeId"
             validateTrigger="onBlur"
-            rules={[{ required: true, message: "请选择产品" }]}
+            rules={[{ required: true, message: "请选择业务品种" }]}
             hasFeedback
           >
             <Select
               showSearch
-              placeholder="选择产品"
+              placeholder="选择业务品种"
               optionFilterProp="children"
               filterOption={filterOption}
               options={dict
                 ?.find((con) => con.code === "sys_project_type")
-                .childList?.map((con) => ({
+                .childList?.filter((i) => i.status === "0")
+                .map((con) => ({
                   value: con.id,
                   label: con.dictLabel,
                 }))}
+            />
+          </Form.Item>
+          <Form.Item
+            label="折合台数"
+            name="eqUnits"
+            validateTrigger="onBlur"
+            // rules={[{ required: true, message: "折合台数不能为空" }]}
+            hasFeedback
+          >
+            <InputNumber
+              defaultValue={0}
+              precision={2}
+              min={0}
+              placeholder="折合台数"
+              className="w-full"
             />
           </Form.Item>
           <Form.Item label="品牌" name="brandId">

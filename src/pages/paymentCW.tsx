@@ -111,9 +111,11 @@ const Payment = () => {
   ]);
 
   const selectedFee = useMemo(() => {
-    return selectedRows.reduce((acc, cur) => {
-      return acc + cur.fee;
-    }, 0);
+    return (
+      selectedRows.reduce((acc, cur) => {
+        return acc + Math.round(cur.fee * 100);
+      }, 0) / 100
+    ).toFixed(2);
   }, [selectedRows]);
 
   const handleDetail = async (id) => {
@@ -378,7 +380,7 @@ const Payment = () => {
               <Tooltip title="审核通过">
                 <Popconfirm
                   title="是否批准？"
-                  getPopupContainer={(node) => node.parentElement}
+                  placement="bottom"
                   okButtonProps={{ style: { backgroundColor: "#198348" } }}
                   onConfirm={() => handleDetail(record.id)}
                 >
@@ -398,7 +400,7 @@ const Payment = () => {
               <Tooltip title="退回">
                 <Popconfirm
                   title="是否退回？"
-                  getPopupContainer={(node) => node.parentElement}
+                  getPopupContainer={() => document.body}
                   okButtonProps={{ style: { backgroundColor: "#198348" } }}
                   onConfirm={() => setRejectId(record.id)}
                 >
