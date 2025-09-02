@@ -90,7 +90,7 @@ const YFDrawer = ({ yfRecord, onClose }) => {
     },
     onDownload: async (file) => {
       window.open(
-        `http://123.60.88.8/zc/common/download/resource?resource=${file?.url}`
+        `http://115.175.21.89/zc/common/download/resource?resource=${file?.url}`
       );
     },
   };

@@ -243,7 +243,7 @@ const Project = () => {
       const file = await exportMyProject();
       setExportEnabled(true);
       window.open(
-        `http://123.60.88.8/zc/common/download?fileName=${file.msg}&delete=false`
+        `http://115.175.21.89/zc/common/download?fileName=${file.msg}&delete=false`
       );
     } catch {}
   };
