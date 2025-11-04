@@ -1247,6 +1247,32 @@ const Item = ({ projectId, onClose, modalType }) => {
                             </Popconfirm>
                           </Tooltip>
                         )}
+                      {(projectState === "未完结" ||
+                        projectState === "已退回") &&
+                        record?.state !== "审批通过" &&
+                        record?.state !== "待审批" && (
+                          <Tooltip title="删除">
+                            <Popconfirm
+                              title="是否删除？"
+                              okButtonProps={{
+                                style: { backgroundColor: "#198348" },
+                              }}
+                              placement="bottom"
+                              getPopupContainer={() => document.body}
+                              onConfirm={() => handleDeleteYS(record.id)}
+                            >
+                              <Button
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  padding: "3px 5px",
+                                }}
+                              >
+                                <DeleteTwoTone twoToneColor="#198348" />
+                              </Button>
+                            </Popconfirm>
+                          </Tooltip>
+                        )}
                     </>
                   )}
                   {modalType === ModalType.PAYMENTCW && (
