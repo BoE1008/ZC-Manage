@@ -24,6 +24,7 @@ import {
   InteractionTwoTone,
   AppstoreTwoTone,
   GiftTwoTone,
+  RocketTwoTone,
 } from "@ant-design/icons";
 import {
   getProjectsSubmitList,
@@ -91,7 +92,8 @@ const Project = () => {
   const [businessGroupId, setBusinessGroupId] = useState();
   const [businessLineId, setBusinessLineId] = useState();
 
-  const [transId, setTransId] = useState();
+  const [normalTransId, setNormalTransId] = useState();
+  const [leaveTransId, setLeaveTransId] = useState();
 
   useEffect(() => {
     (async () => {
@@ -119,7 +121,7 @@ const Project = () => {
         businessGroupId,
         businessLineId,
         projectYear,
-        trainNumName
+        trainNumName,
       );
       setData(data);
       setLoading(false);
@@ -197,7 +199,7 @@ const Project = () => {
             businessGroupId,
             businessLineId,
             projectYear,
-            trainNumName
+            trainNumName,
           );
           setData(data);
         }
@@ -226,7 +228,7 @@ const Project = () => {
       businessGroupId,
       businessLineId,
       projectYear,
-      trainNumName
+      trainNumName,
     );
     setData(data);
     setLoading(false);
@@ -243,7 +245,7 @@ const Project = () => {
       const file = await exportMyProject();
       setExportEnabled(true);
       window.open(
-        `http://115.175.21.89/zc/common/download?fileName=${file.msg}&delete=false`
+        `http://115.175.21.89/zc/common/download?fileName=${file.msg}&delete=false`,
       );
     } catch {}
   };
@@ -626,14 +628,28 @@ const Project = () => {
                 </Tooltip>
               )}
               {hasMoveRight && (
-                <Tooltip title={<span>转移项目</span>}>
+                <Tooltip title={<span>普通转移</span>}>
                   <Button
                     style={{
                       display: "flex",
                       alignItems: "center",
                       padding: "3px 5px",
                     }}
-                    onClick={() => setTransId(record.id)}
+                    onClick={() => setNormalTransId(record.id)}
+                  >
+                    <RocketTwoTone twoToneColor="#198348" />
+                  </Button>
+                </Tooltip>
+              )}
+              {hasMoveRight && (
+                <Tooltip title={<span>离职转移</span>}>
+                  <Button
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      padding: "3px 5px",
+                    }}
+                    onClick={() => setLeaveTransId(record.id)}
                   >
                     <GiftTwoTone twoToneColor="#198348" />
                   </Button>
@@ -650,7 +666,7 @@ const Project = () => {
 
   const filterOption = (
     input: string,
-    option?: { label: string; value: string }
+    option?: { label: string; value: string },
   ) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
 
   const validateName = () => {
@@ -702,8 +718,8 @@ const Project = () => {
     setProjectYear(dateString);
   };
 
-  const handleTrans = async (transUserId) => {
-    await transProject(transId, transUserId);
+  const handleNormalTrans = async (transUserId) => {
+    await transProject(normalTransId, transUserId, 1);
     const data = await getProjectsSubmitList(
       page,
       pageSize,
@@ -719,11 +735,36 @@ const Project = () => {
       businessGroupId,
       businessLineId,
       projectYear,
-      trainNumName
+      trainNumName,
     );
     setData(data);
     setLoading(false);
-    setTransId("");
+    setNormalTransId("");
+    message.success("普通转移成功");
+  };
+  const handleLeaveTrans = async (transUserId) => {
+    await transProject(leaveTransId, transUserId, 0);
+    const data = await getProjectsSubmitList(
+      page,
+      pageSize,
+      searchValue,
+      searchNumValue,
+      projectDateSort,
+      productId,
+      projectType,
+      projectBrand,
+      projectState,
+      customerId,
+      date,
+      businessGroupId,
+      businessLineId,
+      projectYear,
+      trainNumName,
+    );
+    setData(data);
+    setLoading(false);
+    setLeaveTransId("");
+    message.success("离职转移成功");
   };
 
   return (
@@ -1080,11 +1121,19 @@ const Project = () => {
         />
       )}
 
-      {!!transId && (
+      {!!normalTransId && (
         <TransModal
-          transId={transId}
-          onClose={() => setTransId(undefined)}
-          onConfirm={(userId) => handleTrans(userId)}
+          transId={normalTransId}
+          onClose={() => setNormalTransId(undefined)}
+          onConfirm={(userId) => handleNormalTrans(userId)}
+        />
+      )}
+
+      {!!leaveTransId && (
+        <TransModal
+          transId={leaveTransId}
+          onClose={() => setLeaveTransId(undefined)}
+          onConfirm={(userId) => handleLeaveTrans(userId)}
         />
       )}
     </div>

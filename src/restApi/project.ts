@@ -17,7 +17,7 @@ export const getProjectsSubmitList = async (
   businessGroupId?: string,
   businessLineId?: string,
   projectYear?: string,
-  trainNumName?: string
+  trainNumName?: string,
 ) => {
   const res = await axiosInstance.get("/zc/project/submit/list", {
     params: {
@@ -57,7 +57,7 @@ export const getProjectsApproveList = async (
   businessGroupId?: string,
   businessLineId?: string,
   projectYear?: string,
-  trainNumName?: string
+  trainNumName?: string,
 ) => {
   const res = await axiosInstance.get("/zc/project/approve/list", {
     params: {
@@ -97,7 +97,7 @@ export const getProjectsCWList = async (
   businessGroupId?: string,
   businessLineId?: string,
   projectYear?: string,
-  trainNumName?: string
+  trainNumName?: string,
 ) => {
   const res = await axiosInstance.get("/zc/project/cw/list", {
     params: {
@@ -152,7 +152,7 @@ export const deleteProject = async (id: string) => {
 export const getProjectYSList = async (
   projectId: string,
   pageNo: number,
-  pageSize: number
+  pageSize: number,
 ) => {
   const res = await axiosInstance.get(`/zc/project/ys/list`, {
     params: {
@@ -236,7 +236,7 @@ export const rejectOne = async (projectId: string, remark: string) => {
 
 export const logsOne = async (projectYsfId: string) => {
   const res = await axiosInstance.get(
-    `/zc/project/log/list?projectYsfId=${projectYsfId}`
+    `/zc/project/log/list?projectYsfId=${projectYsfId}`,
   );
 
   return res.data;
@@ -260,7 +260,7 @@ export const approveYS = async (projectId: string, projectYsfId: string) => {
 export const rejectYS = async (
   projectId: string,
   projectYsfId: string,
-  remark: string
+  remark: string,
 ) => {
   const res = await axiosInstance.post(`/zc/project/ys/reject`, {
     projectId,
@@ -301,7 +301,7 @@ export const approveYF = async (projectId: string, projectYsfId: string) => {
 export const rejectYF = async (
   projectId: string,
   projectYsfId: string,
-  remark: string
+  remark: string,
 ) => {
   const res = await axiosInstance.post(`/zc/project/yf/reject`, {
     projectId,
@@ -369,10 +369,15 @@ export const getYSFByProjectId = async (projectId: string, type: string) => {
   return res.data;
 };
 
-export const transProject = async (id: string, userId: string) => {
+export const transProject = async (
+  id: string,
+  userId: string,
+  moveReason: number,
+) => {
   const res = await axiosInstance.post(`/zc/project/move`, {
     id,
     userId,
+    moveReason,
   });
 
   return res.data;
