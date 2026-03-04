@@ -13,6 +13,13 @@ import { useEffect, useState } from "react";
 import { isLogged } from "@/utils";
 // import { Monitoring } from "react-scan/monitoring";
 
+let buildInfo: { version: string; buildTime: string } | null = null;
+try {
+  buildInfo = require("@/build-info.json");
+} catch (e) {
+  buildInfo = null;
+}
+
 // if (typeof window !== "undefined") {
 //   scan({
 //     enabled: true,
@@ -42,6 +49,18 @@ export default function App({ Component, pageProps }: AppProps) {
 
     checkLogin();
   }, [router.pathname, isNoLayout, router]);
+
+  useEffect(() => {
+    console.log('%c🚀 上海甄察供应链业务管理系统', 'font-size: 20px; font-weight: bold; color: #198348;');
+    if (buildInfo) {
+      console.log('%c版本: ' + buildInfo.version, 'font-size: 14px; color: #333;');
+      console.log('%c构建时间: ' + buildInfo.buildTime, 'font-size: 12px; color: #666;');
+    } else {
+      console.log('%c版本: 0.1.0', 'font-size: 14px; color: #333;');
+      console.log('%c构建时间: 开发模式', 'font-size: 12px; color: #666;');
+    }
+    console.log('%c----------------------------------------', 'color: #198348;');
+  }, []);
 
   // 防止未授权时组件提前渲染
   if (!isNoLayout && !isReady) return null;
