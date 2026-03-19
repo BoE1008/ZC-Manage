@@ -12,7 +12,7 @@ const SearchInput = ({
   // 用 useCallback + debounce 确保只生成一次函数
   const debouncedSearch = useMemo(
     () =>
-      debounce({ delay: 500 }, (val: string) => {
+      debounce({ delay: 1000 }, (val: string) => {
         onSearch(val);
       }),
     [onSearch]
