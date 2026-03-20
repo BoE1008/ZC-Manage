@@ -118,7 +118,7 @@ const Project = () => {
         businessGroupId,
         businessLineId,
         projectYear,
-        trainNumName
+        trainNumName,
       );
       // const file = await exportProject();
       setLoading(false);
@@ -166,7 +166,7 @@ const Project = () => {
     }
   };
 
-  const handleRejectOne = async (projectId: string, remark) => {
+  const handleRejectOne = async (projectId: string, remark: string) => {
     await rejectOne(projectId, remark);
     message.success({ content: "审核退回", type: "success" });
     setRejectId(undefined);
@@ -181,7 +181,7 @@ const Project = () => {
       const file = await exportProject();
       setExportEnabled(true);
       window.open(
-        `http://115.175.21.89/zc/common/download?fileName=${file.msg}&delete=false`
+        `http://115.175.21.89/zc/common/download?fileName=${file.msg}&delete=false`,
       );
     } catch {}
   };
@@ -234,7 +234,7 @@ const Project = () => {
         ellipsis: {
           showTitle: false,
         },
-        render: (name) => (
+        render: (name: string) => (
           <Tooltip placement="topLeft" title={name}>
             {name}
           </Tooltip>
@@ -267,7 +267,7 @@ const Project = () => {
         ellipsis: {
           showTitle: false,
         },
-        render: (customName) => (
+        render: (customName: string) => (
           <Tooltip placement="topLeft" title={customName}>
             {customName}
           </Tooltip>
@@ -441,7 +441,7 @@ const Project = () => {
         ellipsis: {
           showTitle: false,
         },
-        render: (remark) => (
+        render: (remark: string) => (
           <Tooltip placement="topLeft" title={remark}>
             {remark}
           </Tooltip>
@@ -499,7 +499,7 @@ const Project = () => {
 
   const filterOption = (
     input: string,
-    option?: { label: string; value: string }
+    option?: { label: string; value: string },
   ) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
 
   const validateName = () => {

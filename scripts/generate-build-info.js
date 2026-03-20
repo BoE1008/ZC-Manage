@@ -2,7 +2,6 @@ const fs = require('fs');
 const path = require('path');
 
 const buildInfo = {
-  version: '0.1.0',
   buildTime: new Date().toLocaleString('zh-CN', {
     year: 'numeric',
     month: '2-digit',

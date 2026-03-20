@@ -1,5 +1,5 @@
 import { Input } from "antd";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import { debounce } from "radash";
 
 const SearchInput = ({
@@ -9,6 +9,9 @@ const SearchInput = ({
   onSearch: (val: string) => void;
   placeholder: string;
 }) => {
+  // 处理中英文全输入：中文输入法（IME）组合输入期间不要触发搜索
+  const isComposingRef = useRef(false);
+
   // 用 useCallback + debounce 确保只生成一次函数
   const debouncedSearch = useMemo(
     () =>
@@ -20,12 +23,35 @@ const SearchInput = ({
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      debouncedSearch(e.target.value);
+      const val = e.target.value;
+      if (isComposingRef.current) return;
+      debouncedSearch(val);
     },
     [debouncedSearch]
   );
 
-  return <Input placeholder={placeholder} allowClear onChange={handleChange} />;
+  const handleCompositionStart = useCallback(() => {
+    isComposingRef.current = true;
+  }, []);
+
+  const handleCompositionEnd = useCallback(
+    (e: React.CompositionEvent<HTMLInputElement>) => {
+      isComposingRef.current = false;
+      // 输入法组合结束后，使用最终值触发一次搜索
+      debouncedSearch((e.currentTarget as HTMLInputElement).value);
+    },
+    [debouncedSearch]
+  );
+
+  return (
+    <Input
+      placeholder={placeholder}
+      allowClear
+      onChange={handleChange}
+      onCompositionStart={handleCompositionStart}
+      onCompositionEnd={handleCompositionEnd}
+    />
+  );
 };
 
 export default SearchInput;
