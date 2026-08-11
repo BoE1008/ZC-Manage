@@ -1,10 +1,13 @@
 import { Modal } from "antd";
-import { memo, useRef, useMemo, useEffect, useState } from "react";
+import { memo, useRef, useMemo, useEffect, useState, FC } from "react";
 import * as echarts from "echarts";
 import { getProjectsApproveList } from "@/restApi/project";
 import { group } from "radash";
 
-const StaticModal = ({ open, onCancel }) => {
+const StaticModal: FC<{ open: boolean; onCancel: () => void }> = ({
+  open,
+  onCancel,
+}) => {
   const typeChartRef = useRef(null);
   const productChartRef = useRef(null);
   const brandChartRef = useRef(null);
@@ -35,7 +38,7 @@ const StaticModal = ({ open, onCancel }) => {
             (i) => ({
               name: i[0],
               value: i[1].length,
-            })
+            }),
           ),
           itemStyle: {
             normal: {
@@ -75,7 +78,7 @@ const StaticModal = ({ open, onCancel }) => {
             (i) => ({
               name: i[0],
               value: i[1].length,
-            })
+            }),
           ),
           itemStyle: {
             normal: {
@@ -115,7 +118,7 @@ const StaticModal = ({ open, onCancel }) => {
             (i) => ({
               name: i[0],
               value: i[1].length,
-            })
+            }),
           ),
           itemStyle: {
             normal: {

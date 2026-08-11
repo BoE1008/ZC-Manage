@@ -1,4 +1,4 @@
-import { memo, useEffect, useState } from "react";
+import { memo, useEffect, useState, FC } from "react";
 import { Modal, Upload, Button } from "antd";
 import {
   getFilesById,
@@ -8,7 +8,11 @@ import {
 import { UploadOutlined } from "@ant-design/icons";
 import { formatNumber } from "@/utils";
 
-const PaymentDetailModal = ({ onClose, data, onConfirm }) => {
+const PaymentDetailModal: FC<{
+  onClose: () => void;
+  data: any;
+  onConfirm: () => void;
+}> = ({ onClose, data, onConfirm }) => {
   const [files, setFiles] = useState([]);
   const [oldFiles, setOldFiles] = useState([]);
 
@@ -30,7 +34,7 @@ const PaymentDetailModal = ({ onClose, data, onConfirm }) => {
 
   const handleConfirm = async () => {
     const fileList = files.filter(
-      (itemA) => !oldFiles.some((itemB) => itemA.name === itemB.name)
+      (itemA) => !oldFiles.some((itemB) => itemA.name === itemB.name),
     );
 
     const formData = new FormData();
@@ -78,7 +82,7 @@ const PaymentDetailModal = ({ onClose, data, onConfirm }) => {
     },
     onDownload: async (file) => {
       window.open(
-        `http://115.175.21.89/zc/common/download/resource?resource=${file?.url}`
+        `http://115.175.21.89/zc/common/download/resource?resource=${file?.url}`,
       );
     },
   };

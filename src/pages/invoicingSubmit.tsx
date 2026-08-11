@@ -27,14 +27,9 @@ import {
   Typography,
   Upload,
   InputNumber,
-  DatePicker,
 } from "antd";
 import { Operation } from "@/types";
-import {
-  getProjectsSubmitList,
-  getProjectYSList,
-  getYSFByProjectId,
-} from "@/restApi/project";
+import { getProjectsSubmitList, getYSFByProjectId } from "@/restApi/project";
 import {
   EditTwoTone,
   DeleteTwoTone,
@@ -118,7 +113,7 @@ const InvoicingSubmit = () => {
           projectState,
           userName,
           projectNum,
-          updateTimeSort
+          updateTimeSort,
         );
         setData(res);
         setLoading(false);
@@ -150,10 +145,10 @@ const InvoicingSubmit = () => {
     const projectCustom = await getCustomersYSList(record.projectId);
     setCustomer(projectCustom.entity.data);
     setSelectCustomer(
-      projectCustom.entity?.data?.find((c) => record.customId === c.id)
+      projectCustom.entity?.data?.find((c) => record.customId === c.id),
     );
     const selectProject = project?.find(
-      (c) => c.projectNum === record.projectNum
+      (c) => c.projectNum === record.projectNum,
     );
     setSelectProject(selectProject);
     const res = await getDictByCode("sys_money_type");
@@ -263,7 +258,7 @@ const InvoicingSubmit = () => {
         formData.append("invoicingId", editId);
 
         const fileList = files.filter(
-          (itemA) => !oldFiles.some((itemB) => itemA.name === itemB.name)
+          (itemA) => !oldFiles.some((itemB) => itemA.name === itemB.name),
         );
         if (fileList.length > 0) {
           fileList.forEach((file) => {
@@ -287,7 +282,7 @@ const InvoicingSubmit = () => {
           projectState,
           userName,
           projectNum,
-          updateTimeSort
+          updateTimeSort,
         );
         setLoading(false);
         setData(data);
@@ -321,7 +316,7 @@ const InvoicingSubmit = () => {
       projectState,
       userName,
       projectNum,
-      updateTimeSort
+      updateTimeSort,
     );
     setData(data);
   };
@@ -342,7 +337,7 @@ const InvoicingSubmit = () => {
       projectState,
       userName,
       projectNum,
-      updateTimeSort
+      updateTimeSort,
     );
     setData(data);
   };
@@ -357,7 +352,7 @@ const InvoicingSubmit = () => {
       projectState,
       userName,
       projectNum,
-      updateTimeSort
+      updateTimeSort,
     );
     setData(data);
   };
@@ -389,7 +384,7 @@ const InvoicingSubmit = () => {
     form.setFieldValue("bankCard", {});
     form.setFieldValue("bank", {});
     const res = selectCustomer?.accountList?.filter(
-      (c) => c.moneyType === value.value
+      (c) => c.moneyType === value.value,
     );
     setBankcards(res);
   };
@@ -402,7 +397,7 @@ const InvoicingSubmit = () => {
 
   const customerFilterOption = (
     input: string,
-    option?: { label: string; value: string }
+    option?: { label: string; value: string },
   ) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
 
   const customerFilters = useMemo(() => {
@@ -723,7 +718,7 @@ const InvoicingSubmit = () => {
     },
     onDownload: async (file) => {
       window.open(
-        `http://115.175.21.89/zc/common/download/resource?resource=${file?.url}`
+        `http://115.175.21.89/zc/common/download/resource?resource=${file?.url}`,
       );
     },
   };

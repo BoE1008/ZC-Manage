@@ -150,7 +150,7 @@ const Customer = () => {
 
   const customerFilterOption = (
     input: string,
-    option?: { label: string; value: string }
+    option?: { label: string; value: string },
   ) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
 
   const [bankOperation, setBankOperation] = useState<Operation>();
@@ -198,7 +198,7 @@ const Customer = () => {
       const res = await getCustomBankList(customId);
       setBankData(res);
       message.success(
-        bankOperation === Operation.Add ? "添加成功" : "编辑成功"
+        bankOperation === Operation.Add ? "添加成功" : "编辑成功",
       );
     }
   };

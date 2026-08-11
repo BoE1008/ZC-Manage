@@ -4,11 +4,11 @@ export function isLogged() {
 }
 
 // 处理左侧菜单栏
-export const menuHandler = data => {
+export const menuHandler = (data) => {
   return data.map(({ name, url, children }) => ({
     key: url,
     label: name,
-    children: children?.map(item => ({
+    children: children?.map((item) => ({
       key: item.url,
       label: item.name,
     })),
@@ -23,8 +23,8 @@ export const formatNumber = (number?: number) => {
 };
 
 // 菜单处理为antd类型
-export const formatMenu = menu => {
-  return menu.map(c => {
+export const formatMenu = (menu) => {
+  return menu.map((c) => {
     return {
       ...c,
       title: c.name,
@@ -35,8 +35,8 @@ export const formatMenu = menu => {
 };
 
 // 处理部门
-export const formatDept = menu => {
-  return menu.map(c => {
+export const formatDept = (menu) => {
+  return menu.map((c) => {
     return {
       ...c,
       label: c.name,
@@ -49,8 +49,8 @@ export const formatDept = menu => {
 // 数组处理成树状
 export const arrayToTree = (arr, parentId: string = "0") =>
   arr
-    .filter(item => item.parentId === parentId)
-    .map(item => {
+    .filter((item) => item.parentId === parentId)
+    .map((item) => {
       const children = arrayToTree(arr, item.id);
       if (children.length > 0) {
         return {

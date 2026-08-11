@@ -19,7 +19,7 @@ import {
   withDrawYS,
   withDrawYF,
 } from "@/restApi/project";
-import { useEffect, useState } from "react";
+import { useEffect, useState, FC } from "react";
 import {
   Form,
   Table,
@@ -59,7 +59,11 @@ import { getDictByCode } from "@/restApi/dict";
 import { getExchangeRateList } from "@/restApi/exchangeRate";
 import clsx from "clsx";
 
-const Item = ({ projectId, onClose, modalType }) => {
+const Item: FC<{
+  projectId: string;
+  onClose: () => void;
+  modalType: ModalType;
+}> = ({ projectId, onClose, modalType }) => {
   const [data, setData] = useState();
   const [ysModalOpen, setYsModalOpen] = useState(false);
   const [yfModalOpen, setYfModalOpen] = useState(false);
@@ -151,7 +155,7 @@ const Item = ({ projectId, onClose, modalType }) => {
         const data = await getProjectYSList(
           projectId as string,
           page,
-          pageSize
+          pageSize,
         );
         setData({
           ...data,
@@ -1406,7 +1410,7 @@ const Item = ({ projectId, onClose, modalType }) => {
         const data = await getProjectYSList(
           projectId as string,
           page,
-          pageSize
+          pageSize,
         );
         setData({
           ...data,
@@ -1425,7 +1429,7 @@ const Item = ({ projectId, onClose, modalType }) => {
 
   const customerFilterOption = (
     input: string,
-    option?: { label: string; value: string }
+    option?: { label: string; value: string },
   ) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
 
   const handleSupplierSelectChange = (value) => {};
@@ -1434,7 +1438,7 @@ const Item = ({ projectId, onClose, modalType }) => {
 
   const supplierFilterOption = (
     input: string,
-    option?: { label: string; value: string }
+    option?: { label: string; value: string },
   ) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
 
   const handleYSMoneyTypeChange = async ({ value }) => {
@@ -1442,7 +1446,7 @@ const Item = ({ projectId, onClose, modalType }) => {
       dayjs(projectDate).format("YYYY-MM"),
       1,
       1,
-      value
+      value,
     );
     form.setFieldValue("ysExrate", res?.entity?.data[0]?.exchangeRate);
   };
@@ -1452,7 +1456,7 @@ const Item = ({ projectId, onClose, modalType }) => {
       dayjs(projectDate).format("YYYY-MM"),
       1,
       1,
-      value
+      value,
     );
     form1.setFieldValue("yfExrate", res?.entity?.data[0]?.exchangeRate);
   };

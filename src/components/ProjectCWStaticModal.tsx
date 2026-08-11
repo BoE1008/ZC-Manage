@@ -1,9 +1,12 @@
 import { Modal } from "antd";
-import { memo, useRef, useMemo, useEffect, useState } from "react";
+import { memo, useRef, useMemo, useEffect, useState, FC } from "react";
 import * as echarts from "echarts";
 import { getProjectCWStatic } from "@/restApi/project";
 
-const StaticModal = ({ open, onCancel }) => {
+const StaticModal: FC<{ open: boolean; onCancel: () => void }> = ({
+  open,
+  onCancel,
+}) => {
   const chartRef = useRef();
 
   const [data, setData] = useState([]);

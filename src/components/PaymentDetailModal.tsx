@@ -1,9 +1,12 @@
-import { memo, useEffect, useState } from "react";
+import { memo, useEffect, useState, FC } from "react";
 import { Modal, Upload } from "antd";
 import { getFilesById, deleteFileById } from "@/restApi/payment";
 import { formatNumber } from "@/utils";
 
-const PaymentDetailModal = ({ onClose, data }) => {
+const PaymentDetailModal: FC<{ onClose: () => void; data: any }> = ({
+  onClose,
+  data,
+}) => {
   const [files, setFiles] = useState([]);
 
   useEffect(() => {
@@ -52,7 +55,7 @@ const PaymentDetailModal = ({ onClose, data }) => {
     },
     onDownload: async (file) => {
       window.open(
-        `http://115.175.21.89/zc/common/download/resource?resource=${file?.url}`
+        `http://115.175.21.89/zc/common/download/resource?resource=${file?.url}`,
       );
     },
   };

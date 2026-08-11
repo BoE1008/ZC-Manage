@@ -16,7 +16,6 @@ import {
   Avatar,
   Tooltip,
   Popconfirm,
-  DatePicker,
   Statistic,
 } from "antd";
 import {
@@ -90,7 +89,7 @@ const InvoicingCW = () => {
           userName,
           projectNum,
           updateTimeSort,
-          moneyType
+          moneyType,
         );
         setData(res);
         setLoading(false);
@@ -134,7 +133,7 @@ const InvoicingCW = () => {
       customerId,
       projectState,
       userName,
-      projectNum
+      projectNum,
     );
     setLoading(false);
     setData(data);
@@ -151,7 +150,7 @@ const InvoicingCW = () => {
       customerId,
       projectState,
       userName,
-      projectNum
+      projectNum,
     );
     setLoading(false);
     setData(data);

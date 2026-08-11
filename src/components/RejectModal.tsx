@@ -1,7 +1,11 @@
 import { Modal, Input } from "antd";
-import { useState, memo } from "react";
+import { useState, memo, FC } from "react";
 
-const RejectModal = ({ open, onReject, onClose }) => {
+const RejectModal: FC<{
+  open: boolean;
+  onReject: (value: string) => void;
+  onClose: () => void;
+}> = ({ open, onReject, onClose }) => {
   const [value, setValue] = useState("");
 
   return (
