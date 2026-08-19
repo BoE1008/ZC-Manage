@@ -1,3 +1,6 @@
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
+
 export function isLogged() {
   if (typeof window === "undefined") return false;
   return !!sessionStorage.getItem("username");
@@ -62,3 +65,7 @@ export const arrayToTree = (arr, parentId: string = "0") =>
         return rest;
       }
     });
+
+export const cn = (...inputs: ClassValue[]) => {
+  return twMerge(clsx(inputs));
+};

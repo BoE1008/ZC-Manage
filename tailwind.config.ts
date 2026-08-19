@@ -16,6 +16,10 @@ const config: Config = {
       "2xl": "1536px",
     },
     extend: {
+      colors: {
+        primary: { DEFAULT: '#198348', hover: '#14693A', light: '#EAF6EF' },
+        sidebar: { DEFAULT: '#198348', dark: '#14693A' },
+      },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-conic":

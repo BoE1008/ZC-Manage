@@ -51,13 +51,22 @@ export default function App({ Component, pageProps }: AppProps) {
   }, [router.pathname, isNoLayout, router]);
 
   useEffect(() => {
-    console.log('%c🚀 上海甄察供应链业务管理系统', 'font-size: 20px; font-weight: bold; color: #198348;');
+    console.log(
+      "%c🚀 上海甄察供应链业务管理系统",
+      "font-size: 20px; font-weight: bold; color: #198348;",
+    );
     if (buildInfo) {
-      console.log('%c构建时间: ' + buildInfo.buildTime, 'font-size: 12px; color: #666;');
+      console.log(
+        "%c构建时间: " + buildInfo.buildTime,
+        "font-size: 12px; color: #666;",
+      );
     } else {
-      console.log('%c构建时间: 开发模式', 'font-size: 12px; color: #666;');
+      console.log("%c构建时间: 开发模式", "font-size: 12px; color: #666;");
     }
-    console.log('%c----------------------------------------', 'color: #198348;');
+    console.log(
+      "%c----------------------------------------",
+      "color: #198348;",
+    );
   }, []);
 
   // 防止未授权时组件提前渲染
@@ -76,6 +85,7 @@ export default function App({ Component, pageProps }: AppProps) {
           colorTextBase: "#000",
           colorBgBase: "#fff",
           colorPrimary: "#198348",
+          colorLink: "#198348",
           fontFamily:
             '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif',
         },
