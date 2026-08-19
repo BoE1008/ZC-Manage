@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
 import { useMemo, useEffect, useState } from "react";
-import { getContainerDashboardStatus } from "@/restApi/container";
+import { getContainerDashboardStats } from "@/restApi/container";
 import { Container, Activity } from "@/types";
 
 export const Dashboard = () => {
@@ -83,7 +83,7 @@ export const Dashboard = () => {
   };
   useEffect(() => {
     (async () => {
-      const res = await getContainerDashboardStatus();
+      const res = await getContainerDashboardStats();
       console.log(res);
     })();
   }, []);
