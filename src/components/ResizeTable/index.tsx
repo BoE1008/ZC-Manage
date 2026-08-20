@@ -1,13 +1,21 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import { Table } from "antd";
+import type { TableProps } from "antd";
 
-class ResizeTable extends React.Component {
+// 表头单元格自定义扩展属性（列宽拖拽用）
+interface ResizableCell extends HTMLTableCellElement {
+  mouseDown?: boolean;
+  oldX?: number;
+  oldWidth?: number;
+}
+
+class ResizeTable extends React.Component<TableProps<any>> {
   private table: HTMLTableElement | null;
-  private column: HTMLTableCellElement | null;
+  private column: ResizableCell | null;
   private tableWidth: number;
 
-  constructor(props: any) {
+  constructor(props: TableProps<any>) {
     super(props);
 
     this.table = null;
@@ -16,19 +24,22 @@ class ResizeTable extends React.Component {
   }
 
   componentDidMount() {
-    let el = ReactDOM.findDOMNode(this);
-    this.table = el.getElementsByTagName("table")[0];
-    this.table.setAttribute("data-table-resizable", "true");
-    let id = "rs_tb";
-    this.table.id = id;
+    const el = ReactDOM.findDOMNode(this) as HTMLElement | null;
+    if (!el) return;
+    const table = el.getElementsByTagName("table")[0];
+    if (!table) return;
+    this.table = table;
+    table.setAttribute("data-table-resizable", "true");
+    table.id = "rs_tb";
     this.resizeable();
     this.clearColumnsWidth();
   }
 
   resizeable() {
-    let header = this.table.rows[0];
-    let cells = header.cells;
-    let len = cells.length;
+    if (!this.table || !this.table.rows[0]) return;
+    const header = this.table.rows[0];
+    const cells = header.cells;
+    const len = cells.length;
 
     for (let i = 0; i < len; i++) {
       cells[i].addEventListener("mousedown", this.handleMousedown);
@@ -37,19 +48,21 @@ class ResizeTable extends React.Component {
     this.table.addEventListener("mouseup", this.handleMouseup);
   }
 
-  handleMousedown = (event) => {
-    let target = event.currentTarget;
+  handleMousedown = (event: MouseEvent) => {
+    const target = event.currentTarget as ResizableCell;
     this.column = target;
     if (event.offsetX > target.offsetWidth - 10) {
       target.mouseDown = true;
       target.oldX = event.x;
       target.oldWidth = target.offsetWidth;
     }
-    this.tableWidth = this.table.rows[0].clientWidth;
+    if (this.table && this.table.rows[0]) {
+      this.tableWidth = this.table.rows[0].clientWidth;
+    }
   };
 
-  handleMousemove = (event) => {
-    let target = event.currentTarget;
+  handleMousemove = (event: MouseEvent) => {
+    const target = event.currentTarget as ResizableCell;
     if (event.offsetX > target.offsetWidth - 10) {
       target.style.cursor = "col-resize";
     } else {
@@ -58,21 +71,23 @@ class ResizeTable extends React.Component {
     if (!this.column) {
       this.column = target;
     }
-    let column = this.column;
+    const column = this.column;
     if (column.mouseDown) {
       column.style.cursor = "default";
-      var diff = event.x - column.oldX;
-      if (column.oldWidth + (event.x - column.oldX) > 0) {
-        column.width = column.oldWidth + diff;
+      const diff = event.x - (column.oldX ?? 0);
+      if (column.oldWidth !== undefined && column.oldWidth + (event.x - column.oldX!) > 0) {
+        (column as any).width = column.oldWidth + diff;
       }
 
-      column.style.width = column.width;
-      this.table.style.width = this.tableWidth + diff + "px";
+      column.style.width = String(column.width);
+      if (this.table) {
+        this.table.style.width = this.tableWidth + diff + "px";
+      }
       column.style.cursor = "col-resize";
     }
   };
 
-  handleMouseup = (event) => {
+  handleMouseup = () => {
     if (this.column) {
       this.column.mouseDown = false;
       this.column.style.cursor = "default";
@@ -80,15 +95,13 @@ class ResizeTable extends React.Component {
   };
 
   clearColumnsWidth() {
-    let colgroup = null;
-    let childNodes = this.table.childNodes;
-    childNodes.forEach((node) => {
-      if (node.tagName === "COLGROUP") {
-        colgroup = node;
-      }
-    });
+    if (!this.table) return;
+    const colgroup = Array.from(this.table.children).find(
+      (n) => (n as HTMLElement).tagName === "COLGROUP",
+    ) as HTMLTableColElement | undefined;
     if (colgroup) {
-      colgroup.childNodes.forEach((node) => {
+      const cols = Array.from(colgroup.children) as HTMLElement[];
+      cols.forEach((node) => {
         node.style.width = "auto";
       });
     }

@@ -1,766 +1,406 @@
-import { useState, useMemo } from 'react';
-import { Table, Button, Input, Select, Space, Modal, Form } from 'antd';
-import { Supplier, Buyer, Yard } from '@/types';
-import { SupplierTypeBadge, BuyerTypeBadge } from '@/components/ui/Badge';
-import { message } from 'antd';
-import { useStore } from '@/store';
+import { useState, useEffect } from 'react';
+import Table from "@/components/ResizeTable";
+import { Button, Space, Input, Modal, Form, message, Select } from 'antd';
+import type { ColumnsType } from 'antd/es/table';
+import {
+  addSupplier, editSupplier, deleteSupplier,
+} from '@/restApi/supplier';
+import { getSuppliersList } from '@/restApi/supplyer';
+import {
+  getContainerBuyerList, addContainerBuyer, editContainerBuyer, deleteContainerBuyer,
+} from '@/restApi/containerBuyer';
+import {
+  getYardList, addYard, editYard, deleteYard,
+} from '@/restApi/yard';
+import {
+  getDictById, addDict, updateDict, deleteDict,
+  addDictData, updateDictData, deleteDictData, getDictDetail,
+} from '@/restApi/dict';
 
-// ==================== 卖方/出租方/堆场 ====================
+// ===== SupplierList =====
 export const SupplierList = () => {
-  const { suppliers, setSuppliers } = useStore();
-  const [typeFilter, setTypeFilter] = useState('');
-  const [keyword, setKeyword] = useState('');
-  const [editId, setEditId] = useState<number | null | undefined>(undefined);
-
-  const filtered = useMemo(
-    () =>
-      suppliers.filter((s) => {
-        if (typeFilter && s.type !== typeFilter) return false;
-        if (keyword && !s.name.toLowerCase().includes(keyword.toLowerCase())) return false;
-        return true;
-      }),
-    [suppliers, typeFilter, keyword]
-  );
-
-  const handleSave = (id: number | null, data: Partial<Supplier>) => {
-    if (id) {
-      setSuppliers((prev) => prev.map((s) => (s.id === id ? { ...s, ...data } : s)));
-      message.success('已更新');
-    } else {
-      const newId = Math.max(0, ...suppliers.map((s) => s.id)) + 1;
-      setSuppliers((prev) => [...prev, { ...data, id: newId } as Supplier]);
-      message.success('已添加');
-    }
-    setEditId(undefined);
-  };
-
-  const handleDelete = (id: number) => {
-    Modal.confirm({
-      okText: '删除',
-      okButtonProps: { className: '!bg-[#198348] !border-[#198348]' },
-      cancelText: '取消',
-      title: '确认删除',
-      content: '确定删除此卖方/出租方/堆场吗？',
-      onOk() {
-        setSuppliers((prev) => prev.filter((s) => s.id !== id));
-        message.warning('已删除');
-      },
-    });
-  };
-
-  return (
-    <div className="space-y-3">
-      <div className="flex items-center gap-2">
-        <Button type="primary" size="small" onClick={() => setEditId(null)}>
-          + 添加
-        </Button>
-        <div className="ml-auto flex gap-2">
-          <Select
-            size="small"
-            className="w-28"
-            placeholder="全部类型"
-            allowClear
-            value={typeFilter || undefined}
-            onChange={(v) => setTypeFilter(v || '')}
-            options={['卖方', '出租方', '堆场'].map((t) => ({
-              label: t,
-              value: t,
-            }))}
-          />
-          <Input
-            size="small"
-            placeholder="名称"
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            className="!w-36"
-            allowClear
-          />
-        </div>
-      </div>
-      <div className="bg-white rounded shadow-sm overflow-hidden">
-        <Table
-          columns={[
-            { title: '名称', dataIndex: 'name', ellipsis: true },
-            {
-              title: '类型',
-              dataIndex: 'type',
-              width: 80,
-              render: (v) => <SupplierTypeBadge type={v} />,
-            },
-            { title: '城市', dataIndex: 'city', width: 90 },
-            { title: '联系人', dataIndex: 'contact', width: 80 },
-            { title: '电话', dataIndex: 'phone', width: 120 },
-            { title: '税号', dataIndex: 'tax', width: 130 },
-            { title: '备注', dataIndex: 'remark', ellipsis: true },
-            {
-              title: '操作',
-              width: 80,
-              align: 'center',
-              render: (_, r) => (
-                <Space size={1}>
-                  <Button
-                    type="text"
-                    size="small"
-                    className="!px-1 !py-0.5 !text-xs"
-                    onClick={() => setEditId(r.id)}
-                  >
-                    ✎
-                  </Button>
-                  <Button
-                    type="text"
-                    size="small"
-                    danger
-                    className="!px-1 !py-0.5 !text-xs"
-                    onClick={() => handleDelete(r.id)}
-                  >
-                    🗑
-                  </Button>
-                </Space>
-              ),
-            },
-          ]}
-          dataSource={filtered}
-          rowKey="id"
-          size="small"
-          pagination={{ pageSize: 20, showTotal: (t) => `共 ${t} 条` }}
-        />
-      </div>
-      {editId !== undefined && (
-        <SupplierModal
-          id={editId ?? null}
-          suppliers={suppliers}
-          onSave={handleSave}
-          onClose={() => setEditId(undefined)}
-        />
-      )}
-    </div>
-  );
-}
-
-const SupplierModal = ({
-  id,
-  suppliers,
-  onSave,
-  onClose,
-}: {
-  id: number | null;
-  suppliers: Supplier[];
-  onSave: (id: number | null, d: Partial<Supplier>) => void;
-  onClose: () => void;
-}) => {
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [total, setTotal] = useState(0);
+  const [editId, setEditId] = useState<string | null>(null);
   const [form] = Form.useForm();
-  const editing = id ? suppliers.find((s) => s.id === id) : null;
-  return (
-    <Modal
-      title={editing ? `编辑 - ${editing.name}` : '添加卖方/出租方/堆场'}
-      open
-      onCancel={onClose}
-      width={560}
-      destroyOnClose
-      footer={
-        <Space>
-          <Button onClick={onClose}>取消</Button>
-          <Button
-            type="primary"
-            onClick={() => form.validateFields().then((v) => onSave(id, v as Supplier))}
-          >
-            保存
-          </Button>
-        </Space>
-      }
-    >
-      <Form
-        form={form}
-        layout="vertical"
-        initialValues={editing || { type: '卖方' }}
-        className="mt-3"
-      >
-        <div className="grid grid-cols-2 gap-3">
-          <Form.Item name="name" label="名称" rules={[{ required: true, message: '请输入名称' }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="type" label="类型" rules={[{ required: true }]}>
-            <Select
-              options={['卖方', '出租方', '堆场'].map((t) => ({
-                label: t,
-                value: t,
-              }))}
-            />
-          </Form.Item>
-          <Form.Item name="city" label="所在城市">
-            <Input />
-          </Form.Item>
-          <Form.Item name="contact" label="联系人">
-            <Input />
-          </Form.Item>
-          <Form.Item name="phone" label="联系电话">
-            <Input />
-          </Form.Item>
-          <Form.Item name="tax" label="税号">
-            <Input />
-          </Form.Item>
-          <Form.Item name="remark" label="备注" className="col-span-2">
-            <Input />
-          </Form.Item>
-        </div>
-      </Form>
-    </Modal>
-  );
-}
+  const [open, setOpen] = useState(false);
 
-// ==================== 买方/租方 ====================
-export const BuyerList = () => {
-  const { buyers, setBuyers } = useStore();
-  const [keyword, setKeyword] = useState('');
-  const [editId, setEditId] = useState<number | null | undefined>(undefined);
-
-  const filtered = useMemo(
-    () => buyers.filter((b) => !keyword || b.name.toLowerCase().includes(keyword.toLowerCase())),
-    [buyers, keyword]
-  );
-
-  const handleSave = (id: number | null, data: Partial<Buyer>) => {
-    if (id) {
-      setBuyers((prev) => prev.map((b) => (b.id === id ? { ...b, ...data } : b)));
-      message.success('已更新');
-    } else {
-      const newId = Math.max(0, ...buyers.map((b) => b.id)) + 1;
-      setBuyers((prev) => [...prev, { ...data, id: newId, count: 0 } as Buyer]);
-      message.success('已添加');
-    }
-    setEditId(undefined);
+  const load = () => {
+    setLoading(true);
+    // getSuppliersList 返回响应体本身，列表在 .entity.data（与弹框一致）
+    getSuppliersList(page, pageSize).then(r => {
+      setData(r.entity?.data ?? []);
+      setTotal(r.entity?.total ?? (r.entity?.data ?? []).length);
+    }).finally(() => setLoading(false));
   };
 
-  const handleDelete = (id: number) => {
-    Modal.confirm({
-      okText: '删除',
-      okButtonProps: { className: '!bg-[#198348] !border-[#198348]' },
-      cancelText: '取消',
-      title: '确认删除',
-      content: '确定删除此买方/租方吗？',
-      onOk() {
-        setBuyers((prev) => prev.filter((b) => b.id !== id));
-        message.warning('已删除');
-      },
-    });
+  useEffect(() => { load(); }, [page, pageSize]);
+
+  const handleSave = async () => {
+    const vals = await form.validateFields();
+    try {
+      if (editId) {
+        await editSupplier({ ...vals, id: editId });
+        message.success('供应商已更新');
+      } else {
+        await addSupplier(vals);
+        message.success('供应商已添加');
+      }
+      setOpen(false);
+      load();
+    } catch { message.error('保存失败'); }
   };
 
-  return (
-    <div className="space-y-3">
-      <div className="flex items-center gap-2">
-        <Button type="primary" size="small" onClick={() => setEditId(null)}>
-          + 添加
-        </Button>
-        <div className="ml-auto">
-          <Input
-            size="small"
-            placeholder="名称"
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            className="!w-36"
-            allowClear
-          />
-        </div>
-      </div>
-      <div className="bg-white rounded shadow-sm overflow-hidden">
-        <Table
-          columns={[
-            { title: '名称', dataIndex: 'name', ellipsis: true },
-            {
-              title: '类型',
-              dataIndex: 'type',
-              width: 80,
-              render: (v) => <BuyerTypeBadge type={v} />,
-            },
-            { title: '联系方式', dataIndex: 'contact', ellipsis: true },
-            { title: '主要采购箱况', dataIndex: 'cond', width: 110 },
-            {
-              title: '历史交易',
-              dataIndex: 'count',
-              width: 90,
-              align: 'center',
-            },
-            { title: '备注', dataIndex: 'remark', ellipsis: true },
-            {
-              title: '操作',
-              width: 80,
-              align: 'center',
-              render: (_, r) => (
-                <Space size={1}>
-                  <Button
-                    type="text"
-                    size="small"
-                    className="!px-1 !py-0.5 !text-xs"
-                    onClick={() => setEditId(r.id)}
-                  >
-                    ✎
-                  </Button>
-                  <Button
-                    type="text"
-                    size="small"
-                    danger
-                    className="!px-1 !py-0.5 !text-xs"
-                    onClick={() => handleDelete(r.id)}
-                  >
-                    🗑
-                  </Button>
-                </Space>
-              ),
-            },
-          ]}
-          dataSource={filtered}
-          rowKey="id"
-          size="small"
-          pagination={{ pageSize: 20, showTotal: (t) => `共 ${t} 条` }}
-        />
-      </div>
-      {editId !== undefined && (
-        <BuyerModal
-          id={editId ?? null}
-          buyers={buyers}
-          onSave={handleSave}
-          onClose={() => setEditId(undefined)}
-        />
-      )}
-    </div>
-  );
-}
-
-const BuyerModal = ({
-  id,
-  buyers,
-  onSave,
-  onClose,
-}: {
-  id: number | null;
-  buyers: Buyer[];
-  onSave: (id: number | null, d: Partial<Buyer>) => void;
-  onClose: () => void;
-}) => {
-  const [form] = Form.useForm();
-  const editing = id ? buyers.find((b) => b.id === id) : null;
-  return (
-    <Modal
-      title={editing ? '编辑' : '添加'}
-      open
-      onCancel={onClose}
-      width={560}
-      destroyOnClose
-      footer={
-        <Space>
-          <Button onClick={onClose}>取消</Button>
-          <Button
-            type="primary"
-            onClick={() => form.validateFields().then((v) => onSave(id, v as Buyer))}
-          >
-            保存
-          </Button>
+  const columns: ColumnsType<any> = [
+    { title: '名称', dataIndex: 'name', width: 160 },
+    { title: '联系人', dataIndex: 'contactsName', width: 100 },
+    { title: '联系电话', dataIndex: 'contactsMobile', width: 120 },
+    { title: '城市', dataIndex: 'city', width: 100 },
+    { title: '地址', dataIndex: 'address', width: 200, ellipsis: true },
+    { title: '备注', dataIndex: 'remark', width: 150, ellipsis: true },
+    {
+      title: '操作', width: 100,
+      render: (_, r) => (
+        <Space size="small">
+          <Button type="link" size="small" onClick={() => { setEditId(r.id); form.setFieldsValue(r); setOpen(true); }}>编辑</Button>
+          <Button type="link" size="small" danger onClick={() => {
+            Modal.confirm({ title: '确认删除', content: '确定删除吗？', okText: '删除', okButtonProps: { className: '!bg-[#198348] !border-[#198348]' }, cancelText: '取消',
+              onOk: async () => { await deleteSupplier(r.id); message.warning('供应商已删除'); load(); } });
+          }}>删除</Button>
         </Space>
-      }
-    >
-      <Form
-        form={form}
-        layout="vertical"
-        initialValues={editing || { type: '买方' }}
-        className="mt-3"
-      >
-        <div className="grid grid-cols-2 gap-3">
-          <Form.Item name="name" label="名称" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="type" label="类型">
-            <Select options={['买方', '租方'].map((t) => ({ label: t, value: t }))} />
-          </Form.Item>
-          <Form.Item name="contact" label="联系方式">
-            <Input />
-          </Form.Item>
-          <Form.Item name="cond" label="主要采购箱况">
-            <Input placeholder="如：适货箱" />
-          </Form.Item>
-          <Form.Item name="remark" label="备注" className="col-span-2">
-            <Input />
-          </Form.Item>
-        </div>
-      </Form>
-    </Modal>
-  );
-}
-
-// ==================== 堆场 ====================
-export const YardList = () => {
-  const { yards, setYards } = useStore();
-  const [keyword, setKeyword] = useState('');
-  const [editId, setEditId] = useState<number | null | undefined>(undefined);
-
-  const filtered = useMemo(
-    () =>
-      yards.filter(
-        (y) =>
-          !keyword ||
-          y.name.toLowerCase().includes(keyword.toLowerCase()) ||
-          y.city.toLowerCase().includes(keyword.toLowerCase())
       ),
-    [yards, keyword]
-  );
-
-  const handleSave = (id: number | null, data: Partial<Yard>) => {
-    if (id) {
-      setYards((prev) => prev.map((y) => (y.id === id ? { ...y, ...data } : y)));
-      message.success('已更新');
-    } else {
-      const newId = Math.max(0, ...yards.map((y) => y.id)) + 1;
-      setYards((prev) => [...prev, { ...data, id: newId } as Yard]);
-      message.success('已添加');
-    }
-    setEditId(undefined);
-  };
-
-  const handleDelete = (id: number) => {
-    Modal.confirm({
-      okText: '删除',
-      okButtonProps: { className: '!bg-[#198348] !border-[#198348]' },
-      cancelText: '取消',
-      title: '确认删除',
-      content: '确定删除此堆场吗？',
-      onOk() {
-        setYards((prev) => prev.filter((y) => y.id !== id));
-        message.warning('已删除');
-      },
-    });
-  };
+    },
+  ];
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-2">
-        <Button type="primary" size="small" onClick={() => setEditId(null)}>
-          + 添加堆场
-        </Button>
-        <div className="ml-auto">
-          <Input
-            size="small"
-            placeholder="堆场名称 / 城市"
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            className="!w-44"
-            allowClear
-          />
-        </div>
+      <div className="flex justify-between">
+        <span className="font-bold text-gray-800 flex items-center">
+          <div className="w-1 h-4 bg-[#198348] rounded mr-2" />供应商管理
+        </span>
+        <Button type="primary" size="small" onClick={() => { setEditId(null); form.resetFields(); setOpen(true); }}>+ 新增供应商</Button>
       </div>
-      <div className="bg-white rounded shadow-sm overflow-hidden">
-        <Table
-          columns={[
-            { title: '堆场名称', dataIndex: 'name', ellipsis: true },
-            { title: '城市', dataIndex: 'city', width: 100 },
-            { title: '地址', dataIndex: 'addr', width: 110, ellipsis: true },
-            { title: '堆存费率', dataIndex: 'storageRate', width: 100 },
-            { title: '吊装费率', dataIndex: 'liftRate', width: 100 },
-            { title: '对接人', dataIndex: 'contact', width: 80 },
-            { title: '电话', dataIndex: 'phone', width: 110 },
-            {
-              title: '操作',
-              width: 80,
-              align: 'center',
-              render: (_, r) => (
-                <Space size={1}>
-                  <Button
-                    type="text"
-                    size="small"
-                    className="!px-1 !py-0.5 !text-xs"
-                    onClick={() => setEditId(r.id)}
-                  >
-                    ✎
-                  </Button>
-                  <Button
-                    type="text"
-                    size="small"
-                    danger
-                    className="!px-1 !py-0.5 !text-xs"
-                    onClick={() => handleDelete(r.id)}
-                  >
-                    🗑
-                  </Button>
-                </Space>
-              ),
-            },
-          ]}
-          dataSource={filtered}
-          rowKey="id"
-          size="small"
-          pagination={{ pageSize: 20, showTotal: (t) => `共 ${t} 条` }}
-        />
-      </div>
-      {editId !== undefined && (
-        <YardModal
-          id={editId ?? null}
-          yards={yards}
-          onSave={handleSave}
-          onClose={() => setEditId(undefined)}
-        />
-      )}
+      <Table
+        columns={columns} dataSource={data} loading={loading} rowKey="id"
+        pagination={{ current: page, pageSize, total, onChange: (p, ps) => { setPage(p); if (ps) setPageSize(ps); }, showSizeChanger: true, showTotal: (t) => `共 ${t} 条` }}
+        size="small" scroll={{ x: 900 }}
+      />
+      <Modal open={open} title="供应商" onCancel={() => setOpen(false)} onOk={handleSave} destroyOnClose>
+        <Form form={form} layout="vertical">
+          <Form.Item label="名称" name="name" rules={[{ required: true }]}><Input /></Form.Item>
+          <Form.Item label="联系人" name="contactsName"><Input /></Form.Item>
+          <Form.Item label="联系电话" name="contactsMobile"><Input /></Form.Item>
+          <Form.Item label="城市" name="city"><Input /></Form.Item>
+          <Form.Item label="地址" name="address"><Input /></Form.Item>
+          <Form.Item label="备注" name="remark"><Input.TextArea rows={2} /></Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
-}
+};
 
-const YardModal = ({
-  id,
-  yards,
-  onSave,
-  onClose,
-}: {
-  id: number | null;
-  yards: Yard[];
-  onSave: (id: number | null, d: Partial<Yard>) => void;
-  onClose: () => void;
-}) => {
+// ===== BuyerList =====
+export const BuyerList = () => {
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [total, setTotal] = useState(0);
+  const [editId, setEditId] = useState<string | null>(null);
   const [form] = Form.useForm();
-  const editing = id ? yards.find((y) => y.id === id) : null;
-  return (
-    <Modal
-      title={editing ? '编辑' : '添加堆场'}
-      open
-      onCancel={onClose}
-      width={560}
-      destroyOnClose
-      footer={
-        <Space>
-          <Button onClick={onClose}>取消</Button>
-          <Button
-            type="primary"
-            onClick={() => form.validateFields().then((v) => onSave(id, v as Yard))}
-          >
-            保存
-          </Button>
-        </Space>
+  const [open, setOpen] = useState(false);
+
+  const load = () => {
+    setLoading(true);
+    getContainerBuyerList({ current: page, size: pageSize }).then(r => {
+      setData(r.entity?.data ?? []);
+      setTotal(r.entity?.total ?? 0);
+    }).finally(() => setLoading(false));
+  };
+
+  useEffect(() => { load(); }, [page, pageSize]);
+
+  const handleSave = async () => {
+    const vals = await form.validateFields();
+    try {
+      if (editId) {
+        await editContainerBuyer({ ...vals, id: editId });
+        message.success('买方已更新');
+      } else {
+        await addContainerBuyer(vals);
+        message.success('买方已添加');
       }
-    >
-      <Form form={form} layout="vertical" initialValues={editing || {}} className="mt-3">
-        <div className="grid grid-cols-2 gap-3">
-          <Form.Item name="name" label="堆场名称" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="city" label="所在城市">
-            <Input />
-          </Form.Item>
-          <Form.Item name="addr" label="地址">
-            <Input />
-          </Form.Item>
-          <Form.Item name="storageRate" label="堆存费率">
-            <Input placeholder="如：USD 2/天" />
-          </Form.Item>
-          <Form.Item name="liftRate" label="吊装费率">
-            <Input placeholder="如：USD 30" />
-          </Form.Item>
-          <Form.Item name="contact" label="对接人">
-            <Input />
-          </Form.Item>
-          <Form.Item name="phone" label="电话">
-            <Input />
-          </Form.Item>
-        </div>
-      </Form>
-    </Modal>
-  );
-}
-
-// ==================== 字典 ====================
-import { dictTypes as dt, dictConds as dc } from '@/data/mockData';
-
-const STATUS_DATA = [
-  {
-    status: '国内堆存',
-    color: '灰色',
-    desc: '集装箱在国内堆场存放',
-    flow: '→ 去程在途',
-  },
-  {
-    status: '去程在途',
-    color: '蓝色',
-    desc: '集装箱正在发往国外途中',
-    flow: '→ 国外堆存',
-  },
-  {
-    status: '国外堆存',
-    color: '橙色',
-    desc: '集装箱已到达国外堆场',
-    flow: '→ 卖出 / 回程在途',
-  },
-  { status: '卖出', color: '绿色', desc: '买箱已卖出，业务结束', flow: '终态' },
-  {
-    status: '回程在途',
-    color: '紫色',
-    desc: '集装箱正在回国内途中',
-    flow: '→ 国内堆存',
-  },
-  {
-    status: '已还箱',
-    color: '深灰',
-    desc: '长租箱已归还至指定堆场',
-    flow: '终态',
-  },
-];
-
-const COND_COLORS: Record<string, string> = {
-  新箱: 'bg-green-100 text-green-700',
-  次新箱: 'bg-yellow-100 text-yellow-700',
-  适货箱: 'bg-blue-100 text-blue-700',
-};
-
-const STATUS_COLORS: Record<string, string> = {
-  国内堆存: 'bg-gray-100 text-gray-600',
-  去程在途: 'bg-blue-100 text-blue-700',
-  国外堆存: 'bg-yellow-100 text-yellow-700',
-  卖出: 'bg-green-100 text-green-700',
-  回程在途: 'bg-purple-100 text-purple-700',
-  已还箱: 'bg-gray-200 text-gray-700',
-};
-
-export const DictPage = () => {
-  const [tList, setTList] = useState(dt);
-  const [cList, setCList] = useState(dc);
-
-  const handleDeleteType = (code: string) => {
-    Modal.confirm({
-      okText: '删除',
-      okButtonProps: { className: '!bg-[#198348] !border-[#198348]' },
-      cancelText: '取消',
-      title: '确认删除',
-      content: `确定删除箱型 ${code} 吗？`,
-      onOk() {
-        setTList((prev) => prev.filter((t) => t.code !== code));
-      },
-    });
+      setOpen(false);
+      load();
+    } catch { message.error('保存失败'); }
   };
-  const handleDeleteCond = (code: string) => {
-    Modal.confirm({
-      okText: '删除',
-      okButtonProps: { className: '!bg-[#198348] !border-[#198348]' },
-      cancelText: '取消',
-      title: '确认删除',
-      content: `确定删除箱况 ${code} 吗？`,
-      onOk() {
-        setCList((prev) => prev.filter((c) => c.code !== code));
-      },
-    });
-  };
+
+  const columns: ColumnsType<any> = [
+    { title: '名称', dataIndex: 'name', width: 160 },
+    { title: '类型', dataIndex: 'type', width: 80,
+      render: (v: string) => v === '买方' ? <span className="text-green-600">买方</span> : <span className="text-blue-600">租方</span> },
+    { title: '联系人', dataIndex: 'contactsName', width: 100 },
+    { title: '联系电话', dataIndex: 'contactsMobile', width: 120 },
+    { title: '城市', dataIndex: 'city', width: 100 },
+    { title: '地址', dataIndex: 'address', width: 200, ellipsis: true },
+    { title: '备注', dataIndex: 'remark', width: 150, ellipsis: true },
+    {
+      title: '操作', width: 100,
+      render: (_, r) => (
+        <Space size="small">
+          <Button type="link" size="small" onClick={() => { setEditId(r.id); form.setFieldsValue(r); setOpen(true); }}>编辑</Button>
+          <Button type="link" size="small" danger onClick={() => {
+            Modal.confirm({ title: '确认删除', content: '确定删除吗？', okText: '删除', okButtonProps: { className: '!bg-[#198348] !border-[#198348]' }, cancelText: '取消',
+              onOk: async () => { await deleteContainerBuyer(r.id); message.warning('买方已删除'); load(); } });
+          }}>删除</Button>
+        </Space>
+      ),
+    },
+  ];
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-2 gap-3">
-        {/* 箱型字典 */}
-        <div className="bg-white rounded shadow-sm p-4">
-          <div className="flex items-center text-sm font-bold mb-3 text-gray-800">
-            <div className="w-1 h-4 bg-[#198348] rounded mr-2 flex-shrink-0" />
-            箱型字典
-            <span className="ml-auto text-xs text-[#198348] cursor-pointer hover:underline">
-              + 添加
-            </span>
-          </div>
-          <Table
-            columns={[
-              { title: '箱型代码', dataIndex: 'code', width: 90 },
-              { title: '描述', dataIndex: 'desc', ellipsis: true },
-              {
-                title: '操作',
-                width: 70,
-                align: 'center',
-                render: (_, r) => (
-                  <Button
-                    type="text"
-                    size="small"
-                    danger
-                    className="!px-1 !py-0.5 !text-xs"
-                    onClick={() => handleDeleteType(r.code)}
-                  >
-                    🗑
-                  </Button>
-                ),
-              },
-            ]}
-            dataSource={tList}
-            rowKey="code"
-            size="small"
-            pagination={false}
-          />
-        </div>
-
-        {/* 箱况字典 */}
-        <div className="bg-white rounded shadow-sm p-4">
-          <div className="flex items-center text-sm font-bold mb-3 text-gray-800">
-            <div className="w-1 h-4 bg-[#198348] rounded mr-2 flex-shrink-0" />
-            箱况字典
-            <span className="ml-auto text-xs text-[#198348] cursor-pointer hover:underline">
-              + 添加
-            </span>
-          </div>
-          <Table
-            columns={[
-              {
-                title: '箱况',
-                dataIndex: 'code',
-                width: 80,
-                render: (v) => (
-                  <span
-                    className={`inline-block px-1.5 py-0.5 rounded text-xs ${COND_COLORS[v] || ''}`}
-                  >
-                    {v}
-                  </span>
-                ),
-              },
-              { title: '说明', dataIndex: 'desc', ellipsis: true },
-              {
-                title: '操作',
-                width: 70,
-                align: 'center',
-                render: (_, r) => (
-                  <Button
-                    type="text"
-                    size="small"
-                    danger
-                    className="!px-1 !py-0.5 !text-xs"
-                    onClick={() => handleDeleteCond(r.code)}
-                  >
-                    🗑
-                  </Button>
-                ),
-              },
-            ]}
-            dataSource={cList}
-            rowKey="code"
-            size="small"
-            pagination={false}
-          />
-        </div>
+      <div className="flex justify-between">
+        <span className="font-bold text-gray-800 flex items-center">
+          <div className="w-1 h-4 bg-[#198348] rounded mr-2" />买方/租方管理
+        </span>
+        <Button type="primary" size="small" onClick={() => { setEditId(null); form.resetFields(); setOpen(true); }}>+ 新增</Button>
       </div>
-
-      {/* 状态字典 */}
-      <div className="bg-white rounded shadow-sm p-4">
-        <div className="flex items-center text-sm font-bold mb-3 text-gray-800">
-          <div className="w-1 h-4 bg-[#198348] rounded mr-2 flex-shrink-0" />
-          集装箱状态字典
-        </div>
-        <Table
-          columns={[
-            {
-              title: '状态名称',
-              dataIndex: 'status',
-              render: (v) => (
-                <span
-                  className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[v] || ''}`}
-                >
-                  {v}
-                </span>
-              ),
-            },
-            { title: '颜色标识', dataIndex: 'color' },
-            { title: '说明', dataIndex: 'desc' },
-            { title: '流转方向', dataIndex: 'flow' },
-          ]}
-          dataSource={STATUS_DATA}
-          rowKey="status"
-          size="small"
-          pagination={false}
-        />
-      </div>
+      <Table
+        columns={columns} dataSource={data} loading={loading} rowKey="id"
+        pagination={{ current: page, pageSize, total, onChange: (p, ps) => { setPage(p); if (ps) setPageSize(ps); }, showSizeChanger: true, showTotal: (t) => `共 ${t} 条` }}
+        size="small" scroll={{ x: 1000 }}
+      />
+      <Modal open={open} title="买方/租方" onCancel={() => setOpen(false)} onOk={handleSave} destroyOnClose>
+        <Form form={form} layout="vertical">
+          <Form.Item label="名称" name="name" rules={[{ required: true }]}><Input /></Form.Item>
+          <Form.Item label="类型" name="type" rules={[{ required: true }]}>
+            <Select options={[{ label: '买方', value: '买方' }, { label: '租方', value: '租方' }]} />
+          </Form.Item>
+          <Form.Item label="联系人" name="contactsName"><Input /></Form.Item>
+          <Form.Item label="联系电话" name="contactsMobile"><Input /></Form.Item>
+          <Form.Item label="城市" name="city"><Input /></Form.Item>
+          <Form.Item label="地址" name="address"><Input /></Form.Item>
+          <Form.Item label="备注" name="remark"><Input.TextArea rows={2} /></Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
-}
+};
+
+// ===== YardList =====
+export const YardList = () => {
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [total, setTotal] = useState(0);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [form] = Form.useForm();
+  const [open, setOpen] = useState(false);
+
+  const load = () => {
+    setLoading(true);
+    getYardList({ pageNo: page, pageSize }).then(r => {
+      setData(r.entity?.data ?? []);
+      setTotal(r.entity?.total ?? 0);
+    }).finally(() => setLoading(false));
+  };
+
+  useEffect(() => { load(); }, [page, pageSize]);
+
+  const handleSave = async () => {
+    const vals = await form.validateFields();
+    try {
+      if (editId) {
+        await editYard({ ...vals, id: editId });
+        message.success('堆场已更新');
+      } else {
+        await addYard(vals);
+        message.success('堆场已添加');
+      }
+      setOpen(false);
+      load();
+    } catch { message.error('保存失败'); }
+  };
+
+  const columns: ColumnsType<any> = [
+    { title: '名称', dataIndex: 'name', width: 160 },
+    { title: '城市', dataIndex: 'city', width: 100 },
+    { title: '联系人', dataIndex: 'contactsName', width: 100 },
+    { title: '联系电话', dataIndex: 'contactsMobile', width: 120 },
+    { title: '地址', dataIndex: 'address', width: 200, ellipsis: true },
+    { title: '备注', dataIndex: 'remark', width: 150, ellipsis: true },
+    {
+      title: '操作', width: 100,
+      render: (_, r) => (
+        <Space size="small">
+          <Button type="link" size="small" onClick={() => { setEditId(r.id); form.setFieldsValue(r); setOpen(true); }}>编辑</Button>
+          <Button type="link" size="small" danger onClick={() => {
+            Modal.confirm({ title: '确认删除', content: '确定删除吗？', okText: '删除', okButtonProps: { className: '!bg-[#198348] !border-[#198348]' }, cancelText: '取消',
+              onOk: async () => { await deleteYard(r.id); message.warning('堆场已删除'); load(); } });
+          }}>删除</Button>
+        </Space>
+      ),
+    },
+  ];
+
+  return (
+    <div className="space-y-3">
+      <div className="flex justify-between">
+        <span className="font-bold text-gray-800 flex items-center">
+          <div className="w-1 h-4 bg-[#198348] rounded mr-2" />堆场管理
+        </span>
+        <Button type="primary" size="small" onClick={() => { setEditId(null); form.resetFields(); setOpen(true); }}>+ 新增堆场</Button>
+      </div>
+      <Table
+        columns={columns} dataSource={data} loading={loading} rowKey="id"
+        pagination={{ current: page, pageSize, total, onChange: (p, ps) => { setPage(p); if (ps) setPageSize(ps); }, showSizeChanger: true, showTotal: (t) => `共 ${t} 条` }}
+        size="small" scroll={{ x: 950 }}
+      />
+      <Modal open={open} title="堆场" onCancel={() => setOpen(false)} onOk={handleSave} destroyOnClose>
+        <Form form={form} layout="vertical">
+          <Form.Item label="名称" name="name" rules={[{ required: true }]}><Input /></Form.Item>
+          <Form.Item label="城市" name="city"><Input /></Form.Item>
+          <Form.Item label="联系人" name="contactsName"><Input /></Form.Item>
+          <Form.Item label="联系电话" name="contactsMobile"><Input /></Form.Item>
+          <Form.Item label="地址" name="address"><Input /></Form.Item>
+          <Form.Item label="备注" name="remark"><Input.TextArea rows={2} /></Form.Item>
+        </Form>
+      </Modal>
+    </div>
+  );
+};
+
+// ===== DictPage =====
+export const DictPage = () => {
+  const [dictTree, setDictTree] = useState<any[]>([]);
+  const [selectedType, setSelectedType] = useState<any>(null);
+  const [dictData, setDictData] = useState<any[]>([]);
+  const [dataLoading, setDataLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [total, setTotal] = useState(0);
+  const [typeModalOpen, setTypeModalOpen] = useState(false);
+  const [dataModalOpen, setDataModalOpen] = useState(false);
+  const [editTypeId, setEditTypeId] = useState<string | null>(null);
+  const [editDataId, setEditDataId] = useState<string | null>(null);
+  const [typeForm] = Form.useForm();
+  const [dataForm] = Form.useForm();
+
+  const loadTree = () => {
+    getDictById().then(r => {
+      setDictTree(r.entity ?? []);
+    });
+  };
+
+  useEffect(() => { loadTree(); }, []);
+
+  const loadData = (dictTypeId: string) => {
+    setDataLoading(true);
+    getDictDetail(dictTypeId, page, pageSize).then(r => {
+      setDictData(r.entity?.data ?? []);
+      setTotal(r.entity?.total ?? 0);
+    }).finally(() => setDataLoading(false));
+  };
+
+  useEffect(() => {
+    if (selectedType) loadData(selectedType.dictId);
+  }, [selectedType, page, pageSize]);
+
+  return (
+    <div className="space-y-3">
+      <div className="flex justify-between">
+        <span className="font-bold text-gray-800 flex items-center">
+          <div className="w-1 h-4 bg-[#198348] rounded mr-2" />字典管理
+        </span>
+        <Button type="primary" size="small" onClick={() => { setEditTypeId(null); typeForm.resetFields(); setTypeModalOpen(true); }}>+ 新增字典类型</Button>
+      </div>
+      <div className="bg-white rounded p-4 shadow-sm">
+        <div className="flex gap-4">
+          <div className="w-64 border-r pr-4">
+            <div className="text-xs font-medium text-gray-500 mb-2">字典类型</div>
+            <div className="space-y-1">
+              {dictTree.map(t => (
+                <div key={t.dictId} onClick={() => setSelectedType(t)} className={`px-2 py-1 rounded cursor-pointer text-sm ${selectedType?.dictId === t.dictId ? 'bg-[#198348]/10 text-[#198348] font-medium' : 'hover:bg-gray-50'}`}>
+                  {t.dictName}
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="flex-1">
+            {selectedType ? (
+              <>
+                <div className="flex justify-between mb-2">
+                  <span className="text-xs font-medium text-gray-500">{selectedType.dictName} — 字典数据</span>
+                  <Button type="primary" size="small" onClick={() => { setEditDataId(null); dataForm.resetFields(); setDataModalOpen(true); }}>+ 新增数据项</Button>
+                </div>
+                <Table
+                  columns={[
+                    { title: '数据值', dataIndex: 'itemValue', width: 120 },
+                    { title: '标签', dataIndex: 'itemText', width: 160 },
+                    { title: '排序', dataIndex: 'sortOrder', width: 60 },
+                    { title: '备注', dataIndex: 'remark', ellipsis: true },
+                    {
+                      title: '操作', width: 100,
+                      render: (_, r: any) => (
+                        <Space size="small">
+                          <Button type="link" size="small" onClick={() => { setEditDataId(r.itemId); dataForm.setFieldsValue(r); setDataModalOpen(true); }}>编辑</Button>
+                          <Button type="link" size="small" danger onClick={() => {
+                            Modal.confirm({ title: '确认删除', content: '确定删除吗？', okText: '删除', okButtonProps: { className: '!bg-[#198348] !border-[#198348]' }, cancelText: '取消',
+                              onOk: async () => { await deleteDictData(r.itemId); message.warning('已删除'); loadData(selectedType.dictId); } });
+                          }}>删除</Button>
+                        </Space>
+                      ),
+                    },
+                  ]}
+                  dataSource={dictData} loading={dataLoading} rowKey="itemId"
+                  pagination={{ current: page, pageSize, total, onChange: (p, ps) => { setPage(p); if (ps) setPageSize(ps); }, showSizeChanger: true, showTotal: (t) => `共 ${t} 条` }}
+                  size="small"
+                />
+              </>
+            ) : (
+              <div className="text-center text-gray-400 py-10">← 请选择左侧字典类型</div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* 字典类型 Modal */}
+      <Modal open={typeModalOpen} title="字典类型" onCancel={() => setTypeModalOpen(false)} onOk={async () => {
+        const vals = await typeForm.validateFields();
+        try {
+          if (editTypeId) { await updateDict(editTypeId, vals); message.success('已更新'); }
+          else { await addDict(vals); message.success('已添加'); }
+          setTypeModalOpen(false);
+          loadTree();
+        } catch { message.error('保存失败'); }
+      }} destroyOnClose>
+        <Form form={typeForm} layout="vertical">
+          <Form.Item label="字典名称" name="dictName" rules={[{ required: true }]}><Input /></Form.Item>
+        </Form>
+      </Modal>
+
+      {/* 字典数据 Modal */}
+      <Modal open={dataModalOpen} title="字典数据项" onCancel={() => setDataModalOpen(false)} onOk={async () => {
+        const vals = await dataForm.validateFields();
+        try {
+          if (editDataId) { await updateDictData(editDataId, { ...vals, dictTypeId: selectedType?.dictId }); message.success('已更新'); }
+          else { await addDictData({ ...vals, dictTypeId: selectedType?.dictId }); message.success('已添加'); }
+          setDataModalOpen(false);
+          loadData(selectedType?.dictId);
+        } catch { message.error('保存失败'); }
+      }} destroyOnClose>
+        <Form form={dataForm} layout="vertical">
+          <Form.Item label="数据值" name="itemValue" rules={[{ required: true }]}><Input /></Form.Item>
+          <Form.Item label="标签" name="itemText" rules={[{ required: true }]}><Input /></Form.Item>
+          <Form.Item label="排序" name="sortOrder"><Input type="number" /></Form.Item>
+          <Form.Item label="备注" name="remark"><Input.TextArea rows={2} /></Form.Item>
+        </Form>
+      </Modal>
+    </div>
+  );
+};

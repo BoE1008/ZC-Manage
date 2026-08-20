@@ -12,6 +12,8 @@ export enum Operation {
 }
 
 export interface Project {
+  id?: string;
+  projectId?: string;
   name: string;
   num: string;
   date: string;
@@ -61,11 +63,11 @@ export enum PaymentOthersType {
 /** 通用分页响应 */
 export interface PageResult<T> {
   /** 数据列表 */
-  records: T[];
+  data: T[];
   /** 当前页码 */
-  current: number;
-  /** 每页条数 */
-  size: number;
+  pageNo?: number;
+  /** 每页条数，默认 20 */
+  pageSize?: number;
   /** 总记录数 */
   total: number;
   /** 总页数 */
@@ -76,10 +78,8 @@ export interface PageResult<T> {
 export interface ApiResponse<T = void> {
   /** 状态码，200=成功 */
   code: number;
-  /** 响应消息 */
-  msg: string;
   /** 数据体 */
-  data?: T;
+  entity?: T;
 }
 
 // ============================================================
@@ -228,9 +228,9 @@ export type ContainerForm = Omit<
 /** Container 分页查询参数 */
 export interface ContainerPageQuery {
   /** 页码，默认 1 */
-  current?: number;
+  pageNo?: number;
   /** 每页条数，默认 20 */
-  size?: number;
+  pageSize?: number;
   /** 箱号（模糊匹配） */
   containerNo?: string;
   /** 状态，精确匹配 */
@@ -353,9 +353,9 @@ export type ContainerTrackingForm = Omit<
 /** ContainerTracking 分页查询参数 */
 export interface ContainerTrackingPageQuery {
   /** 页码，默认 1 */
-  current?: number;
+  pageNo?: number;
   /** 每页条数，默认 20 */
-  size?: number;
+  pageSize?: number;
   /** 箱号 */
   containerNo?: string;
   /** 集装箱ID */
@@ -454,9 +454,9 @@ export type ReleaseOrderForm = Omit<
 /** ReleaseOrder 分页查询参数 */
 export interface ReleaseOrderPageQuery {
   /** 页码，默认 1 */
-  current?: number;
+  pageNo?: number;
   /** 每页条数，默认 20 */
-  size?: number;
+  pageSize?: number;
   /** 放箱令编号 */
   orderNo?: string;
   /** 箱号 */
@@ -523,9 +523,9 @@ export type YardForm = Omit<
 /** Yard 分页查询参数 */
 export interface YardPageQuery {
   /** 页码，默认 1 */
-  current?: number;
+  pageNo?: number;
   /** 每页条数，默认 20 */
-  size?: number;
+  pageSize?: number;
   /** 堆场名称（模糊匹配） */
   name?: string;
   /** 所在城市 */

@@ -1,92 +1,166 @@
 import { useRouter } from "next/router";
-import { useMemo, useEffect, useState } from "react";
-import { getContainerDashboardStats } from "@/restApi/container";
-import { Container, Activity } from "@/types";
+import { useEffect, useState } from "react";
+import {
+  getContainerDashboardStats,
+  getContainerList,
+} from "@/restApi/container";
+import { ContainerStatus } from "@/types";
+
+/** 本地操作记录类型 */
+interface Activity {
+  time: string;
+  text: string;
+}
 
 export const Dashboard = () => {
-  const [containers, setContainers] = useState<Container[]>([]);
-  const [activities, setActivities] = useState<Activity[]>([]);
   const router = useRouter();
+  const [stats, setStats] = useState<Record<string, number>>({});
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const counts = useMemo(() => {
-    const c: Record<string, number> = {
-      国内堆存: 0,
-      去程在途: 0,
-      国外堆存: 0,
-      卖出: 0,
-      回程在途: 0,
-      已还箱: 0,
-    };
-    containers.forEach((x) => {
-      if (c[x.status] !== undefined) c[x.status]++;
-    });
-    return c;
-  }, [containers]);
+  // 待办数据
+  const [pendingReleaseCount, setPendingReleaseCount] = useState(0);
+  const [overdueStorageCount, setOverdueStorageCount] = useState(0);
+  const [inTransitCount, setInTransitCount] = useState(0);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await getContainerDashboardStats();
+        const raw = (res.entity ?? {}) as Record<string, number>;
+
+        // 尝试从 API 字段取值；若为空则降级用容器列表
+        const apiStats: Record<string, number> = {
+          pending: Number(raw.pending ?? 0),
+          lifting: Number(raw.lifting ?? 0),
+          in_transit: Number(raw.in_transit ?? 0),
+          dropped: Number(raw.dropped ?? 0),
+          storage: Number(raw.storage ?? 0),
+          released: Number(raw.released ?? 0),
+          picked_up: Number(raw.picked_up ?? 0),
+          returned: Number(raw.returned ?? 0),
+        };
+
+        const hasData = Object.values(apiStats).some((v) => v > 0);
+
+        if (hasData) {
+          setStats(apiStats);
+        } else {
+          // 降级：拿总数
+          const totalRes = await getContainerList({ pageNo: 1, pageSize: 1 });
+          const total = totalRes.entity?.total ?? 0;
+
+          // 拉全部列表算各状态数量（最多 1000）
+          const allRes = await getContainerList({ pageNo: 1, pageSize: 1000 });
+          const records: { status: ContainerStatus }[] =
+            allRes.entity?.data ?? [];
+          const counts: Record<string, number> = {};
+          records.forEach((r) => {
+            counts[r.status] = (counts[r.status] ?? 0) + 1;
+          });
+
+          setStats({ ...counts, total });
+        }
+
+        // 动态待办数据
+        await loadTodoData();
+      } catch (e) {
+        console.error("Dashboard 加载失败", e);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  /** 加载待办数据 */
+  async function loadTodoData() {
+    try {
+      // 待确认放箱令数量（pending 状态）
+      // 待确认放箱令数量：通过 ReleaseOrder API 查询（暂无接口，暂时用 released 计数占位）
+      // 注意：getContainerList 没有 status=released 直接过滤；
+      // 这里用已放箱(released)状态模拟待办，后续有 ReleaseOrder API 再替换
+      const releasedCount = stats["released"] ?? 0;
+      setPendingReleaseCount(releasedCount);
+
+      // 超 30 天堆存箱数量（storage 且 dropTime 超过 30 天）
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      const allRes = await getContainerList({ pageNo: 1, pageSize: 1000 });
+      const records: { status: ContainerStatus; dropTime?: string }[] =
+        allRes.entity?.data ?? [];
+      const overdue = records.filter((r) => {
+        if (r.status !== "storage" || !r.dropTime) return false;
+        const dropDate = new Date(r.dropTime);
+        return dropDate < thirtyDaysAgo;
+      });
+      setOverdueStorageCount(overdue.length);
+
+      // 在途箱数量
+      const transitCount = stats["in_transit"] ?? 0;
+      setInTransitCount(transitCount);
+    } catch {
+      // 待办数据加载失败不影响主流程
+    }
+  }
+
+  const goFilter = (status: string | null) => {
+    router.push(
+      status
+        ? `/containerList?status=${encodeURIComponent(status)}`
+        : "/containerList",
+    );
+  };
 
   const statCards = [
     {
       cls: "border-l-blue-500",
-      val: counts["去程在途"],
+      val: stats["in_transit"] ?? 0,
       label: "去程在途",
       sub: "海运/铁路中",
       color: "text-blue-500",
-      filter: "去程在途",
+      filter: "in_transit",
     },
     {
       cls: "border-l-yellow-500",
-      val: counts["国外堆存"],
+      val: stats["dropped"] ?? 0,
       label: "国外堆存",
       sub: "等待处理",
       color: "text-yellow-500",
-      filter: "国外堆存",
+      filter: "dropped",
     },
     {
       cls: "border-l-gray-500",
-      val: counts["国内堆存"],
+      val: stats["storage"] ?? 0,
       label: "国内堆存",
       sub: "待发运",
       color: "text-gray-500",
-      filter: "国内堆存",
+      filter: "storage",
     },
     {
       cls: "border-l-purple-500",
-      val: counts["回程在途"],
+      val: stats["pending"] ?? 0,
       label: "回程在途",
       sub: "回国内中",
       color: "text-purple-500",
-      filter: "回程在途",
+      filter: "pending",
     },
     {
       cls: "border-l-green-500",
-      val: counts["卖出"],
+      val: stats["released"] ?? 0,
       label: "已卖出",
       sub: "业务结束",
       color: "text-green-500",
-      filter: "卖出",
+      filter: "released",
     },
     {
       cls: "border-l-teal-500",
-      val: containers.length,
+      val: stats["total"] ?? 0,
       label: "集装箱总数",
       sub: "在管总量",
       color: "text-teal-500",
       filter: null,
     },
   ];
-
-  const goFilter = (status: string | null) => {
-    router.push(
-      status
-        ? `/containers?status=${encodeURIComponent(status)}`
-        : "/containers",
-    );
-  };
-  useEffect(() => {
-    (async () => {
-      const res = await getContainerDashboardStats();
-      console.log(res);
-    })();
-  }, []);
 
   return (
     <div className="space-y-3">
@@ -99,7 +173,9 @@ export const Dashboard = () => {
             onClick={() => goFilter(s.filter)}
           >
             <div className="text-xs text-gray-500 mb-1">{s.label}</div>
-            <div className={`text-2xl font-bold ${s.color}`}>{s.val}</div>
+            <div className={`text-2xl font-bold ${s.color}`}>
+              {loading ? "—" : s.val}
+            </div>
             <div className="text-[11px] text-gray-400 mt-0.5">{s.sub}</div>
           </div>
         ))}
@@ -118,21 +194,21 @@ export const Dashboard = () => {
           {[
             {
               label: "国内堆存",
-              cnt: counts["国内堆存"],
+              cnt: stats["storage"] ?? 0,
               color: "text-gray-500",
-              filter: "国内堆存",
+              filter: "storage",
             },
             {
               label: "去程在途",
-              cnt: counts["去程在途"],
+              cnt: stats["in_transit"] ?? 0,
               color: "text-blue-500",
-              filter: "去程在途",
+              filter: "in_transit",
             },
             {
               label: "国外堆存",
-              cnt: counts["国外堆存"],
+              cnt: stats["dropped"] ?? 0,
               color: "text-yellow-500",
-              filter: "国外堆存",
+              filter: "dropped",
             },
           ].map((f, i) => (
             <div key={i} className="flex items-center gap-1.5">
@@ -143,7 +219,7 @@ export const Dashboard = () => {
               >
                 <div className={`text-xs font-bold ${f.color}`}>{f.label}</div>
                 <div className="text-base font-bold text-gray-900 mt-0.5">
-                  {f.cnt}
+                  {loading ? "—" : f.cnt}
                 </div>
               </div>
             </div>
@@ -154,9 +230,9 @@ export const Dashboard = () => {
           {[
             {
               label: "回程在途",
-              cnt: counts["回程在途"],
+              cnt: stats["pending"] ?? 0,
               color: "text-purple-500",
-              filter: "回程在途",
+              filter: "pending",
             },
           ].map((f, i) => (
             <div key={i} className="flex items-center gap-1.5">
@@ -167,7 +243,7 @@ export const Dashboard = () => {
               >
                 <div className={`text-xs font-bold ${f.color}`}>{f.label}</div>
                 <div className="text-base font-bold text-gray-900 mt-0.5">
-                  {f.cnt}
+                  {loading ? "—" : f.cnt}
                 </div>
               </div>
             </div>
@@ -186,11 +262,11 @@ export const Dashboard = () => {
         <div className="flex items-center gap-2 mt-2">
           <div
             className="bg-green-50 border border-green-400 rounded-md px-3 py-1.5 text-center cursor-pointer hover:shadow transition-all"
-            onClick={() => goFilter("卖出")}
+            onClick={() => goFilter("released")}
           >
             <div className="text-xs font-bold text-green-600">已卖出</div>
             <div className="text-base font-bold text-green-600 mt-0.5">
-              {counts["卖出"]}
+              {loading ? "—" : stats["released"] ?? 0}
             </div>
           </div>
           <span className="text-[11px] text-gray-400 ml-2">
@@ -207,20 +283,26 @@ export const Dashboard = () => {
             最近操作记录
           </div>
           <div className="space-y-2">
-            {activities.map((a, i) => (
-              <div
-                key={i}
-                className="flex gap-3 py-1.5 border-b border-dashed border-gray-100 last:border-0"
-              >
-                <span className="text-[11px] text-gray-400 min-w-[60px]">
-                  {a.time}
-                </span>
-                <span
-                  className="text-xs text-gray-600"
-                  dangerouslySetInnerHTML={{ __html: a.text }}
-                />
-              </div>
-            ))}
+            {activities.length === 0 ? (
+              <p className="text-xs text-gray-400 py-4 text-center">
+                暂无操作记录
+              </p>
+            ) : (
+              activities.map((a, i) => (
+                <div
+                  key={i}
+                  className="flex gap-3 py-1.5 border-b border-dashed border-gray-100 last:border-0"
+                >
+                  <span className="text-[11px] text-gray-400 min-w-[60px]">
+                    {a.time}
+                  </span>
+                  <span
+                    className="text-xs text-gray-600"
+                    dangerouslySetInnerHTML={{ __html: a.text }}
+                  />
+                </div>
+              ))
+            )}
           </div>
         </div>
 
@@ -229,36 +311,11 @@ export const Dashboard = () => {
             <div className="w-1 h-4 bg-[#198348] rounded mr-2 flex-shrink-0" />
             本月财务概览
           </div>
-          <div className="space-y-2">
-            {[
-              { label: "采购支出", val: "USD 326,800" },
-              { label: "提箱费支出", val: "USD 12,460" },
-              { label: "堆存成本", val: "USD 8,920" },
-              { label: "还箱费", val: "USD 3,200" },
-              {
-                label: "卖出/出租收入",
-                val: "USD 78,500",
-                color: "text-green-600 font-bold",
-              },
-            ].map((item, i) => (
-              <div
-                key={i}
-                className="flex justify-between items-center py-2 border-b border-dashed border-gray-100 last:border-0"
-              >
-                <span className="text-xs text-gray-500">{item.label}</span>
-                <span
-                  className={`text-xs font-bold ${item.color || "text-gray-800"}`}
-                >
-                  {item.val}
-                </span>
-              </div>
-            ))}
-            <div className="flex justify-between items-center pt-2">
-              <span className="text-xs text-gray-500">本月净支出</span>
-              <span className="text-base font-bold text-red-500">
-                USD 272,880
-              </span>
-            </div>
+          <div className="flex flex-col items-center justify-center py-6">
+            <span className="text-xs text-gray-400">暂无数据</span>
+            <span className="text-[11px] text-gray-300 mt-1">
+              财务 API 接入后显示
+            </span>
           </div>
         </div>
       </div>
@@ -275,13 +332,15 @@ export const Dashboard = () => {
         <div className="grid grid-cols-3 gap-2.5">
           <div
             className="p-3 border border-red-200 rounded bg-red-50 cursor-pointer hover:shadow transition-all"
-            onClick={() => router.push("/release")}
+            onClick={() => router.push("/releaseOrder")}
           >
             <div className="flex items-center gap-2">
               <span className="text-xl">🚪</span>
               <div>
                 <div className="text-sm font-bold text-red-500">
-                  3 笔放箱令待确认
+                  {loading
+                    ? "—"
+                    : `${pendingReleaseCount} 笔放箱令待确认`}
                 </div>
                 <div className="text-[11px] text-gray-400 mt-0.5">
                   客户等待提箱中
@@ -291,13 +350,15 @@ export const Dashboard = () => {
           </div>
           <div
             className="p-3 border border-yellow-200 rounded bg-yellow-50 cursor-pointer hover:shadow transition-all"
-            onClick={() => goFilter("国外堆存")}
+            onClick={() => goFilter("storage")}
           >
             <div className="flex items-center gap-2">
               <span className="text-xl">⏰</span>
               <div>
                 <div className="text-sm font-bold text-yellow-600">
-                  5 个箱子堆存超30天
+                  {loading
+                    ? "—"
+                    : `${overdueStorageCount} 个箱子堆存超30天`}
                 </div>
                 <div className="text-[11px] text-gray-400 mt-0.5">
                   建议尽快处理
@@ -307,13 +368,15 @@ export const Dashboard = () => {
           </div>
           <div
             className="p-3 border border-blue-200 rounded bg-blue-50 cursor-pointer hover:shadow transition-all"
-            onClick={() => goFilter("去程在途")}
+            onClick={() => goFilter("in_transit")}
           >
             <div className="flex items-center gap-2">
               <span className="text-xl">🚢</span>
               <div>
                 <div className="text-sm font-bold text-blue-600">
-                  32 个箱子在途中
+                  {loading
+                    ? "—"
+                    : `${inTransitCount} 个箱子在途中`}
                 </div>
                 <div className="text-[11px] text-gray-400 mt-0.5">
                   预计本周到达12个

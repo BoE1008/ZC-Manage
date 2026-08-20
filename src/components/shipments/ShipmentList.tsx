@@ -1,52 +1,66 @@
-import { useState, useMemo } from 'react';
-import { Table, Button, Select, Input, Space, Modal, message } from 'antd';
+import { useState, useEffect } from 'react';
+import Table from "@/components/ResizeTable";
+import { Button, Select, Input, Space, Modal, message } from 'antd';
 import { ContainerDetailModal } from '@/components/containers/ContainerDetailModal';
 import type { ColumnsType } from 'antd/es/table';
-import { Shipment, ContainerStatus } from '@/types';
-import { useCallback } from 'react';
+import { Container, ContainerTracking, ContainerStatus } from '@/types';
 import { StatusBadge } from '@/components/ui/Badge';
 import { ShipmentModal } from './ShipmentModal';
-import { useStore } from '@/store';
+import { getTrackingList, deleteTracking } from '@/restApi/tracking';
+import { getContainerList } from '@/restApi/container';
+import { getProjectList } from "@/restApi/project";
 
 export const ShipmentList = () => {
-  const { shipments, setShipments, containers, setContainers } = useStore();
+  const [shipments, setShipments] = useState<ContainerTracking[]>([]);
+  const [containers, setContainers] = useState<Container[]>([]);
+  const [loading, setLoading] = useState(false);
   const [statusFilter, setStatusFilter] = useState('');
   const [keyword, setKeyword] = useState('');
-  const [editId, setEditId] = useState<number | null | undefined>(undefined);
-  const [viewBoxNo, setViewBoxNo] = useState<string | null>(null);
-  const viewContainerId = viewBoxNo ? containers.find((c) => c.no === viewBoxNo)?.id : null;
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [editId, setEditId] = useState<string | null | undefined>(undefined);
+  const [viewId, setViewId] = useState<string | null>(null);
+  const [projects, setProjects] = useState<any[]>([]);
 
-  const handleViewBox = useCallback((boxNo: string) => {
-    setViewBoxNo(boxNo);
+  const loadShipments = (pageNo = page) => {
+    setLoading(true);
+    getTrackingList({
+      pageNo,
+      pageSize: 20,
+      status: statusFilter || undefined,
+      containerNo: keyword || undefined,
+      returnOrderNo: keyword || undefined,
+    })
+      .then(r => {
+        setShipments(r.entity?.data ?? []);
+        setTotal(r.entity?.total ?? 0);
+      })
+      .finally(() => setLoading(false));
+  };
+
+  const loadContainers = () => {
+    getContainerList({ pageNo: 1, pageSize: 500 })
+      .then(r => setContainers(r.entity?.data ?? []));
+  };
+
+  useEffect(() => {
+    loadShipments(1);
+    loadContainers();
   }, []);
 
-  const handleCloseView = useCallback(() => {
-    setViewBoxNo(null);
+  useEffect(() => {
+    getProjectList(1, 1000).then((r: any) => setProjects(r?.entity?.data ?? []));
   }, []);
 
-  const filtered = useMemo(
-    () =>
-      shipments.filter((s) => {
-        if (statusFilter && s.status !== statusFilter) return false;
-        if (keyword) {
-          const k = keyword.toLowerCase();
-          if (
-            !s.boxNo.toLowerCase().includes(k) &&
-            !s.project.toLowerCase().includes(k) &&
-            !s.pickupOrder.toLowerCase().includes(k)
-          )
-            return false;
-        }
-        return true;
-      }),
-    [shipments, statusFilter, keyword]
-  );
+  const handleViewBox = (containerNo: string) => {
+    const c = containers.find(x => x.containerNo === containerNo);
+    if (c) setViewId(c.id);
+  };
 
-  const columns: ColumnsType<Shipment> = [
-    { title: '序号', dataIndex: 'no', width: 60, align: 'center' },
+  const columns: ColumnsType<ContainerTracking> = [
     {
       title: '箱号',
-      dataIndex: 'boxNo',
+      dataIndex: 'containerNo',
       width: 140,
       render: (v) => (
         <span
@@ -57,16 +71,32 @@ export const ShipmentList = () => {
         </span>
       ),
     },
-    { title: '项目名称', dataIndex: 'project', width: 120, ellipsis: true },
-    { title: '项目编号', dataIndex: 'projectNo', width: 130, ellipsis: true },
-    { title: '发运站', dataIndex: 'from', width: 80 },
-    { title: '目的站', dataIndex: 'to', width: 80 },
-    { title: '口岸', dataIndex: 'port', width: 80 },
-    { title: '提箱时间', dataIndex: 'pickupDate', width: 110 },
-    { title: '提箱令', dataIndex: 'pickupOrder', width: 100, ellipsis: true },
+    {
+      title: '项目名称',
+      dataIndex: 'projectName',
+      width: 130,
+      ellipsis: true,
+      render: (v, r) => projects.find(x => x.id === r.projectId)?.name || v,
+    },
+    {
+      title: '项目ID',
+      dataIndex: 'projectId',
+      width: 130,
+      ellipsis: true,
+      render: (v) => projects.find(x => x.id === v)?.num || v,
+    },
+    { title: '发运站', dataIndex: 'departureStation', width: 100 },
+    { title: '目的站', dataIndex: 'arrivalStation', width: 100 },
+    {
+      title: '船名/班列',
+      dataIndex: 'shipName',
+      width: 100,
+      ellipsis: true,
+      render: v => v || '-',
+    },
     {
       title: '发运时间',
-      dataIndex: 'atd',
+      dataIndex: 'sendTime',
       width: 100,
       render: (v) => v || '-',
     },
@@ -85,21 +115,34 @@ export const ShipmentList = () => {
     {
       title: '状态',
       dataIndex: 'status',
-      width: 100,
+      width: 90,
       render: (v) => <StatusBadge status={v as ContainerStatus} />,
     },
-    { title: '状态备注', dataIndex: 'remark', width: 120, ellipsis: true },
+    {
+      title: '状态备注',
+      dataIndex: 'statusRemark',
+      width: 120,
+      ellipsis: true,
+      render: v => v || '-',
+    },
+    {
+      title: '落箱时间',
+      dataIndex: 'dropTime',
+      width: 100,
+      render: v => v || '-',
+    },
     {
       title: '还箱时间',
-      dataIndex: 'returnDate',
+      dataIndex: 'returnTime',
       width: 100,
       render: (v) => v || '-',
     },
     {
       title: '还箱令',
-      dataIndex: 'returnOrder',
+      dataIndex: 'returnOrderNo',
       width: 120,
-      render: (v) => v || '-',
+      ellipsis: true,
+      render: v => v || '-',
     },
     {
       title: '操作',
@@ -129,45 +172,25 @@ export const ShipmentList = () => {
     },
   ];
 
-  const handleDelete = (id: number) => {
+  const handleDelete = (id: string) => {
     Modal.confirm({
       okText: '删除',
       okButtonProps: { className: '!bg-[#198348] !border-[#198348]' },
       cancelText: '取消',
       title: '确认删除',
       content: '确定删除此运踪记录吗？',
-      onOk() {
-        setShipments((prev) => prev.filter((s) => s.id !== id));
+      onOk: async () => {
+        await deleteTracking(id);
         message.warning('运踪已删除');
+        loadShipments();
       },
     });
   };
 
-  const handleSave = (id: number | null, data: Partial<Shipment>) => {
-    if (id) {
-      setShipments((prev) => prev.map((s) => (s.id === id ? { ...s, ...data } : s)));
-      message.success('运踪已更新');
-    } else {
-      const newId = Math.max(0, ...shipments.map((s) => s.id)) + 1;
-      const newNo = Math.max(0, ...shipments.map((s) => s.no)) + 1;
-      setShipments((prev) => [{ ...data, id: newId, no: newNo } as Shipment, ...prev]);
-      // 同步更新集装箱状态
-      if (data.boxNo && data.status) {
-        setContainers((prev) =>
-          prev.map((c) =>
-            c.no === data.boxNo
-              ? {
-                  ...c,
-                  status: data.status as ContainerStatus,
-                  remark: data.remark || c.remark,
-                }
-              : c
-          )
-        );
-      }
-      message.success('运踪已添加，集装箱状态已同步');
-    }
+  const handleSave = () => {
     setEditId(undefined);
+    loadShipments(page);
+    loadContainers();
   };
 
   return (
@@ -182,19 +205,22 @@ export const ShipmentList = () => {
             placeholder="全部状态"
             allowClear
             value={statusFilter || undefined}
-            onChange={(v) => setStatusFilter(v || '')}
+            onChange={(v) => { setStatusFilter(v || ''); setPage(1); loadShipments(1); }}
             className="w-32"
             size="small"
-            options={['去程在途', '国外堆存', '回程在途', '已还箱'].map((s) => ({
-              label: s,
-              value: s,
-            }))}
+            options={[
+              { label: '去程在途', value: 'in_transit' },
+              { label: '落箱', value: 'dropped' },
+              { label: '堆存中', value: 'storage' },
+              { label: '已还箱', value: 'returned' },
+            ]}
           />
-          <Input
-            placeholder="项目 / 箱号 / 提箱令"
+          <Input.Search
+            placeholder="箱号 / 还箱令（回车搜索）"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
-            className="!w-44"
+            onSearch={(v) => { setKeyword(v); setPage(1); loadShipments(1); }}
+            className="!w-48"
             size="small"
             allowClear
           />
@@ -209,11 +235,22 @@ export const ShipmentList = () => {
       <div className="bg-white rounded shadow-sm overflow-hidden">
         <Table
           columns={columns}
-          dataSource={filtered}
+          dataSource={shipments}
+          loading={loading}
           rowKey="id"
           size="small"
-          pagination={{ pageSize: 20, showTotal: (t) => `共 ${t} 条` }}
-          scroll={{ x: 1800 }}
+          pagination={
+            total > 20
+              ? {
+                  current: page,
+                  total,
+                  pageSize: 20,
+                  showTotal: (t) => `共 ${t} 条`,
+                  onChange: (p) => { setPage(p); loadShipments(p); },
+                }
+              : false
+          }
+          scroll={{ x: 1900 }}
         />
       </div>
 
@@ -226,14 +263,13 @@ export const ShipmentList = () => {
           onClose={() => setEditId(undefined)}
         />
       )}
-      {viewBoxNo && viewContainerId && (
+      {viewId && (
         <ContainerDetailModal
-          id={viewContainerId}
-          containers={containers}
-          onClose={handleCloseView}
-          onEdit={handleCloseView}
+          id={viewId}
+          onClose={() => setViewId(null)}
+          onEdit={() => setViewId(null)}
         />
       )}
     </div>
   );
-}
+};

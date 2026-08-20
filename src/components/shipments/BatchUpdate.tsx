@@ -1,39 +1,45 @@
-import { useState, useMemo } from 'react';
-import { Table, Button, Select, Input, Space, message } from 'antd';
+import { useState, useMemo, useEffect } from 'react';
+import Table from "@/components/ResizeTable";
+import { Button, Select, Input, Space, message, DatePicker } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { Container, ContainerStatus, BatchUpdate } from '@/types';
+import { Container, ContainerStatus } from '@/types';
 import { StatusBadge, UsageTag } from '@/components/ui/Badge';
-import { useStore } from '@/store';
+import { getContainerList, batchUpdateContainer } from '@/restApi/container';
+import { getProjectList } from "@/restApi/project";
 
 export const BatchUpdatePage = () => {
-  const { containers, setContainers, shipments, setShipments } = useStore();
+  const [containers, setContainers] = useState<Container[]>([]);
   const [step, setStep] = useState(1);
   const [projectFilter, setProjectFilter] = useState('');
   const [keyword, setKeyword] = useState('');
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
-  const [updates, setUpdates] = useState<BatchUpdate>({});
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [updates, setUpdates] = useState<Record<string, any>>({});
+  const [projects, setProjects] = useState<any[]>([]);
 
-  // 提取项目列表
-  const projects = useMemo(() => {
-    const list: string[] = [];
-    containers.forEach((c) => {
-      if (c.project && c.project !== '-' && !list.includes(c.project)) list.push(c.project);
+  // 加载集装箱列表
+  useEffect(() => {
+    getContainerList({ pageNo: 1, pageSize: 1000 }).then((r) => {
+      setContainers(r.entity?.data ?? []);
     });
-    return list;
-  }, [containers]);
+  }, []);
+
+  // 加载项目列表
+  useEffect(() => {
+    getProjectList(1, 1000).then((r: any) => setProjects(r?.entity?.data ?? []));
+  }, []);
 
   // 筛选后的集装箱
   const filtered = useMemo(
     () =>
       containers.filter((c) => {
-        if (projectFilter && c.project !== projectFilter) return false;
-        if (keyword && !c.no.toLowerCase().includes(keyword.toLowerCase())) return false;
+        if (projectFilter && c.projectId !== projectFilter) return false;
+        if (keyword && !c.containerNo.toLowerCase().includes(keyword.toLowerCase())) return false;
         return true;
       }),
     [containers, projectFilter, keyword]
   );
 
-  const toggleSelect = (id: number, checked: boolean) => {
+  const toggleSelect = (id: string, checked: boolean) => {
     setSelectedIds((prev) => (checked ? [...prev, id] : prev.filter((x) => x !== id)));
   };
 
@@ -62,11 +68,11 @@ export const BatchUpdatePage = () => {
         />
       ),
     },
-    { title: '箱号', dataIndex: 'no', width: 140 },
-    { title: '箱型', dataIndex: 'type', width: 70 },
+    { title: '箱号', dataIndex: 'containerNo', width: 140 },
+    { title: '箱型', dataIndex: 'containerType', width: 70 },
     {
       title: '使用情况',
-      dataIndex: 'usage',
+      dataIndex: 'usageType',
       width: 80,
       render: (v) => <UsageTag usage={v} />,
     },
@@ -77,24 +83,36 @@ export const BatchUpdatePage = () => {
       render: (v) => <StatusBadge status={v as ContainerStatus} />,
     },
     { title: '状态备注', dataIndex: 'remark', width: 150, ellipsis: true },
-    { title: '提箱令', dataIndex: 'pickupOrder', width: 100, ellipsis: true },
+    { title: '提箱令', dataIndex: 'liftingOrderNo', width: 100, ellipsis: true },
   ];
 
   const stepTitles = ['选择集装箱', '填写更新内容', '预览确认'];
   const fieldNames: Record<string, string> = {
-    atd: '发运时间',
-    eta: '预计到达',
-    ata: '实际到达',
     status: '状态',
+    eta: '预计到达 (ETA)',
+    ata: '实际到达 (ATA)',
     remark: '状态备注',
-    yard: '落箱堆场',
-    yardSupplier: '堆场供应商',
-    returnDate: '还箱时间',
-    storageCost: '堆存费',
-    liftCost: '吊装费',
-    returnCost: '还箱费',
-    overdueIncome: '超期收入',
+    storageCost: '堆存成本 (USD)',
   };
+
+  // 状态可选项（英文枚举）
+  const statusOptions = [
+    { label: '待提箱', value: 'pending' },
+    { label: '提箱中', value: 'lifting' },
+    { label: '在途', value: 'in_transit' },
+    { label: '已落箱', value: 'dropped' },
+    { label: '堆存中', value: 'storage' },
+    { label: '已放箱', value: 'released' },
+    { label: '已提箱', value: 'picked_up' },
+    { label: '已还箱', value: 'returned' },
+  ];
+
+  const step2Fields = [
+    { key: 'status', label: fieldNames.status, type: 'select' as const, opts: statusOptions },
+    { key: 'eta', label: fieldNames.eta, type: 'date' as const },
+    { key: 'ata', label: fieldNames.ata, type: 'date' as const },
+    { key: 'remark', label: fieldNames.remark, type: 'text' as const },
+  ];
 
   const selectedContainers = containers.filter((c) => selectedIds.includes(c.id));
 
@@ -107,34 +125,25 @@ export const BatchUpdatePage = () => {
     setStep(3);
   };
 
-  const applyBatch = () => {
-    selectedIds.forEach((id) => {
-      const c = containers.find((x) => x.id === id);
-      if (!c) return;
-      if (updates.status) {
-        const newStatus = updates.status as ContainerStatus;
-        setContainers((prev) =>
-          prev.map((x) =>
-            x.id === id ? { ...x, status: newStatus, remark: updates.remark || x.remark } : x
-          )
-        );
-        const s = shipments.find((x) => x.boxNo === c.no);
-        if (s)
-          setShipments((prev) =>
-            prev.map((x) =>
-              x.boxNo === c.no ? { ...x, ...updates, status: updates.status || x.status } : x
-            )
-          );
-      } else if (updates.remark) {
-        setContainers((prev) =>
-          prev.map((x) => (x.id === id ? { ...x, remark: updates.remark! } : x))
-        );
-      }
-    });
-    message.success(`已成功更新 ${selectedIds.length} 个集装箱`);
-    setSelectedIds([]);
-    setStep(1);
-    setUpdates({});
+  const applyBatch = async () => {
+    const keys = Object.keys(updates);
+    if (keys.length === 0) {
+      message.error('请至少填写一个需要更新的字段');
+      return;
+    }
+    try {
+      await batchUpdateContainer(selectedIds, updates as Partial<Container>);
+      message.success(`已成功更新 ${selectedIds.length} 个集装箱`);
+      // 重新加载列表
+      getContainerList({ pageNo: 1, pageSize: 1000 }).then((r) => {
+        setContainers(r.entity?.data ?? []);
+      });
+      setSelectedIds([]);
+      setStep(1);
+      setUpdates({});
+    } catch {
+      message.error('批量更新失败');
+    }
   };
 
   return (
@@ -142,7 +151,7 @@ export const BatchUpdatePage = () => {
       {/* 说明 */}
       <div className="bg-yellow-50 border-l-4 border-yellow-400 px-3 py-2 text-xs text-yellow-800 rounded">
         <b>📌 批量更新说明：</b>
-        按项目筛选后勾选集装箱，统一更新"发运时间/到达时间/状态/堆场"等字段，适用于同一项目下所有箱子状态统一变更（如：集体到达、集体落箱）。
+        按项目筛选后勾选集装箱，统一更新"状态 / 预计到达 / 实际到达 / 状态备注 / 堆存成本"等字段，适用于同一项目下所有箱子状态统一变更（如：集体到达、集体落箱）。
       </div>
 
       {/* 步骤条 */}
@@ -180,7 +189,8 @@ export const BatchUpdatePage = () => {
               onChange={(v) => setProjectFilter(v || '')}
               className="w-48"
               size="small"
-              options={projects.map((p) => ({ label: p, value: p }))}
+              
+              options={projects.map((p: any) => ({ label: p.name, value: p.id }))}
             />
             <Input
               placeholder="或输入箱号"
@@ -231,7 +241,7 @@ export const BatchUpdatePage = () => {
                 已选 {selectedIds.length} 个集装箱
               </div>
               <div className="text-[11px] text-gray-500 mt-0.5">
-                {selectedContainers.map((c) => c.no).join('、')}
+                {selectedContainers.map((c) => c.containerNo).join('、')}
               </div>
             </div>
           </div>
@@ -246,33 +256,19 @@ export const BatchUpdatePage = () => {
             <div className="bg-green-50 border border-green-200 rounded p-4 mb-3">
               <div className="text-xs font-bold text-green-700 mb-3">运踪信息更新</div>
               <div className="grid grid-cols-4 gap-3">
-                {[
-                  { key: 'atd', label: '发运时间 (ATD)', type: 'date' },
-                  { key: 'eta', label: '预计到达 (ETA)', type: 'date' },
-                  { key: 'ata', label: '实际到达', type: 'date' },
-                  {
-                    key: 'status',
-                    label: '更新状态',
-                    type: 'select',
-                    opts: ['去程在途', '国外堆存', '回程在途', '国内堆存', '已还箱'],
-                  },
-                  { key: 'remark', label: '状态备注', type: 'text' },
-                  {
-                    key: 'yard',
-                    label: '落箱堆场',
-                    type: 'select',
-                    opts: ['宁波陆联堆场', '海参崴 MYC', 'MINSK 堆场', '莫斯科堆场'],
-                  },
-                  { key: 'returnDate', label: '还箱时间', type: 'date' },
-                ].map((f) => (
+                {step2Fields.map((f) => (
                   <div key={f.key}>
                     <label className="text-xs text-gray-600 block mb-1">{f.label}</label>
                     {f.type === 'date' ? (
-                      <Input
-                        type="date"
+                      <DatePicker
                         size="small"
-                        className="w-full"
-                        onChange={(e) => setUpdates((u) => ({ ...u, [f.key]: e.target.value }))}
+                        style={{ width: '100%' }}
+                        onChange={(d) =>
+                          setUpdates((u) => ({
+                            ...u,
+                            [f.key]: d ? d.format('YYYY-MM-DD') : undefined,
+                          }))
+                        }
                       />
                     ) : f.type === 'select' ? (
                       <Select
@@ -280,17 +276,14 @@ export const BatchUpdatePage = () => {
                         className="w-full"
                         allowClear
                         placeholder="不更新"
-                        options={(f.opts || []).map((o) => ({
-                          label: o,
-                          value: o,
-                        }))}
+                        options={f.opts}
                         onChange={(v) => setUpdates((u) => ({ ...u, [f.key]: v }))}
                       />
                     ) : (
                       <Input
                         size="small"
                         className="w-full"
-                        placeholder={`不更新`}
+                        placeholder="不更新"
                         onChange={(e) => setUpdates((u) => ({ ...u, [f.key]: e.target.value }))}
                       />
                     )}
@@ -301,20 +294,23 @@ export const BatchUpdatePage = () => {
             <div className="bg-green-50 border border-green-200 rounded p-4">
               <div className="text-xs font-bold text-green-700 mb-3">费用信息更新（可选）</div>
               <div className="grid grid-cols-4 gap-3">
-                {['storageCost', 'liftCost', 'returnCost', 'overdueIncome'].map((key) => (
-                  <div key={key}>
-                    <label className="text-xs text-gray-600 block mb-1">
-                      {fieldNames[key] || key} (USD)
-                    </label>
-                    <Input
-                      type="number"
-                      size="small"
-                      className="w-full"
-                      placeholder="如：420"
-                      onChange={(e) => setUpdates((u) => ({ ...u, [key]: e.target.value }))}
-                    />
-                  </div>
-                ))}
+                <div>
+                  <label className="text-xs text-gray-600 block mb-1">
+                    {fieldNames.storageCost}
+                  </label>
+                  <Input
+                    type="number"
+                    size="small"
+                    className="w-full"
+                    placeholder="如：420"
+                    onChange={(e) =>
+                      setUpdates((u) => ({
+                        ...u,
+                        storageCost: e.target.value ? Number(e.target.value) : undefined,
+                      }))
+                    }
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -355,10 +351,10 @@ export const BatchUpdatePage = () => {
           </div>
           <Table
             columns={[
-              { title: '箱号', dataIndex: 'no', width: 140 },
+              { title: '箱号', dataIndex: 'containerNo', width: 140 },
               {
                 title: '项目',
-                dataIndex: 'project',
+                dataIndex: 'projectName',
                 width: 120,
                 ellipsis: true,
               },
@@ -404,7 +400,7 @@ export const BatchUpdatePage = () => {
                     <span className="text-gray-400">-</span>
                   ) : (
                     keys.map((k) => {
-                      const newVal = updates[k as keyof BatchUpdate] as string;
+                      const newVal = updates[k] as string;
                       return k === 'status' ? (
                         <StatusBadge key={k} status={newVal as ContainerStatus} />
                       ) : (
@@ -439,4 +435,4 @@ export const BatchUpdatePage = () => {
       )}
     </div>
   );
-}
+};

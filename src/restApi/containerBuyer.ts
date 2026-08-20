@@ -59,37 +59,47 @@ export interface ContainerBuyerPageQuery {
 /**
  * 买方分页列表
  */
-export const getContainerBuyerList = (params: ContainerBuyerPageQuery) =>
-  axiosInstance.get<ApiResponse<PageResult<ContainerBuyer>>>(
+export const getContainerBuyerList = async (params: ContainerBuyerPageQuery) => {
+  const res = await axiosInstance.get<ApiResponse<PageResult<ContainerBuyer>>>(
     "/zc/container/buyer/list",
-    { params }
+    { params },
   );
+  return res.data;
+};
 
 /**
  * 获取买方详情
  */
-export const getContainerBuyerDetail = (id: string) =>
-  axiosInstance.get<ApiResponse<ContainerBuyer>>(
-    `/zc/container/buyer/detail/${id}`
+export const getContainerBuyerDetail = async (id: string) => {
+  const res = await axiosInstance.get<ApiResponse<ContainerBuyer>>(
+    `/zc/container/buyer/detail/${id}`,
   );
+  return res.data;
+};
 
 /**
  * 新增买方
  */
-export const addContainerBuyer = (data: ContainerBuyerForm) =>
-  axiosInstance.post<ApiResponse>("/zc/container/buyer/add", data);
+export const addContainerBuyer = async (data: ContainerBuyerForm) => {
+  const res = await axiosInstance.post<ApiResponse>("/zc/container/buyer/add", data);
+  return res.data;
+};
 
 /**
  * 编辑买方
  */
-export const editContainerBuyer = (data: ContainerBuyerForm & { id: string }) =>
-  axiosInstance.put<ApiResponse>("/zc/container/buyer/edit", data);
+export const editContainerBuyer = async (data: ContainerBuyerForm & { id: string }) => {
+  const res = await axiosInstance.put<ApiResponse>("/zc/container/buyer/edit", data);
+  return res.data;
+};
 
 /**
  * 删除买方
  */
-export const deleteContainerBuyer = (id: string) =>
-  axiosInstance.delete<ApiResponse>(`/zc/container/buyer/delete/${id}`);
+export const deleteContainerBuyer = async (id: string) => {
+  const res = await axiosInstance.delete<ApiResponse>(`/zc/container/buyer/delete/${id}`);
+  return res.data;
+};
 
 // ========================
 // 买方辅助接口
@@ -98,7 +108,9 @@ export const deleteContainerBuyer = (id: string) =>
 /**
  * 获取所有买方（下拉框用，不分页）
  */
-export const getAllContainerBuyers = () =>
-  axiosInstance.get<ApiResponse<ContainerBuyer[]>>(
-    "/zc/container/buyer/all"
+export const getAllContainerBuyers = async () => {
+  const res = await axiosInstance.get<ApiResponse<ContainerBuyer[]>>(
+    "/zc/container/buyer/all",
   );
+  return res.data;
+};

@@ -42,6 +42,21 @@ export const getProjectsSubmitList = async (
   return res.data;
 };
 
+/**
+ * 项目全量列表（用于下拉匹配 id -> name）
+ * GET /zc/project/submit/list
+ */
+export const getProjectList = async (
+  pageNo: number = 1,
+  pageSize: number = 1000,
+) => {
+  const res = await axiosInstance.get<{ entity: { data: Project[]; total: number } }>(
+    "/zc/project/submit/list",
+    { params: { pageNo, pageSize } },
+  );
+  return res.data;
+};
+
 export const getProjectsApproveList = async (
   pageNo: number,
   pageSize: number,

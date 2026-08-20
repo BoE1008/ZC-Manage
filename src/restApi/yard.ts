@@ -11,33 +11,54 @@ import { Yard, YardForm, YardPageQuery, PageResult, ApiResponse } from "@/types"
 
 /**
  * 堆场分页列表
+ * GET /zc/yard/list
  */
-export const getYardList = (params: YardPageQuery) =>
-  axiosInstance.get<ApiResponse<PageResult<Yard>>>("/zc/yard/list", { params });
+export const getYardList = async (params: YardPageQuery) => {
+  const res = await axiosInstance.get<ApiResponse<PageResult<Yard>>>("/zc/yard/list", {
+    params,
+  });
+  return res.data;
+};
 
 /**
  * 获取堆场详情
+ * GET /zc/yard/detail?id=xxx
  */
-export const getYardDetail = (id: string) =>
-  axiosInstance.get<ApiResponse<Yard>>(`/zc/yard/detail/${id}`);
+export const getYardDetail = async (id: string) => {
+  const res = await axiosInstance.get<ApiResponse<Yard>>("/zc/yard/detail", {
+    params: { id },
+  });
+  return res.data;
+};
 
 /**
  * 新增堆场
+ * POST /zc/yard/add
  */
-export const addYard = (data: YardForm) =>
-  axiosInstance.post<ApiResponse>("/zc/yard/add", data);
+export const addYard = async (data: YardForm) => {
+  const res = await axiosInstance.post<ApiResponse>("/zc/yard/add", data);
+  return res.data;
+};
 
 /**
  * 编辑堆场
+ * POST /zc/yard/update（注意不是 PUT）
  */
-export const editYard = (data: YardForm & { id: string }) =>
-  axiosInstance.put<ApiResponse>("/zc/yard/edit", data);
+export const editYard = async (data: YardForm & { id: string }) => {
+  const res = await axiosInstance.post<ApiResponse>("/zc/yard/update", data);
+  return res.data;
+};
 
 /**
  * 删除堆场
+ * GET /zc/yard/del?id=xxx（注意不是 DELETE）
  */
-export const deleteYard = (id: string) =>
-  axiosInstance.delete<ApiResponse>(`/zc/yard/delete/${id}`);
+export const deleteYard = async (id: string) => {
+  const res = await axiosInstance.delete<ApiResponse>("/zc/yard/del", {
+    params: { id },
+  });
+  return res.data;
+};
 
 // ========================
 // 堆场辅助接口
@@ -45,6 +66,9 @@ export const deleteYard = (id: string) =>
 
 /**
  * 获取所有堆场（下拉框用，不分页）
+ * GET /zc/yard/listAll
  */
-export const getAllYards = () =>
-  axiosInstance.get<ApiResponse<Yard[]>>("/zc/yard/all");
+export const getAllYards = async () => {
+  const res = await axiosInstance.get<ApiResponse<Yard[]>>("/zc/yard/listAll");
+  return res.data;
+};

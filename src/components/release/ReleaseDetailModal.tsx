@@ -1,22 +1,62 @@
-import { Modal, Space, Button } from 'antd';
-import { Release } from '@/types';
+import { useState, useEffect } from 'react';
+import { Modal, Space, Button, Spin } from 'antd';
+import { ReleaseOrder } from '@/restApi/releaseOrder';
 import { ReleaseTypeBadge, StatusBadge } from '@/components/ui/Badge';
+import { getReleaseOrderDetail } from '@/restApi/releaseOrder';
+import { getCustomersList } from '@/restApi/customer';
+import { getSuppliersList } from '@/restApi/supplyer';
 
 interface Props {
-  id: number;
-  releases: Release[];
+  id: string;
   onClose: () => void;
-  onEdit: () => void;
-  onConfirmPickup: () => void;
+  onEdit?: () => void;
+  onConfirmPickup?: () => void;
 }
 
-export const ReleaseDetailModal = ({ id, releases, onClose, onEdit, onConfirmPickup }: Props) => {
-  const r = releases.find((x) => x.id === id);
+export const ReleaseDetailModal = ({ id, onClose, onEdit, onConfirmPickup }: Props) => {
+  const [r, setR] = useState<ReleaseOrder | null>(null);
+  const [buyerName, setBuyerName] = useState('');
+  const [yardName, setYardName] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    Promise.all([
+      getReleaseOrderDetail(id),
+      getCustomersList(1, 1000),
+      getSuppliersList(1, 1000),
+    ])
+      .then(([res, cusRes, supRes]: any[]) => {
+        const d = res?.entity?.data ?? res?.entity ?? null;
+        setR(d);
+        // 后端详情可能只返回 id 无名称：按 id 反查名称显示
+        const buyersArr = (cusRes?.entity?.data ?? []) as any[];
+        const yardsArr = (supRes?.entity?.data ?? []) as any[];
+        if (d?.buyerId) {
+          const b = buyersArr.find((x: any) => x.id === d.buyerId);
+          if (b) setBuyerName(b.name);
+        }
+        if (d?.yardId) {
+          const y = yardsArr.find((x: any) => x.id === d.yardId);
+          if (y) setYardName(y.name);
+        }
+      })
+      .finally(() => setLoading(false));
+  }, [id]);
+
+  if (loading) {
+    return (
+      <Modal title="放箱令详情" open onCancel={onClose} footer={null} width={560}>
+        <div className="flex justify-center py-8"><Spin /></div>
+      </Modal>
+    );
+  }
+
   if (!r) return null;
 
   return (
     <Modal
-      title={`放箱令详情 - ${r.no}`}
+      title={`放箱令详情 - ${r.orderNo}`}
       open
       onCancel={onClose}
       width={560}
@@ -24,13 +64,9 @@ export const ReleaseDetailModal = ({ id, releases, onClose, onEdit, onConfirmPic
       footer={
         <Space>
           <Button onClick={onClose}>关闭</Button>
-          <Button type="primary" onClick={onEdit}>
-            编辑
-          </Button>
-          {r.status === '待提箱' && (
-            <Button type="primary" onClick={onConfirmPickup}>
-              确认已提箱
-            </Button>
+          {onEdit && <Button type="primary" onClick={onEdit}>编辑</Button>}
+          {r.status === 'pending' && (
+            <Button type="primary" onClick={onConfirmPickup}>确认已提箱</Button>
           )}
         </Space>
       }
@@ -41,41 +77,41 @@ export const ReleaseDetailModal = ({ id, releases, onClose, onEdit, onConfirmPic
         </div>
         <div>
           <span className="text-xs text-gray-400 block">放箱令编号</span>
-          <span className="font-medium">{r.no}</span>
+          <span className="font-medium">{r.orderNo || '-'}</span>
         </div>
         <div>
           <span className="text-xs text-gray-400 block">类型</span>
-          <ReleaseTypeBadge type={r.type} />
+          <ReleaseTypeBadge type={(r.orderType as string) || ''} />
         </div>
         <div>
-          <span className="text-xs text-gray-400 block">箱号</span>
-          <span className="font-medium text-[#198348]">{r.boxNo}</span>
+          <span className="text-xs text-gray-400 block">集装箱编号</span>
+          <span className="font-medium text-[#198348]">{r.containerNo || '-'}</span>
         </div>
         <div>
           <span className="text-xs text-gray-400 block">买方/租方</span>
-          <span className="font-medium">{r.buyer}</span>
+          <span className="font-medium">{buyerName || r.buyerName || '-'}</span>
         </div>
         <div>
           <span className="text-xs text-gray-400 block">放箱堆场</span>
-          <span className="font-medium">{r.yard}</span>
+          <span className="font-medium">{yardName || r.yardName || '-'}</span>
         </div>
         <div>
-          <span className="text-xs text-gray-400 block">收入 (USD)</span>
-          <span className="font-medium">{r.income || '-'}</span>
-        </div>
-        <div>
-          <span className="text-xs text-gray-400 block">生成时间</span>
-          <span className="font-medium">{r.genDate}</span>
+          <span className="text-xs text-gray-400 block">收入</span>
+          <span className="font-medium">{r.income != null ? `¥${r.income.toLocaleString()}` : '-'}</span>
         </div>
         <div>
           <span className="text-xs text-gray-400 block">客户提箱时间</span>
-          <span className="font-medium">{r.pickupDate || '-'}</span>
+          <span className="font-medium">{r.pickupTime || '-'}</span>
         </div>
         <div>
           <span className="text-xs text-gray-400 block">状态</span>
-          <StatusBadge status={r.status} />
+          <StatusBadge status={(r.status as string) || ''} />
+        </div>
+        <div className="col-span-2">
+          <span className="text-xs text-gray-400 block">备注</span>
+          <span className="font-medium">{r.remark || '-'}</span>
         </div>
       </div>
     </Modal>
   );
-}
+};

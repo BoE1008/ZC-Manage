@@ -1,21 +1,84 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import Table from "@/components/ResizeTable";
 import { useRouter } from 'next/router';
-import { Table } from 'antd';
-import { useStore } from '@/store';
+import { getContainerList } from '@/restApi/container';
+import { getProjectList } from "@/restApi/project";
+import type { Container } from '@/types';
+
+const COND_LABEL: Record<string, string> = {
+  new: '新箱',
+  sub_new: '次新箱',
+  cargo_worthy: '适货箱',
+};
+
+const getCurrentMonthPrefix = () => {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  return `${y}-${m}`;
+};
 
 export const ReportPage = () => {
-  const { containers } = useStore();
   const router = useRouter();
+  const [containers, setContainers] = useState<Container[]>([]);
+  const [projects, setProjects] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getContainerList({ pageNo: 1, pageSize: 1000 })
+      .then((r) => {
+        setContainers(r.entity?.data ?? []);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+    getProjectList(1, 1000).then((r: any) => {
+      setProjects(r?.entity?.data ?? []);
+    });
+  }, []);
+
+  const currentMonth = getCurrentMonthPrefix();
+
+  // 本月提箱数：liftingTime
+  const monthLift = useMemo(
+    () => containers.filter((c) => c.liftingTime?.startsWith(currentMonth)).length,
+    [containers, currentMonth],
+  );
+
+  // 本月发运数：sendTime
+  const monthSend = useMemo(
+    () => containers.filter((c) => c.sendTime?.startsWith(currentMonth)).length,
+    [containers, currentMonth],
+  );
+
+  // 本月卖出数：status === 'released'
+  const monthSold = useMemo(
+    () => containers.filter((c) => c.status === 'released').length,
+    [containers],
+  );
+
+  // 本月回程数：status === 'in_transit'（去程/回程都在途）
+  const monthReturn = useMemo(
+    () => containers.filter((c) => c.status === 'in_transit').length,
+    [containers],
+  );
+
+  // 本月还箱数：status === 'returned'
+  const monthReturnBox = useMemo(
+    () => containers.filter((c) => c.status === 'returned').length,
+    [containers],
+  );
 
   // 按项目维度统计
   const projectStats = useMemo(() => {
     const map: Record<string, any> = {};
     containers.forEach((c) => {
-      if (!c.project || c.project === '-') return;
-      if (!map[c.project]) {
-        map[c.project] = {
-          name: c.project,
-          no: c.projectNo,
+      if (!c.projectId) return;
+      if (!map[c.projectId]) {
+        const proj = projects.find((x: any) => x.id === c.projectId);
+        map[c.projectId] = {
+          projectId: c.projectId,
+          projectName: proj?.name || c.projectName || '-',
+          projectNo: proj?.num || '-',
           total: 0,
           inTransit: 0,
           landed: 0,
@@ -23,45 +86,50 @@ export const ReportPage = () => {
           sold: 0,
         };
       }
-      map[c.project].total++;
-      if (c.status === '去程在途' || c.status === '回程在途') map[c.project].inTransit++;
-      if (c.status === '国外堆存' || c.status === '国内堆存') map[c.project].landed++;
-      if (c.status === '已还箱') map[c.project].returned++;
-      if (c.status === '卖出') map[c.project].sold++;
+      map[c.projectId].total++;
+      if (c.status === 'in_transit') map[c.projectId].inTransit++;
+      if (c.status === 'dropped' || c.status === 'storage') map[c.projectId].landed++;
+      if (c.status === 'returned') map[c.projectId].returned++;
+      if (c.status === 'released') map[c.projectId].sold++;
     });
     return Object.values(map);
-  }, [containers]);
+  }, [containers, projects]);
 
+  // 按箱况维度统计
   const condStats = useMemo(() => {
     const total = containers.length || 1;
-    const groups = { 新箱: 0, 次新箱: 0, 适货箱: 0 };
+    const groups: Record<string, number> = { new: 0, sub_new: 0, cargo_worthy: 0 };
     containers.forEach((c) => {
-      if (groups[c.cond] !== undefined) groups[c.cond]++;
+      if (groups[c.conditionType] !== undefined) groups[c.conditionType]++;
     });
-    return [
-      {
-        cond: '新箱',
-        count: groups['新箱'],
-        pct: ((groups['新箱'] / total) * 100).toFixed(1),
-        color: 'text-green-600',
-        border: 'border-green-400',
-      },
-      {
-        cond: '次新箱',
-        count: groups['次新箱'],
-        pct: ((groups['次新箱'] / total) * 100).toFixed(1),
-        color: 'text-yellow-600',
-        border: 'border-yellow-400',
-      },
-      {
-        cond: '适货箱',
-        count: groups['适货箱'],
-        pct: ((groups['适货箱'] / total) * 100).toFixed(1),
-        color: 'text-blue-600',
-        border: 'border-blue-400',
-      },
-    ];
+
+    const colorMap: Record<string, string> = {
+      new: 'text-green-600',
+      sub_new: 'text-yellow-600',
+      cargo_worthy: 'text-blue-600',
+    };
+    const borderMap: Record<string, string> = {
+      new: 'border-green-400',
+      sub_new: 'border-yellow-400',
+      cargo_worthy: 'border-blue-400',
+    };
+    const labelMap: Record<string, string> = {
+      new: '新箱',
+      sub_new: '次新箱',
+      cargo_worthy: '适货箱',
+    };
+
+    return (Object.keys(groups) as Array<keyof typeof groups>).map((key) => ({
+      condKey: key,
+      cond: labelMap[key] ?? key,
+      count: groups[key],
+      pct: ((groups[key] / total) * 100).toFixed(1),
+      color: colorMap[key] ?? 'text-gray-600',
+      border: borderMap[key] ?? 'border-gray-300',
+    }));
   }, [containers]);
+
+  if (loading) return null;
 
   return (
     <div className="space-y-3">
@@ -70,43 +138,43 @@ export const ReportPage = () => {
         {[
           {
             cls: 'border-l-blue-500',
-            val: 68,
+            val: monthLift,
             label: '本月提箱数',
-            sub: '较上月 +12',
+            sub: '本月累计',
             color: 'text-blue-500',
             to: '/containers',
           },
           {
             cls: 'border-l-yellow-500',
-            val: 64,
+            val: monthSend,
             label: '本月发运数',
-            sub: '较上月 +8',
+            sub: '本月累计',
             color: 'text-yellow-500',
             to: '/containers',
           },
           {
             cls: 'border-l-green-500',
-            val: 42,
+            val: monthSold,
             label: '本月卖出数',
-            sub: '较上月 +6',
+            sub: '已卖出',
             color: 'text-green-500',
-            to: `/containers?status=${encodeURIComponent('卖出')}`,
+            to: '/containers?status=released',
           },
           {
             cls: 'border-l-teal-500',
-            val: 18,
+            val: monthReturn,
             label: '本月回程数',
-            sub: '较上月 +3',
+            sub: '在途状态',
             color: 'text-teal-500',
-            to: `/containers?status=${encodeURIComponent('回程在途')}`,
+            to: '/containers?status=in_transit',
           },
           {
             cls: 'border-l-purple-500',
-            val: 12,
+            val: monthReturnBox,
             label: '本月还箱数',
             sub: '长租箱归还',
             color: 'text-purple-500',
-            to: `/containers?status=${encodeURIComponent('已还箱')}`,
+            to: '/containers?status=returned',
           },
           {
             cls: 'border-l-gray-500',
@@ -138,15 +206,21 @@ export const ReportPage = () => {
         </div>
         <Table
           onRow={(record) => ({
-            onClick: () => router.push(`/containers?project=${encodeURIComponent(record.name)}`),
+            onClick: () => router.push(`/containers?projectId=${record.projectId}`),
             className: 'cursor-pointer',
           })}
           columns={[
-            { title: '项目编号', dataIndex: 'no', width: 140, ellipsis: true },
+            {
+              title: '项目编号',
+              dataIndex: 'projectNo',
+              width: 140,
+              ellipsis: true,
+              render: (v: string) => v || '-',
+            },
             {
               title: '项目名称',
-              dataIndex: 'name',
-              width: 140,
+              dataIndex: 'projectName',
+              width: 160,
               ellipsis: true,
             },
             {
@@ -185,11 +259,13 @@ export const ReportPage = () => {
               title: '操作',
               width: 60,
               align: 'center',
-              render: () => <button className="text-[#198348] hover:underline text-xs">👁</button>,
+              render: () => (
+                <button className="text-[#198348] hover:underline text-xs">👁</button>
+              ),
             },
           ]}
           dataSource={projectStats}
-          rowKey="name"
+          rowKey="projectName"
           size="small"
           pagination={false}
         />
@@ -204,12 +280,18 @@ export const ReportPage = () => {
         <div className="grid grid-cols-3 gap-3">
           {condStats.map((s) => (
             <div
-              key={s.cond}
+              key={s.condKey}
               className="p-4 border rounded text-center bg-gray-50 cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all"
-              onClick={() => router.push(`/containers?cond=${encodeURIComponent(s.cond)}`)}
+              onClick={() => router.push(`/containers?conditionType=${s.condKey}`)}
             >
               <div
-                className={`text-xs font-medium mb-2 ${s.cond === '新箱' ? 'bg-green-100 text-green-700' : s.cond === '次新箱' ? 'bg-yellow-100 text-yellow-700' : 'bg-blue-100 text-blue-700'} inline-block px-2 py-0.5 rounded text-[11px]`}
+                className={`text-xs font-medium mb-2 inline-block px-2 py-0.5 rounded text-[11px] ${
+                  s.condKey === 'new'
+                    ? 'bg-green-100 text-green-700'
+                    : s.condKey === 'sub_new'
+                      ? 'bg-yellow-100 text-yellow-700'
+                      : 'bg-blue-100 text-blue-700'
+                }`}
               >
                 {s.cond}
               </div>
@@ -221,4 +303,4 @@ export const ReportPage = () => {
       </div>
     </div>
   );
-}
+};

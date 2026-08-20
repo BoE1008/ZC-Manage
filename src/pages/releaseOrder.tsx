@@ -1,4 +1,4 @@
-import { ReleaseList } from '@/components/release/ReleaseList';
+import { ReleaseList } from "@/components/release/ReleaseList";
 
 const ReleasePage = () => {
   return <ReleaseList />;
