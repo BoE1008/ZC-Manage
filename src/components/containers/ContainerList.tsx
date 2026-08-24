@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/router";
 import { Button, Input, Select, Space, Modal, message } from "antd";
 import Table from "@/components/ResizeTable";
@@ -8,32 +8,9 @@ import { StatusBadge, UsageTag, CondTag } from "@/components/ui/Badge";
 import { ContainerModal } from "./ContainerModal";
 import { ContainerDetailModal } from "./ContainerDetailModal";
 import { getContainerList, deleteContainer } from "@/restApi/container";
-import { getProjectList } from "@/restApi/project";
-
-// 状态枚举值（后端）
-const STATUS_OPTIONS = [
-  { label: "待提箱", value: "pending" },
-  { label: "提箱中", value: "lifting" },
-  { label: "在途", value: "in_transit" },
-  { label: "已落箱", value: "dropped" },
-  { label: "堆存中", value: "storage" },
-  { label: "已放箱", value: "released" },
-  { label: "已提箱", value: "picked_up" },
-  { label: "已还箱", value: "returned" },
-];
-
-// 箱况枚举值（后端）
-const COND_OPTIONS = [
-  { label: "新箱", value: "new" },
-  { label: "次新箱", value: "sub_new" },
-  { label: "适货箱", value: "cargo_worthy" },
-];
-
-// 使用情况枚举值（后端）
-const USAGE_OPTIONS = [
-  { label: "买箱", value: "purchase" },
-  { label: "长租", value: "long_rental" },
-];
+import { getProjectList } from "@/restApi/projectCache";
+import { getDictOptions, getDictOptionsSync } from "@/restApi/dictCache";
+import type { DictOption } from "@/types/dict";
 
 export const ContainerList = () => {
   const router = useRouter();
@@ -47,76 +24,94 @@ export const ContainerList = () => {
   const [containers, setContainers] = useState<Container[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // 筛选（URL query 同步 + 本地 state）
+  // 筛选 state（由 URL sync effect 写入，供 Select value 绑定）
   const [statusFilter, setStatusFilter] = useState("");
   const [usageFilter, setUsageFilter] = useState("");
   const [condFilter, setCondFilter] = useState("");
-  const [projectFilter, setProjectFilter] = useState("");
   const [keyword, setKeyword] = useState("");
 
-  // 项目列表（用于下拉 & 名称反查）
-  const [projects, setProjects] = useState<any[]>([]);
+  // 字典选项
+  const [statusOptions, setStatusOptions] = useState<DictOption[]>(
+    getDictOptionsSync("container_status"),
+  );
+  const [usageOptions, setUsageOptions] = useState<DictOption[]>(
+    getDictOptionsSync("container_usage"),
+  );
+  const [condOptions, setCondOptions] = useState<DictOption[]>(
+    getDictOptionsSync("container_cond"),
+  );
 
   // 编辑 & 预览
   const [editId, setEditId] = useState<string | null | undefined>(undefined);
   const [viewId, setViewId] = useState<string | null>(null);
 
-  // 从 URL query 同步筛选（支持从 dashboard/report 跳转带入）
-  // URL query 同步筛选
+  // 加载字典
   useEffect(() => {
-    const q = router.query;
-    if (q.status) setStatusFilter(String(q.status));
-    if (q.usage) setUsageFilter(String(q.usage));
-    if (q.cond) setCondFilter(String(q.cond));
-    if (q.project) setProjectFilter(String(q.project));
-    if (q.q) setKeyword(String(q.q));
-  }, [router.query]);
-
-  // 一次性加载项目列表
-  useEffect(() => {
-    getProjectList(1, 1000).then((r: any) => setProjects(r?.entity?.data ?? []));
+    Promise.all([
+      getDictOptions("container_status"),
+      getDictOptions("container_usage"),
+      getDictOptions("container_cond"),
+    ]).then(([s, u, c]) => {
+      setStatusOptions(s);
+      setUsageOptions(u);
+      setCondOptions(c);
+    });
   }, []);
 
-  // 加载数据
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      const res = await getContainerList({
-        pageNo: page,
-        pageSize: pageSize,
-        status: statusFilter || undefined,
-        usageType: usageFilter || undefined,
-        conditionType: condFilter || undefined,
-        projectId: projectFilter || undefined,
-        containerNo: keyword || undefined,
-      });
-      const records = res.entity?.data ?? [];
-      setContainers(records);
-      setTotal(res.entity?.total ?? 0);
-    } catch {
-      message.error("获取集装箱列表失败");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // 加载数据（URL 是唯一数据源）
+  const loadData = useCallback(
+    (qs: Record<string, string | string[] | undefined>, p: number) => {
+      const s = typeof qs.status === "string" ? qs.status : "";
+      const u = typeof qs.usage === "string" ? qs.usage : "";
+      const c = typeof qs.cond === "string" ? qs.cond : "";
+      const k = typeof qs.q === "string" ? qs.q : "";
+      setLoading(true);
+      getContainerList({
+        pageNo: p,
+        pageSize,
+        status: s || undefined,
+        usageType: u || undefined,
+        conditionType: c || undefined,
+        containerNo: k || undefined,
+      })
+        .then((res) => {
+          setContainers(res.entity?.data ?? []);
+          setTotal(res.entity?.total ?? 0);
+        })
+        .catch(() => message.error("获取集装箱列表失败"))
+        .finally(() => setLoading(false));
+    },
+    [pageSize],
+  );
 
+  // URL sync effect（唯一数据加载入口）
   useEffect(() => {
-    loadData();
-  }, [
-    page,
-    pageSize,
-    statusFilter,
-    usageFilter,
-    condFilter,
-    projectFilter,
-    keyword,
-  ]);
+    if (!router.isReady) return;
+    const q = router.query;
+    setStatusFilter(typeof q.status === "string" ? q.status : "");
+    setUsageFilter(typeof q.usage === "string" ? q.usage : "");
+    setCondFilter(typeof q.cond === "string" ? q.cond : "");
+    setKeyword(typeof q.q === "string" ? q.q : "");
+    const p = typeof q.page === "string" ? Number(q.page) : 1;
+    setPage(p);
+    loadData(router.query, p);
+  }, [router.isReady, router.query, loadData]);
 
-  // 重置页码
-  const handleFilterChange = (setter: (v: string) => void) => (v: string) => {
-    setter(v);
-    setPage(1);
+  // 工具栏筛选 / 关键词回车 → 更新 URL
+  const updateUrl = (field: string, value: string) => {
+    const q = { ...router.query } as Record<
+      string,
+      string | string[] | undefined
+    >;
+    if (value) q[field] = value;
+    else delete q[field];
+    delete q.page;
+    router.push({ pathname: router.pathname, query: q }, undefined, {
+      shallow: true,
+    });
   };
+  const handleFilterChange = (field: string) => (v: string) =>
+    updateUrl(field, v);
 
   // 删除
   const handleDelete = (id: string) => {
@@ -131,7 +126,7 @@ export const ContainerList = () => {
         try {
           await deleteContainer(id);
           message.warning(`集装箱 ${c?.containerNo} 已删除`);
-          loadData();
+          loadData(router.query, page);
         } catch {
           message.error("删除失败");
         }
@@ -142,7 +137,7 @@ export const ContainerList = () => {
   // 保存后刷新
   const handleSave = () => {
     setEditId(undefined);
-    loadData();
+    loadData(router.query, page);
   };
 
   const columns: ColumnsType<Container> = [
@@ -211,7 +206,6 @@ export const ContainerList = () => {
       title: "当前项目",
       dataIndex: "projectName",
       align: "center",
-      render: (v) => projects.find((x) => x.id === v)?.name || v || "-",
     },
     {
       title: "当前状态",
@@ -273,7 +267,7 @@ export const ContainerList = () => {
   return (
     <div className="space-y-3">
       {/* 工具栏 */}
-      <div className="flex items-center gap-2 flex-wrap">
+      <div className="flex items-center gap-2 flex-wrap px-4">
         <Button type="primary" onClick={() => setEditId(null)}>
           + 新增集装箱
         </Button>
@@ -282,45 +276,43 @@ export const ContainerList = () => {
             placeholder="全部状态"
             allowClear
             value={statusFilter || undefined}
-            onChange={handleFilterChange(setStatusFilter)}
+            onChange={handleFilterChange("status")}
             className="w-32"
             size="small"
-            options={STATUS_OPTIONS}
+            options={statusOptions}
           />
           <Select
             placeholder="全部使用情况"
             allowClear
             value={usageFilter || undefined}
-            onChange={handleFilterChange(setUsageFilter)}
+            onChange={handleFilterChange("usage")}
             className="w-32"
             size="small"
-            options={USAGE_OPTIONS}
+            options={usageOptions}
           />
           <Select
             placeholder="全部箱况"
             allowClear
             value={condFilter || undefined}
-            onChange={handleFilterChange(setCondFilter)}
+            onChange={handleFilterChange("cond")}
             className="w-32"
             size="small"
-            options={COND_OPTIONS}
-          />
-          <Select
-            placeholder="全部项目"
-            allowClear
-            value={projectFilter || undefined}
-            onChange={handleFilterChange(setProjectFilter)}
-            className="w-40"
-            size="small"
-            
-            options={projects.map((p) => ({ label: p.name, value: p.id }))}
+            options={condOptions}
           />
           <Input
-            placeholder="箱号 / 项目"
+            placeholder="箱号"
             value={keyword}
-            onChange={(e) => {
-              setKeyword(e.target.value);
-              setPage(1);
+            onChange={(e) => setKeyword(e.target.value)}
+            onPressEnter={() => {
+              const q: Record<string, string | string[] | undefined> = {
+                ...router.query,
+              };
+              if (keyword) q.keyword = keyword;
+              else delete q.keyword;
+              delete q.page;
+              router.push({ pathname: router.pathname, query: q }, undefined, {
+                shallow: true,
+              });
             }}
             className="!w-44"
             size="small"
@@ -340,13 +332,27 @@ export const ContainerList = () => {
           pageSize,
           total,
           onChange: (p, ps) => {
-            setPage(p);
-            setPageSize(ps);
+            const q = { ...router.query } as Record<
+              string,
+              string | string[] | undefined
+            >;
+            q.page = String(p);
+            if (ps !== 20) q.pageSize = String(ps);
+            else delete q.pageSize;
+            router.push({ pathname: router.pathname, query: q }, undefined, {
+              shallow: true,
+            });
           },
-          // pageSize 变化的回调
-          onShowSizeChange: async (page, size) => {
-            setPage(page);
-            setPageSize(size);
+          onShowSizeChange: (_p, ps) => {
+            const q = { ...router.query } as Record<
+              string,
+              string | string[] | undefined
+            >;
+            q.page = "1";
+            q.pageSize = String(ps);
+            router.push({ pathname: router.pathname, query: q }, undefined, {
+              shallow: true,
+            });
           },
           showTotal: (t) => `共 ${t} 条`,
         }}

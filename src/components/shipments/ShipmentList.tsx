@@ -1,26 +1,32 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import Table from "@/components/ResizeTable";
-import { Button, Select, Input, Space, Modal, message } from 'antd';
-import { ContainerDetailModal } from '@/components/containers/ContainerDetailModal';
-import type { ColumnsType } from 'antd/es/table';
-import { Container, ContainerTracking, ContainerStatus } from '@/types';
-import { StatusBadge } from '@/components/ui/Badge';
-import { ShipmentModal } from './ShipmentModal';
-import { getTrackingList, deleteTracking } from '@/restApi/tracking';
-import { getContainerList } from '@/restApi/container';
-import { getProjectList } from "@/restApi/project";
+import { Button, Select, Space, Modal, message } from "antd";
+import SearchInput from "@/components/SearchInput";
+import { ContainerDetailModal } from "@/components/containers/ContainerDetailModal";
+import type { ColumnsType } from "antd/es/table";
+import { Container, ContainerTracking, ContainerStatus } from "@/types";
+import { StatusBadge } from "@/components/ui/Badge";
+import { ShipmentModal } from "./ShipmentModal";
+import { getTrackingList, deleteTracking } from "@/restApi/tracking";
+import { getContainerList } from "@/restApi/container";
+import { getAllProjectList } from "@/restApi/project";
+import { getDictOptions, getDictOptionsSync } from "@/restApi/dictCache";
+import type { DictOption } from "@/types/dict";
 
 export const ShipmentList = () => {
   const [shipments, setShipments] = useState<ContainerTracking[]>([]);
   const [containers, setContainers] = useState<Container[]>([]);
   const [loading, setLoading] = useState(false);
-  const [statusFilter, setStatusFilter] = useState('');
-  const [keyword, setKeyword] = useState('');
+  const [statusFilter, setStatusFilter] = useState("");
+  const [keyword, setKeyword] = useState("");
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [editId, setEditId] = useState<string | null | undefined>(undefined);
   const [viewId, setViewId] = useState<string | null>(null);
   const [projects, setProjects] = useState<any[]>([]);
+  const [statusOptions, setStatusOptions] = useState<DictOption[]>(
+    getDictOptionsSync("container_status"),
+  );
 
   const loadShipments = (pageNo = page) => {
     setLoading(true);
@@ -31,7 +37,7 @@ export const ShipmentList = () => {
       containerNo: keyword || undefined,
       returnOrderNo: keyword || undefined,
     })
-      .then(r => {
+      .then((r) => {
         setShipments(r.entity?.data ?? []);
         setTotal(r.entity?.total ?? 0);
       })
@@ -39,8 +45,9 @@ export const ShipmentList = () => {
   };
 
   const loadContainers = () => {
-    getContainerList({ pageNo: 1, pageSize: 500 })
-      .then(r => setContainers(r.entity?.data ?? []));
+    getContainerList({ pageNo: 1, pageSize: 500 }).then((r) =>
+      setContainers(r.entity?.data ?? []),
+    );
   };
 
   useEffect(() => {
@@ -49,19 +56,19 @@ export const ShipmentList = () => {
   }, []);
 
   useEffect(() => {
-    getProjectList(1, 1000).then((r: any) => setProjects(r?.entity?.data ?? []));
+    getAllProjectList().then((r: any) => setProjects(r?.entity?.data ?? []));
+    getDictOptions("container_status").then(setStatusOptions);
   }, []);
 
   const handleViewBox = (containerNo: string) => {
-    const c = containers.find(x => x.containerNo === containerNo);
+    const c = containers.find((x) => x.containerNo === containerNo);
     if (c) setViewId(c.id);
   };
 
   const columns: ColumnsType<ContainerTracking> = [
     {
-      title: '箱号',
-      dataIndex: 'containerNo',
-      width: 140,
+      title: "箱号",
+      dataIndex: "containerNo",
       render: (v) => (
         <span
           className="text-[#198348] hover:underline cursor-pointer"
@@ -72,82 +79,71 @@ export const ShipmentList = () => {
       ),
     },
     {
-      title: '项目名称',
-      dataIndex: 'projectName',
-      width: 130,
+      title: "项目名称",
+      dataIndex: "projectName",
       ellipsis: true,
-      render: (v, r) => projects.find(x => x.id === r.projectId)?.name || v,
+      render: (v, r) => projects.find((x) => x.id === r.projectId)?.name || v,
     },
     {
-      title: '项目ID',
-      dataIndex: 'projectId',
-      width: 130,
+      title: "项目编号",
+      dataIndex: "projectId",
       ellipsis: true,
-      render: (v) => projects.find(x => x.id === v)?.num || v,
+      render: (v) => projects.find((x) => x.id === v)?.num || v,
     },
-    { title: '发运站', dataIndex: 'departureStation', width: 100 },
-    { title: '目的站', dataIndex: 'arrivalStation', width: 100 },
+    { title: "发运站", dataIndex: "departureStation" },
+    { title: "目的站", dataIndex: "arrivalStation" },
+    { title: "口岸", dataIndex: "port" },
     {
-      title: '船名/班列',
-      dataIndex: 'shipName',
-      width: 100,
+      title: "提箱时间",
+      dataIndex: "liftingTime",
+      render: (v) => v || "-",
+    },
+    {
+      title: "提箱令",
+      dataIndex: "liftingOrderNo",
       ellipsis: true,
-      render: v => v || '-',
+      render: (v) => v || "-",
     },
     {
-      title: '发运时间',
-      dataIndex: 'sendTime',
-      width: 100,
-      render: (v) => v || '-',
+      title: "发运时间",
+      dataIndex: "sendTime",
+      render: (v) => v || "-",
     },
     {
-      title: '预计到达',
-      dataIndex: 'eta',
-      width: 100,
-      render: (v) => v || '-',
+      title: "预计到达",
+      dataIndex: "eta",
+      render: (v) => v || "-",
     },
     {
-      title: '实际到达',
-      dataIndex: 'ata',
-      width: 100,
-      render: (v) => v || '-',
+      title: "实际到达",
+      dataIndex: "ata",
+      render: (v) => v || "-",
     },
     {
-      title: '状态',
-      dataIndex: 'status',
-      width: 90,
+      title: "状态",
+      dataIndex: "status",
       render: (v) => <StatusBadge status={v as ContainerStatus} />,
     },
     {
-      title: '状态备注',
-      dataIndex: 'statusRemark',
-      width: 120,
+      title: "状态备注",
+      dataIndex: "statusRemark",
       ellipsis: true,
-      render: v => v || '-',
+      render: (v) => v || "-",
     },
     {
-      title: '落箱时间',
-      dataIndex: 'dropTime',
-      width: 100,
-      render: v => v || '-',
+      title: "还箱时间",
+      dataIndex: "returnTime",
+      render: (v) => v || "-",
     },
     {
-      title: '还箱时间',
-      dataIndex: 'returnTime',
-      width: 100,
-      render: (v) => v || '-',
-    },
-    {
-      title: '还箱令',
-      dataIndex: 'returnOrderNo',
-      width: 120,
+      title: "还箱令",
+      dataIndex: "returnOrderNo",
       ellipsis: true,
-      render: v => v || '-',
+      render: (v) => v || "-",
     },
     {
-      title: '操作',
-      width: 80,
-      align: 'center',
+      title: "操作",
+      align: "center",
       render: (_, r) => (
         <Space size={2}>
           <Button
@@ -174,14 +170,14 @@ export const ShipmentList = () => {
 
   const handleDelete = (id: string) => {
     Modal.confirm({
-      okText: '删除',
-      okButtonProps: { className: '!bg-[#198348] !border-[#198348]' },
-      cancelText: '取消',
-      title: '确认删除',
-      content: '确定删除此运踪记录吗？',
+      okText: "删除",
+      okButtonProps: { className: "!bg-[#198348] !border-[#198348]" },
+      cancelText: "取消",
+      title: "确认删除",
+      content: "确定删除此运踪记录吗？",
       onOk: async () => {
         await deleteTracking(id);
-        message.warning('运踪已删除');
+        message.warning("运踪已删除");
         loadShipments();
       },
     });
@@ -195,35 +191,37 @@ export const ShipmentList = () => {
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-2 flex-wrap">
+      <div className="flex items-center gap-2 flex-wrap px-4">
         <Button type="primary" onClick={() => setEditId(null)}>
           + 新增运踪
         </Button>
-        <Button onClick={() => message.success('运踪数据已导出')}>📤 导出</Button>
+        <Button onClick={() => message.success("运踪数据已导出")}>
+          📤 导出
+        </Button>
         <div className="ml-auto flex items-center gap-2">
           <Select
             placeholder="全部状态"
             allowClear
             value={statusFilter || undefined}
-            onChange={(v) => { setStatusFilter(v || ''); setPage(1); loadShipments(1); }}
+            onChange={(v) => {
+              setStatusFilter(v || "");
+              setPage(1);
+              loadShipments(1);
+            }}
             className="w-32"
             size="small"
-            options={[
-              { label: '去程在途', value: 'in_transit' },
-              { label: '落箱', value: 'dropped' },
-              { label: '堆存中', value: 'storage' },
-              { label: '已还箱', value: 'returned' },
-            ]}
+            options={statusOptions}
           />
-          <Input.Search
-            placeholder="箱号 / 还箱令（回车搜索）"
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            onSearch={(v) => { setKeyword(v); setPage(1); loadShipments(1); }}
-            className="!w-48"
-            size="small"
-            allowClear
-          />
+          <div className="!w-48">
+            <SearchInput
+              placeholder="箱号"
+              onSearch={(v) => {
+                setKeyword(v);
+                setPage(1);
+                loadShipments(1);
+              }}
+            />
+          </div>
         </div>
       </div>
 
@@ -246,7 +244,10 @@ export const ShipmentList = () => {
                   total,
                   pageSize: 20,
                   showTotal: (t) => `共 ${t} 条`,
-                  onChange: (p) => { setPage(p); loadShipments(p); },
+                  onChange: (p) => {
+                    setPage(p);
+                    loadShipments(p);
+                  },
                 }
               : false
           }

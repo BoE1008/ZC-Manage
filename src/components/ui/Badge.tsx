@@ -1,5 +1,4 @@
 import {
-  ContainerStatus,
   ConditionType,
   UsageType,
   OrderType,
@@ -8,21 +7,25 @@ import {
 import { cn } from "@/utils";
 
 // 状态枚举 → 中文显示 + 颜色
+// 来源：sys_dict_type.code = 'container_status' 后端字典
 const STATUS_MAP: Record<string, { label: string; cls: string }> = {
-  pending: { label: "待提箱", cls: "bg-gray-100 text-gray-600" },
-  lifting: { label: "提箱中", cls: "bg-blue-100 text-blue-700" },
-  in_transit: { label: "在途", cls: "bg-blue-100 text-blue-700" },
-  dropped: { label: "已落箱", cls: "bg-amber-100 text-amber-700" },
-  storage: { label: "堆存中", cls: "bg-yellow-100 text-yellow-700" },
-  released: { label: "已放箱", cls: "bg-green-100 text-green-700" },
+  // 集装箱状态
+  domestic_storage: { label: "国内堆存", cls: "bg-cyan-50 text-cyan-700 border border-cyan-200" },
+  outbound: { label: "去程在途", cls: "bg-blue-100 text-blue-700" },
+  overseas_storage: { label: "国外堆存", cls: "bg-amber-100 text-amber-700" },
+  sold: { label: "已卖出", cls: "bg-green-100 text-green-700" },
+  inbound: { label: "回程在途", cls: "bg-purple-100 text-purple-700" },
+  // 放箱令状态
+  pending: { label: "待确认", cls: "bg-yellow-100 text-yellow-700" },
   picked_up: { label: "已提箱", cls: "bg-green-100 text-green-700" },
-  returned: { label: "已还箱", cls: "bg-gray-200 text-gray-700" },
+  cancelled: { label: "已作废", cls: "bg-gray-100 text-gray-600" },
+  released: { label: "已放箱", cls: "bg-blue-100 text-blue-700" },
 };
 
 export const StatusBadge = ({
   status,
 }: {
-  status: ContainerStatus | ReleaseStatus | string;
+  status: string;
 }) => {
   const info = STATUS_MAP[status] ?? { label: status || "-", cls: "bg-gray-100 text-gray-600" };
   return (

@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import Table from "@/components/ResizeTable";
-import { Button, Select, Input, Space, Modal, message } from "antd";
+import { Button, Select, Space, Modal, message } from "antd";
+import SearchInput from "@/components/SearchInput";
 import type { ColumnsType } from "antd/es/table";
 import { ReleaseOrder } from "@/restApi/releaseOrder";
 import { ReleaseTypeBadge, StatusBadge } from "@/components/ui/Badge";
@@ -18,7 +19,6 @@ const ORDER_TYPE_OPTIONS = [
 
 const STATUS_OPTIONS = [
   { label: "待确认", value: "pending" },
-  { label: "已放箱", value: "released" },
   { label: "已提箱", value: "picked_up" },
   { label: "已作废", value: "cancelled" },
 ];
@@ -91,7 +91,6 @@ export const ReleaseList = () => {
     {
       title: "放箱令编号",
       dataIndex: "orderNo",
-      width: 180,
       render: (v, r) => (
         <span
           className="text-[#198348] hover:underline cursor-pointer"
@@ -104,7 +103,6 @@ export const ReleaseList = () => {
     {
       title: "类型",
       dataIndex: "orderType",
-      width: 100,
       render: (v) => <ReleaseTypeBadge type={v} />,
     },
     { title: "集装箱编号", dataIndex: "containerNo", width: 130 },
@@ -114,19 +112,16 @@ export const ReleaseList = () => {
     {
       title: "收入",
       dataIndex: "income",
-      width: 100,
       render: (v) => (v ? `¥${v.toLocaleString()}` : "-"),
     },
     {
       title: "状态",
       dataIndex: "status",
-      width: 100,
       render: (v) => <StatusBadge status={v} />,
     },
     { title: "备注", dataIndex: "remark", ellipsis: true },
     {
       title: "操作",
-      width: 150,
       render: (_, record) => (
         <Space>
           <Button
@@ -163,34 +158,37 @@ export const ReleaseList = () => {
   ];
 
   return (
-    <div className="p-6">
-      <div className="mb-4 flex flex-wrap gap-3">
-        <Input.Search
-          placeholder="搜索放箱令编号 / 集装箱编号"
-          className="w-64"
-          onSearch={(v) => {
-            setKeyword(v);
-            setTimeout(() => load(1), 0);
-          }}
-          allowClear
-        />
-        <Select
-          allowClear
-          className="w-36"
-          placeholder="类型"
-          options={ORDER_TYPE_OPTIONS}
-          onChange={(v) => setTypeFilter(v ?? "")}
-        />
-        <Select
-          allowClear
-          className="w-36"
-          placeholder="状态"
-          options={STATUS_OPTIONS}
-          onChange={(v) => setStatusFilter(v ?? "")}
-        />
+    <div>
+      <div className="mb-4 flex flex-wrap gap-3 justify-between px-4">
         <Button type="primary" onClick={() => setEditId(null)}>
           + 新增放箱令
         </Button>
+        <div className="flex items-center gap-3 flex-wrap">
+          <Select
+            allowClear
+            className="w-36"
+            placeholder="类型"
+            options={ORDER_TYPE_OPTIONS}
+            onChange={(v) => setTypeFilter(v ?? "")}
+          />
+          <Select
+            allowClear
+            className="w-36"
+            placeholder="状态"
+            options={STATUS_OPTIONS}
+            onChange={(v) => setStatusFilter(v ?? "")}
+          />
+          <div className="w-64">
+            <SearchInput
+              placeholder="放箱令编号"
+              onSearch={(v) => {
+                setKeyword(v);
+                setPage(1);
+                load(1);
+              }}
+            />
+          </div>
+        </div>
       </div>
 
       <Table

@@ -83,29 +83,41 @@ export interface ApiResponse<T = void> {
 }
 
 // ============================================================
-// 字典枚举
+// 字典枚举（已抽到 ./dict.ts，这里只保留向后兼容的别名）
 // ============================================================
 
-/** 箱型 */
-export type ContainerType = "20GP" | "40GP" | "40HC" | "45HC" | string;
+export type {
+  ContainerTypeCode,
+  ContainerCondCode,
+  ContainerUsageCode,
+  ContainerStatusCode,
+  ContainerTypeValue,
+  ContainerCondValue,
+  ContainerUsageValue,
+  ContainerStatusValue,
+  ContainerDictCode,
+  DictItem,
+  DictOption,
+} from "./dict";
 
-/** 使用情况 */
-export type UsageType = "purchase" | "long_rental" | string;
+import type {
+  ContainerTypeValue,
+  ContainerCondValue,
+  ContainerUsageValue,
+  ContainerStatusValue,
+} from "./dict";
 
-/** 箱况 */
-export type ConditionType = "new" | "sub_new" | "cargo_worthy" | string;
+/** 箱型（向后兼容别名） */
+export type ContainerType = ContainerTypeValue;
 
-/** 集装箱状态 */
-export type ContainerStatus =
-  | "pending" // 待提箱
-  | "lifting" // 提箱中
-  | "in_transit" // 在途
-  | "dropped" // 已落箱
-  | "storage" // 堆存中
-  | "released" // 已放箱
-  | "picked_up" // 已提箱
-  | "returned" // 已还箱
-  | string;
+/** 使用情况（向后兼容别名） */
+export type UsageType = ContainerUsageValue;
+
+/** 箱况（向后兼容别名） */
+export type ConditionType = ContainerCondValue;
+
+/** 集装箱状态（向后兼容别名） */
+export type ContainerStatus = ContainerStatusValue;
 
 /** 运踪运输段 */
 export type TrackingSegment = "outbound" | "inbound" | string;

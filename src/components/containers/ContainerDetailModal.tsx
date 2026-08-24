@@ -5,7 +5,6 @@ import { Container, ContainerStatus } from "@/types";
 import { StatusBadge, UsageTag, CondTag } from "@/components/ui/Badge";
 import { getContainerDetail } from "@/restApi/container";
 
-import { getProjectList } from "@/restApi/project";
 import { ReleaseOrder } from "@/types";
 
 interface Props {
@@ -20,7 +19,6 @@ export const ContainerDetailModal = ({ id, onClose, onEdit }: Props) => {
   const [releases, setReleases] = useState<ReleaseOrder[]>([]);
   const [tab, setTab] = useState("info");
   const [loading, setLoading] = useState(true);
-  const [projects, setProjects] = useState<any[]>([]);
 
   useEffect(() => {
     setLoading(true);
@@ -29,11 +27,13 @@ export const ContainerDetailModal = ({ id, onClose, onEdit }: Props) => {
         // 兼容：{code, entity: {data}} / {code, entity} / 直接实体
         const c = r?.entity?.data ?? r?.entity ?? r;
         setContainer(c ?? null);
-        // 运踪直接从 container.tracking 取
+        // 运踪直接从 container.trackings 取
         setShipments(
           Array.isArray(r?.entity?.trackings) ? r?.entity?.trackings : [],
         );
-        setReleases([]);
+        setReleases(
+          Array.isArray(r?.entity?.releases) ? r?.entity?.releases : [],
+        );
       })
       .finally(() => setLoading(false));
   }, [id]);
@@ -63,6 +63,19 @@ export const ContainerDetailModal = ({ id, onClose, onEdit }: Props) => {
     { key: "timeline", label: "生命周期轨迹" },
     { key: "shipments", label: `运踪记录 (${shipments.length})` },
     { key: "releases", label: `放箱记录 (${releases.length})` },
+  ];
+
+  const releaseColumns: ColumnsType<any> = [
+    { title: "放箱令编号", dataIndex: "orderNo", key: "orderNo", width: 160 },
+    { title: "放箱类型", dataIndex: "orderType", key: "orderType", width: 120 },
+    { title: "买方/租方", dataIndex: "buyerName", key: "buyerName" },
+    {
+      title: "状态",
+      dataIndex: "status",
+      key: "status",
+      width: 100,
+      render: (v: string) => <StatusBadge status={v as ContainerStatus} />,
+    },
   ];
 
   return (
@@ -138,10 +151,6 @@ export const ContainerDetailModal = ({ id, onClose, onEdit }: Props) => {
           <div>
             <span className="text-xs text-gray-400 block">当前项目</span>
             <span className="font-medium">{c.projectName || "-"}</span>
-          </div>
-          <div>
-            <span className="text-xs text-gray-400 block">船名/班列号</span>
-            <span className="font-medium">{c.shipName || "-"}</span>
           </div>
 
           <div className="col-span-2 text-xs font-bold text-[#198348] py-1 border-b border-dashed border-gray-200">
@@ -270,17 +279,13 @@ export const ContainerDetailModal = ({ id, onClose, onEdit }: Props) => {
             {
               title: "项目",
               dataIndex: "projectName",
-              render: (v, r: any) =>
-                projects.find((x: any) => x.id === r.projectId)?.name ||
-                v ||
-                "-",
             },
             {
               title: "发运→目的",
               render: (_, r: any) =>
-                `${r.fromStation || "-"} → ${r.toStation || "-"}`,
+                `${r.departureStation || "-"} → ${r.arrivalStation || "-"}`,
             },
-            { title: "ATD", dataIndex: "atd", render: (v) => v || "-" },
+            { title: "ATD", dataIndex: "sendTime", render: (v) => v || "-" },
             { title: "ETA", dataIndex: "eta", render: (v) => v || "-" },
             { title: "ATA", dataIndex: "ata", render: (v) => v || "-" },
             {
@@ -295,8 +300,21 @@ export const ContainerDetailModal = ({ id, onClose, onEdit }: Props) => {
       )}
 
       {tab === "releases" && (
-        <div className="mt-2 text-xs text-gray-400 text-center py-8">
-          {releases.length === 0 ? "暂无放箱记录" : null}
+        <div className="mt-2">
+          {releases.length === 0 ? (
+            <div className="text-xs text-gray-400 text-center py-8">
+              暂无放箱记录
+            </div>
+          ) : (
+            <Table
+              rowKey="id"
+              columns={releaseColumns}
+              dataSource={releases}
+              pagination={false}
+              size="small"
+              scroll={{ x: 600 }}
+            />
+          )}
         </div>
       )}
     </Modal>

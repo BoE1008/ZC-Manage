@@ -1,20 +1,24 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect } from "react";
 import Table from "@/components/ResizeTable";
-import { Button, Select, Input, Space, message, DatePicker } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
-import { Container, ContainerStatus } from '@/types';
-import { StatusBadge, UsageTag } from '@/components/ui/Badge';
-import { getContainerList, batchUpdateContainer } from '@/restApi/container';
-import { getProjectList } from "@/restApi/project";
+import { Button, Select, Input, Space, message, DatePicker } from "antd";
+import type { ColumnsType } from "antd/es/table";
+import { Container, ContainerStatus } from "@/types";
+import { StatusBadge, UsageTag } from "@/components/ui/Badge";
+import { getContainerList, batchUpdateContainer } from "@/restApi/container";
+import { getAllProjectList } from "@/restApi/project";
+import { getDictOptions, getDictOptionsSync } from "@/restApi/dictCache";
+import type { DictOption } from "@/types/dict";
 
 export const BatchUpdatePage = () => {
   const [containers, setContainers] = useState<Container[]>([]);
   const [step, setStep] = useState(1);
-  const [projectFilter, setProjectFilter] = useState('');
-  const [keyword, setKeyword] = useState('');
+  const [projectFilter, setProjectFilter] = useState("");
+  const [keyword, setKeyword] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [updates, setUpdates] = useState<Record<string, any>>({});
   const [projects, setProjects] = useState<any[]>([]);
+  const [projectLoading, setProjectLoading] = useState(false);
+  const [statusOptions, setStatusOptions] = useState<DictOption[]>(getDictOptionsSync("container_status"));
 
   // 加载集装箱列表
   useEffect(() => {
@@ -25,7 +29,11 @@ export const BatchUpdatePage = () => {
 
   // 加载项目列表
   useEffect(() => {
-    getProjectList(1, 1000).then((r: any) => setProjects(r?.entity?.data ?? []));
+    setProjectLoading(true);
+    getAllProjectList()
+      .then((r: any) => setProjects(r?.entity?.data ?? []))
+      .finally(() => setProjectLoading(false));
+    getDictOptions("container_status").then(setStatusOptions);
   }, []);
 
   // 筛选后的集装箱
@@ -33,14 +41,20 @@ export const BatchUpdatePage = () => {
     () =>
       containers.filter((c) => {
         if (projectFilter && c.projectId !== projectFilter) return false;
-        if (keyword && !c.containerNo.toLowerCase().includes(keyword.toLowerCase())) return false;
+        if (
+          keyword &&
+          !c.containerNo.toLowerCase().includes(keyword.toLowerCase())
+        )
+          return false;
         return true;
       }),
-    [containers, projectFilter, keyword]
+    [containers, projectFilter, keyword],
   );
 
   const toggleSelect = (id: string, checked: boolean) => {
-    setSelectedIds((prev) => (checked ? [...prev, id] : prev.filter((x) => x !== id)));
+    setSelectedIds((prev) =>
+      checked ? [...prev, id] : prev.filter((x) => x !== id),
+    );
   };
 
   const toggleAll = (checked: boolean) => {
@@ -53,12 +67,14 @@ export const BatchUpdatePage = () => {
         <input
           type="checkbox"
           className="w-4 h-4 accent-[#198348]"
-          checked={selectedIds.length === filtered.length && filtered.length > 0}
+          checked={
+            selectedIds.length === filtered.length && filtered.length > 0
+          }
           onChange={(e) => toggleAll(e.target.checked)}
         />
       ),
       width: 40,
-      align: 'center',
+      align: "center",
       render: (_, r) => (
         <input
           type="checkbox"
@@ -68,58 +84,61 @@ export const BatchUpdatePage = () => {
         />
       ),
     },
-    { title: '箱号', dataIndex: 'containerNo', width: 140 },
-    { title: '箱型', dataIndex: 'containerType', width: 70 },
+    { title: "箱号", dataIndex: "containerNo", width: 140 },
+    { title: "箱型", dataIndex: "containerType", width: 70 },
     {
-      title: '使用情况',
-      dataIndex: 'usageType',
+      title: "使用情况",
+      dataIndex: "usageType",
       width: 80,
       render: (v) => <UsageTag usage={v} />,
     },
     {
-      title: '当前状态',
-      dataIndex: 'status',
+      title: "当前状态",
+      dataIndex: "status",
       width: 100,
       render: (v) => <StatusBadge status={v as ContainerStatus} />,
     },
-    { title: '状态备注', dataIndex: 'remark', width: 150, ellipsis: true },
-    { title: '提箱令', dataIndex: 'liftingOrderNo', width: 100, ellipsis: true },
+    { title: "状态备注", dataIndex: "remark", width: 150, ellipsis: true },
+    {
+      title: "提箱令",
+      dataIndex: "liftingOrderNo",
+      width: 100,
+      ellipsis: true,
+    },
   ];
 
-  const stepTitles = ['选择集装箱', '填写更新内容', '预览确认'];
+  const stepTitles = ["选择集装箱", "填写更新内容", "预览确认"];
   const fieldNames: Record<string, string> = {
-    status: '状态',
-    eta: '预计到达 (ETA)',
-    ata: '实际到达 (ATA)',
-    remark: '状态备注',
-    storageCost: '堆存成本 (USD)',
+    status: "状态",
+    eta: "预计到达 (ETA)",
+    ata: "实际到达 (ATA)",
+    remark: "状态备注",
+    storageCost: "堆存成本 (USD)",
   };
 
-  // 状态可选项（英文枚举）
-  const statusOptions = [
-    { label: '待提箱', value: 'pending' },
-    { label: '提箱中', value: 'lifting' },
-    { label: '在途', value: 'in_transit' },
-    { label: '已落箱', value: 'dropped' },
-    { label: '堆存中', value: 'storage' },
-    { label: '已放箱', value: 'released' },
-    { label: '已提箱', value: 'picked_up' },
-    { label: '已还箱', value: 'returned' },
-  ];
+  // 状态可选项（字典）
+  const opts = statusOptions;
 
   const step2Fields = [
-    { key: 'status', label: fieldNames.status, type: 'select' as const, opts: statusOptions },
-    { key: 'eta', label: fieldNames.eta, type: 'date' as const },
-    { key: 'ata', label: fieldNames.ata, type: 'date' as const },
-    { key: 'remark', label: fieldNames.remark, type: 'text' as const },
+    {
+      key: "status",
+      label: fieldNames.status,
+      type: "select" as const,
+      opts: statusOptions,
+    },
+    { key: "eta", label: fieldNames.eta, type: "date" as const },
+    { key: "ata", label: fieldNames.ata, type: "date" as const },
+    { key: "remark", label: fieldNames.remark, type: "text" as const },
   ];
 
-  const selectedContainers = containers.filter((c) => selectedIds.includes(c.id));
+  const selectedContainers = containers.filter((c) =>
+    selectedIds.includes(c.id),
+  );
 
   const previewChanges = () => {
     const keys = Object.keys(updates);
     if (keys.length === 0) {
-      message.error('请至少填写一个需要更新的字段');
+      message.error("请至少填写一个需要更新的字段");
       return;
     }
     setStep(3);
@@ -128,7 +147,7 @@ export const BatchUpdatePage = () => {
   const applyBatch = async () => {
     const keys = Object.keys(updates);
     if (keys.length === 0) {
-      message.error('请至少填写一个需要更新的字段');
+      message.error("请至少填写一个需要更新的字段");
       return;
     }
     try {
@@ -142,7 +161,7 @@ export const BatchUpdatePage = () => {
       setStep(1);
       setUpdates({});
     } catch {
-      message.error('批量更新失败');
+      message.error("批量更新失败");
     }
   };
 
@@ -151,22 +170,27 @@ export const BatchUpdatePage = () => {
       {/* 说明 */}
       <div className="bg-yellow-50 border-l-4 border-yellow-400 px-3 py-2 text-xs text-yellow-800 rounded">
         <b>📌 批量更新说明：</b>
-        按项目筛选后勾选集装箱，统一更新"状态 / 预计到达 / 实际到达 / 状态备注 / 堆存成本"等字段，适用于同一项目下所有箱子状态统一变更（如：集体到达、集体落箱）。
+        按项目筛选后勾选集装箱，统一更新"状态 / 预计到达 / 实际到达 / 状态备注 /
+        堆存成本"等字段，适用于同一项目下所有箱子状态统一变更（如：集体到达、集体落箱）。
       </div>
 
       {/* 步骤条 */}
       <div className="flex items-center gap-2 bg-white rounded p-3 shadow-sm">
         {stepTitles.map((title, i) => (
           <div key={i} className="flex items-center gap-2">
-            {i > 0 && <div className={`w-8 h-0.5 ${i < step ? 'bg-[#198348]' : 'bg-gray-200'}`} />}
+            {i > 0 && (
+              <div
+                className={`w-8 h-0.5 ${i < step ? "bg-[#198348]" : "bg-gray-200"}`}
+              />
+            )}
             <div className="flex items-center gap-2">
               <div
-                className={`w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold ${i + 1 < step ? 'bg-green-100 text-green-700' : i + 1 === step ? 'bg-[#198348] text-white' : 'bg-gray-200 text-gray-500'}`}
+                className={`w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold ${i + 1 < step ? "bg-green-100 text-green-700" : i + 1 === step ? "bg-[#198348] text-white" : "bg-gray-200 text-gray-500"}`}
               >
-                {i + 1 < step ? '✓' : i + 1}
+                {i + 1 < step ? "✓" : i + 1}
               </div>
               <span
-                className={`text-xs ${i + 1 === step ? 'text-[#198348] font-medium' : 'text-gray-500'}`}
+                className={`text-xs ${i + 1 === step ? "text-[#198348] font-medium" : "text-gray-500"}`}
               >
                 {title}
               </span>
@@ -179,18 +203,22 @@ export const BatchUpdatePage = () => {
       {step === 1 && (
         <div className="bg-white rounded shadow-sm p-4">
           <div className="flex items-center text-sm font-bold mb-3 text-gray-800">
-            <div className="w-1 h-4 bg-[#198348] rounded mr-2 flex-shrink-0" />第 1 步：选择集装箱
+            <div className="w-1 h-4 bg-[#198348] rounded mr-2 flex-shrink-0" />
+            第 1 步：选择集装箱
           </div>
           <div className="flex items-center gap-2 mb-3 flex-wrap">
             <Select
               placeholder="请选择项目..."
               allowClear
+              loading={projectLoading}
               value={projectFilter || undefined}
-              onChange={(v) => setProjectFilter(v || '')}
+              onChange={(v) => setProjectFilter(v || "")}
               className="w-48"
               size="small"
-              
-              options={projects.map((p: any) => ({ label: p.name, value: p.id }))}
+              options={projects.map((p: any) => ({
+                label: p.name,
+                value: p.id,
+              }))}
             />
             <Input
               placeholder="或输入箱号"
@@ -200,7 +228,10 @@ export const BatchUpdatePage = () => {
               size="small"
               allowClear
             />
-            <Button size="small" onClick={() => setSelectedIds(filtered.map((c) => c.id))}>
+            <Button
+              size="small"
+              onClick={() => setSelectedIds(filtered.map((c) => c.id))}
+            >
               全选
             </Button>
             <Button size="small" onClick={() => setSelectedIds([])}>
@@ -219,7 +250,11 @@ export const BatchUpdatePage = () => {
             scroll={{ y: 300 }}
           />
           <div className="flex justify-end mt-3">
-            <Button type="primary" disabled={selectedIds.length === 0} onClick={() => setStep(2)}>
+            <Button
+              type="primary"
+              disabled={selectedIds.length === 0}
+              onClick={() => setStep(2)}
+            >
               下一步 →
             </Button>
           </div>
@@ -241,50 +276,58 @@ export const BatchUpdatePage = () => {
                 已选 {selectedIds.length} 个集装箱
               </div>
               <div className="text-[11px] text-gray-500 mt-0.5">
-                {selectedContainers.map((c) => c.containerNo).join('、')}
+                {selectedContainers.map((c) => c.containerNo).join("、")}
               </div>
             </div>
           </div>
           <div className="bg-white rounded shadow-sm p-4">
             <div className="flex items-center text-sm font-bold mb-3 text-gray-800">
-              <div className="w-1 h-4 bg-[#198348] rounded mr-2 flex-shrink-0" />第 2
-              步：填写批量更新字段
+              <div className="w-1 h-4 bg-[#198348] rounded mr-2 flex-shrink-0" />
+              第 2 步：填写批量更新字段
               <span className="ml-auto text-xs font-normal text-gray-500">
                 仅填写需要更新的项，留空的不更新
               </span>
             </div>
             <div className="bg-green-50 border border-green-200 rounded p-4 mb-3">
-              <div className="text-xs font-bold text-green-700 mb-3">运踪信息更新</div>
+              <div className="text-xs font-bold text-green-700 mb-3">
+                运踪信息更新
+              </div>
               <div className="grid grid-cols-4 gap-3">
                 {step2Fields.map((f) => (
                   <div key={f.key}>
-                    <label className="text-xs text-gray-600 block mb-1">{f.label}</label>
-                    {f.type === 'date' ? (
+                    <label className="text-xs text-gray-600 block mb-1">
+                      {f.label}
+                    </label>
+                    {f.type === "date" ? (
                       <DatePicker
                         size="small"
-                        style={{ width: '100%' }}
+                        style={{ width: "100%" }}
                         onChange={(d) =>
                           setUpdates((u) => ({
                             ...u,
-                            [f.key]: d ? d.format('YYYY-MM-DD') : undefined,
+                            [f.key]: d ? d.format("YYYY-MM-DD") : undefined,
                           }))
                         }
                       />
-                    ) : f.type === 'select' ? (
+                    ) : f.type === "select" ? (
                       <Select
                         size="small"
                         className="w-full"
                         allowClear
                         placeholder="不更新"
                         options={f.opts}
-                        onChange={(v) => setUpdates((u) => ({ ...u, [f.key]: v }))}
+                        onChange={(v) =>
+                          setUpdates((u) => ({ ...u, [f.key]: v }))
+                        }
                       />
                     ) : (
                       <Input
                         size="small"
                         className="w-full"
                         placeholder="不更新"
-                        onChange={(e) => setUpdates((u) => ({ ...u, [f.key]: e.target.value }))}
+                        onChange={(e) =>
+                          setUpdates((u) => ({ ...u, [f.key]: e.target.value }))
+                        }
                       />
                     )}
                   </div>
@@ -292,7 +335,9 @@ export const BatchUpdatePage = () => {
               </div>
             </div>
             <div className="bg-green-50 border border-green-200 rounded p-4">
-              <div className="text-xs font-bold text-green-700 mb-3">费用信息更新（可选）</div>
+              <div className="text-xs font-bold text-green-700 mb-3">
+                费用信息更新（可选）
+              </div>
               <div className="grid grid-cols-4 gap-3">
                 <div>
                   <label className="text-xs text-gray-600 block mb-1">
@@ -306,7 +351,9 @@ export const BatchUpdatePage = () => {
                     onChange={(e) =>
                       setUpdates((u) => ({
                         ...u,
-                        storageCost: e.target.value ? Number(e.target.value) : undefined,
+                        storageCost: e.target.value
+                          ? Number(e.target.value)
+                          : undefined,
                       }))
                     }
                   />
@@ -335,8 +382,8 @@ export const BatchUpdatePage = () => {
       {step === 3 && (
         <div className="bg-white rounded shadow-sm p-4">
           <div className="flex items-center text-sm font-bold mb-3 text-gray-800">
-            <div className="w-1 h-4 bg-[#198348] rounded mr-2 flex-shrink-0" />第 3
-            步：变更预览（确认后应用）
+            <div className="w-1 h-4 bg-[#198348] rounded mr-2 flex-shrink-0" />
+            第 3 步：变更预览（确认后应用）
           </div>
           <div className="mb-3 px-3 py-2 bg-green-50 border border-green-200 rounded text-xs text-green-700">
             将对 <b>{selectedIds.length}</b> 个集装箱应用以下变更：
@@ -351,15 +398,15 @@ export const BatchUpdatePage = () => {
           </div>
           <Table
             columns={[
-              { title: '箱号', dataIndex: 'containerNo', width: 140 },
+              { title: "箱号", dataIndex: "containerNo", width: 140 },
               {
-                title: '项目',
-                dataIndex: 'projectName',
+                title: "项目",
+                dataIndex: "projectName",
                 width: 120,
                 ellipsis: true,
               },
               {
-                title: '更新字段',
+                title: "更新字段",
                 render: (_, r) =>
                   Object.keys(updates).map((k) => (
                     <span
@@ -371,7 +418,7 @@ export const BatchUpdatePage = () => {
                   )),
               },
               {
-                title: '原值',
+                title: "原值",
                 render: (_, r) => {
                   const keys = Object.keys(updates);
                   return keys.length === 0 ? (
@@ -379,11 +426,21 @@ export const BatchUpdatePage = () => {
                   ) : (
                     keys.map((k) => {
                       const oldVal =
-                        k === 'status' ? r.status : k === 'remark' ? r.remark || '-' : '-';
-                      return k === 'status' ? (
-                        <StatusBadge key={k} status={oldVal as ContainerStatus} />
+                        k === "status"
+                          ? r.status
+                          : k === "remark"
+                            ? r.remark || "-"
+                            : "-";
+                      return k === "status" ? (
+                        <StatusBadge
+                          key={k}
+                          status={oldVal as ContainerStatus}
+                        />
                       ) : (
-                        <span key={k} className="inline-block mr-1 text-xs text-gray-600">
+                        <span
+                          key={k}
+                          className="inline-block mr-1 text-xs text-gray-600"
+                        >
                           {oldVal}
                         </span>
                       );
@@ -391,9 +448,9 @@ export const BatchUpdatePage = () => {
                   );
                 },
               },
-              { title: '→', width: 40, align: 'center' },
+              { title: "→", width: 40, align: "center" },
               {
-                title: '新值',
+                title: "新值",
                 render: (_, r) => {
                   const keys = Object.keys(updates);
                   return keys.length === 0 ? (
@@ -401,8 +458,11 @@ export const BatchUpdatePage = () => {
                   ) : (
                     keys.map((k) => {
                       const newVal = updates[k] as string;
-                      return k === 'status' ? (
-                        <StatusBadge key={k} status={newVal as ContainerStatus} />
+                      return k === "status" ? (
+                        <StatusBadge
+                          key={k}
+                          status={newVal as ContainerStatus}
+                        />
                       ) : (
                         <span
                           key={k}
@@ -423,7 +483,9 @@ export const BatchUpdatePage = () => {
             scroll={{ x: 900, y: 300 }}
           />
           <div className="flex justify-between items-center mt-4">
-            <div className="text-xs text-yellow-600">⚠ 变更不可撤销，建议先导出当前数据备份</div>
+            <div className="text-xs text-yellow-600">
+              ⚠ 变更不可撤销，建议先导出当前数据备份
+            </div>
             <Space>
               <Button onClick={() => setStep(2)}>← 上一步</Button>
               <Button type="primary" onClick={applyBatch}>

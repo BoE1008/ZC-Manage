@@ -53,7 +53,10 @@ export const addContainer = async (data: ContainerForm) => {
  * POST /zc/container/update（注意不是 PUT）
  */
 export const editContainer = async (data: ContainerForm & { id: string }) => {
-  const res = await axiosInstance.post<ApiResponse>("/zc/container/update", data);
+  const res = await axiosInstance.post<ApiResponse>(
+    "/zc/container/update",
+    data,
+  );
   return res.data;
 };
 
@@ -73,11 +76,22 @@ export const deleteContainer = async (id: string) => {
 // ========================
 
 /**
- * 集装箱工作台统计（各状态数量）
+ * 集装箱工作台（各状态数量）
  * GET /zc/container/dashboardStats
  */
 export const getContainerDashboardStats = async () => {
-  const res = await axiosInstance.get<ApiResponse>("/zc/container/dashboardStats");
+  const res = await axiosInstance.get<ApiResponse>(
+    "/zc/container/dashboardStats",
+  );
+  return res.data;
+};
+
+/**
+ * 集装箱报表统计（各状态数量）
+ * GET /zc/container/reportStats
+ */
+export const getContainerReportStats = async () => {
+  const res = await axiosInstance.get<ApiResponse>("/zc/container/reportStats");
   return res.data;
 };
 
@@ -99,9 +113,13 @@ export const batchUpdateContainer = async (
     eta?: string;
   },
 ) => {
-  const res = await axiosInstance.post<ApiResponse>("/zc/container/batchUpdate", null, {
-    params: { containerIds, ...data },
-  });
+  const res = await axiosInstance.post<ApiResponse>(
+    "/zc/container/batchUpdate",
+    null,
+    {
+      params: { containerIds, ...data },
+    },
+  );
   return res.data;
 };
 
@@ -110,8 +128,12 @@ export const batchUpdateContainer = async (
  * POST /zc/container/bindContainerNo
  */
 export const bindContainerNo = async (id: string, containerNo: string) => {
-  const res = await axiosInstance.post<ApiResponse>("/zc/container/bindContainerNo", null, {
-    params: { id, containerNo },
-  });
+  const res = await axiosInstance.post<ApiResponse>(
+    "/zc/container/bindContainerNo",
+    null,
+    {
+      params: { id, containerNo },
+    },
+  );
   return res.data;
 };

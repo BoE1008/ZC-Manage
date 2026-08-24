@@ -13,6 +13,8 @@ import {
 import dayjs from "dayjs";
 
 import { Container, ContainerForm } from "@/types";
+import { getDictOptions, getDictOptionsSync } from "@/restApi/dictCache";
+import type { DictOption } from "@/types/dict";
 import {
   getContainerDetail,
   addContainer,
@@ -20,24 +22,13 @@ import {
 } from "@/restApi/container";
 import { getSuppliersList } from "@/restApi/supplyer";
 import { getCustomersList } from "@/restApi/customer";
-import { getProjectList } from "@/restApi/project";
+import { getAllProjectList } from "@/restApi/project";
 
 interface Props {
   id: string | null;
   onSave: () => void;
   onClose: () => void;
 }
-
-const STATUS_OPTIONS = [
-  { label: "待提箱", value: "pending" },
-  { label: "提箱中", value: "lifting" },
-  { label: "在途", value: "in_transit" },
-  { label: "已落箱", value: "dropped" },
-  { label: "堆存", value: "storage" },
-  { label: "已放箱", value: "released" },
-  { label: "已提箱", value: "picked_up" },
-  { label: "已还箱", value: "returned" },
-];
 
 const USAGE_OPTIONS = [
   { label: "买箱", value: "purchase" },
@@ -59,6 +50,11 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
   const [buyers, setBuyers] = useState<{ label: string; value: string }[]>([]);
   const [yards, setYards] = useState<{ label: string; value: string }[]>([]);
   const [projects, setProjects] = useState<any[]>([]);
+  const [projectLoading, setProjectLoading] = useState(false);
+  const [statusOptions, setStatusOptions] = useState<DictOption[]>(getDictOptionsSync("container_status"));
+  const [typeOptions, setTypeOptions] = useState<DictOption[]>(getDictOptionsSync("container_type"));
+  const [usageOptions, setUsageOptions] = useState<DictOption[]>(getDictOptionsSync("container_usage"));
+  const [condOptions, setCondOptions] = useState<DictOption[]>(getDictOptionsSync("container_cond"));
 
   const isEdit = id !== null;
 
@@ -78,9 +74,24 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
         })),
       );
     });
-    getProjectList(1, 1000).then((r: any) => {
-      const list = r?.entity?.data ?? [];
-      setProjects(list);
+    setProjectLoading(true);
+    getAllProjectList()
+      .then((r: any) => {
+        const list = r?.entity?.data ?? [];
+        setProjects(list);
+      })
+      .finally(() => setProjectLoading(false));
+    // 字典加载（状态/箱型/使用情况/箱况）
+    Promise.all([
+      getDictOptions("container_status"),
+      getDictOptions("container_type"),
+      getDictOptions("container_usage"),
+      getDictOptions("container_cond"),
+    ]).then(([s, t, u, c]) => {
+      setStatusOptions(s);
+      setTypeOptions(t);
+      setUsageOptions(u);
+      setCondOptions(c);
     });
   }, []);
 
@@ -92,10 +103,10 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
       if (!d) return;
       const vals: any = { ...d };
       // 日期 dayjs 化（供 DatePicker 显示）
-      const dateFields = ["liftingTime", "sendTime", "eta", "ata"] as const;
+      const dateFields = ["liftingTime"] as const;
       dateFields.forEach((f) => {
         const raw = vals[f] as string;
-        if (!raw || raw === '0000-00-00') return;
+        if (!raw || raw === "0000-00-00") return;
         const dd = dayjs(raw);
         if (dd.isValid()) vals[f] = dd;
       });
@@ -119,7 +130,7 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
         vals.projectId = vals.projectId || vals.projectName;
       }
       // 日期有效化
-      ["liftingTime", "sendTime", "eta", "ata"].forEach((f) => {
+      ["liftingTime"].forEach((f) => {
         const raw = vals[f];
         if (!raw) {
           delete vals[f];
@@ -149,7 +160,7 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
       await form.validateFields();
       const values = form.getFieldsValue();
       // 日期字段：dayjs -> 字符串
-      (["liftingTime", "sendTime", "eta", "ata"] as const).forEach((f) => {
+      (["liftingTime"] as const).forEach((f) => {
         const v = (values as any)[f];
         if (v && dayjs(v as any).isValid())
           (values as any)[f] = (v as any).format("YYYY-MM-DD");
@@ -198,72 +209,65 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
       destroyOnClose
     >
       <Form form={form} layout="vertical" className="pt-2">
+        <div className="text-xs font-bold text-[#198348] py-2 border-b border-dashed border-gray-200">
+          基础信息
+        </div>
         <div className="grid grid-cols-2 gap-x-4">
           <Form.Item
             name="containerNo"
-            label={<span className="text-xs">箱号</span>}
+            label={
+              <span className="text-xs">
+                箱号 <span className="text-red-500">*</span>
+              </span>
+            }
+            rules={[{ required: true }]}
           >
-            <Input placeholder="如：EISU1234567" />
+            <Input placeholder="如：UETU5115323" />
           </Form.Item>
           <Form.Item
             name="containerType"
-            label={<span className="text-xs">箱型</span>}
+            label={
+              <span className="text-xs">
+                箱型 <span className="text-red-500">*</span>
+              </span>
+            }
+            rules={[{ required: true }]}
           >
-            <Select
-              allowClear
-              placeholder="请选择"
-              options={[
-                { label: "20GP", value: "20GP" },
-                { label: "40GP", value: "40GP" },
-                { label: "40HC", value: "40HC" },
-                { label: "45HC", value: "45HC" },
-              ]}
-            />
+            <Select allowClear placeholder="请选择" options={typeOptions} />
           </Form.Item>
           <Form.Item
             name="usageType"
-            label={<span className="text-xs">使用类型</span>}
+            label={
+              <span className="text-xs">
+                使用情况 <span className="text-red-500">*</span>
+              </span>
+            }
+            rules={[{ required: true }]}
           >
-            <Select allowClear placeholder="请选择" options={USAGE_OPTIONS} />
+            <Select allowClear placeholder="请选择" options={usageOptions} />
           </Form.Item>
           <Form.Item
             name="conditionType"
-            label={<span className="text-xs">箱况</span>}
+            label={
+              <span className="text-xs">
+                箱况 <span className="text-red-500">*</span>
+              </span>
+            }
+            rules={[{ required: true }]}
           >
-            <Select allowClear placeholder="请选择" options={COND_OPTIONS} />
+            <Select allowClear placeholder="请选择" options={condOptions} />
           </Form.Item>
           <Form.Item
             name="supplierId"
-            label={<span className="text-xs">供应商</span>}
+            label={<span className="text-xs">卖方/出租方</span>}
           >
             <Select allowClear placeholder="请选择" options={suppliers} />
           </Form.Item>
           <Form.Item
             name="cost"
-            label={<span className="text-xs">采购成本</span>}
+            label={<span className="text-xs">成本 (USD)</span>}
           >
-            <InputNumber style={{ width: "100%" }} placeholder="USD" />
-          </Form.Item>
-        </div>
-
-        {/* 项目 */}
-        <div className="grid grid-cols-2 gap-x-4">
-          <Form.Item
-            name="projectId"
-            label={<span className="text-xs">当前项目</span>}
-          >
-            <Select
-              allowClear
-              placeholder="选择项目"
-              value={undefined}
-              options={projects.map((p) => ({ label: p.name, value: p.name }))}
-            />
-          </Form.Item>
-          <Form.Item
-            name="shipName"
-            label={<span className="text-xs">船名/班列号</span>}
-          >
-            <Input placeholder="如：CMA CGM BOURBON" />
+            <InputNumber style={{ width: "100%" }} placeholder="如：1880" />
           </Form.Item>
         </div>
 
@@ -292,117 +296,52 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
             <Input placeholder="如：S225142" />
           </Form.Item>
           <Form.Item
+            name="projectId"
+            label={<span className="text-xs">当前项目</span>}
+          >
+            <Select
+              allowClear
+              placeholder="如：吉速166/167"
+              loading={projectLoading}
+              options={projects.map((p) => ({
+                label: p.name,
+                value: p.name,
+              }))}
+            />
+          </Form.Item>
+        </div>
+
+        {/* 状态信息 */}
+        <div className="text-xs font-bold text-[#198348] py-2 border-b border-dashed border-gray-200 mt-2">
+          状态信息
+        </div>
+        <div className="grid grid-cols-2 gap-x-4">
+          <Form.Item
             name="status"
-            label={<span className="text-xs">状态</span>}
+            label={<span className="text-xs">当前状态</span>}
           >
-            <Select allowClear placeholder="请选择" options={STATUS_OPTIONS} />
+            <Select allowClear placeholder="请选择" options={statusOptions} />
           </Form.Item>
-        </div>
-
-        {/* 运输信息 */}
-        <div className="text-xs font-bold text-[#198348] py-2 border-b border-dashed border-gray-200 mt-2">
-          运输信息
-        </div>
-        <div className="grid grid-cols-2 gap-x-4">
-          <Form.Item
-            name="sendTime"
-            label={<span className="text-xs">发运时间</span>}
-            getValueProps={(v) => ({ value: v ? dayjs(v) : undefined })}
-          >
-            <DatePicker style={{ width: "100%" }} />
-          </Form.Item>
-          <Form.Item
-            name="eta"
-            label={<span className="text-xs">预计到达</span>}
-            getValueProps={(v) => ({ value: v ? dayjs(v) : undefined })}
-          >
-            <DatePicker style={{ width: "100%" }} />
-          </Form.Item>
-          <Form.Item
-            name="ata"
-            label={<span className="text-xs">实际到达</span>}
-            getValueProps={(v) => ({ value: v ? dayjs(v) : undefined })}
-          >
-            <DatePicker style={{ width: "100%" }} />
-          </Form.Item>
-        </div>
-
-        {/* 费用信息 */}
-        <div className="text-xs font-bold text-[#198348] py-2 border-b border-dashed border-gray-200 mt-2">
-          费用信息
-        </div>
-        <div className="grid grid-cols-2 gap-x-4">
-          <Form.Item
-            name="storageCost"
-            label={<span className="text-xs">堆存成本</span>}
-          >
-            <InputNumber style={{ width: "100%" }} placeholder="USD" />
-          </Form.Item>
-          <Form.Item
-            name="storageIncome"
-            label={<span className="text-xs">堆存收入</span>}
-          >
-            <InputNumber style={{ width: "100%" }} placeholder="USD" />
-          </Form.Item>
-          <Form.Item
-            name="saleIncome"
-            label={<span className="text-xs">卖出收入</span>}
-          >
-            <InputNumber style={{ width: "100%" }} placeholder="USD" />
-          </Form.Item>
-        </div>
-
-        {/* 还箱信息 */}
-        <div className="text-xs font-bold text-[#198348] py-2 border-b border-dashed border-gray-200 mt-2">
-          还箱信息
-        </div>
-        <div className="grid grid-cols-2 gap-x-4">
-          <Form.Item
-            name="returnCity"
-            label={<span className="text-xs">还箱城市</span>}
-          >
-            <Input placeholder="如：上海" />
-          </Form.Item>
-          <Form.Item
-            name="returnFee"
-            label={<span className="text-xs">还箱费用</span>}
-          >
-            <InputNumber style={{ width: "100%" }} placeholder="USD" />
-          </Form.Item>
-        </div>
-
-        {/*买方信息*/}
-        <div className="text-xs font-bold text-[#198348] py-2 border-b border-dashed border-gray-200 mt-2">
-          买方信息
-        </div>
-        <div className="grid grid-cols-2 gap-x-4">
           <Form.Item
             name="buyerId"
-            label={<span className="text-xs">买方</span>}
+            label={<span className="text-xs">买方/租方</span>}
           >
-            <Select allowClear placeholder="请选择" options={buyers} />
-          </Form.Item>
-          <Form.Item
-            name="pickupTime"
-            label={<span className="text-xs">提箱时间</span>}
-            getValueProps={(v) => ({ value: v ? dayjs(v) : undefined })}
-          >
-            <DatePicker style={{ width: "100%" }} />
+            <Select allowClear placeholder="-" options={buyers} />
           </Form.Item>
         </div>
 
-        <Form.Item<any>
-          name="remark"
-          label={<span className="text-xs">备注</span>}
+        <Form.Item
+          name="statusRemark"
+          label={<span className="text-xs">状态备注</span>}
           className="mt-2"
         >
-          <Input.TextArea rows={2} placeholder="可选" />
+          <Input.TextArea rows={2} placeholder="如：Vladivostok 港口中转" />
         </Form.Item>
 
         <div className="flex justify-end gap-2 mt-4">
           <Button onClick={onClose}>取消</Button>
           <Button type="primary" loading={loading} onClick={handleOk}>
-            确定
+            保存
           </Button>
         </div>
       </Form>

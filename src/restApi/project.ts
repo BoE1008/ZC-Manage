@@ -50,10 +50,9 @@ export const getProjectList = async (
   pageNo: number = 1,
   pageSize: number = 1000,
 ) => {
-  const res = await axiosInstance.get<{ entity: { data: Project[]; total: number } }>(
-    "/zc/project/submit/list",
-    { params: { pageNo, pageSize } },
-  );
+  const res = await axiosInstance.get<{
+    entity: { data: Project[]; total: number };
+  }>("/zc/project/submit/list", { params: { pageNo, pageSize } });
   return res.data;
 };
 
@@ -395,5 +394,12 @@ export const transProject = async (
     moveReason,
   });
 
+  return res.data;
+};
+
+export const getAllProjectList = async (projectNum?: string) => {
+  const res = await axiosInstance.get<{
+    entity: { data: Project[]; total: number };
+  }>("/zc/project/list", { params: { projectNum } });
   return res.data;
 };
