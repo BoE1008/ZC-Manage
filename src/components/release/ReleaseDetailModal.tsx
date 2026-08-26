@@ -3,8 +3,6 @@ import { Modal, Space, Button, Spin } from "antd";
 import { ReleaseOrder } from "@/restApi/releaseOrder";
 import { ReleaseTypeBadge, StatusBadge } from "@/components/ui/Badge";
 import { getReleaseOrderDetail } from "@/restApi/releaseOrder";
-import { getCustomersList } from "@/restApi/customer";
-import { getSuppliersList } from "@/restApi/supplyer";
 
 interface Props {
   id: string;
@@ -20,8 +18,6 @@ export const ReleaseDetailModal = ({
   onConfirmPickup,
 }: Props) => {
   const [r, setR] = useState<ReleaseOrder | null>(null);
-  const [buyerName, setBuyerName] = useState("");
-  const [yardName, setYardName] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -96,11 +92,11 @@ export const ReleaseDetailModal = ({
         </div>
         <div>
           <span className="text-xs text-gray-400 block">买方/租方</span>
-          <span className="font-medium">{buyerName || r.buyerName || "-"}</span>
+          <span className="font-medium">{r.buyerName || "-"}</span>
         </div>
         <div>
           <span className="text-xs text-gray-400 block">放箱堆场</span>
-          <span className="font-medium">{yardName || r.yardName || "-"}</span>
+          <span className="font-medium">{r.yardName || "-"}</span>
         </div>
         <div>
           <span className="text-xs text-gray-400 block">收入</span>

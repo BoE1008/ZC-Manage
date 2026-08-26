@@ -97,7 +97,7 @@ export const editTracking = async (
  * GET /zc/containerTracking/del?id=xxx（注意不是 DELETE）
  */
 export const deleteTracking = async (id: string) => {
-  const res = await axiosInstance.delete<ApiResponse>(
+  const res = await axiosInstance.get<ApiResponse>(
     `/zc/containerTracking/del?id=${id}`,
   );
   return res.data;

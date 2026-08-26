@@ -127,22 +127,15 @@ export const ReportPage = () => {
       {/* 6 张月度卡 */}
       <div className="grid grid-cols-6 gap-2.5">
         {monthCards.map((m) => {
-          const filter = monthFilterMap[m.key];
           const theme = MONTH_THEME[m.key] ?? {
             border: "border-l-[#198348]",
             text: "text-[#198348]",
           };
-          const onClick = () =>
-            router.push(
-              filter
-                ? `/containerList?status=${encodeURIComponent(filter)}`
-                : "/containerList",
-            );
+
           return (
             <div
               key={m.key}
-              onClick={onClick}
-              className={`bg-white rounded-md p-3 shadow-sm cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all border-l-4 ${theme.border} relative`}
+              className={`bg-white rounded-md p-3 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all border-l-4 ${theme.border} relative`}
             >
               <div className="text-xs text-gray-500 mb-1">{m.label}</div>
               <div className={`text-2xl font-bold ${theme.text}`}>
@@ -172,10 +165,6 @@ export const ReportPage = () => {
         </div>
         <Table
           onRow={(record: ProjectStat) => ({
-            onClick: () =>
-              router.push(
-                `/containerList?projectId=${encodeURIComponent(record.projectId)}`,
-              ),
             className: "cursor-pointer",
           })}
           columns={[
@@ -260,7 +249,7 @@ export const ReportPage = () => {
                 className="p-4 border rounded text-center bg-white cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all"
                 onClick={() =>
                   router.push(
-                    `/containerList?conditionType=${encodeURIComponent(s.type)}`,
+                    `/containerList?cond=${encodeURIComponent(s.type)}`,
                   )
                 }
               >

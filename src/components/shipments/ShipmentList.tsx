@@ -1,21 +1,22 @@
 import { useState, useEffect } from "react";
 import Table from "@/components/ResizeTable";
-import { Button, Select, Space, Modal, message } from "antd";
+import { Button, Select, Space, Modal, message, Tooltip } from "antd";
 import SearchInput from "@/components/SearchInput";
 import { ContainerDetailModal } from "@/components/containers/ContainerDetailModal";
+import { ShipmentDetailModal } from "./ShipmentDetailModal";
 import type { ColumnsType } from "antd/es/table";
 import { Container, ContainerTracking, ContainerStatus } from "@/types";
 import { StatusBadge } from "@/components/ui/Badge";
 import { ShipmentModal } from "./ShipmentModal";
 import { getTrackingList, deleteTracking } from "@/restApi/tracking";
-import { getContainerList } from "@/restApi/container";
 import { getAllProjectList } from "@/restApi/project";
 import { getDictOptions, getDictOptionsSync } from "@/restApi/dictCache";
 import type { DictOption } from "@/types/dict";
+import { useRouter } from "next/router";
 
 export const ShipmentList = () => {
+  const router = useRouter();
   const [shipments, setShipments] = useState<ContainerTracking[]>([]);
-  const [containers, setContainers] = useState<Container[]>([]);
   const [loading, setLoading] = useState(false);
   const [statusFilter, setStatusFilter] = useState("");
   const [keyword, setKeyword] = useState("");
@@ -23,19 +24,24 @@ export const ShipmentList = () => {
   const [total, setTotal] = useState(0);
   const [editId, setEditId] = useState<string | null | undefined>(undefined);
   const [viewId, setViewId] = useState<string | null>(null);
-  const [projects, setProjects] = useState<any[]>([]);
+  const [detailId, setDetailId] = useState<string | null>(null);
   const [statusOptions, setStatusOptions] = useState<DictOption[]>(
     getDictOptionsSync("container_status"),
   );
 
-  const loadShipments = (pageNo = page) => {
+  const loadShipments = (
+    pageNo = page,
+    extra?: { status?: string; keyword?: string },
+  ) => {
+    const status = extra?.status ?? statusFilter;
+    const kw = extra?.keyword ?? keyword;
     setLoading(true);
     getTrackingList({
       pageNo,
       pageSize: 20,
-      status: statusFilter || undefined,
-      containerNo: keyword || undefined,
-      returnOrderNo: keyword || undefined,
+      status: status || undefined,
+      containerNo: kw || undefined,
+      returnOrderNo: kw || undefined,
     })
       .then((r) => {
         setShipments(r.entity?.data ?? []);
@@ -44,51 +50,47 @@ export const ShipmentList = () => {
       .finally(() => setLoading(false));
   };
 
-  const loadContainers = () => {
-    getContainerList({ pageNo: 1, pageSize: 500 }).then((r) =>
-      setContainers(r.entity?.data ?? []),
-    );
-  };
-
   useEffect(() => {
-    loadShipments(1);
-    loadContainers();
-  }, []);
-
-  useEffect(() => {
-    getAllProjectList().then((r: any) => setProjects(r?.entity?.data ?? []));
     getDictOptions("container_status").then(setStatusOptions);
   }, []);
 
-  const handleViewBox = (containerNo: string) => {
-    const c = containers.find((x) => x.containerNo === containerNo);
-    if (c) setViewId(c.id);
-  };
+  // URL 单一数据源：URL 变化 → 同步状态 → 加载数据
+  useEffect(() => {
+    if (!router.isReady) return;
+    const q = router.query;
+    const ns = typeof q.status === "string" ? q.status : "";
+    const nk = typeof q.keyword === "string" ? q.keyword : "";
+    const np = typeof q.page === "string" ? Number(q.page) : 1;
+    setStatusFilter(ns);
+    setKeyword(nk);
+    setPage(np);
+    loadShipments(np, { status: ns, keyword: nk });
+  }, [router.isReady, router.query]);
 
   const columns: ColumnsType<ContainerTracking> = [
     {
       title: "箱号",
       dataIndex: "containerNo",
-      render: (v) => (
-        <span
-          className="text-[#198348] hover:underline cursor-pointer"
-          onClick={() => handleViewBox(v)}
-        >
-          {v}
-        </span>
+      render: (v, r) => (
+        <Tooltip title={<span>查看集装箱信息</span>}>
+          <span
+            className="text-[#198348] hover:underline cursor-pointer"
+            onClick={() => setViewId(r.containerId)}
+          >
+            {v}
+          </span>
+        </Tooltip>
       ),
     },
     {
       title: "项目名称",
       dataIndex: "projectName",
       ellipsis: true,
-      render: (v, r) => projects.find((x) => x.id === r.projectId)?.name || v,
     },
     {
       title: "项目编号",
-      dataIndex: "projectId",
+      dataIndex: "projectNum",
       ellipsis: true,
-      render: (v) => projects.find((x) => x.id === v)?.num || v,
     },
     { title: "发运站", dataIndex: "departureStation" },
     { title: "目的站", dataIndex: "arrivalStation" },
@@ -144,25 +146,40 @@ export const ShipmentList = () => {
     {
       title: "操作",
       align: "center",
+      fixed: "right",
       render: (_, r) => (
         <Space size={2}>
-          <Button
-            type="text"
-            size="small"
-            className="!px-1 !py-0.5 !text-xs"
-            onClick={() => setEditId(r.id)}
-          >
-            ✎
-          </Button>
-          <Button
-            type="text"
-            size="small"
-            danger
-            className="!px-1 !py-0.5 !text-xs"
-            onClick={() => handleDelete(r.id)}
-          >
-            🗑
-          </Button>
+          <Tooltip title={<span>查看运踪详细信息</span>}>
+            <Button
+              type="text"
+              size="small"
+              className="!px-1 !py-0.5 !text-xs"
+              onClick={() => setDetailId(r.id)}
+            >
+              👁
+            </Button>
+          </Tooltip>
+          <Tooltip title={<span>编辑</span>}>
+            <Button
+              type="text"
+              size="small"
+              className="!px-1 !py-0.5 !text-xs"
+              onClick={() => setEditId(r.id)}
+            >
+              ✎
+            </Button>
+          </Tooltip>
+          <Tooltip title={<span>删除</span>}>
+            <Button
+              type="text"
+              size="small"
+              danger
+              className="!px-1 !py-0.5 !text-xs"
+              onClick={() => handleDelete(r.id)}
+            >
+              🗑
+            </Button>
+          </Tooltip>
         </Space>
       ),
     },
@@ -186,7 +203,6 @@ export const ShipmentList = () => {
   const handleSave = () => {
     setEditId(undefined);
     loadShipments(page);
-    loadContainers();
   };
 
   return (
@@ -195,18 +211,22 @@ export const ShipmentList = () => {
         <Button type="primary" onClick={() => setEditId(null)}>
           + 新增运踪
         </Button>
-        <Button onClick={() => message.success("运踪数据已导出")}>
-          📤 导出
-        </Button>
         <div className="ml-auto flex items-center gap-2">
           <Select
             placeholder="全部状态"
             allowClear
             value={statusFilter || undefined}
             onChange={(v) => {
-              setStatusFilter(v || "");
-              setPage(1);
-              loadShipments(1);
+              const q: Record<string, string | string[] | undefined> = {
+                ...router.query,
+                status: v || undefined,
+                page: "1",
+              };
+              if (!v) delete q.status;
+              delete q.keyword;
+              router.push({ pathname: router.pathname, query: q }, undefined, {
+                shallow: true,
+              });
             }}
             className="w-32"
             size="small"
@@ -216,9 +236,20 @@ export const ShipmentList = () => {
             <SearchInput
               placeholder="箱号"
               onSearch={(v) => {
-                setKeyword(v);
-                setPage(1);
-                loadShipments(1);
+                const q: Record<string, string | string[] | undefined> = {
+                  ...router.query,
+                  keyword: v || undefined,
+                  page: "1",
+                };
+                if (!v) delete q.keyword;
+                delete q.status;
+                router.push(
+                  { pathname: router.pathname, query: q },
+                  undefined,
+                  {
+                    shallow: true,
+                  },
+                );
               }}
             />
           </div>
@@ -237,38 +268,55 @@ export const ShipmentList = () => {
           loading={loading}
           rowKey="id"
           size="small"
-          pagination={
-            total > 20
-              ? {
-                  current: page,
-                  total,
-                  pageSize: 20,
-                  showTotal: (t) => `共 ${t} 条`,
-                  onChange: (p) => {
-                    setPage(p);
-                    loadShipments(p);
-                  },
-                }
-              : false
-          }
-          scroll={{ x: 1900 }}
+          pagination={{
+            current: page,
+            total,
+            pageSize: 20,
+            showTotal: (t) => `共 ${t} 条`,
+            onChange: (p) => {
+              const q: Record<string, string | string[] | undefined> = {
+                ...router.query,
+                page: String(p),
+              };
+              delete q.keyword;
+              router.push({ pathname: router.pathname, query: q }, undefined, {
+                shallow: true,
+              });
+            },
+            onShowSizeChange: (_p, ps) => {
+              const q = { ...router.query } as Record<
+                string,
+                string | string[] | undefined
+              >;
+              q.page = "1";
+              q.pageSize = String(ps);
+              router.push({ pathname: router.pathname, query: q }, undefined, {
+                shallow: true,
+              });
+            },
+          }}
+          scroll={{ x: 1700 }}
         />
       </div>
 
       {editId !== undefined && (
         <ShipmentModal
           id={editId ?? null}
-          containers={containers}
-          shipments={shipments}
           onSave={handleSave}
           onClose={() => setEditId(undefined)}
         />
+      )}
+      {detailId && (
+        <ShipmentDetailModal id={detailId} onClose={() => setDetailId(null)} />
       )}
       {viewId && (
         <ContainerDetailModal
           id={viewId}
           onClose={() => setViewId(null)}
-          onEdit={() => setViewId(null)}
+          onEdit={() => {
+            setViewId(null);
+            setEditId(viewId);
+          }}
         />
       )}
     </div>

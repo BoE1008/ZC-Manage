@@ -134,6 +134,17 @@ export type ReleaseStatus = "pending" | "picked_up" | string;
 // ============================================================
 
 /** 集装箱实体（完整字段） */
+export interface LifecycleNode {
+  /** 节点时间 yyyy-MM-dd */
+  time: string;
+  /** 节点详情描述 */
+  detail: string;
+  /** 节点标题（如"提箱"/"当前状态"） */
+  title: string;
+  /** 节点类型（lifting/picking/...） */
+  type: string;
+}
+
 export interface Container {
   /** 主键ID */
   id: string;

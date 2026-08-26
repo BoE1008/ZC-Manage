@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/router";
-import { Button, Input, Select, Space, Modal, message } from "antd";
+import { Button, Tooltip, Select, Space, Modal, message } from "antd";
 import Table from "@/components/ResizeTable";
 import type { ColumnsType } from "antd/es/table";
 import { Container, ContainerStatus, ConditionType, UsageType } from "@/types";
@@ -8,16 +8,16 @@ import { StatusBadge, UsageTag, CondTag } from "@/components/ui/Badge";
 import { ContainerModal } from "./ContainerModal";
 import { ContainerDetailModal } from "./ContainerDetailModal";
 import { getContainerList, deleteContainer } from "@/restApi/container";
-import { getProjectList } from "@/restApi/projectCache";
 import { getDictOptions, getDictOptionsSync } from "@/restApi/dictCache";
 import type { DictOption } from "@/types/dict";
+import SearchInput from "../SearchInput";
 
 export const ContainerList = () => {
   const router = useRouter();
+  const pageSize = 20;
 
   // 分页
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
   const [total, setTotal] = useState(0);
 
   // 数据 & loading
@@ -28,7 +28,6 @@ export const ContainerList = () => {
   const [statusFilter, setStatusFilter] = useState("");
   const [usageFilter, setUsageFilter] = useState("");
   const [condFilter, setCondFilter] = useState("");
-  const [keyword, setKeyword] = useState("");
 
   // 字典选项
   const [statusOptions, setStatusOptions] = useState<DictOption[]>(
@@ -81,7 +80,7 @@ export const ContainerList = () => {
         .catch(() => message.error("获取集装箱列表失败"))
         .finally(() => setLoading(false));
     },
-    [pageSize],
+    [],
   );
 
   // URL sync effect（唯一数据加载入口）
@@ -91,7 +90,6 @@ export const ContainerList = () => {
     setStatusFilter(typeof q.status === "string" ? q.status : "");
     setUsageFilter(typeof q.usage === "string" ? q.usage : "");
     setCondFilter(typeof q.cond === "string" ? q.cond : "");
-    setKeyword(typeof q.q === "string" ? q.q : "");
     const p = typeof q.page === "string" ? Number(q.page) : 1;
     setPage(p);
     loadData(router.query, p);
@@ -146,12 +144,14 @@ export const ContainerList = () => {
       dataIndex: "containerNo",
       align: "center",
       render: (v, r) => (
-        <a
-          className="text-[#198348] hover:underline cursor-pointer"
-          onClick={() => setViewId(r.id)}
-        >
-          {v}
-        </a>
+        <Tooltip title={<span>查看集装箱信息</span>}>
+          <a
+            className="text-[#198348] hover:underline cursor-pointer"
+            onClick={() => setViewId(r.id)}
+          >
+            {v}
+          </a>
+        </Tooltip>
       ),
     },
     {
@@ -231,34 +231,40 @@ export const ContainerList = () => {
       fixed: "right",
       render: (_, r) => (
         <Space size={2}>
-          <Button
-            type="text"
-            size="small"
-            className="!px-1 !py-0.5 !text-xs"
-            onClick={() => setViewId(r.id)}
-            title="查看"
-          >
-            👁
-          </Button>
-          <Button
-            type="text"
-            size="small"
-            className="!px-1 !py-0.5 !text-xs"
-            onClick={() => setEditId(r.id)}
-            title="编辑"
-          >
-            ✎
-          </Button>
-          <Button
-            type="text"
-            size="small"
-            danger
-            className="!px-1 !py-0.5 !text-xs"
-            onClick={() => handleDelete(r.id)}
-            title="删除"
-          >
-            🗑
-          </Button>
+          <Tooltip title={<span>查看集装箱信息</span>}>
+            <Button
+              type="text"
+              size="small"
+              className="!px-1 !py-0.5 !text-xs"
+              onClick={() => setViewId(r.id)}
+              title="查看"
+            >
+              👁
+            </Button>
+          </Tooltip>
+          <Tooltip title={<span>编辑</span>}>
+            <Button
+              type="text"
+              size="small"
+              className="!px-1 !py-0.5 !text-xs"
+              onClick={() => setEditId(r.id)}
+              title="编辑"
+            >
+              ✎
+            </Button>
+          </Tooltip>
+          <Tooltip title={<span>删除</span>}>
+            <Button
+              type="text"
+              size="small"
+              danger
+              className="!px-1 !py-0.5 !text-xs"
+              onClick={() => handleDelete(r.id)}
+              title="删除"
+            >
+              🗑
+            </Button>
+          </Tooltip>
         </Space>
       ),
     },
@@ -299,24 +305,19 @@ export const ContainerList = () => {
             size="small"
             options={condOptions}
           />
-          <Input
+          <SearchInput
             placeholder="箱号"
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            onPressEnter={() => {
+            onSearch={(v) => {
               const q: Record<string, string | string[] | undefined> = {
                 ...router.query,
               };
-              if (keyword) q.keyword = keyword;
-              else delete q.keyword;
+              if (v) q.q = v;
+              else delete q.q;
               delete q.page;
               router.push({ pathname: router.pathname, query: q }, undefined, {
                 shallow: true,
               });
             }}
-            className="!w-44"
-            size="small"
-            allowClear
           />
         </div>
       </div>

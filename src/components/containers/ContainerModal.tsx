@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Modal,
   Form,
@@ -20,6 +20,7 @@ import {
   addContainer,
   editContainer,
 } from "@/restApi/container";
+
 import { getSuppliersList } from "@/restApi/supplyer";
 import { getCustomersList } from "@/restApi/customer";
 import { getAllProjectList } from "@/restApi/project";
@@ -51,10 +52,21 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
   const [yards, setYards] = useState<{ label: string; value: string }[]>([]);
   const [projects, setProjects] = useState<any[]>([]);
   const [projectLoading, setProjectLoading] = useState(false);
-  const [statusOptions, setStatusOptions] = useState<DictOption[]>(getDictOptionsSync("container_status"));
-  const [typeOptions, setTypeOptions] = useState<DictOption[]>(getDictOptionsSync("container_type"));
-  const [usageOptions, setUsageOptions] = useState<DictOption[]>(getDictOptionsSync("container_usage"));
-  const [condOptions, setCondOptions] = useState<DictOption[]>(getDictOptionsSync("container_cond"));
+  const [selectProject, setSelectProject] = useState<
+    { id: string; name: string; num: string } | undefined
+  >();
+  const [statusOptions, setStatusOptions] = useState<DictOption[]>(
+    getDictOptionsSync("container_status"),
+  );
+  const [typeOptions, setTypeOptions] = useState<DictOption[]>(
+    getDictOptionsSync("container_type"),
+  );
+  const [usageOptions, setUsageOptions] = useState<DictOption[]>(
+    getDictOptionsSync("container_usage"),
+  );
+  const [condOptions, setCondOptions] = useState<DictOption[]>(
+    getDictOptionsSync("container_cond"),
+  );
 
   const isEdit = id !== null;
 
@@ -95,64 +107,61 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
     });
   }, []);
 
-  // 编辑时回填
+  // 编辑时回填：每次打开编辑框都重新请求 detail（同一挂载周期内防重复）
+  const requestedIdRef = useRef<string | null>(null);
   useEffect(() => {
     if (!id) return;
+    // 下拉任一未就绪，等下一次触发
+    if (!suppliers.length || !buyers.length || !projects.length) return;
+    // 同一挂载周期内已请求过该 id（options 变化导致的重复触发），跳过
+    if (requestedIdRef.current === id) return;
+    requestedIdRef.current = id;
     getContainerDetail(id).then((r: any) => {
       const d = r?.entity?.data ?? r?.entity ?? r;
       if (!d) return;
       const vals: any = { ...d };
-      // 日期 dayjs 化（供 DatePicker 显示）
-      const dateFields = ["liftingTime"] as const;
-      dateFields.forEach((f) => {
-        const raw = vals[f] as string;
-        if (!raw || raw === "0000-00-00") return;
-        const dd = dayjs(raw);
-        if (dd.isValid()) vals[f] = dd;
-      });
-      // 供应商 id 反查
+      // 供应商/买方/提箱堆场 id 反查
       if (!vals.supplierId && vals.supplierName) {
         const o = suppliers.find((x) => x.label === vals.supplierName);
         if (o) vals.supplierId = o.value;
       }
-      // 买方 id 反查
       if (!vals.buyerId && vals.buyerName) {
         const o = buyers.find((x) => x.label === vals.buyerName);
         if (o) vals.buyerId = o.value;
       }
-      // 提箱堆场 id 反查
       if (!vals.liftingYardId && vals.liftingYardName) {
         const o = suppliers.find((x) => x.label === vals.liftingYardName);
         if (o) vals.liftingYardId = o.value;
       }
-      // 项目名称直接回填（不依赖 options）
+      // 项目：根据 projectName 找到 selectProject，把 id 写到 projectNum（Select value）
       if (vals.projectName) {
-        vals.projectId = vals.projectId || vals.projectName;
+        const proj = projects.find((p) => p.name === vals.projectName);
+        if (proj) {
+          vals.projectNum = proj.id;
+          setSelectProject(proj);
+        }
       }
-      // 日期有效化
+      // 日期 dayjs 化（处理 "0000-00-00"）
       ["liftingTime"].forEach((f) => {
         const raw = vals[f];
-        if (!raw) {
+        if (!raw || raw === "0000-00-00") {
           delete vals[f];
           return;
         }
-        const dd = dayjs(raw as string);
+        const dd = dayjs(raw);
         if (dd.isValid()) vals[f] = dd;
         else delete vals[f];
       });
       form.setFieldsValue(vals);
     });
-  }, [id, suppliers, buyers]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, projects, suppliers, buyers]);
 
-  // projects 加载完成后，用 projectName 回填 Select（value=name 直接显示）
-  useEffect(() => {
-    if (!id || !projects.length) return;
-    getContainerDetail(id).then((r: any) => {
-      const d = r?.entity?.data ?? r?.entity ?? r;
-      if (!d || !d.projectName) return;
-      form.setFieldValue("projectId", d.projectName);
-    });
-  }, [id, projects]);
+  // 项目编号变化：回填项目名称到 selectProject
+  const handleProjectChanged = (param: any) => {
+    const proj = projects.find((p) => p.id === param);
+    setSelectProject(proj);
+  };
 
   const handleOk = async () => {
     try {
@@ -174,12 +183,10 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
       // 买方名称
       const buyer = buyers.find((x) => x.value === values.buyerId);
       if (buyer) values.buyerName = buyer.label;
-      // 项目名称（value 直接是 name）
-      values.projectName = values.projectId || "";
-      // 去掉多余字段
-      delete values.storageCost;
-      delete values.storageIncome;
-      delete values.saleIncome;
+      // 项目：values.projectNum 是真实 id；selectProject 持有完整对象
+      values.projectId = values.projectNum || "";
+      values.projectName = selectProject?.name || "";
+      delete values.projectNum;
       const payload: any = { ...values };
       if (id) {
         await editContainer({ ...payload, id } as ContainerForm & {
@@ -296,18 +303,27 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
             <Input placeholder="如：S225142" />
           </Form.Item>
           <Form.Item
-            name="projectId"
-            label={<span className="text-xs">当前项目</span>}
+            name="projectNum"
+            label={<span className="text-xs">项目编号</span>}
+            validateTrigger="onBlur"
           >
             <Select
               allowClear
-              placeholder="如：吉速166/167"
+              showSearch
+              placeholder="选择项目"
+              optionFilterProp="label"
               loading={projectLoading}
               options={projects.map((p) => ({
-                label: p.name,
-                value: p.name,
+                label: p.projectNum,
+                value: p.id,
               }))}
+              onChange={handleProjectChanged}
             />
+          </Form.Item>
+          <Form.Item label={<span className="text-xs">项目名称</span>}>
+            <div className="px-3 py-1 text-sm text-gray-700 bg-gray-50 rounded border border-gray-200 min-h-[32px]">
+              {selectProject?.name || "-"}
+            </div>
           </Form.Item>
         </div>
 

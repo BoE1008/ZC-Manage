@@ -1,10 +1,11 @@
 import { useState, useEffect, useMemo } from "react";
 import Table from "@/components/ResizeTable";
-import { Button, Select, Space, Modal, message } from "antd";
+import { Button, Tooltip, Select, Space, Modal, message } from "antd";
 import SearchInput from "@/components/SearchInput";
 import type { ColumnsType } from "antd/es/table";
-import { ReleaseOrder } from "@/restApi/releaseOrder";
+import { editReleaseOrder, ReleaseOrder } from "@/restApi/releaseOrder";
 import { ReleaseTypeBadge, StatusBadge } from "@/components/ui/Badge";
+import { useRouter } from "next/router";
 import { ReleaseModal } from "./ReleaseModal";
 import { ReleaseDetailModal } from "./ReleaseDetailModal";
 import {
@@ -24,6 +25,8 @@ const STATUS_OPTIONS = [
 ];
 
 export const ReleaseList = () => {
+  const router = useRouter();
+
   const [releases, setReleases] = useState<ReleaseOrder[]>([]);
   const [loading, setLoading] = useState(false);
   const [typeFilter, setTypeFilter] = useState("");
@@ -34,15 +37,20 @@ export const ReleaseList = () => {
   const [editId, setEditId] = useState<string | null | undefined>(undefined);
   const [viewId, setViewId] = useState<string | null>(null);
 
-  const load = (pageNo = page) => {
+  const load = (
+    pageNo = page,
+    extra?: { keyword?: string; type?: string; status?: string },
+  ) => {
+    const kw = extra?.keyword ?? keyword;
+    const tp = extra?.type ?? typeFilter;
+    const st = extra?.status ?? statusFilter;
     setLoading(true);
     getReleaseOrderList({
       pageNo,
       pageSize: 20,
       orderType: typeFilter || undefined,
       status: statusFilter || undefined,
-      orderNo: keyword || undefined,
-      containerNo: keyword || undefined,
+      orderNo: kw || undefined,
     })
       .then((r) => {
         setReleases(r.entity?.data ?? []);
@@ -53,8 +61,18 @@ export const ReleaseList = () => {
   };
 
   useEffect(() => {
-    load(1);
-  }, [typeFilter, statusFilter]);
+    if (!router.isReady) return;
+    const q = router.query;
+    const nt = typeof q.type === "string" ? q.type : "";
+    const ns = typeof q.status === "string" ? q.status : "";
+    const nk = typeof q.keyword === "string" ? q.keyword : "";
+    const np = typeof q.page === "string" ? Number(q.page) : 1;
+    setTypeFilter(nt);
+    setStatusFilter(ns);
+    setKeyword(nk);
+    setPage(np);
+    load(np, { type: nt, status: ns, keyword: nk });
+  }, [router.isReady, router.query]);
 
   const filtered = useMemo(
     () =>
@@ -87,17 +105,26 @@ export const ReleaseList = () => {
     });
   };
 
+  const handleConfirmPickup = async () => {
+    await editReleaseOrder({ id: viewId as string, status: "picked_up" });
+    message.success("已确认提箱");
+    setViewId(null);
+    load(page);
+  };
+
   const columns: ColumnsType<ReleaseOrder> = [
     {
       title: "放箱令编号",
       dataIndex: "orderNo",
       render: (v, r) => (
-        <span
-          className="text-[#198348] hover:underline cursor-pointer"
-          onClick={() => setViewId(r.id ?? null)}
-        >
-          {v}
-        </span>
+        <Tooltip title={<span>查看放箱令信息</span>}>
+          <span
+            className="text-[#198348] hover:underline cursor-pointer"
+            onClick={() => setViewId(r.id ?? null)}
+          >
+            {v}
+          </span>
+        </Tooltip>
       ),
     },
     {
@@ -122,36 +149,44 @@ export const ReleaseList = () => {
     { title: "备注", dataIndex: "remark", ellipsis: true },
     {
       title: "操作",
+      align: "center",
+      fixed: "right",
       render: (_, record) => (
         <Space>
-          <Button
-            type="text"
-            size="small"
-            className="!px-1 !py-0.5 !text-xs"
-            onClick={() => setViewId(record.id ?? null)}
-            title="查看"
-          >
-            👁
-          </Button>
-          <Button
-            type="text"
-            size="small"
-            className="!px-1 !py-0.5 !text-xs"
-            onClick={() => setEditId(record.id ?? null)}
-            title="编辑"
-          >
-            ✎
-          </Button>
-          <Button
-            type="text"
-            size="small"
-            danger
-            className="!px-1 !py-0.5 !text-xs"
-            onClick={() => handleDelete(record.id!)}
-            title="删除"
-          >
-            🗑
-          </Button>
+          <Tooltip title={<span>查看放箱令信息</span>}>
+            <Button
+              type="text"
+              size="small"
+              className="!px-1 !py-0.5 !text-xs"
+              onClick={() => setViewId(record.id ?? null)}
+              title="查看"
+            >
+              👁
+            </Button>
+          </Tooltip>
+          <Tooltip title={<span>编辑</span>}>
+            <Button
+              type="text"
+              size="small"
+              className="!px-1 !py-0.5 !text-xs"
+              onClick={() => setEditId(record.id ?? null)}
+              title="编辑"
+            >
+              ✎
+            </Button>
+          </Tooltip>
+          <Tooltip title={<span>删除</span>}>
+            <Button
+              type="text"
+              size="small"
+              danger
+              className="!px-1 !py-0.5 !text-xs"
+              onClick={() => handleDelete(record.id!)}
+              title="删除"
+            >
+              🗑
+            </Button>
+          </Tooltip>
         </Space>
       ),
     },
@@ -169,22 +204,56 @@ export const ReleaseList = () => {
             className="w-36"
             placeholder="类型"
             options={ORDER_TYPE_OPTIONS}
-            onChange={(v) => setTypeFilter(v ?? "")}
+            onChange={(v) => {
+              const q: Record<string, string | string[] | undefined> = {
+                ...router.query,
+                type: v || undefined,
+                page: "1",
+              };
+              if (!v) delete q.type;
+              delete q.keyword;
+              router.push({ pathname: router.pathname, query: q }, undefined, {
+                shallow: true,
+              });
+            }}
           />
           <Select
             allowClear
             className="w-36"
             placeholder="状态"
             options={STATUS_OPTIONS}
-            onChange={(v) => setStatusFilter(v ?? "")}
+            onChange={(v) => {
+              const q: Record<string, string | string[] | undefined> = {
+                ...router.query,
+                status: v || undefined,
+                page: "1",
+              };
+              if (!v) delete q.status;
+              delete q.keyword;
+              router.push({ pathname: router.pathname, query: q }, undefined, {
+                shallow: true,
+              });
+            }}
           />
           <div className="w-64">
             <SearchInput
               placeholder="放箱令编号"
               onSearch={(v) => {
-                setKeyword(v);
-                setPage(1);
-                load(1);
+                const q: Record<string, string | string[] | undefined> = {
+                  ...router.query,
+                  keyword: v || undefined,
+                  page: "1",
+                };
+                if (!v) delete q.keyword;
+                delete q.type;
+                delete q.status;
+                router.push(
+                  { pathname: router.pathname, query: q },
+                  undefined,
+                  {
+                    shallow: true,
+                  },
+                );
               }}
             />
           </div>
@@ -197,20 +266,32 @@ export const ReleaseList = () => {
         rowKey="id"
         loading={loading}
         scroll={{ x: 1400 }}
-        pagination={
-          total > 20
-            ? {
-                current: page,
-                total,
-                pageSize: 20,
-                onChange: (p) => {
-                  setPage(p);
-                  load(p);
-                },
-                showSizeChanger: false,
-              }
-            : false
-        }
+        pagination={{
+          current: page,
+          total,
+          pageSize: 20,
+          onChange: (p) => {
+            const q: Record<string, string | string[] | undefined> = {
+              ...router.query,
+              page: String(p),
+            };
+            router.push({ pathname: router.pathname, query: q }, undefined, {
+              shallow: true,
+            });
+          },
+          onShowSizeChange: (_p, ps) => {
+            const q = { ...router.query } as Record<
+              string,
+              string | string[] | undefined
+            >;
+            q.page = "1";
+            q.pageSize = String(ps);
+            router.push({ pathname: router.pathname, query: q }, undefined, {
+              shallow: true,
+            });
+          },
+          showTotal: (t) => `共 ${t} 条`,
+        }}
       />
 
       {editId !== undefined && (
@@ -224,7 +305,11 @@ export const ReleaseList = () => {
         />
       )}
       {viewId && (
-        <ReleaseDetailModal id={viewId} onClose={() => setViewId(null)} />
+        <ReleaseDetailModal
+          id={viewId}
+          onClose={() => setViewId(null)}
+          onConfirmPickup={handleConfirmPickup}
+        />
       )}
     </div>
   );

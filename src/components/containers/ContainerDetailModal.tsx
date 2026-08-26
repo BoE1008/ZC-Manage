@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Modal, Tabs, Button, Space, Spin, Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { Container, ContainerStatus } from "@/types";
+import { Container, ContainerStatus, LifecycleNode } from "@/types";
 import { StatusBadge, UsageTag, CondTag } from "@/components/ui/Badge";
 import { getContainerDetail } from "@/restApi/container";
 
@@ -17,6 +17,7 @@ export const ContainerDetailModal = ({ id, onClose, onEdit }: Props) => {
   const [container, setContainer] = useState<Container | null>(null);
   const [shipments, setShipments] = useState<any[]>([]);
   const [releases, setReleases] = useState<ReleaseOrder[]>([]);
+  const [lifecycle, setLifecycle] = useState<LifecycleNode[]>([]);
   const [tab, setTab] = useState("info");
   const [loading, setLoading] = useState(true);
 
@@ -27,6 +28,9 @@ export const ContainerDetailModal = ({ id, onClose, onEdit }: Props) => {
         // 兼容：{code, entity: {data}} / {code, entity} / 直接实体
         const c = r?.entity?.data ?? r?.entity ?? r;
         setContainer(c ?? null);
+        setLifecycle(
+          Array.isArray(r?.entity?.lifecycle) ? r?.entity?.lifecycle : [],
+        );
         // 运踪直接从 container.trackings 取
         setShipments(
           Array.isArray(r?.entity?.trackings) ? r?.entity?.trackings : [],
@@ -216,55 +220,25 @@ export const ContainerDetailModal = ({ id, onClose, onEdit }: Props) => {
       {tab === "timeline" && (
         <div className="relative pl-6 space-y-4 py-2">
           <div className="absolute left-[7px] top-2 bottom-2 w-0.5 bg-gray-200" />
-          {[
-            {
-              date: c.liftingTime,
-              icon: "📦",
-              title: "提箱",
-              desc: `提箱堆场：${c.dropYardId || "-"} | 提箱令：${c.liftingOrderNo || "-"}`,
-            },
-            c.sendTime && {
-              date: c.sendTime,
-              icon: "🚢",
-              title: "发运",
-              desc: `船名：${c.shipName || "-"}`,
-            },
-            c.eta && {
-              date: c.eta,
-              icon: "📍",
-              title: "预计到达",
-              desc: "待确认",
-            },
-            c.ata && {
-              date: c.ata,
-              icon: "✅",
-              title: "实际到达",
-              desc: c.storageCost != null ? `堆存成本 $${c.storageCost}` : "-",
-            },
-            {
-              date: new Date().toISOString().slice(0, 10),
-              icon: "📊",
-              title: "当前状态",
-              desc: c.statusRemark || `状态：${c.status}`,
-            },
-          ]
-            .filter(Boolean)
-            .map((item: any, i: number) => (
-              <div key={i} className="relative pl-2">
-                <div
-                  className={`absolute -left-[22px] top-1 w-3 h-3 rounded-full border-2 border-white ${
-                    i === 0 ? "bg-gray-400" : "bg-[#198348]"
-                  }`}
-                />
-                <div className="text-[11px] text-gray-400">
-                  {item.date || "-"}
-                </div>
-                <div className="text-sm font-medium">
-                  {item.icon} {item.title}
-                </div>
-                <div className="text-xs text-gray-500">{item.desc}</div>
+          {lifecycle.map((node, i) => (
+            <div key={i} className="relative pl-2">
+              <div
+                className={`absolute -left-[22px] top-1 w-3 h-3 rounded-full border-2 border-white ${
+                  i === 0 ? "bg-gray-400" : "bg-[#198348]"
+                }`}
+              />
+              <div className="text-[11px] text-gray-400">
+                {node.time || "-"}
               </div>
-            ))}
+              <div className="text-sm font-medium">📍 {node.title}</div>
+              <div className="text-xs text-gray-500">{node.detail}</div>
+            </div>
+          ))}
+          {lifecycle.length === 0 && (
+            <div className="text-xs text-gray-400 py-4 text-center">
+              暂无轨迹
+            </div>
+          )}
         </div>
       )}
 

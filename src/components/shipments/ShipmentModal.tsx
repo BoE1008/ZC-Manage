@@ -12,16 +12,19 @@ import {
 import dayjs from "dayjs";
 
 import { Container, ContainerTracking, ContainerTrackingForm } from "@/types";
-import { addTracking, editTracking } from "@/restApi/tracking";
+import {
+  addTracking,
+  editTracking,
+  getTrackingDetail,
+} from "@/restApi/tracking";
 import { getSuppliersList } from "@/restApi/supplyer";
 import { getAllProjectList } from "@/restApi/project";
 import { getDictOptions, getDictOptionsSync } from "@/restApi/dictCache";
 import type { DictOption } from "@/types/dict";
+import { getContainerList } from "@/restApi/container";
 
 interface Props {
   id: string | null;
-  containers: Container[];
-  shipments: ContainerTracking[];
   onSave: (id: string | null, data: Partial<ContainerTracking>) => void;
   onClose: () => void;
 }
@@ -31,23 +34,32 @@ const SEGMENT_OPTIONS = [
   { label: "回程 inbound", value: "inbound" },
 ];
 
-export const ShipmentModal = ({
-  id,
-  containers,
-  shipments,
-  onSave,
-  onClose,
-}: Props) => {
+export const ShipmentModal = ({ id, onSave, onClose }: Props) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [suppliers, setSuppliers] = useState<
     { label: string; value: string }[]
   >([]);
-  const editing = id ? shipments.find((s) => s.id === id) : null;
   const [projects, setProjects] = useState<any[]>([]);
+  const [containers, setContainers] = useState<any[]>([]);
   const [projectLoading, setProjectLoading] = useState(false);
-  const [statusOptions, setStatusOptions] = useState<DictOption[]>(getDictOptionsSync("container_status"));
-  // 缓存拉到的原始数据，只在 id 变化时更新，之后 suppliers/projects 变化不重复触发日期回填
+  const [statusOptions, setStatusOptions] = useState<DictOption[]>(
+    getDictOptionsSync("container_status"),
+  );
+  const [editingRecord, setEditingRecord] = useState<ContainerTracking | null>(
+    null,
+  );
+  // 同一挂载周期内防重复请求（每次打开编辑框都重新拉 detail）
+  const requestedIdRef = useRef<string | null>(null);
+  const [selectProject, setSelectProject] = useState<
+    | {
+        id: string;
+        name: string;
+        num: string;
+      }
+    | undefined
+  >();
+  // 缓存拉到的原始数据，之后 suppliers/projects 变化不重复触发日期回填
   const rawDataRef = useRef<any>(null);
 
   // 独立加载下拉选项，互不等待
@@ -60,6 +72,14 @@ export const ShipmentModal = ({
         })),
       );
     });
+    getContainerList({ pageNo: 1, pageSize: 1000 }).then((r: any) => {
+      setContainers(
+        ((r.entity?.data ?? []) as any[]).map((s: any) => ({
+          label: s.containerNo,
+          value: s.containerNo,
+        })),
+      );
+    });
     setProjectLoading(true);
     getAllProjectList()
       .then((r: any) => {
@@ -69,47 +89,71 @@ export const ShipmentModal = ({
     getDictOptions("container_status").then(setStatusOptions);
   }, []);
 
-  // 打开弹框时缓存原始数据，日期+下拉+项目一次性处理完毕
+  // 打开编辑框：调 getTrackingDetail 重新获取回显数据（按 containerId 查该箱全部运踪，再匹配当前记录）
   useEffect(() => {
-    if (!editing) {
+    if (!id) {
+      requestedIdRef.current = null;
       rawDataRef.current = null;
+      setEditingRecord(null);
       form.resetFields();
       return;
     }
-    const vals: any = { ...editing };
-    // 下拉 id 反查
-    // 日期 dayjs 化
-    (["sendTime", "eta", "ata", "dropTime", "returnTime"] as const).forEach(
-      (f) => {
-        const raw = vals[f] as string;
-        if (!raw || raw === "0000-00-00") return;
-        const d = dayjs(raw);
-        if (d.isValid()) vals[f] = d;
-      },
-    );
-    // 项目
-    if (!vals.projectId && vals.projectName && projects.length) {
-      vals.projectId = projects.find(
-        (x: any) => x.name === vals.projectName,
-      )?.id;
-    }
-    rawDataRef.current = vals;
-    form.setFieldsValue(vals);
-  }, [editing]);
+    // 同一挂载周期内已请求过，跳过
+    if (requestedIdRef.current === id) return;
+    requestedIdRef.current = id;
+    // getTrackingDetail 直接传点击那条记录的 id
+    getTrackingDetail(id).then((r: any) => {
+      // 兼容返回：单条记录 / 数组 / entity.data 包装
+      const entity = r?.entity;
+      const editing = Array.isArray(entity)
+        ? (entity.find((x: any) => x.id === id) ?? entity[0] ?? null)
+        : (entity?.data ?? entity ?? null);
+      if (!editing) return;
+      setEditingRecord(editing);
+      const vals: any = { ...editing };
+      // 日期 dayjs 化
+      (["sendTime", "eta", "ata", "dropTime", "returnTime"] as const).forEach(
+        (f) => {
+          const raw = vals[f] as string;
+          if (!raw || raw === "0000-00-00") return;
+          const d = dayjs(raw);
+          if (d.isValid()) vals[f] = d;
+        },
+      );
+      // 项目：根据 projectName 反查，把 id 写到 projectNum（Select value），并设置 selectProject
+      if (vals.projectName) {
+        const proj = projects.find((x: any) => x.name === vals.projectName);
+        if (proj) {
+          vals.projectNum = proj.id;
+          setSelectProject(proj);
+        }
+      }
+      rawDataRef.current = vals;
+      form.setFieldsValue(vals);
+    });
+  }, [id]);
 
   // suppliers/projects 变化时，只更新下拉和项目，不碰日期
   useEffect(() => {
     if (!rawDataRef.current) return;
     const vals = { ...rawDataRef.current };
     // 下拉重新查 id
-    // 项目
-    if (!vals.projectId && vals.projectName && projects.length) {
-      vals.projectId = projects.find(
-        (x: any) => x.name === vals.projectName,
-      )?.id;
+    // 项目：根据 projectName 反查（options 就绪后补上）
+    if (!vals.projectNum && vals.projectName && projects.length) {
+      const proj = projects.find((x: any) => x.name === vals.projectName);
+      if (proj) {
+        vals.projectNum = proj.id;
+        setSelectProject(proj);
+      }
     }
     form.setFieldsValue(vals);
   }, [suppliers, projects]);
+
+  // 项目编号变化：回填项目名称到 selectProject
+  const handleProjectChanged = (param: any) => {
+    const proj = projects.find((p: any) => p.id === param);
+    setSelectProject(proj);
+  };
 
   const handleOk = async () => {
     try {
@@ -123,14 +167,10 @@ export const ShipmentModal = ({
         if (v && v.format) (values as any)[f] = v.format("YYYY-MM-DD");
       });
       const payload = { ...values, ...derived };
-      // 根据箱号补充集装箱 id
-      const matched = containers.find(
-        (c) => c.containerNo === values.containerNo,
-      );
-      if (matched) payload.containerId = matched.id;
-      payload.projectName = projects.find(
-        (x: any) => x.id === values.projectId,
-      )?.name;
+      // 项目：projectNum 是真实 id，selectProject 持有完整对象
+      payload.projectId = values.projectNum || "";
+      payload.projectName = selectProject?.name || "";
+      delete payload.projectNum;
       setLoading(true);
       if (id) {
         await editTracking({ ...payload, id });
@@ -150,7 +190,9 @@ export const ShipmentModal = ({
 
   return (
     <Modal
-      title={editing ? `编辑运踪 - ${editing.containerNo}` : "新增运踪"}
+      title={
+        editingRecord ? `编辑运踪 - ${editingRecord.containerNo}` : "新增运踪"
+      }
       open
       onOk={handleOk}
       onCancel={onClose}
@@ -170,7 +212,7 @@ export const ShipmentModal = ({
         <div className="text-xs font-bold text-[#198348] pb-1 mb-3 border-b border-dashed border-gray-200">
           集装箱与项目
         </div>
-        <Form form={form} layout="vertical" initialValues={editing || {}}>
+        <Form form={form} layout="vertical" initialValues={editingRecord || {}}>
           <div className="grid grid-cols-2 gap-x-4">
             <Form.Item
               name="containerNo"
@@ -195,29 +237,38 @@ export const ShipmentModal = ({
               />
             </Form.Item>
             <Form.Item
-              name="projectId"
+              name="projectNum"
+              label={
+                <span className="text-xs">
+                  项目编号 <span className="text-red-500">*</span>
+                </span>
+              }
+              rules={[{ required: true, message: "请选择项目" }]}
+              validateTrigger="onBlur"
+            >
+              <Select
+                allowClear
+                showSearch
+                placeholder="选择项目"
+                loading={projectLoading}
+                optionFilterProp="label"
+                options={projects.map((p: any) => ({
+                  label: p.projectNum,
+                  value: p.id,
+                }))}
+                onChange={handleProjectChanged}
+              />
+            </Form.Item>
+            <Form.Item
               label={
                 <span className="text-xs">
                   项目名称 <span className="text-red-500">*</span>
                 </span>
               }
-              rules={[{ required: true }]}
             >
-              <Select
-                allowClear
-                showSearch
-                placeholder="请选择项目"
-                loading={projectLoading}
-                filterOption={(i, o) =>
-                  ((o?.label as string) || "")
-                    .toLowerCase()
-                    .includes(i.toLowerCase())
-                }
-                options={projects.map((p: any) => ({
-                  label: p.name,
-                  value: p.id,
-                }))}
-              />
+              <div className="px-3 py-1 text-sm text-gray-700 bg-gray-50 rounded border border-gray-200 min-h-[32px]">
+                {selectProject?.name || "-"}
+              </div>
             </Form.Item>
             <Form.Item
               name="port"
