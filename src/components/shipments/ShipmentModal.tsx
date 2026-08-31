@@ -22,6 +22,7 @@ import { getAllProjectList } from "@/restApi/project";
 import { getDictOptions, getDictOptionsSync } from "@/restApi/dictCache";
 import type { DictOption } from "@/types/dict";
 import { getContainerList } from "@/restApi/container";
+import { getYardList } from "@/restApi/yard";
 
 interface Props {
   id: string | null;
@@ -42,6 +43,7 @@ export const ShipmentModal = ({ id, onSave, onClose }: Props) => {
   >([]);
   const [projects, setProjects] = useState<any[]>([]);
   const [containers, setContainers] = useState<any[]>([]);
+  const [yards, setYards] = useState<any[]>([]);
   const [projectLoading, setProjectLoading] = useState(false);
   const [statusOptions, setStatusOptions] = useState<DictOption[]>(
     getDictOptionsSync("container_status"),
@@ -77,6 +79,14 @@ export const ShipmentModal = ({ id, onSave, onClose }: Props) => {
         ((r.entity?.data ?? []) as any[]).map((s: any) => ({
           label: s.containerNo,
           value: s.containerNo,
+        })),
+      );
+    });
+    getYardList({ pageNo: 1, pageSize: 1000 }).then((r: any) => {
+      setYards(
+        ((r.entity?.data ?? []) as any[]).map((y: any) => ({
+          label: y.yardName,
+          value: y.id,
         })),
       );
     });
@@ -230,10 +240,7 @@ export const ShipmentModal = ({ id, onSave, onClose }: Props) => {
                     .toLowerCase()
                     .includes(i.toLowerCase())
                 }
-                options={containers.map((c) => ({
-                  label: `${c.containerNo}`,
-                  value: c.containerNo,
-                }))}
+                options={containers}
               />
             </Form.Item>
             <Form.Item
@@ -357,6 +364,29 @@ export const ShipmentModal = ({ id, onSave, onClose }: Props) => {
               name="returnOrderNo"
               label={<span className="text-xs">还箱令</span>}
             >
+              <Input />
+            </Form.Item>
+            <Form.Item
+              name="dropYardId"
+              label={<span className="text-xs">落箱堆场</span>}
+            >
+              <Select
+                allowClear
+                showSearch
+                placeholder="选择落箱堆场"
+                filterOption={(i, o) =>
+                  ((o?.label as string) || "")
+                    .toLowerCase()
+                    .includes(i.toLowerCase())
+                }
+                options={yards}
+                onChange={(val) => {
+                  const y = yards.find((x: any) => x.value === val);
+                  form.setFieldValue("dropYardName", y?.label ?? "");
+                }}
+              />
+            </Form.Item>
+            <Form.Item name="dropYardName" hidden>
               <Input />
             </Form.Item>
           </div>

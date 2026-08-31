@@ -22,6 +22,7 @@ import {
 } from "@/restApi/container";
 
 import { getSuppliersList } from "@/restApi/supplyer";
+import { getYardList } from "@/restApi/yard";
 import { getCustomersList } from "@/restApi/customer";
 import { getAllProjectList } from "@/restApi/project";
 
@@ -74,9 +75,15 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
   useEffect(() => {
     getSuppliersList(1, 1000).then((r: any) => {
       const supList = r.entity?.data ?? [];
-      const supOpts = supList.map((s: any) => ({ label: s.name, value: s.id }));
-      setSuppliers(supOpts);
-      setYards(supOpts);
+      setSuppliers(supList.map((s: any) => ({ label: s.name, value: s.id })));
+    });
+    getYardList({ pageNo: 1, pageSize: 1000 }).then((r: any) => {
+      setYards(
+        (r?.entity?.data ?? []).map((y: any) => ({
+          label: y.yardName,
+          value: y.id,
+        })),
+      );
     });
     getCustomersList(1, 1000).then((r: any) => {
       setBuyers(
@@ -268,7 +275,17 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
             name="supplierId"
             label={<span className="text-xs">卖方/出租方</span>}
           >
-            <Select allowClear placeholder="请选择" options={suppliers} />
+            <Select
+              allowClear
+              showSearch
+              placeholder="请选择"
+              options={suppliers}
+              filterOption={(i, o) =>
+                ((o?.label as string) || "")
+                  .toLowerCase()
+                  .includes(i.toLowerCase())
+              }
+            />
           </Form.Item>
           <Form.Item
             name="cost"
@@ -287,7 +304,17 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
             name="liftingYardId"
             label={<span className="text-xs">提箱堆场</span>}
           >
-            <Select allowClear placeholder="请选择" options={yards} />
+            <Select
+              allowClear
+              showSearch
+              placeholder="请选择"
+              options={yards}
+              filterOption={(i, o) =>
+                ((o?.label as string) || "")
+                  .toLowerCase()
+                  .includes(i.toLowerCase())
+              }
+            />
           </Form.Item>
           <Form.Item
             name="liftingTime"
@@ -342,7 +369,17 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
             name="buyerId"
             label={<span className="text-xs">买方/租方</span>}
           >
-            <Select allowClear placeholder="-" options={buyers} />
+            <Select
+              allowClear
+              showSearch
+              placeholder="-"
+              options={buyers}
+              filterOption={(i, o) =>
+                ((o?.label as string) || "")
+                  .toLowerCase()
+                  .includes(i.toLowerCase())
+              }
+            />
           </Form.Item>
         </div>
 

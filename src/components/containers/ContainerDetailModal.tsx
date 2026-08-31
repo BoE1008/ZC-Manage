@@ -10,7 +10,7 @@ import { ReleaseOrder } from "@/types";
 interface Props {
   id: string;
   onClose: () => void;
-  onEdit: () => void;
+  onEdit?: () => void;
 }
 
 export const ContainerDetailModal = ({ id, onClose, onEdit }: Props) => {
@@ -92,9 +92,11 @@ export const ContainerDetailModal = ({ id, onClose, onEdit }: Props) => {
       footer={
         <Space>
           <Button onClick={onClose}>关闭</Button>
-          <Button type="primary" onClick={onEdit}>
-            编辑
-          </Button>
+          {onEdit && (
+            <Button type="primary" onClick={onEdit}>
+              编辑
+            </Button>
+          )}
         </Space>
       }
     >

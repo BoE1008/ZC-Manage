@@ -3,7 +3,13 @@
  * base path: /zc/yard
  */
 import axiosInstance from "./axiosInstance";
-import { Yard, YardForm, YardPageQuery, PageResult, ApiResponse } from "@/types";
+import {
+  Yard,
+  YardForm,
+  YardPageQuery,
+  PageResult,
+  ApiResponse,
+} from "@/types";
 
 // ========================
 // 堆场 CRUD
@@ -14,9 +20,12 @@ import { Yard, YardForm, YardPageQuery, PageResult, ApiResponse } from "@/types"
  * GET /zc/yard/list
  */
 export const getYardList = async (params: YardPageQuery) => {
-  const res = await axiosInstance.get<ApiResponse<PageResult<Yard>>>("/zc/yard/list", {
-    params,
-  });
+  const res = await axiosInstance.get<ApiResponse<PageResult<Yard>>>(
+    "/zc/yard/list",
+    {
+      params,
+    },
+  );
   return res.data;
 };
 
@@ -54,21 +63,21 @@ export const editYard = async (data: YardForm & { id: string }) => {
  * GET /zc/yard/del?id=xxx（注意不是 DELETE）
  */
 export const deleteYard = async (id: string) => {
-  const res = await axiosInstance.delete<ApiResponse>("/zc/yard/del", {
+  const res = await axiosInstance.get<ApiResponse>("/zc/yard/del", {
     params: { id },
   });
   return res.data;
 };
 
-// ========================
-// 堆场辅助接口
-// ========================
-
 /**
- * 获取所有堆场（下拉框用，不分页）
+ * 全量堆场列表（下拉用）
  * GET /zc/yard/listAll
  */
 export const getAllYards = async () => {
   const res = await axiosInstance.get<ApiResponse<Yard[]>>("/zc/yard/listAll");
   return res.data;
 };
+
+// ========================
+// 堆场辅助接口
+// ========================

@@ -11,25 +11,28 @@ import { PageResult, ApiResponse } from "@/types";
 
 export interface ReleaseOrder {
   id?: string;
-  orderNo?: string;        // 放箱令编号
-  orderType?: string;      // 放箱令类型
-  containerId?: string;    // 集装箱ID
-  containerNo?: string;    // 集装箱编号
-  buyerId?: string;        // 买方/租方客户ID
-  buyerName?: string;      // 买方/租方名称
-  yardId?: string;         // 放箱堆场ID
-  yardName?: string;       // 放箱堆场名称
-  pickupTime?: string;     // 客户提箱时间
-  income?: number;         // 放箱收入
-  status?: string;         // 状态
-  remark?: string;         // 备注
+  orderNo?: string; // 放箱令编号
+  orderType?: string; // 放箱令类型
+  containerId?: string; // 集装箱ID
+  containerNo?: string; // 集装箱编号
+  buyerId?: string; // 买方/租方客户ID
+  buyerName?: string; // 买方/租方名称
+  yardId?: string; // 放箱堆场ID
+  yardName?: string; // 放箱堆场名称
+  pickupTime?: string; // 客户提箱时间
+  income?: number; // 放箱收入
+  status?: string; // 状态
+  remark?: string; // 备注
   createBy?: string;
   createTime?: string;
   updateBy?: string;
   updateTime?: string;
 }
 
-export type ReleaseOrderForm = Omit<ReleaseOrder, "id" | "createBy" | "createTime" | "updateBy" | "updateTime">;
+export type ReleaseOrderForm = Omit<
+  ReleaseOrder,
+  "id" | "createBy" | "createTime" | "updateBy" | "updateTime"
+>;
 
 // ========================
 // 放箱令 CRUD
@@ -82,7 +85,10 @@ export const getReleaseOrderDetail = async (id: string) => {
  * POST /zc/releaseOrder/add
  */
 export const addReleaseOrder = async (data: ReleaseOrderForm) => {
-  const res = await axiosInstance.post<ApiResponse>("/zc/releaseOrder/add", data);
+  const res = await axiosInstance.post<ApiResponse>(
+    "/zc/releaseOrder/add",
+    data,
+  );
   return res.data;
 };
 
@@ -90,8 +96,13 @@ export const addReleaseOrder = async (data: ReleaseOrderForm) => {
  * 编辑放箱令
  * POST /zc/releaseOrder/update
  */
-export const editReleaseOrder = async (data: ReleaseOrderForm & { id: string }) => {
-  const res = await axiosInstance.post<ApiResponse>("/zc/releaseOrder/update", data);
+export const editReleaseOrder = async (
+  data: ReleaseOrderForm & { id: string },
+) => {
+  const res = await axiosInstance.post<ApiResponse>(
+    "/zc/releaseOrder/update",
+    data,
+  );
   return res.data;
 };
 

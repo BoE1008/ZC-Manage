@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import dayjs from "dayjs";
 import Table from "@/components/ResizeTable";
 import { Button, Tooltip, Select, Space, Modal, message } from "antd";
 import SearchInput from "@/components/SearchInput";
@@ -8,18 +9,20 @@ import { ReleaseTypeBadge, StatusBadge } from "@/components/ui/Badge";
 import { useRouter } from "next/router";
 import { ReleaseModal } from "./ReleaseModal";
 import { ReleaseDetailModal } from "./ReleaseDetailModal";
+import { ContainerDetailModal } from "@/components/containers/ContainerDetailModal";
 import {
   getReleaseOrderList,
   deleteReleaseOrder,
 } from "@/restApi/releaseOrder";
 
 const ORDER_TYPE_OPTIONS = [
-  { label: "卖出放箱", value: "卖出放箱" },
-  { label: "租箱", value: "租箱" },
+  { label: "卖出放箱", value: "sale" },
+  { label: "回程放箱", value: "return" },
+  { label: "租给客户", value: "rent" },
 ];
 
 const STATUS_OPTIONS = [
-  { label: "待确认", value: "pending" },
+  { label: "待提箱", value: "pending" },
   { label: "已提箱", value: "picked_up" },
   { label: "已作废", value: "cancelled" },
 ];
@@ -36,6 +39,7 @@ export const ReleaseList = () => {
   const [total, setTotal] = useState(0);
   const [editId, setEditId] = useState<string | null | undefined>(undefined);
   const [viewId, setViewId] = useState<string | null>(null);
+  const [viewContainerId, setViewContainerId] = useState<string | null>(null);
 
   const load = (
     pageNo = page,
@@ -132,23 +136,94 @@ export const ReleaseList = () => {
       dataIndex: "orderType",
       render: (v) => <ReleaseTypeBadge type={v} />,
     },
-    { title: "集装箱编号", dataIndex: "containerNo", width: 130 },
+    {
+      title: "箱数",
+      dataIndex: "boxCount",
+      width: 70,
+      align: "center",
+      render: (v, r: any) => v ?? r.containers?.length ?? "-",
+    },
+    {
+      title: "箱号",
+      dataIndex: "containerNo",
+      width: 130,
+      render: (v: string, r: any) =>
+        v ? (
+          <Tooltip title={<span>查看集装箱详情</span>}>
+            <span
+              className="text-[#198348] hover:underline cursor-pointer"
+              onClick={() => r.containerId && setViewContainerId(r.containerId)}
+            >
+              {v}
+            </span>
+          </Tooltip>
+        ) : (
+          "-"
+        ),
+    },
     { title: "买方/租方", dataIndex: "buyerName", width: 140 },
     { title: "放箱堆场", dataIndex: "yardName", width: 140 },
-    { title: "提箱时间", dataIndex: "pickupTime", width: 120 },
     {
-      title: "收入",
+      title: "生成时间",
+      dataIndex: "createTime",
+      width: 120,
+      render: (v: string) =>
+        v && v !== "-" && dayjs(v).isValid() ? dayjs(v).format("YYYY-MM-DD") : "-",
+    },
+    {
+      title: "客户提箱时间",
+      dataIndex: "pickupTime",
+      width: 130,
+      render: (v: string) =>
+        v && v !== "-" && dayjs(v).isValid() ? dayjs(v).format("YYYY-MM-DD") : "-",
+    },
+    {
+      title: "放箱方式",
+      dataIndex: "releaseMethod",
+      width: 110,
+      align: "center",
+      render: (v: any) =>
+        v === "designated"
+          ? <span className="text-xs px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">指定箱号</span>
+          : v === "undesignated"
+            ? <span className="text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 border border-gray-200">不指定箱号</span>
+            : "-",
+    },
+    {
+      title: "箱型",
+      dataIndex: "containerType",
+      width: 90,
+      align: "center",
+      render: (v: any) => v || "-",
+    },
+    {
+      title: "放箱数量",
+      dataIndex: "quantity",
+      width: 100,
+      align: "center",
+      render: (v: any) => (v != null ? `${v} 个` : "-"),
+    },
+    {
+      title: "放箱地区",
+      dataIndex: "region",
+      width: 100,
+      render: (v: any) => v || "-",
+    },
+    {
+      title: "收入(USD)",
       dataIndex: "income",
-      render: (v) => (v ? `¥${v.toLocaleString()}` : "-"),
+      width: 110,
+      render: (v) => (v ? `USD ${Number(v).toLocaleString()}` : "-"),
     },
     {
       title: "状态",
       dataIndex: "status",
+      width: 100,
       render: (v) => <StatusBadge status={v} />,
     },
-    { title: "备注", dataIndex: "remark", ellipsis: true },
     {
       title: "操作",
+      width: 120,
       align: "center",
       fixed: "right",
       render: (_, record) => (
@@ -194,10 +269,19 @@ export const ReleaseList = () => {
 
   return (
     <div>
+      <div className="mb-3 px-4">
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 px-3 py-2 text-xs text-yellow-800 rounded">
+          <b>📌 放箱令说明：</b>
+          箱子必须处于<b>堆存状态</b>（国内堆存/国外堆存）才能放箱；放箱堆场<b>可指定也可不指定</b>——不指定时客户提箱后再由操作员回填"箱号+提箱时间"完成匹配。支持一次勾选多个箱子批量生成放箱令，Word 模板中自动生成多行放箱指令。
+        </div>
+      </div>
       <div className="mb-4 flex flex-wrap gap-3 justify-between px-4">
-        <Button type="primary" onClick={() => setEditId(null)}>
-          + 新增放箱令
-        </Button>
+        <div className="flex gap-2">
+          <Button type="primary" onClick={() => setEditId(null)}>
+            + 生成放箱令(支持批量)
+          </Button>
+          <Button onClick={() => message.info("导出功能待对接")}>📤 导出</Button>
+        </div>
         <div className="flex items-center gap-3 flex-wrap">
           <Select
             allowClear
@@ -237,7 +321,7 @@ export const ReleaseList = () => {
           />
           <div className="w-64">
             <SearchInput
-              placeholder="放箱令编号"
+              placeholder="放箱令编号 / 箱号"
               onSearch={(v) => {
                 const q: Record<string, string | string[] | undefined> = {
                   ...router.query,
@@ -308,7 +392,14 @@ export const ReleaseList = () => {
         <ReleaseDetailModal
           id={viewId}
           onClose={() => setViewId(null)}
-          onConfirmPickup={handleConfirmPickup}
+        />
+      )}
+
+      {/* 集装箱详情弹窗（点击箱号打开） */}
+      {viewContainerId && (
+        <ContainerDetailModal
+          id={viewContainerId}
+          onClose={() => setViewContainerId(null)}
         />
       )}
     </div>
