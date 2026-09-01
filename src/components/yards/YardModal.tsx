@@ -112,7 +112,7 @@ const YardModal: React.FC<Props> = ({ id, onSave, onClose }) => {
           <Form.Item label="对接人" name="contactName">
             <Input placeholder="联系人姓名" />
           </Form.Item>
-          <Form.Item label="联系电话" name="contactMobile">
+          <Form.Item label="联系电话" name="contactPhone">
             <Input placeholder="电话" />
           </Form.Item>
           <Form.Item label="箱管电话" name="boxMgrPhone">
@@ -142,18 +142,6 @@ const YardModal: React.FC<Props> = ({ id, onSave, onClose }) => {
               options={suppliers}
             />
           </Form.Item>
-        </div>
-
-        <div className="border-t border-dashed border-gray-200 pt-3 mt-1">
-          <div className="text-xs font-bold text-[#198348] mb-2">费率信息</div>
-          <div className="grid grid-cols-2 gap-x-4">
-            <Form.Item label="堆存费率" name="storageRate">
-              <Input placeholder="如：USD 2/天" />
-            </Form.Item>
-            <Form.Item label="吊装费率" name="liftRate">
-              <Input placeholder="如：USD 30" />
-            </Form.Item>
-          </div>
         </div>
 
         <Form.Item label="备注" name="remark">

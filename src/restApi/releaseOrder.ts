@@ -116,3 +116,15 @@ export const deleteReleaseOrder = async (id: string) => {
   });
   return res.data;
 };
+
+/**
+ * 下载放箱令 Word 放箱单
+ * GET /zc/releaseOrder/doc?id=xxx （返回完整 AxiosResponse，含 blob 和 Content-Disposition）
+ */
+export const downloadReleaseOrderDoc = async (id: string) => {
+  const res = await axiosInstance.get("/zc/releaseOrder/doc", {
+    params: { id },
+    responseType: "blob",
+  });
+  return res;
+};

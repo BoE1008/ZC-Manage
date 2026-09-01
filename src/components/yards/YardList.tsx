@@ -48,7 +48,7 @@ const YardList: React.FC = () => {
   const handleDelete = (r: any) => {
     Modal.confirm({
       title: "确认删除",
-      content: `确定删除堆场「${r.name}」吗？`,
+      content: `确定删除堆场「${r.yardName}」吗？`,
       okText: "删除",
       okButtonProps: { className: "!bg-red-500 !border-red-500" },
       cancelText: "取消",
@@ -95,8 +95,6 @@ const YardList: React.FC = () => {
       dataIndex: "supplierName",
       render: (v: string) => v || <span className="text-gray-400">未关联</span>,
     },
-    { title: "堆存费率", dataIndex: "storageRate" },
-    { title: "吊装费率", dataIndex: "liftRate" },
     {
       title: "当前堆存",
       dataIndex: "boxCount",
@@ -111,7 +109,7 @@ const YardList: React.FC = () => {
         ),
     },
     { title: "对接人", dataIndex: "contactName" },
-    { title: "电话", dataIndex: "boxMgrPhone" },
+    { title: "电话", dataIndex: "contactPhone" },
     { title: "作业时间", dataIndex: "workingTime" },
     {
       title: "操作",

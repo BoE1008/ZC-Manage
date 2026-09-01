@@ -39,9 +39,15 @@ const ReturnOrderModal: React.FC<Props> = ({ id, onSave, onClose }) => {
     });
   }, []);
 
-  // 加载可还箱的集装箱（在途/国外堆存/回程在途/待提箱）
+  // 加载可还箱的集装箱（国内堆存/在途/国外堆存/回程在途/待提箱）
   useEffect(() => {
-    const statuses = ["outbound", "overseas_storage", "inbound", "pending"];
+    const statuses = [
+      "domestic_storage",
+      "outbound",
+      "overseas_storage",
+      "inbound",
+      "pending",
+    ];
     Promise.all(
       statuses.map((s) =>
         getContainerList({ status: s, pageNo: 1, pageSize: 500 }),

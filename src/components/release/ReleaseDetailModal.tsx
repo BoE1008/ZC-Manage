@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
 import { Modal, Space, Button, Spin, message } from "antd";
 import dayjs from "dayjs";
-import { getReleaseOrderDetail } from "@/restApi/releaseOrder";
+import {
+  getReleaseOrderDetail,
+  downloadReleaseOrderDoc,
+} from "@/restApi/releaseOrder";
 import { ReleaseTypeBadge, StatusBadge } from "@/components/ui/Badge";
 
 interface Props {
@@ -87,8 +90,42 @@ export const ReleaseDetailModal = ({
 
   if (!r) return null;
 
-  const downloadWord = () => {
-    message.info("📄 下载 Word 放箱单功能待对接后端 /zc/releaseOrder/doc 接口");
+  const downloadWord = async () => {
+    if (!id) {
+      message.error("放箱令 id 缺失");
+      return;
+    }
+    try {
+      message.loading({ content: "正在下载放箱单...", key: "doc" });
+      const res: any = await downloadReleaseOrderDoc(id);
+      const blob = res.data as Blob;
+
+      // 优先解析服务端 Content-Disposition 的文件名
+      let filename = `放箱单_${r?.orderNo ?? id}.docx`;
+      const cd =
+        res.headers?.["content-disposition"] ??
+        res.headers?.["Content-Disposition"] ??
+        "";
+      const match = /filename\*?=(?:UTF-8''|")?([^;"]+)/i.exec(cd);
+      if (match && match[1]) {
+        try {
+          filename = decodeURIComponent(match[1].trim().replace(/\\"/g, ""));
+        } catch {
+          filename = match[1].trim().replace(/\\"/g, "");
+        }
+      }
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      message.error({ content: "下载失败", key: "doc" });
+    }
   };
 
   return (
@@ -106,11 +143,6 @@ export const ReleaseDetailModal = ({
         <Space>
           <Button onClick={onClose}>关闭</Button>
           <Button onClick={downloadWord}>📄 下载 Word 放箱单</Button>
-          {r.status === "pending" && (
-            <Button type="primary" onClick={onConfirmPickup}>
-              🔗 匹配提箱信息
-            </Button>
-          )}
           {onEdit && (
             <Button type="primary" onClick={onEdit}>
               编辑
@@ -120,7 +152,8 @@ export const ReleaseDetailModal = ({
       }
     >
       <div className="text-xs text-gray-400 mb-2">
-        <span className="text-[#198348]">📋</span> 放箱令基本信息 + Word 模板中同款明细表
+        <span className="text-[#198348]">📋</span> 放箱令基本信息 + Word
+        模板中同款明细表
       </div>
 
       {/* 放箱令信息 9 项栅格 */}
@@ -161,7 +194,9 @@ export const ReleaseDetailModal = ({
 
         <div>
           <div className="text-xs text-gray-400">放箱数量</div>
-          <div className="font-medium">{r.quantity != null ? r.quantity : "-"}</div>
+          <div className="font-medium">
+            {r.quantity != null ? r.quantity : "-"}
+          </div>
         </div>
 
         <div>
@@ -247,7 +282,10 @@ export const ReleaseDetailModal = ({
             <tbody>
               {boxes.length > 0 ? (
                 boxes.map((b, i) => (
-                  <tr key={b.releaseId || i} className="border-t border-gray-100">
+                  <tr
+                    key={b.releaseId || i}
+                    className="border-t border-gray-100"
+                  >
                     <td className="py-2 px-2 text-[#198348] font-medium">
                       {b.containerNo || "-"}
                     </td>

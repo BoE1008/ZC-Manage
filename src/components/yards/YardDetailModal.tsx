@@ -15,12 +15,10 @@ interface YardInfo {
   city?: string;
   address?: string;
   contactName?: string;
-  contactMobile?: string;
+  contactPhone?: string;
   workingTime?: string;
   boxMgrPhone?: string;
   supplierName?: string;
-  storageRate?: string;
-  liftRate?: string;
   remark?: string;
 }
 
@@ -136,7 +134,7 @@ const YardDetailModal: React.FC<Props> = ({ id, onClose, onEdit }) => {
             </div>
             <div>
               <div className="text-xs text-gray-400">联系电话</div>
-              <div className="text-gray-800">{r.contactMobile || "-"}</div>
+              <div className="text-gray-800">{r.contactPhone || "-"}</div>
             </div>
           </div>
         </div>
@@ -150,23 +148,6 @@ const YardDetailModal: React.FC<Props> = ({ id, onClose, onEdit }) => {
             <div className="text-xs text-gray-400">供应商</div>
             <div className="text-gray-800 font-medium">
               {r.supplierName || <span className="text-gray-400">未关联</span>}
-            </div>
-          </div>
-        </div>
-
-        {/* 费率 */}
-        <div>
-          <div className="text-xs font-bold text-[#198348] pb-1 border-b border-dashed border-gray-200 mb-2">
-            费率信息
-          </div>
-          <div className="grid grid-cols-2 gap-y-2 text-sm">
-            <div>
-              <div className="text-xs text-gray-400">堆存费率</div>
-              <div className="text-gray-800">{r.storageRate || "-"}</div>
-            </div>
-            <div>
-              <div className="text-xs text-gray-400">吊装费率</div>
-              <div className="text-gray-800">{r.liftRate || "-"}</div>
             </div>
           </div>
         </div>

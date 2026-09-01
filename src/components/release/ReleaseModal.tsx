@@ -159,7 +159,8 @@ export const ReleaseModal = ({ id, onSave, onClose }: Props) => {
 
   const handleOk = () => {
     return form.validateFields().then((values) => {
-      if (selectedBoxes.length === 0) {
+      // 不指定箱号时，无需勾选集装箱
+      if (values.releaseMethod !== "undesignated" && selectedBoxes.length === 0) {
         message.error("请至少勾选一个箱子");
         return;
       }

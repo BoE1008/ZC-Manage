@@ -9,6 +9,15 @@ const axiosInstance = axios.create({
 if (typeof window !== "undefined") {
   axiosInstance.interceptors.response.use(
     (response) => {
+      // Blob / ArrayBuffer 等二进制响应直接放行，不做 code 判断
+      if (
+        response.config?.responseType === "blob" ||
+        response.config?.responseType === "arraybuffer" ||
+        response.data instanceof Blob
+      ) {
+        return response;
+      }
+
       const { code, message } = response.data;
       if (code === 200) return response;
 
