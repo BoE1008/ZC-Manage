@@ -12,7 +12,7 @@ import {
 } from "antd";
 import dayjs from "dayjs";
 
-import { Container, ContainerForm } from "@/types";
+import { ContainerForm } from "@/types";
 import { getDictOptions, getDictOptionsSync } from "@/restApi/dictCache";
 import type { DictOption } from "@/types/dict";
 import {
@@ -31,17 +31,6 @@ interface Props {
   onSave: () => void;
   onClose: () => void;
 }
-
-const USAGE_OPTIONS = [
-  { label: "买箱", value: "purchase" },
-  { label: "租箱", value: "long_rental" },
-];
-
-const COND_OPTIONS = [
-  { label: "新箱", value: "new" },
-  { label: "次新箱", value: "sub_new" },
-  { label: "适货箱", value: "cargo_worthy" },
-];
 
 export const ContainerModal = ({ id, onSave, onClose }: Props) => {
   const [form] = Form.useForm();
@@ -68,8 +57,6 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
   const [condOptions, setCondOptions] = useState<DictOption[]>(
     getDictOptionsSync("container_cond"),
   );
-
-  const isEdit = id !== null;
 
   // 加载下拉选项
   useEffect(() => {

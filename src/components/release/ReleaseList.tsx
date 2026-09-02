@@ -143,24 +143,6 @@ export const ReleaseList = () => {
       align: "center",
       render: (v, r: any) => v ?? r.containers?.length ?? "-",
     },
-    {
-      title: "箱号",
-      dataIndex: "containerNo",
-      width: 130,
-      render: (v: string, r: any) =>
-        v ? (
-          <Tooltip title={<span>查看集装箱详情</span>}>
-            <span
-              className="text-[#198348] hover:underline cursor-pointer"
-              onClick={() => r.containerId && setViewContainerId(r.containerId)}
-            >
-              {v}
-            </span>
-          </Tooltip>
-        ) : (
-          "-"
-        ),
-    },
     { title: "买方/租方", dataIndex: "buyerName", width: 140 },
     { title: "放箱堆场", dataIndex: "yardName", width: 140 },
     {
@@ -168,14 +150,18 @@ export const ReleaseList = () => {
       dataIndex: "createTime",
       width: 120,
       render: (v: string) =>
-        v && v !== "-" && dayjs(v).isValid() ? dayjs(v).format("YYYY-MM-DD") : "-",
+        v && v !== "-" && dayjs(v).isValid()
+          ? dayjs(v).format("YYYY-MM-DD")
+          : "-",
     },
     {
       title: "客户提箱时间",
       dataIndex: "pickupTime",
       width: 130,
       render: (v: string) =>
-        v && v !== "-" && dayjs(v).isValid() ? dayjs(v).format("YYYY-MM-DD") : "-",
+        v && v !== "-" && dayjs(v).isValid()
+          ? dayjs(v).format("YYYY-MM-DD")
+          : "-",
     },
     {
       title: "放箱方式",
@@ -183,11 +169,17 @@ export const ReleaseList = () => {
       width: 110,
       align: "center",
       render: (v: any) =>
-        v === "designated"
-          ? <span className="text-xs px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">指定箱号</span>
-          : v === "undesignated"
-            ? <span className="text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 border border-gray-200">不指定箱号</span>
-            : "-",
+        v === "designated" ? (
+          <span className="text-xs px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">
+            指定箱号
+          </span>
+        ) : v === "undesignated" ? (
+          <span className="text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 border border-gray-200">
+            不指定箱号
+          </span>
+        ) : (
+          "-"
+        ),
     },
     {
       title: "箱型",
@@ -272,7 +264,10 @@ export const ReleaseList = () => {
       <div className="mb-3 px-4">
         <div className="bg-yellow-50 border-l-4 border-yellow-400 px-3 py-2 text-xs text-yellow-800 rounded">
           <b>📌 放箱令说明：</b>
-          箱子必须处于<b>堆存状态</b>（国内堆存/国外堆存）才能放箱；放箱堆场<b>可指定也可不指定</b>——不指定时客户提箱后再由操作员回填"箱号+提箱时间"完成匹配。支持一次勾选多个箱子批量生成放箱令，Word 模板中自动生成多行放箱指令。
+          箱子必须处于<b>堆存状态</b>（国内堆存/国外堆存）才能放箱；放箱堆场
+          <b>可指定也可不指定</b>
+          ——不指定时客户提箱后再由操作员回填"箱号+提箱时间"完成匹配。支持一次勾选多个箱子批量生成放箱令，Word
+          模板中自动生成多行放箱指令。
         </div>
       </div>
       <div className="mb-4 flex flex-wrap gap-3 justify-between px-4">
@@ -280,7 +275,9 @@ export const ReleaseList = () => {
           <Button type="primary" onClick={() => setEditId(null)}>
             + 生成放箱令(支持批量)
           </Button>
-          <Button onClick={() => message.info("导出功能待对接")}>📤 导出</Button>
+          <Button onClick={() => message.info("导出功能待对接")}>
+            📤 导出
+          </Button>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
           <Select
@@ -389,10 +386,7 @@ export const ReleaseList = () => {
         />
       )}
       {viewId && (
-        <ReleaseDetailModal
-          id={viewId}
-          onClose={() => setViewId(null)}
-        />
+        <ReleaseDetailModal id={viewId} onClose={() => setViewId(null)} />
       )}
 
       {/* 集装箱详情弹窗（点击箱号打开） */}

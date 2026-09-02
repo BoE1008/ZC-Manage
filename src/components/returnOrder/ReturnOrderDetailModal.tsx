@@ -85,7 +85,10 @@ const ReturnOrderDetailModal: React.FC<Props> = ({
       title: "还箱时间",
       dataIndex: "returnTime",
       width: 120,
-      render: (v: string) => v && v !== "-" && dayjs(v).isValid() ? dayjs(v).format("YYYY-MM-DD") : "-",
+      render: (v: string) =>
+        v && v !== "-" && dayjs(v).isValid()
+          ? dayjs(v).format("YYYY-MM-DD")
+          : "-",
     },
     {
       title: "实际还箱堆场",
@@ -202,12 +205,20 @@ const ReturnOrderDetailModal: React.FC<Props> = ({
             <div>
               <div className="text-xs text-gray-400">实际还箱时间</div>
               <div className="text-gray-800">
-                {r.returnTime && r.returnTime !== "-" && dayjs(r.returnTime).isValid() ? dayjs(r.returnTime).format("YYYY-MM-DD") : "-"}
+                {r.returnTime &&
+                r.returnTime !== "-" &&
+                dayjs(r.returnTime).isValid()
+                  ? dayjs(r.returnTime).format("YYYY-MM-DD")
+                  : "-"}
               </div>
             </div>
             <div>
               <div className="text-xs text-gray-400">创建时间</div>
-              <div className="text-gray-800">{r.createTime && dayjs(r.createTime).isValid() ? dayjs(r.createTime).format("YYYY-MM-DD") : (r.createTime || "-")}</div>
+              <div className="text-gray-800">
+                {r.createTime && dayjs(r.createTime).isValid()
+                  ? dayjs(r.createTime).format("YYYY-MM-DD")
+                  : r.createTime || "-"}
+              </div>
             </div>
             <div className="col-span-2">
               <div className="text-xs text-gray-400">备注</div>

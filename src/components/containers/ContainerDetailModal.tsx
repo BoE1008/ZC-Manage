@@ -25,9 +25,7 @@ export const ContainerDetailModal = ({ id, onClose, onEdit }: Props) => {
     setLoading(true);
     getContainerDetail(id)
       .then((r: any) => {
-        // 兼容：{code, entity: {data}} / {code, entity} / 直接实体
-        const c = r?.entity?.data ?? r?.entity ?? r;
-        setContainer(c ?? null);
+        setContainer(r?.entity?.data);
         setLifecycle(
           Array.isArray(r?.entity?.lifecycle) ? r?.entity?.lifecycle : [],
         );
@@ -60,8 +58,6 @@ export const ContainerDetailModal = ({ id, onClose, onEdit }: Props) => {
 
   if (!container) return null;
 
-  const c = container;
-
   const tabItems = [
     { key: "info", label: "基本信息" },
     { key: "timeline", label: "生命周期轨迹" },
@@ -84,7 +80,7 @@ export const ContainerDetailModal = ({ id, onClose, onEdit }: Props) => {
 
   return (
     <Modal
-      title={`集装箱详情 - ${c.containerNo}`}
+      title={`集装箱详情 - ${container.containerNo}`}
       open
       onCancel={onClose}
       width={900}
@@ -114,28 +110,30 @@ export const ContainerDetailModal = ({ id, onClose, onEdit }: Props) => {
           </div>
           <div>
             <span className="text-xs text-gray-400 block">箱号</span>
-            <span className="font-medium">{c.containerNo || "-"}</span>
+            <span className="font-medium">{container.containerNo || "-"}</span>
           </div>
           <div>
             <span className="text-xs text-gray-400 block">箱型</span>
-            <span className="font-medium">{c.containerType || "-"}</span>
+            <span className="font-medium">
+              {container.containerType || "-"}
+            </span>
           </div>
           <div>
             <span className="text-xs text-gray-400 block">使用情况</span>
-            <UsageTag usage={c.usageType} />
+            <UsageTag usage={container.usageType} />
           </div>
           <div>
             <span className="text-xs text-gray-400 block">箱况</span>
-            <CondTag cond={c.conditionType} />
+            <CondTag cond={container.conditionType} />
           </div>
           <div>
             <span className="text-xs text-gray-400 block">卖方/出租方</span>
-            <span className="font-medium">{c.supplierName || "-"}</span>
+            <span className="font-medium">{container.supplierName || "-"}</span>
           </div>
           <div>
             <span className="text-xs text-gray-400 block">成本 (USD)</span>
             <span className="font-medium">
-              {c.cost != null ? `$${c.cost}` : "-"}
+              {container.cost != null ? `$${container.cost}` : "-"}
             </span>
           </div>
 
@@ -144,19 +142,23 @@ export const ContainerDetailModal = ({ id, onClose, onEdit }: Props) => {
           </div>
           <div>
             <span className="text-xs text-gray-400 block">提箱堆场</span>
-            <span className="font-medium">{c.liftingYardName || "-"}</span>
+            <span className="font-medium">
+              {container.liftingYardName || "-"}
+            </span>
           </div>
           <div>
             <span className="text-xs text-gray-400 block">提箱时间</span>
-            <span className="font-medium">{c.liftingTime || "-"}</span>
+            <span className="font-medium">{container.liftingTime || "-"}</span>
           </div>
           <div>
             <span className="text-xs text-gray-400 block">提箱令</span>
-            <span className="font-medium">{c.liftingOrderNo || "-"}</span>
+            <span className="font-medium">
+              {container.liftingOrderNo || "-"}
+            </span>
           </div>
           <div>
             <span className="text-xs text-gray-400 block">当前项目</span>
-            <span className="font-medium">{c.projectName || "-"}</span>
+            <span className="font-medium">{container.projectName || "-"}</span>
           </div>
 
           <div className="col-span-2 text-xs font-bold text-[#198348] py-1 border-b border-dashed border-gray-200">
@@ -164,54 +166,58 @@ export const ContainerDetailModal = ({ id, onClose, onEdit }: Props) => {
           </div>
           <div>
             <span className="text-xs text-gray-400 block">状态</span>
-            <StatusBadge status={c.status} />
+            <StatusBadge status={container.status} />
           </div>
           <div>
             <span className="text-xs text-gray-400 block">状态备注</span>
-            <span className="font-medium">{c.statusRemark || "-"}</span>
+            <span className="font-medium">{container.statusRemark || "-"}</span>
           </div>
           <div>
             <span className="text-xs text-gray-400 block">买方/租方</span>
-            <span className="font-medium">{c.buyerName || "-"}</span>
+            <span className="font-medium">{container.buyerName || "-"}</span>
           </div>
           <div>
             <span className="text-xs text-gray-400 block">是否箱号待定</span>
             <span className="font-medium">
-              {c.isTemp === "1" ? "是" : "否"}
+              {container.isTemp === "1" ? "是" : "否"}
             </span>
           </div>
 
-          {(c.sendTime ||
-            c.eta ||
-            c.ata ||
-            c.storageCost != null ||
-            c.storageIncome != null) && (
+          {(container.sendTime ||
+            container.eta ||
+            container.ata ||
+            container.storageCost != null ||
+            container.storageIncome != null) && (
             <>
               <div className="col-span-2 text-xs font-bold text-[#198348] py-1 border-b border-dashed border-gray-200">
                 运输 &amp; 费用
               </div>
               <div>
                 <span className="text-xs text-gray-400 block">发运时间</span>
-                <span className="font-medium">{c.sendTime || "-"}</span>
+                <span className="font-medium">{container.sendTime || "-"}</span>
               </div>
               <div>
                 <span className="text-xs text-gray-400 block">预计到达</span>
-                <span className="font-medium">{c.eta || "-"}</span>
+                <span className="font-medium">{container.eta || "-"}</span>
               </div>
               <div>
                 <span className="text-xs text-gray-400 block">实际到达</span>
-                <span className="font-medium">{c.ata || "-"}</span>
+                <span className="font-medium">{container.ata || "-"}</span>
               </div>
               <div>
                 <span className="text-xs text-gray-400 block">堆存成本</span>
                 <span className="font-medium">
-                  {c.storageCost != null ? `$${c.storageCost}` : "-"}
+                  {container.storageCost != null
+                    ? `$${container.storageCost}`
+                    : "-"}
                 </span>
               </div>
               <div>
                 <span className="text-xs text-gray-400 block">堆存收入</span>
                 <span className="font-medium">
-                  {c.storageIncome != null ? `$${c.storageIncome}` : "-"}
+                  {container.storageIncome != null
+                    ? `$${container.storageIncome}`
+                    : "-"}
                 </span>
               </div>
             </>

@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { Button, Tooltip, Select, Space, Modal, message } from "antd";
 import Table from "@/components/ResizeTable";
 import type { ColumnsType } from "antd/es/table";
-import { Container, ContainerStatus, ConditionType, UsageType } from "@/types";
+import { Container } from "@/types";
 import { StatusBadge, UsageTag, CondTag } from "@/components/ui/Badge";
 import { ContainerModal } from "./ContainerModal";
 import { ContainerDetailModal } from "./ContainerDetailModal";

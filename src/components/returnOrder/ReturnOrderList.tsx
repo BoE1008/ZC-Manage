@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import dayjs from "dayjs";
-import { Table, Button, Space, Input, Select, message, Modal } from "antd";
+import { Button, Space, Input, Select, message, Modal } from "antd";
 import ResizeTable from "@/components/ResizeTable";
 import ReturnOrderModal from "./ReturnOrderModal";
 import ReturnOrderDetailModal from "./ReturnOrderDetailModal";
@@ -31,7 +31,8 @@ const ReturnOrderList: React.FC = () => {
   const load = (p = 1, extra?: { status?: string; keyword?: string }) => {
     const q = router.query;
     const s = extra?.status ?? (typeof q.status === "string" ? q.status : "");
-    const k = extra?.keyword ?? (typeof q.keyword === "string" ? q.keyword : "");
+    const k =
+      extra?.keyword ?? (typeof q.keyword === "string" ? q.keyword : "");
     const pn = typeof q.page === "string" ? Number(q.page) : p;
     setLoading(true);
     setPage(pn);
@@ -118,24 +119,6 @@ const ReturnOrderList: React.FC = () => {
           "0"
         );
       },
-    },
-    {
-      title: "箱号",
-      dataIndex: "boxes",
-      width: 220,
-      render: (v: any[]) =>
-        v?.length
-          ? v.map((b: any, i: number) => (
-              <span key={i} className="inline-block mr-1">
-                <span className="font-mono text-xs text-gray-700">
-                  {b.boxNo}
-                </span>
-                {i < v.length - 1 && (
-                  <span className="text-gray-300 mx-0.5">、</span>
-                )}
-              </span>
-            ))
-          : "-",
     },
     {
       title: "还箱堆场",
@@ -269,12 +252,21 @@ const ReturnOrderList: React.FC = () => {
             allowClear
             placeholder="状态"
             style={{ width: 100 }}
-            value={typeof router.query.status === "string" ? router.query.status : undefined}
+            value={
+              typeof router.query.status === "string"
+                ? router.query.status
+                : undefined
+            }
             onChange={(v) => {
-              const q: Record<string, string | string[] | undefined> = { ...router.query, status: v || undefined };
+              const q: Record<string, string | string[] | undefined> = {
+                ...router.query,
+                status: v || undefined,
+              };
               if (!v) delete q.status;
               q.page = "1";
-              router.push({ pathname: router.pathname, query: q }, undefined, { shallow: true });
+              router.push({ pathname: router.pathname, query: q }, undefined, {
+                shallow: true,
+              });
             }}
             options={[
               { label: "待还箱", value: "pending" },
@@ -287,16 +279,26 @@ const ReturnOrderList: React.FC = () => {
             style={{ width: 220 }}
             allowClear
             onChange={(e) => {
-              const q: Record<string, string | string[] | undefined> = { ...router.query, keyword: e.target.value || undefined };
+              const q: Record<string, string | string[] | undefined> = {
+                ...router.query,
+                keyword: e.target.value || undefined,
+              };
               if (!e.target.value) delete q.keyword;
               q.page = "1";
-              router.push({ pathname: router.pathname, query: q }, undefined, { shallow: true });
+              router.push({ pathname: router.pathname, query: q }, undefined, {
+                shallow: true,
+              });
             }}
             onPressEnter={(e) => {
-              const q: Record<string, string | string[] | undefined> = { ...router.query, keyword: (e.target as any).value || undefined };
+              const q: Record<string, string | string[] | undefined> = {
+                ...router.query,
+                keyword: (e.target as any).value || undefined,
+              };
               if (!(e.target as any).value) delete q.keyword;
               q.page = "1";
-              router.push({ pathname: router.pathname, query: q }, undefined, { shallow: true });
+              router.push({ pathname: router.pathname, query: q }, undefined, {
+                shallow: true,
+              });
             }}
           />
         </div>
@@ -324,7 +326,10 @@ const ReturnOrderList: React.FC = () => {
             total,
             onChange: (p, ps) => {
               router.push(
-                { pathname: router.pathname, query: { ...router.query, page: String(p) } },
+                {
+                  pathname: router.pathname,
+                  query: { ...router.query, page: String(p) },
+                },
                 undefined,
                 { shallow: true },
               );

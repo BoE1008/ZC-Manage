@@ -98,6 +98,38 @@ export type {
   ContainerDictCode,
   DictItem,
   DictOption,
+  DictBadgeMeta,
+  DictBadgeMap,
+  TrackingSegmentValue,
+  OrderTypeValue,
+  ReleaseStatusValue,
+  ReleaseMethodValue,
+  SupplierTypeValue,
+  BuyerTypeValue,
+} from "./dict";
+
+export {
+  CONTAINER_STATUS_MAP,
+  USAGE_TYPE_MAP,
+  CONTAINER_COND_MAP,
+  ORDER_TYPE_MAP,
+  RELEASE_STATUS_MAP,
+  RELEASE_METHOD_MAP,
+  RETURN_ORDER_STATUS_MAP,
+  RETURN_ORDER_TYPE_MAP,
+  TRACKING_SEGMENT_MAP,
+  SUPPLIER_TYPE_MAP,
+  BUYER_TYPE_MAP,
+  CONTAINER_TYPE_OPTIONS,
+  USAGE_TYPE_OPTIONS,
+  CONTAINER_COND_OPTIONS,
+  CONTAINER_STATUS_OPTIONS,
+  TRACKING_SEGMENT_OPTIONS,
+  ORDER_TYPE_OPTIONS,
+  RELEASE_STATUS_OPTIONS,
+  RELEASE_METHOD_OPTIONS,
+  RETURN_ORDER_TYPE_OPTIONS,
+  RETURN_ORDER_STATUS_OPTIONS,
 } from "./dict";
 
 import type {
@@ -105,6 +137,9 @@ import type {
   ContainerCondValue,
   ContainerUsageValue,
   ContainerStatusValue,
+  TrackingSegmentValue,
+  OrderTypeValue,
+  ReleaseStatusValue,
 } from "./dict";
 
 /** 箱型（向后兼容别名） */
@@ -119,14 +154,14 @@ export type ConditionType = ContainerCondValue;
 /** 集装箱状态（向后兼容别名） */
 export type ContainerStatus = ContainerStatusValue;
 
-/** 运踪运输段 */
-export type TrackingSegment = "outbound" | "inbound" | string;
+/** 运踪运输段（向后兼容别名，原始定义见 ./dict） */
+export type TrackingSegment = TrackingSegmentValue;
 
-/** 放箱类型 */
-export type OrderType = "sale" | "return" | "rent" | string;
+/** 放箱类型（向后兼容别名） */
+export type OrderType = OrderTypeValue;
 
-/** 放箱令状态 */
-export type ReleaseStatus = "pending" | "picked_up" | string;
+/** 放箱令状态（向后兼容别名） */
+export type ReleaseStatus = ReleaseStatusValue;
 
 // ============================================================
 // Container 集装箱
