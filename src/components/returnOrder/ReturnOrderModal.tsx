@@ -67,13 +67,17 @@ const ReturnOrderModal: React.FC<Props> = ({ id, onSave, onClose }) => {
     if (!id) return;
     getReturnOrderDetail(id).then((res: any) => {
       // 兼容三种返回：r.entity.data / r.entity / r
-      const d = res?.entity?.data ?? res?.entity ?? res ?? {};
+      const entity = res?.entity ?? {};
+      const d = entity?.data ?? entity ?? {};
       form.setFieldsValue({
         orderType: d.orderType,
         yardId: d.yardId,
         remark: d.remark,
       });
-      const selected = (d.boxes ?? []).map((b: any) => b.boxNo).filter(Boolean);
+      // boxes 是 entity 的同级字段，不是 data 的子字段
+      const selected = (Array.isArray(entity?.boxes) ? entity.boxes : [])
+        .map((b: any) => b.containerNo)
+        .filter(Boolean);
       setSelectedBoxes(selected);
     });
   }, [id]);

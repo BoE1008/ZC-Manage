@@ -651,20 +651,39 @@ export const BatchUpdatePage = () => {
 
             {/* 工具栏 */}
             <div className="flex items-center gap-2 mb-3 flex-wrap">
+              {/* 项目编号 */}
               <Select
                 showSearch
                 allowClear
-                placeholder="请选择项目..."
+                placeholder="项目编号"
                 loading={projectLoading}
                 value={projectFilter || undefined}
                 onChange={(v) => setProjectFilter(v || "")}
-                className="!w-52"
+                className="!w-40"
                 size="middle"
                 filterOption={(i, o) =>
                   ((o?.label as string) || "").toLowerCase().includes(i.toLowerCase())
                 }
                 options={projects.map((p: any) => ({
-                  label: `${p.projectNum || p.num || ""} · ${p.name}`,
+                  label: p.projectNum || p.num || "",
+                  value: p.id,
+                }))}
+              />
+              {/* 项目名称 */}
+              <Select
+                showSearch
+                allowClear
+                placeholder="项目名称"
+                loading={projectLoading}
+                value={projectFilter || undefined}
+                onChange={(v) => setProjectFilter(v || "")}
+                className="!w-48"
+                size="middle"
+                filterOption={(i, o) =>
+                  ((o?.label as string) || "").toLowerCase().includes(i.toLowerCase())
+                }
+                options={projects.map((p: any) => ({
+                  label: p.name,
                   value: p.id,
                 }))}
               />

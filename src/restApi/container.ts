@@ -95,6 +95,16 @@ export const getContainerReportStats = async () => {
   return res.data;
 };
 
+/**
+ * 工作台待办统计
+ * GET /zc/container/todoStats（无参数）
+ * 返回：Record<string, number>，键如 pendingReleaseCount/overdueStorageCount/inTransitCount/etaAlertCount 等
+ */
+export const getContainerTodoStats = async () => {
+  const res = await axiosInstance.get<ApiResponse>("/zc/container/todoStats");
+  return res.data;
+};
+
 // ========================
 // 批量操作
 // ========================

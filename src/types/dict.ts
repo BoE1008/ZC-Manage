@@ -44,6 +44,7 @@ export type ContainerStatusValue =
   | "overseas_storage"
   | "sold"
   | "inbound"
+  | "lost"
   | string;
 
 /** 4 个容器字典 code 集合 */
@@ -136,6 +137,8 @@ export const CONTAINER_STATUS_MAP: DictBadgeMap = {
   overseas_storage: { label: "国外堆存", cls: "bg-amber-100 text-amber-700" },
   sold: { label: "已卖出", cls: "bg-green-100 text-green-700" },
   inbound: { label: "回程在途", cls: "bg-purple-100 text-purple-700" },
+  lost: { label: "灭失", cls: "bg-red-100 text-red-700" },
+  pending: { label: "待提箱", cls: "bg-yellow-100 text-yellow-700" },
   wait_pickup: { label: "待提箱", cls: "bg-yellow-100 text-yellow-700" },
   lifted: { label: "已提箱", cls: "bg-green-100 text-green-700" },
 };
@@ -237,6 +240,7 @@ export const CONTAINER_STATUS_OPTIONS: DictOption[] = [
   { label: "国外堆存", value: "overseas_storage" },
   { label: "已卖出", value: "sold" },
   { label: "回程在途", value: "inbound" },
+  { label: "灭失", value: "lost" },
 ];
 
 /** 运踪运输段 Select 选项 */

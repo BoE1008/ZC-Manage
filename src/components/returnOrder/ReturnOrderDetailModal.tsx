@@ -29,6 +29,7 @@ const ReturnOrderDetailModal: React.FC<Props> = ({
   onConfirm,
 }) => {
   const [r, setR] = useState<any>(null);
+  const [boxes, setBoxes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);
 
@@ -36,7 +37,9 @@ const ReturnOrderDetailModal: React.FC<Props> = ({
     setLoading(true);
     getReturnOrderDetail(id)
       .then((res: any) => {
-        setR(res?.entity?.data ?? null);
+        const entity = res?.entity ?? {};
+        setR(entity?.data ?? null);
+        setBoxes(Array.isArray(entity?.boxes) ? entity.boxes : []);
       })
       .finally(() => setLoading(false));
   }, [id]);
@@ -77,10 +80,10 @@ const ReturnOrderDetailModal: React.FC<Props> = ({
   if (!r) return null;
 
   const isPending = r.status === "pending";
-  const boxCount = r.boxes?.length ?? 0;
+  const boxCount = boxes.length;
 
   const detailColumns: any[] = [
-    { title: "箱号", dataIndex: "boxNo", width: 150 },
+    { title: "箱号", dataIndex: "containerNo", width: 150 },
     {
       title: "还箱时间",
       dataIndex: "returnTime",
@@ -233,7 +236,7 @@ const ReturnOrderDetailModal: React.FC<Props> = ({
           </div>
           <Table
             columns={detailColumns}
-            dataSource={(r.boxes ?? []).map((b: any, i: number) => ({
+            dataSource={boxes.map((b: any, i: number) => ({
               ...b,
               key: i,
             }))}

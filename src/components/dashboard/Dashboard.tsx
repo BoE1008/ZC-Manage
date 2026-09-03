@@ -1,8 +1,26 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { getContainerDashboardStats } from "@/restApi/container";
+import {
+  getContainerDashboardStats,
+  getContainerTodoStats,
+} from "@/restApi/container";
 
 /** 后端 dashboardStats 响应结构 */
+/** 待办项单条结构（接口 /zc/container/todoStats 返回） */
+interface TodoItem {
+  /** 提示文案 */
+  hint: string;
+  /** 数量 */
+  count: number;
+  /** 待办标题 */
+  title: string;
+}
+/** todoStats 响应结构：items 是按 key 分组的待办列表，totalTodo 是总待办数 */
+interface TodoStats {
+  items: Record<string, TodoItem>;
+  totalTodo: number;
+}
+
 interface DashboardStats {
   statusStats: Record<string, number> & { total?: number };
   typeStats: { containerType: string; num: number }[];
@@ -22,13 +40,25 @@ interface DashboardStats {
 export const Dashboard = () => {
   const router = useRouter();
   const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [todoStats, setTodoStats] = useState<TodoStats | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
       try {
-        const res = await getContainerDashboardStats();
+        const [res, todoRes] = await Promise.all([
+          getContainerDashboardStats(),
+          getContainerTodoStats().catch(() => null),
+        ]);
         const raw = (res?.entity ?? {}) as Partial<DashboardStats>;
+        const todoRaw = (todoRes?.entity ?? {
+          items: {},
+          totalTodo: 0,
+        }) as TodoStats;
+        setTodoStats({
+          items: todoRaw.items ?? {},
+          totalTodo: todoRaw.totalTodo ?? 0,
+        });
         setStats({
           statusStats: raw.statusStats ?? {},
           typeStats: raw.typeStats ?? [],
@@ -105,6 +135,14 @@ export const Dashboard = () => {
       filter: "sold",
     },
     {
+      cls: "border-l-red-500",
+      val: statusOf("lost"),
+      label: "灭失",
+      sub: "已灭失/丢失",
+      color: "text-red-500",
+      filter: "lost",
+    },
+    {
       cls: "border-l-[#198348]",
       val: totalCount,
       label: "集装箱总数",
@@ -114,17 +152,82 @@ export const Dashboard = () => {
     },
   ];
 
-  // 待办数据（基于 stats，无外部接口）
-  const pendingReleaseCount = statusOf("sold");
-  const inTransitCount = statusOf("outbound");
-  // 买箱（purchase）长期在国外堆存算超期堆存占位
-  const overdueStorageCount =
-    stats?.usageStats?.find((u) => u.usageType === "purchase")?.num ?? 0;
+  // 待办数据：完全数据驱动渲染，按 todoStats.items 的 key 顺序输出
+  const todoKeyAction: Record<string, () => void> = {
+    releasePending: () => router.push("/releaseOrder"),
+    inTransit: () => goFilter("outbound"),
+    arrivalImminent: () => goFilter("inbound"),
+    arrivalOverdue: () => goFilter("domestic_storage"),
+    dayRule: () => goFilter("domestic_storage"),
+    storageOverdue: () => goFilter("domestic_storage"),
+  };
+  const todoKeyStyle: Record<
+    string,
+    { emoji: string; color: string; bg: string; border: string }
+  > = {
+    releasePending: {
+      emoji: "🚪",
+      color: "text-red-500",
+      bg: "bg-red-50",
+      border: "border-red-200",
+    },
+    inTransit: {
+      emoji: "🚢",
+      color: "text-blue-600",
+      bg: "bg-blue-50",
+      border: "border-blue-200",
+    },
+    arrivalImminent: {
+      emoji: "📍",
+      color: "text-orange-600",
+      bg: "bg-orange-50",
+      border: "border-orange-200",
+    },
+    arrivalOverdue: {
+      emoji: "⚠️",
+      color: "text-red-600",
+      bg: "bg-red-50",
+      border: "border-red-300",
+    },
+    dayRule: {
+      emoji: "⏰",
+      color: "text-yellow-600",
+      bg: "bg-yellow-50",
+      border: "border-yellow-200",
+    },
+    storageOverdue: {
+      emoji: "📦",
+      color: "text-purple-600",
+      bg: "bg-purple-50",
+      border: "border-purple-200",
+    },
+  };
+  const todoEntries = Object.entries(todoStats?.items ?? {}).map(
+    ([key, item]) => ({
+      key,
+      label: `${item.count} ${item.title}`,
+      sub: item.hint,
+      val: item.count,
+      ...(todoKeyStyle[key] ?? {
+        emoji: "📌",
+        color: "text-gray-600",
+        bg: "bg-gray-50",
+        border: "border-gray-200",
+      }),
+      onClick: () => {
+        const act = todoKeyAction[key];
+        if (act) act();
+        else if (key.toLowerCase().includes("release"))
+          router.push("/releaseOrder");
+        else goFilter(null);
+      },
+    }),
+  );
 
   return (
     <div className="space-y-3">
       {/* 统计卡片 */}
-      <div className="grid grid-cols-6 gap-2.5">
+      <div className="grid grid-cols-7 gap-2.5">
         {statCards.map((s, i) => (
           <div
             key={i}
@@ -335,8 +438,12 @@ export const Dashboard = () => {
             ) : (
               stats!.typeStats.map((t, i) => (
                 <div key={i} className="flex items-center gap-2">
-                  <span className="text-[13px] text-gray-600">{t.containerType}</span>
-                  <span className="text-[13px] font-bold text-[#198348]">{t.num}</span>
+                  <span className="text-[13px] text-gray-600">
+                    {t.containerType}
+                  </span>
+                  <span className="text-[13px] font-bold text-[#198348]">
+                    {t.num}
+                  </span>
                   {i < stats!.typeStats.length - 1 && (
                     <span className="text-gray-300 text-xs">|</span>
                   )}
@@ -360,9 +467,15 @@ export const Dashboard = () => {
               stats!.usageStats.map((u, i) => (
                 <div key={i} className="flex items-center gap-2">
                   <span className="text-[13px] text-gray-600">
-                    {u.usageType === "purchase" ? "买箱" : u.usageType === "long_rental" ? "长租" : u.usageType}
+                    {u.usageType === "purchase"
+                      ? "买箱"
+                      : u.usageType === "long_rental"
+                        ? "长租"
+                        : u.usageType}
                   </span>
-                  <span className="text-[13px] font-bold text-[#198348]">{u.num}</span>
+                  <span className="text-[13px] font-bold text-[#198348]">
+                    {u.num}
+                  </span>
                   {i < stats!.usageStats.length - 1 && (
                     <span className="text-gray-300 text-xs">|</span>
                   )}
@@ -378,57 +491,25 @@ export const Dashboard = () => {
         <div className="flex items-center text-sm font-bold mb-3 text-gray-800">
           <div className="w-1 h-4 bg-[#198348] rounded mr-2 flex-shrink-0" />
           待办事项
-          <span className="ml-auto text-xs font-normal text-gray-500">
-            需要您关注的事项
-          </span>
         </div>
-        <div className="grid grid-cols-3 gap-2.5">
-          <div
-            className="p-3 border border-red-200 rounded bg-red-50 cursor-pointer hover:shadow transition-all"
-            onClick={() => router.push("/releaseOrder")}
-          >
-            <div className="flex items-center gap-3">
-              <span className="text-2xl">🚪</span>
-              <div>
-                <div className="text-base font-bold text-red-500">
-                  {loading ? "—" : `${pendingReleaseCount} 笔放箱令待确认`}
-                </div>
-                <div className="text-xs text-gray-500 mt-0.5">
-                  客户等待提箱中
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            className="p-3 border border-yellow-200 rounded bg-yellow-50 cursor-pointer hover:shadow transition-all"
-            onClick={() => goFilter("domestic_storage")}
-          >
-            <div className="flex items-center gap-3">
-              <span className="text-2xl">⏰</span>
-              <div>
-                <div className="text-base font-bold text-yellow-600">
-                  {loading ? "—" : `${overdueStorageCount} 个箱子堆存超30天`}
-                </div>
-                <div className="text-xs text-gray-500 mt-0.5">建议尽快处理</div>
-              </div>
-            </div>
-          </div>
-          <div
-            className="p-3 border border-blue-200 rounded bg-blue-50 cursor-pointer hover:shadow transition-all"
-            onClick={() => goFilter("outbound")}
-          >
-            <div className="flex items-center gap-3">
-              <span className="text-2xl">🚢</span>
-              <div>
-                <div className="text-base font-bold text-blue-600">
-                  {loading ? "—" : `${inTransitCount} 个箱子在途中`}
-                </div>
-                <div className="text-xs text-gray-500 mt-0.5">
-                  预计本周到达12个
+        <div className="grid grid-cols-5 gap-2.5">
+          {todoEntries.map((t) => (
+            <div
+              key={t.key}
+              className={`p-3 border ${t.border} rounded ${t.bg} cursor-pointer hover:shadow transition-all`}
+              onClick={t.onClick}
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">{t.emoji}</span>
+                <div>
+                  <div className={`text-base font-bold ${t.color}`}>
+                    {loading ? "—" : t.label}
+                  </div>
+                  <div className="text-xs text-gray-500 mt-0.5">{t.sub}</div>
                 </div>
               </div>
             </div>
-          </div>
+          ))}
         </div>
       </div>
     </div>

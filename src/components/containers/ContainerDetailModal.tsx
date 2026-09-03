@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
+import dayjs from "dayjs";
 import { Modal, Tabs, Button, Space, Spin, Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { Container, ContainerStatus, LifecycleNode } from "@/types";
 import { StatusBadge, UsageTag, CondTag } from "@/components/ui/Badge";
 import { getContainerDetail } from "@/restApi/container";
+import CostIncomeDetail, { DetailFormModal } from "./CostIncomeDetail";
 
 import { ReleaseOrder } from "@/types";
 
@@ -19,6 +21,10 @@ export const ContainerDetailModal = ({ id, onClose, onEdit }: Props) => {
   const [releases, setReleases] = useState<ReleaseOrder[]>([]);
   const [lifecycle, setLifecycle] = useState<LifecycleNode[]>([]);
   const [tab, setTab] = useState("info");
+  const [costIncomeSubTab, setCostIncomeSubTab] = useState<"cost" | "income">("cost");
+  const [addCostOpen, setAddCostOpen] = useState(false);
+  const [addIncomeOpen, setAddIncomeOpen] = useState(false);
+  const [costIncomeKey, setCostIncomeKey] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -63,6 +69,7 @@ export const ContainerDetailModal = ({ id, onClose, onEdit }: Props) => {
     { key: "timeline", label: "生命周期轨迹" },
     { key: "shipments", label: `运踪记录 (${shipments.length})` },
     { key: "releases", label: `放箱记录 (${releases.length})` },
+    { key: "costIncome", label: `成本/收入明细` },
   ];
 
   const releaseColumns: ColumnsType<any> = [
@@ -176,6 +183,37 @@ export const ContainerDetailModal = ({ id, onClose, onEdit }: Props) => {
             <span className="text-xs text-gray-400 block">买方/租方</span>
             <span className="font-medium">{container.buyerName || "-"}</span>
           </div>
+
+          {/* 还箱信息 */}
+          {(container.dropYardName ||
+            container.expectReturnTime ||
+            container.expectReturnLocation ||
+            container.returnCity) && (
+            <div className="col-span-2 text-xs font-bold text-[#198348] py-1 border-b border-dashed border-gray-200">
+              还箱信息
+            </div>
+          )}
+          <div>
+            <span className="text-xs text-gray-400 block">当前堆场</span>
+            <span className="font-medium">{container.dropYardName || "-"}</span>
+          </div>
+          <div>
+            <span className="text-xs text-gray-400 block">预计还箱时间</span>
+            <span className="font-medium">
+              {container.expectReturnTime &&
+              container.expectReturnTime !== "-" &&
+              dayjs(container.expectReturnTime).isValid()
+                ? dayjs(container.expectReturnTime).format("YYYY-MM-DD")
+                : container.expectReturnTime || "-"}
+            </span>
+          </div>
+          <div>
+            <span className="text-xs text-gray-400 block">预计还箱地</span>
+            <span className="font-medium">
+              {container.expectReturnLocation || container.returnCity || "-"}
+            </span>
+          </div>
+
           <div>
             <span className="text-xs text-gray-400 block">是否箱号待定</span>
             <span className="font-medium">
@@ -298,6 +336,45 @@ export const ContainerDetailModal = ({ id, onClose, onEdit }: Props) => {
             />
           )}
         </div>
+      )}
+      {tab === "costIncome" && container && (
+        <CostIncomeDetail
+          containerId={container.id ?? id}
+          containerNo={container.containerNo ?? ""}
+        />
+      )}
+
+      {/* 新增成本明细弹框 */}
+      {addCostOpen && container && (
+        <DetailFormModal
+          type="cost"
+          id={null}
+          containerId={container.id ?? id ?? ""}
+          containerNo={container.containerNo ?? ""}
+          onClose={() => setAddCostOpen(false)}
+          onSaved={() => {
+            setAddCostOpen(false);
+            setCostIncomeSubTab("cost");
+            setCostIncomeKey((k) => k + 1);
+            setTab("costIncome");
+          }}
+        />
+      )}
+      {/* 新增收入明细弹框 */}
+      {addIncomeOpen && container && (
+        <DetailFormModal
+          type="income"
+          id={null}
+          containerId={container.id ?? id ?? ""}
+          containerNo={container.containerNo ?? ""}
+          onClose={() => setAddIncomeOpen(false)}
+          onSaved={() => {
+            setAddIncomeOpen(false);
+            setCostIncomeSubTab("income");
+            setCostIncomeKey((k) => k + 1);
+            setTab("costIncome");
+          }}
+        />
       )}
     </Modal>
   );

@@ -109,7 +109,7 @@ const AppLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
               openKeys={openKeys}
               onOpenChange={onOpenChange}
               defaultSelectedKeys={["custom"]}
-              selectedKeys={[asPath.slice(1, asPath.length)]}
+              selectedKeys={[asPath.split("?")[0].slice(1)]}
               style={{
                 height: "100%",
                 borderRight: 0,

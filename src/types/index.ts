@@ -247,8 +247,12 @@ export interface Container {
   saleIncome: number;
   /** 客户提箱时间 */
   pickupTime: string;
-  /** 还箱城市 */
+  /** 还箱城市（预计还箱地） */
   returnCity: string;
+  /** 预计还箱时间，格式：yyyy-MM-dd */
+  expectReturnTime?: string;
+  /** 预计还箱地（城市/堆场名称） */
+  expectReturnLocation?: string;
   /** 还箱费，单位：USD */
   returnFee: number;
 

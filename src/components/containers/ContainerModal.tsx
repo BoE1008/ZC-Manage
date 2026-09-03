@@ -35,6 +35,7 @@ interface Props {
 export const ContainerModal = ({ id, onSave, onClose }: Props) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
+  const [container, setContainer] = useState<any>(null);
   const [suppliers, setSuppliers] = useState<
     { label: string; value: string }[]
   >([]);
@@ -113,6 +114,7 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
     getContainerDetail(id).then((r: any) => {
       const d = r?.entity?.data ?? r?.entity ?? r;
       if (!d) return;
+      setContainer(d);
       const vals: any = { ...d };
       // 供应商/买方/提箱堆场 id 反查
       if (!vals.supplierId && vals.supplierName) {
@@ -136,7 +138,7 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
         }
       }
       // 日期 dayjs 化（处理 "0000-00-00"）
-      ["liftingTime"].forEach((f) => {
+      ["liftingTime", "expectReturnTime"].forEach((f) => {
         const raw = vals[f];
         if (!raw || raw === "0000-00-00") {
           delete vals[f];
@@ -158,15 +160,31 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
   };
 
   const handleOk = async () => {
+    let values: any;
     try {
       setLoading(true);
-      await form.validateFields();
-      const values = form.getFieldsValue();
-      // 日期字段：dayjs -> 字符串
-      (["liftingTime"] as const).forEach((f) => {
+      values = await form.validateFields();
+    } catch (e: any) {
+      // antd 校验失败：errorFields 存在
+      if (e?.errorFields?.length) {
+        message.error("请检查表单：" + e.errorFields.map((x: any) => x.name?.join(".")).join("、") + " 等必填项");
+      } else {
+        message.error("表单校验异常：" + (e?.message || "未知错误"));
+      }
+      setLoading(false);
+      return;
+    }
+    try {
+      // 日期字段：v 可能是 dayjs 对象（liftingTime）或字符串（expectReturnTime 已 normalize）
+      // 用 dayjs(v).format() 同时兼容两种形态
+      (["liftingTime", "expectReturnTime"] as const).forEach((f) => {
         const v = (values as any)[f];
-        if (v && dayjs(v as any).isValid())
-          (values as any)[f] = (v as any).format("YYYY-MM-DD");
+        if (!v) {
+          delete (values as any)[f];
+          return;
+        }
+        const d = dayjs.isDayjs(v) ? v : dayjs(v);
+        if (d.isValid()) (values as any)[f] = d.format("YYYY-MM-DD");
         else delete (values as any)[f];
       });
       // 供应商名称
@@ -191,8 +209,9 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
       }
       message.success(id ? "编辑成功" : "新增成功");
       onSave();
-    } catch {
-      // validation error or api error, ignore
+    } catch (e: any) {
+      console.error("[ContainerModal] save error:", e);
+      message.error((id ? "编辑失败：" : "新增失败：") + (e?.message || "未知错误"));
     } finally {
       setLoading(false);
     }
@@ -365,6 +384,41 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
                 ((o?.label as string) || "")
                   .toLowerCase()
                   .includes(i.toLowerCase())
+              }
+            />
+          </Form.Item>
+        </div>
+
+        {/* 还箱信息 */}
+        <div className="text-xs font-bold text-[#198348] py-2 border-b border-dashed border-gray-200 mt-2">
+          还箱信息
+        </div>
+        <div className="grid grid-cols-2 gap-x-4">
+          <Form.Item
+            name="expectReturnTime"
+            label={<span className="text-xs">预计还箱时间</span>}
+            getValueProps={(v) => ({ value: v ? dayjs(v) : undefined })}
+            normalize={(v) => (v ? v.format("YYYY-MM-DD") : undefined)}
+          >
+            <DatePicker style={{ width: "100%" }} placeholder="选择预计还箱时间" />
+          </Form.Item>
+          <Form.Item
+            name="expectReturnLocation"
+            label={<span className="text-xs">预计还箱地</span>}
+          >
+            <Input placeholder="如：宁波陆联堆场 / 莫斯科堆场" />
+          </Form.Item>
+          <Form.Item
+            name="dropYardId"
+            label={<span className="text-xs">当前堆场</span>}
+          >
+            <Select
+              allowClear
+              showSearch
+              placeholder="选择当前堆场"
+              options={yards}
+              filterOption={(i, o) =>
+                ((o?.label as string) || "").toLowerCase().includes(i.toLowerCase())
               }
             />
           </Form.Item>
