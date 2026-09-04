@@ -202,12 +202,6 @@ export const ReleaseList = () => {
       render: (v: any) => v || "-",
     },
     {
-      title: "收入(USD)",
-      dataIndex: "income",
-      width: 110,
-      render: (v) => (v ? `USD ${Number(v).toLocaleString()}` : "-"),
-    },
-    {
       title: "状态",
       dataIndex: "status",
       width: 100,

@@ -285,6 +285,25 @@ export const ShipmentModal = ({ id, onSave, onClose }: Props) => {
             </Form.Item>
           </div>
 
+          {/* 批次信息 */}
+          <div className="text-xs font-bold text-[#198348] py-2 border-b border-dashed border-gray-200 mt-2">
+            批次信息
+          </div>
+          <div className="grid grid-cols-2 gap-x-4">
+            <Form.Item
+              name="batchNo"
+              label={<span className="text-xs">批次号</span>}
+            >
+              <Input maxLength={64} />
+            </Form.Item>
+            <Form.Item
+              name="billOfLadingNo"
+              label={<span className="text-xs">提单号</span>}
+            >
+              <Input maxLength={100} />
+            </Form.Item>
+          </div>
+
           <div className="text-xs font-bold text-[#198348] py-2 border-b border-dashed border-gray-200 mt-2">
             发运信息
           </div>

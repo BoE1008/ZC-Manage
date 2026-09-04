@@ -102,3 +102,16 @@ export const deleteTracking = async (id: string) => {
   );
   return res.data;
 };
+
+/**
+ * 项目维度运踪汇总（页面上半部分展示）
+ * GET /zc/containerTracking/projectSummary?projectId=xxx
+ * 不传 projectId 则汇总所有项目
+ */
+export const getTrackingProjectSummary = async (projectId?: string) => {
+  const res = await axiosInstance.get<ApiResponse>(
+    "/zc/containerTracking/projectSummary",
+    { params: projectId ? { projectId } : {} },
+  );
+  return res.data;
+};

@@ -201,8 +201,10 @@ export interface Container {
   // ---------- 采购信息 ----------
   /** 卖方/出租方ID */
   supplierId: string;
-  /** 成本（提箱费），单位：USD */
+  /** 成本，单位：USD */
   cost: number;
+  /** 收入，单位：USD */
+  income: number;
   /** 提箱令编号 */
   liftingOrderNo: string;
   /** 提箱堆场ID */
@@ -344,6 +346,12 @@ export interface ContainerTracking {
   projectId: string;
   /** 项目名称 */
   projectName: string;
+
+  // ---------- 批次信息 ----------
+  /** 批次号（同一批次多票共用） */
+  batchNo: string;
+  /** 提单号（批次提单，可与 bl_no 区分单据级 vs 批次级） */
+  billOfLadingNo: string;
 
   // ---------- 运输信息 ----------
   /** 运输段（outbound去程 inbound回程） */

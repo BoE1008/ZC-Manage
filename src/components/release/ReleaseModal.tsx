@@ -160,7 +160,10 @@ export const ReleaseModal = ({ id, onSave, onClose }: Props) => {
   const handleOk = () => {
     return form.validateFields().then((values) => {
       // 不指定箱号时，无需勾选集装箱
-      if (values.releaseMethod !== "undesignated" && selectedBoxes.length === 0) {
+      if (
+        values.releaseMethod !== "undesignated" &&
+        selectedBoxes.length === 0
+      ) {
         message.error("请至少勾选一个箱子");
         return;
       }
@@ -376,17 +379,6 @@ export const ReleaseModal = ({ id, onSave, onClose }: Props) => {
                   style={{ width: "100%" }}
                   format="YYYY-MM-DD"
                   placeholder={["起始日期", "截止日期"]}
-                />
-              </Form.Item>
-
-              <Form.Item
-                name="income"
-                label={<span className="text-xs">收入 (USD)</span>}
-              >
-                <InputNumber
-                  min={0}
-                  style={{ width: "100%" }}
-                  placeholder="卖出/出租收入"
                 />
               </Form.Item>
 

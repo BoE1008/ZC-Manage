@@ -92,6 +92,24 @@ export const ShipmentDetailModal = ({ id, onClose }: Props) => {
         />
 
         <div className="text-xs font-bold text-[#198348] pb-1 mb-3 mt-4 border-b border-dashed border-gray-200">
+          批次信息
+        </div>
+        <Descriptions
+          column={2}
+          size="small"
+          labelStyle={{ width: 110, color: "#9ca3af", fontSize: 12 }}
+          contentStyle={{ fontSize: 13 }}
+          items={[
+            { key: "batchNo", label: "批次号", children: r.batchNo || "-" },
+            {
+              key: "billOfLadingNo",
+              label: "提单号",
+              children: r.billOfLadingNo || "-",
+            },
+          ]}
+        />
+
+        <div className="text-xs font-bold text-[#198348] pb-1 mb-3 mt-4 border-b border-dashed border-gray-200">
           发运信息
         </div>
         <Descriptions

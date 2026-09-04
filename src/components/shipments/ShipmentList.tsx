@@ -8,7 +8,11 @@ import type { ColumnsType } from "antd/es/table";
 import { Container, ContainerTracking, ContainerStatus } from "@/types";
 import { StatusBadge } from "@/components/ui/Badge";
 import { ShipmentModal } from "./ShipmentModal";
-import { getTrackingList, deleteTracking } from "@/restApi/tracking";
+import {
+  getTrackingList,
+  deleteTracking,
+  getTrackingProjectSummary,
+} from "@/restApi/tracking";
 import { getAllProjectList } from "@/restApi/project";
 import { getDictOptions, getDictOptionsSync } from "@/restApi/dictCache";
 import type { DictOption } from "@/types/dict";
@@ -20,6 +24,7 @@ export const ShipmentList = () => {
   const [loading, setLoading] = useState(false);
   const [statusFilter, setStatusFilter] = useState("");
   const [keyword, setKeyword] = useState("");
+  const [projectFilter, setProjectFilter] = useState<string>("");
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [editId, setEditId] = useState<string | null | undefined>(undefined);
@@ -28,13 +33,21 @@ export const ShipmentList = () => {
   const [statusOptions, setStatusOptions] = useState<DictOption[]>(
     getDictOptionsSync("container_status"),
   );
+  // 项目维度运踪汇总
+  const [projectSummaries, setProjectSummaries] = useState<any[]>([]);
+  const [summaryLoading, setSummaryLoading] = useState(false);
+  const [summaryProjects, setSummaryProjects] = useState<
+    { id: string; name: string; num: string }[]
+  >([]);
 
   const loadShipments = (
     pageNo = page,
-    extra?: { status?: string; keyword?: string },
+    extra?: { status?: string; keyword?: string; projectId?: string },
   ) => {
     const status = extra?.status ?? statusFilter;
     const kw = extra?.keyword ?? keyword;
+    const pid =
+      extra?.projectId !== undefined ? extra.projectId : projectFilter;
     setLoading(true);
     getTrackingList({
       pageNo,
@@ -42,6 +55,7 @@ export const ShipmentList = () => {
       status: status || undefined,
       containerNo: kw || undefined,
       returnOrderNo: kw || undefined,
+      projectId: pid || undefined,
     })
       .then((r) => {
         setShipments(r.entity?.data ?? []);
@@ -54,6 +68,51 @@ export const ShipmentList = () => {
     getDictOptions("container_status").then(setStatusOptions);
   }, []);
 
+  // 加载项目下拉选项（汇总筛选用）
+  useEffect(() => {
+    getAllProjectList().then((r: any) => {
+      const list = (r?.entity?.data ?? []) as any[];
+      setSummaryProjects(
+        list.map((p) => ({
+          id: p.id,
+          name: p.name ?? "",
+          num: p.num ?? p.projectNum ?? "",
+        })),
+      );
+    });
+  }, []);
+
+  // 加载项目维度运踪汇总
+  const loadProjectSummary = async (projectId?: string) => {
+    setSummaryLoading(true);
+    try {
+      const res: any = await getTrackingProjectSummary(projectId);
+      const raw = res?.entity ?? {};
+      // 兼容两种返回结构：数组 或 { list: [] } 或 { records: [] } 或 { data: [] }
+      const arr = Array.isArray(raw)
+        ? raw
+        : Array.isArray(raw.list)
+          ? raw.list
+          : Array.isArray(raw.records)
+            ? raw.records
+            : Array.isArray(raw.data)
+              ? raw.data
+              : [];
+      setProjectSummaries(arr);
+    } catch (e) {
+      console.error("[ShipmentList] projectSummary error:", e);
+      setProjectSummaries([]);
+    } finally {
+      setSummaryLoading(false);
+    }
+  };
+
+  // 项目汇总：始终展示全部项目汇总（不随 projectFilter 联动）
+  useEffect(() => {
+    loadProjectSummary(undefined);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // URL 单一数据源：URL 变化 → 同步状态 → 加载数据
   useEffect(() => {
     if (!router.isReady) return;
@@ -61,10 +120,12 @@ export const ShipmentList = () => {
     const ns = typeof q.status === "string" ? q.status : "";
     const nk = typeof q.keyword === "string" ? q.keyword : "";
     const np = typeof q.page === "string" ? Number(q.page) : 1;
+    const npid = typeof q.projectId === "string" ? q.projectId : "";
     setStatusFilter(ns);
     setKeyword(nk);
     setPage(np);
-    loadShipments(np, { status: ns, keyword: nk });
+    setProjectFilter(npid);
+    loadShipments(np, { status: ns, keyword: nk, projectId: npid });
   }, [router.isReady, router.query]);
 
   const columns: ColumnsType<ContainerTracking> = [
@@ -92,6 +153,8 @@ export const ShipmentList = () => {
       dataIndex: "projectNum",
       ellipsis: true,
     },
+    { title: "批次号", dataIndex: "batchNo" },
+    { title: "提单号", dataIndex: "billOfLadingNo" },
     { title: "发运站", dataIndex: "departureStation" },
     { title: "目的站", dataIndex: "arrivalStation" },
     { title: "口岸", dataIndex: "port" },
@@ -196,12 +259,14 @@ export const ShipmentList = () => {
         await deleteTracking(id);
         message.warning("运踪已删除");
         loadShipments();
+        loadProjectSummary();
       },
     });
   };
 
   const handleSave = () => {
     setEditId(undefined);
+    loadProjectSummary();
     loadShipments(page);
   };
 
@@ -211,7 +276,58 @@ export const ShipmentList = () => {
         <Button type="primary" onClick={() => setEditId(null)}>
           + 新增运踪
         </Button>
+
         <div className="ml-auto flex items-center gap-2">
+          <Select
+            size="small"
+            allowClear
+            showSearch
+            placeholder="项目编号"
+            className="!w-44"
+            value={projectFilter || undefined}
+            onChange={(v) => {
+              const q: any = { ...router.query, page: "1" };
+              if (v) q.projectId = v;
+              else delete q.projectId;
+              router.push({ pathname: router.pathname, query: q }, undefined, {
+                shallow: true,
+              });
+            }}
+            filterOption={(i, o) =>
+              ((o?.label as string) || "")
+                .toLowerCase()
+                .includes(i.toLowerCase())
+            }
+            options={summaryProjects.map((p) => ({
+              label: p.num || p.name,
+              value: p.id,
+            }))}
+          />
+          <Select
+            size="small"
+            allowClear
+            showSearch
+            placeholder="项目名称"
+            className="!w-48"
+            value={projectFilter || undefined}
+            onChange={(v) => {
+              const q: any = { ...router.query, page: "1" };
+              if (v) q.projectId = v;
+              else delete q.projectId;
+              router.push({ pathname: router.pathname, query: q }, undefined, {
+                shallow: true,
+              });
+            }}
+            filterOption={(i, o) =>
+              ((o?.label as string) || "")
+                .toLowerCase()
+                .includes(i.toLowerCase())
+            }
+            options={summaryProjects.map((p) => ({
+              label: p.name,
+              value: p.id,
+            }))}
+          />
           <Select
             placeholder="全部状态"
             allowClear
@@ -256,9 +372,125 @@ export const ShipmentList = () => {
         </div>
       </div>
 
+      {/* 项目运踪汇总 */}
+      <div className="bg-white rounded shadow-sm p-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center text-sm font-bold text-gray-800">
+            <div className="w-1 h-4 bg-[#198348] rounded mr-2 flex-shrink-0" />
+            项目运踪汇总
+          </div>
+        </div>
+        <Table
+          size="small"
+          loading={summaryLoading}
+          dataSource={projectSummaries.map((s, i) => ({
+            key: s.projectId ?? s.id ?? i,
+            ...s,
+          }))}
+          pagination={false}
+          rowClassName={(r: any) =>
+            r.key === projectFilter
+              ? "bg-[#EAF6EF]"
+              : "cursor-pointer hover:bg-gray-50"
+          }
+          onRow={(r: any) => ({
+            onClick: () => {
+              const pid = r.key as string;
+              const q: any = { ...router.query, page: "1" };
+              if (pid === projectFilter) delete q.projectId;
+              else q.projectId = pid;
+              router.push({ pathname: router.pathname, query: q }, undefined, {
+                shallow: true,
+              });
+            },
+          })}
+          columns={[
+            {
+              title: "项目名称",
+              dataIndex: "projectName",
+              render: (v: any, r: any) => v ?? r.name ?? "-",
+            },
+            {
+              title: "项目编号",
+              dataIndex: "projectNum",
+              render: (v: any, r: any) => v ?? r.num ?? "-",
+            },
+            {
+              title: "总箱数",
+              dataIndex: "totalCount",
+              align: "center",
+              render: (v: any, r: any) => v ?? r.total ?? r.count ?? 0,
+            },
+            {
+              title: "已到达",
+              dataIndex: "arrivedCount",
+              align: "center",
+              render: (v: any, r: any) => (
+                <span className="text-[#198348] font-medium">
+                  {v ?? r.arrived ?? 0}
+                </span>
+              ),
+            },
+            {
+              title: "在途",
+              dataIndex: "inTransitCount",
+              align: "center",
+              render: (v: any, r: any) => (
+                <span className="text-blue-600 font-medium">
+                  {v ?? r.inTransit ?? 0}
+                </span>
+              ),
+            },
+            {
+              title: "已还箱",
+              dataIndex: "returnedCount",
+              align: "center",
+              render: (v: any, r: any) => (
+                <span className="text-orange-600 font-medium">
+                  {v ?? r.returned ?? 0}
+                </span>
+              ),
+            },
+            {
+              title: "已卖出",
+              dataIndex: "soldCount",
+              align: "center",
+              render: (v: any, r: any) => (
+                <span className="text-purple-600 font-medium">
+                  {v ?? r.sold ?? 0}
+                </span>
+              ),
+            },
+            {
+              title: "到达进度",
+              dataIndex: "progress",
+              width: 220,
+              render: (_: any, r: any) => {
+                const total = r.totalCount ?? r.total ?? r.count ?? 0;
+                const arrived = r.arrivedCount ?? r.arrived ?? 0;
+                const pct = total > 0 ? Math.round((arrived / total) * 100) : 0;
+                return (
+                  <div className="space-y-1">
+                    <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-[#198348] rounded-full transition-all"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                    <div className="text-[11px] text-gray-500 text-right">
+                      已到达/总 {pct}%
+                    </div>
+                  </div>
+                );
+              },
+            },
+          ]}
+        />
+      </div>
+
       <div className="bg-yellow-50 border-l-4 border-yellow-400 px-3 py-2 text-xs text-yellow-800 rounded">
         <b>📌 说明：</b>
-        运踪以"项目+箱号"为维度，每次发运记录一段运踪。同一集装箱多次复用时，按发运顺序记录多段。
+        运踪以「项目+箱号」为维度，每次发运记录一段运踪。同一集装箱多次复用时，按发运顺序记录多段。点击箱号查看该集装箱完整运生命周期。已录入集装箱号的箱子可直接新增运踪（箱号支持输入搜索）。
       </div>
 
       <div className="bg-white rounded shadow-sm overflow-hidden">

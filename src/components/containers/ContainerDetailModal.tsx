@@ -21,7 +21,9 @@ export const ContainerDetailModal = ({ id, onClose, onEdit }: Props) => {
   const [releases, setReleases] = useState<ReleaseOrder[]>([]);
   const [lifecycle, setLifecycle] = useState<LifecycleNode[]>([]);
   const [tab, setTab] = useState("info");
-  const [costIncomeSubTab, setCostIncomeSubTab] = useState<"cost" | "income">("cost");
+  const [costIncomeSubTab, setCostIncomeSubTab] = useState<"cost" | "income">(
+    "cost",
+  );
   const [addCostOpen, setAddCostOpen] = useState(false);
   const [addIncomeOpen, setAddIncomeOpen] = useState(false);
   const [costIncomeKey, setCostIncomeKey] = useState(0);
@@ -141,6 +143,12 @@ export const ContainerDetailModal = ({ id, onClose, onEdit }: Props) => {
             <span className="text-xs text-gray-400 block">成本 (USD)</span>
             <span className="font-medium">
               {container.cost != null ? `$${container.cost}` : "-"}
+            </span>
+          </div>
+          <div>
+            <span className="text-xs text-gray-400 block">收入 (USD)</span>
+            <span className="font-medium">
+              {container.income != null ? `$${container.income}` : "-"}
             </span>
           </div>
 

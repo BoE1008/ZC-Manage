@@ -215,28 +215,6 @@ export const ContainerList = () => {
       render: (v) => <StatusBadge status={v} />,
     },
     {
-      title: "状态备注",
-      dataIndex: "statusRemark",
-      align: "center",
-      render: (v) => v || "-",
-    },
-    {
-      title: "预计还箱时间",
-      dataIndex: "expectReturnTime",
-      align: "center",
-      width: 130,
-      render: (v) =>
-        v && v !== "-" && dayjs(v).isValid()
-          ? dayjs(v).format("YYYY-MM-DD")
-          : v || "-",
-    },
-    {
-      title: "预计还箱地",
-      dataIndex: "expectReturnLocation",
-      align: "center",
-      render: (v) => v || "-",
-    },
-    {
       title: "当前堆场",
       dataIndex: "dropYardName",
       align: "center",

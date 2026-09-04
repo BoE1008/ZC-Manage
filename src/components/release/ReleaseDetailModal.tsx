@@ -228,14 +228,6 @@ export const ReleaseDetailModal = ({
         </div>
 
         <div>
-          <div className="text-xs text-gray-400">收入 (USD)</div>
-          <div className="font-medium">
-            {r.income != null
-              ? `USD ${Number(r.income).toLocaleString()}`
-              : "-"}
-          </div>
-        </div>
-        <div>
           <div className="text-xs text-gray-400">生成时间 / 制单</div>
           <div className="font-medium text-xs">
             {r.createTime && dayjs(r.createTime).isValid()

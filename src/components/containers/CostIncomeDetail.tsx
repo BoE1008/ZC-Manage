@@ -1,5 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { Button, Space, Modal, Form, Input, InputNumber, Select, DatePicker, message, Table } from "antd";
+import {
+  Button,
+  Space,
+  Modal,
+  Form,
+  Input,
+  InputNumber,
+  Select,
+  DatePicker,
+  message,
+  Table,
+} from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
@@ -41,7 +52,9 @@ const CostPanel: React.FC<Props> = ({ containerId, containerNo }) => {
     setLoading(true);
     try {
       const r: any = await getCostDetailList(containerId);
-      const data = (r?.entity?.data ?? r?.entity ?? []) as ContainerCostDetail[];
+      const data = (r?.entity?.data ??
+        r?.entity ??
+        []) as ContainerCostDetail[];
       setList(Array.isArray(data) ? data : []);
     } finally {
       setLoading(false);
@@ -105,7 +118,6 @@ const CostPanel: React.FC<Props> = ({ containerId, containerNo }) => {
           <Button
             type="text"
             size="small"
-            danger
             icon={<DeleteOutlined />}
             onClick={() => handleDelete(r.id)}
           />
@@ -119,7 +131,8 @@ const CostPanel: React.FC<Props> = ({ containerId, containerNo }) => {
       <div className="flex items-center mb-2">
         <span className="text-xs font-bold text-[#198348]">成本明细</span>
         <span className="ml-2 text-xs text-gray-500">
-          （共 {list.length} 条，合计 USD {list.reduce((s, x) => s + (Number(x.amount) || 0), 0).toFixed(2)}）
+          （共 {list.length} 条，合计 USD{" "}
+          {list.reduce((s, x) => s + (Number(x.amount) || 0), 0).toFixed(2)}）
         </span>
         <Button
           type="primary"
@@ -169,7 +182,9 @@ const IncomePanel: React.FC<Props> = ({ containerId, containerNo }) => {
     setLoading(true);
     try {
       const r: any = await getIncomeDetailList(containerId);
-      const data = (r?.entity?.data ?? r?.entity ?? []) as ContainerIncomeDetail[];
+      const data = (r?.entity?.data ??
+        r?.entity ??
+        []) as ContainerIncomeDetail[];
       setList(Array.isArray(data) ? data : []);
     } finally {
       setLoading(false);
@@ -249,7 +264,6 @@ const IncomePanel: React.FC<Props> = ({ containerId, containerNo }) => {
           <Button
             type="text"
             size="small"
-            danger
             icon={<DeleteOutlined />}
             onClick={() => handleDelete(r.id)}
           />
@@ -263,7 +277,8 @@ const IncomePanel: React.FC<Props> = ({ containerId, containerNo }) => {
       <div className="flex items-center mb-2">
         <span className="text-xs font-bold text-[#198348]">收入明细</span>
         <span className="ml-2 text-xs text-gray-500">
-          （共 {list.length} 条，合计 USD {list.reduce((s, x) => s + (Number(x.amount) || 0), 0).toFixed(2)}）
+          （共 {list.length} 条，合计 USD{" "}
+          {list.reduce((s, x) => s + (Number(x.amount) || 0), 0).toFixed(2)}）
         </span>
         <Button
           type="primary"
@@ -334,9 +349,10 @@ const DetailFormModal: React.FC<{
             itemName: d.itemName,
             amount: d.amount,
             currency: d.currency || "USD",
-            occurDate: d.occurDate && dayjs(d.occurDate).isValid()
-              ? dayjs(d.occurDate)
-              : null,
+            occurDate:
+              d.occurDate && dayjs(d.occurDate).isValid()
+                ? dayjs(d.occurDate)
+                : null,
             remark: d.remark,
           });
         }
@@ -355,7 +371,11 @@ const DetailFormModal: React.FC<{
         amount: values.amount,
         currency: values.currency || "USD",
         occurDate: values.occurDate
-          ? values.occurDate.format("YYYY-MM-DD")
+          ? dayjs.isDayjs(values.occurDate)
+            ? values.occurDate.format("YYYY-MM-DD")
+            : dayjs(values.occurDate).isValid()
+              ? dayjs(values.occurDate).format("YYYY-MM-DD")
+              : values.occurDate
           : "",
         remark: values.remark ?? "",
       };
@@ -390,7 +410,9 @@ const DetailFormModal: React.FC<{
       confirmLoading={submitting || initLoading}
       okText={isEdit ? "保存" : "新增"}
       cancelText="取消"
-      okButtonProps={{ style: { background: "#198348", borderColor: "#198348" } }}
+      okButtonProps={{
+        style: { background: "#198348", borderColor: "#198348" },
+      }}
       width={520}
       destroyOnClose
     >
@@ -455,8 +477,14 @@ const DetailFormModal: React.FC<{
 
 export { DetailFormModal };
 
-export const CostIncomeDetail: React.FC<Props> = ({ containerId, containerNo, defaultSubTab }) => {
-  const [subTab, setSubTab] = useState<"cost" | "income">(defaultSubTab ?? "cost");
+export const CostIncomeDetail: React.FC<Props> = ({
+  containerId,
+  containerNo,
+  defaultSubTab,
+}) => {
+  const [subTab, setSubTab] = useState<"cost" | "income">(
+    defaultSubTab ?? "cost",
+  );
   return (
     <div className="mt-2">
       <div className="flex items-center gap-1 mb-2 border-b border-gray-200">

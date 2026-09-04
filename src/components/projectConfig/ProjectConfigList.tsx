@@ -44,7 +44,7 @@ const ProjectConfigList: React.FC = () => {
       projectId: projectFilter || undefined,
     })
       .then((r: any) => {
-        const data = r?.entity;
+        const data = r?.entity.data;
         setList(data);
         setTotal(r?.entity?.total ?? data.length);
       })

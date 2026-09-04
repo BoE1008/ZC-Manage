@@ -68,7 +68,7 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
     getYardList({ pageNo: 1, pageSize: 1000 }).then((r: any) => {
       setYards(
         (r?.entity?.data ?? []).map((y: any) => ({
-          label: y.yardName,
+          label: y.name ?? y.yardName,
           value: y.id,
         })),
       );
@@ -107,7 +107,8 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
   useEffect(() => {
     if (!id) return;
     // 下拉任一未就绪，等下一次触发
-    if (!suppliers.length || !buyers.length || !projects.length) return;
+    if (!suppliers.length || !buyers.length || !projects.length || !yards.length)
+      return;
     // 同一挂载周期内已请求过该 id（options 变化导致的重复触发），跳过
     if (requestedIdRef.current === id) return;
     requestedIdRef.current = id;
@@ -126,8 +127,12 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
         if (o) vals.buyerId = o.value;
       }
       if (!vals.liftingYardId && vals.liftingYardName) {
-        const o = suppliers.find((x) => x.label === vals.liftingYardName);
+        const o = yards.find((x) => x.label === vals.liftingYardName);
         if (o) vals.liftingYardId = o.value;
+      }
+      if (!vals.dropYardId && vals.dropYardName) {
+        const o = yards.find((x) => x.label === vals.dropYardName);
+        if (o) vals.dropYardId = o.value;
       }
       // 项目：根据 projectName 找到 selectProject，把 id 写到 projectNum（Select value）
       if (vals.projectName) {
@@ -151,7 +156,7 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
       form.setFieldsValue(vals);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, projects, suppliers, buyers]);
+  }, [id, projects, suppliers, buyers, yards]);
 
   // 项目编号变化：回填项目名称到 selectProject
   const handleProjectChanged = (param: any) => {
@@ -190,8 +195,12 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
       // 供应商名称
       const sup = suppliers.find((x) => x.value === values.supplierId);
       if (sup) values.supplierName = sup.label;
+      // 提箱堆场名称（id → name）
       const yard = yards.find((x) => x.value === values.liftingYardId);
       if (yard) values.liftingYardName = yard.label;
+      // 当前堆场名称（dropYardId → dropYardName，与 id 一并传后端）
+      const dropYard = yards.find((x) => x.value === values.dropYardId);
+      if (dropYard) values.dropYardName = dropYard.label;
       // 买方名称
       const buyer = buyers.find((x) => x.value === values.buyerId);
       if (buyer) values.buyerName = buyer.label;
