@@ -16,6 +16,7 @@ import {
   editReturnOrder,
   getReturnOrderDetail,
 } from "@/restApi/returnOrder";
+import dayjs from "dayjs";
 
 interface Props {
   id: string | null;
@@ -73,6 +74,9 @@ const ReturnOrderModal: React.FC<Props> = ({ id, onSave, onClose }) => {
         orderType: d.orderType,
         yardId: d.yardId,
         remark: d.remark,
+        returnTime: d.returnTime && dayjs(d.returnTime).isValid()
+          ? dayjs(d.returnTime)
+          : undefined,
       });
       // boxes 是 entity 的同级字段，不是 data 的子字段
       const selected = (Array.isArray(entity?.boxes) ? entity.boxes : [])
@@ -103,8 +107,10 @@ const ReturnOrderModal: React.FC<Props> = ({ id, onSave, onClose }) => {
       const payload: any = {
         orderType: vals.orderType,
         yardId: vals.yardId || undefined,
+        yardName: vals.yardName || undefined,
         remark: vals.remark,
         boxes: boxesPayload,
+        returnTime: vals.returnTime || undefined,
       };
       if (id) {
         await editReturnOrder({ ...payload, id });
@@ -165,7 +171,7 @@ const ReturnOrderModal: React.FC<Props> = ({ id, onSave, onClose }) => {
             />
           </Form.Item>
         </div>
-        <Form.Item label="还箱时间" name="pickupTime">
+        <Form.Item label="还箱时间" name="returnTime">
           <DatePicker
             className="w-full"
             format="YYYY-MM-DD"

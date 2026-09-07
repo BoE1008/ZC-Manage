@@ -7,7 +7,7 @@ import { ApiResponse } from "@/types";
 
 /** 箱子明细（box 关联字段名待定，按实际返回兼容） */
 export interface ReturnOrderBox {
-  boxNo?: string;
+  containerNo?: string;
   containerId?: string;
   returnTime?: string;
   actualYardId?: string;
@@ -70,7 +70,7 @@ export interface ReturnOrderListResp {
 export const getReturnOrderList = async (params: ReturnOrderPageQuery = {}) => {
   const res = await axiosInstance.get<ApiResponse<ReturnOrderListResp>>(
     "/zc/returnOrder/list",
-    { params: { pageNo: 1, pageSize: 500, ...params } }
+    { params: { pageNo: 1, pageSize: 500, ...params } },
   );
   return res.data;
 };
@@ -79,20 +79,27 @@ export const getReturnOrderList = async (params: ReturnOrderPageQuery = {}) => {
 export const getReturnOrderDetail = async (id: string) => {
   const res = await axiosInstance.get<ApiResponse<ReturnOrder>>(
     "/zc/returnOrder/detail",
-    { params: { id } }
+    { params: { id } },
   );
   return res.data;
 };
 
 /** 生成还箱令（支持批量多箱） POST /zc/returnOrder/add */
 export const addReturnOrder = async (data: Partial<ReturnOrder>) => {
-  const res = await axiosInstance.post<ApiResponse>("/zc/returnOrder/add", data);
+  const res = await axiosInstance.post<ApiResponse>(
+    "/zc/returnOrder/add",
+    data,
+  );
   return res.data;
 };
 
 /** 修改还箱令 POST /zc/returnOrder/update */
-export const editReturnOrder = async (data: Partial<ReturnOrder> & { id: string }) => {
-  const res = await axiosInstance.post<ApiResponse>("/zc/returnOrder/update", data);
+export const editReturnOrder = async (
+  data: Partial<ReturnOrder> & { id: string },
+) => {
+  const res = await axiosInstance.post<ApiResponse>("/zc/returnOrder/update", {
+    data,
+  });
   return res.data;
 };
 
@@ -105,11 +112,13 @@ export const deleteReturnOrder = async (id: string) => {
 };
 
 /** 确认还箱：逐箱记录还箱时间与实际归还堆场 POST /zc/returnOrder/confirm */
-export const confirmReturnOrderApi = async (id: string, data: Partial<ReturnOrder>) => {
-  const res = await axiosInstance.post<ApiResponse>("/zc/returnOrder/confirm", {
-    id,
-    ...data,
-  });
+export const confirmReturnOrderApi = async (
+  data: { id: string } & Partial<ReturnOrder>,
+) => {
+  const res = await axiosInstance.post<ApiResponse>(
+    "/zc/returnOrder/confirm",
+    data,
+  );
   return res.data;
 };
 

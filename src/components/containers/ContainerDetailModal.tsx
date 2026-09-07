@@ -152,7 +152,7 @@ export const ContainerDetailModal = ({ id, onClose, onEdit }: Props) => {
             </span>
           </div>
 
-          <div className="col-span-2 text-xs font-bold text-[#198348] py-1 border-b border-dashed border-gray-200">
+          <div className="col-span-2 text-~xs font-bold text-[#198348] py-1 border-b border-dashed border-gray-200">
             提箱信息
           </div>
           <div>

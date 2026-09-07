@@ -9,11 +9,11 @@ interface Props {
   onEdit?: () => void;
 }
 
-const Row: React.FC<{ label: string; children: React.ReactNode; span?: number }> = ({
-  label,
-  children,
-  span = 1,
-}) => (
+const Row: React.FC<{
+  label: string;
+  children: React.ReactNode;
+  span?: number;
+}> = ({ label, children, span = 1 }) => (
   <div className={span === 2 ? "col-span-2" : ""}>
     <span className="text-xs text-gray-400 block">{label}</span>
     <span className="font-medium">{children || "-"}</span>
@@ -80,7 +80,6 @@ export const ProjectConfigDetailModal: React.FC<Props> = ({
           </div>
           <Row label="项目编号">{d.projectNum ?? "-"}</Row>
           <Row label="项目名称">{d.projectName ?? "-"}</Row>
-          <Row label="项目ID">{d.projectId ?? "-"}</Row>
 
           {/* 提醒规则 */}
           <div className="col-span-2 text-xs font-bold text-[#198348] py-1 border-b border-dashed border-gray-200 mt-2">

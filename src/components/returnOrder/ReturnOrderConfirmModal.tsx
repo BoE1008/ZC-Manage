@@ -13,9 +13,10 @@ interface Props {
 }
 
 interface BoxItem {
-  boxNo: string;
+  containerNo: string;
   returnTime?: string;
   actualYardId?: string;
+  actualYardName?: string;
 }
 
 const ReturnOrderConfirmModal: React.FC<Props> = ({ id, onSave, onClose }) => {
@@ -32,17 +33,10 @@ const ReturnOrderConfirmModal: React.FC<Props> = ({ id, onSave, onClose }) => {
       getYardList({ pageNo: 1, pageSize: 1000 }),
     ])
       .then(([res, yardRes]: any[]) => {
-        const d = res?.entity?.data ?? res?.entity ?? res ?? {};
+        const d = res?.entity?.data;
         setR(d);
-        const bs: BoxItem[] = (d.boxes ?? []).map((b: any) => ({
-          boxNo: b.boxNo,
-          returnTime: b.returnTime && b.returnTime !== "-" ? b.returnTime : "",
-          actualYardId: b.actualYardId || "",
-        }));
+        const bs = res?.entity?.boxes ?? [];
         setBoxes(bs);
-        // 如已有部分箱子设置过还箱时间，预填到统一日期
-        const filled = bs.find((b) => b.returnTime);
-        if (filled) setUnifiedDate(filled.returnTime!);
         setYards(yardRes?.entity?.data ?? []);
       })
       .finally(() => setLoading(false));
@@ -63,11 +57,12 @@ const ReturnOrderConfirmModal: React.FC<Props> = ({ id, onSave, onClose }) => {
     setSubmitting(true);
     try {
       const finalBoxes = boxes.map((b) => ({
-        boxNo: b.boxNo,
+        containerNo: b.containerNo,
         returnTime: b.returnTime || unifiedDate || "",
         actualYardId: b.actualYardId || "",
+        actualYardName: b.actualYardName || "",
       }));
-      await confirmReturnOrderApi(id, { boxes: finalBoxes });
+      await confirmReturnOrderApi({ id, ...finalBoxes });
       const allSet = finalBoxes.every((b) => b.returnTime && b.actualYardId);
       message.success(
         allSet ? "还箱确认完成" : "部分箱子未选择堆场，已保存其余信息",
@@ -83,7 +78,7 @@ const ReturnOrderConfirmModal: React.FC<Props> = ({ id, onSave, onClose }) => {
   const columns: any[] = [
     {
       title: "箱号",
-      dataIndex: "boxNo",
+      dataIndex: "containerNo",
       width: 180,
       render: (v: string) => <span className="font-mono">{v}</span>,
     },
@@ -118,7 +113,7 @@ const ReturnOrderConfirmModal: React.FC<Props> = ({ id, onSave, onClose }) => {
           value={boxes[i]?.actualYardId || undefined}
           onChange={(v) => updateBox(i, "actualYardId", v ?? "")}
           options={yards.map((y: any) => ({
-            label: `${y.name}（${y.city ?? ""}）`,
+            label: `${y.yardName}（${y.city ?? ""}）`,
             value: y.id,
           }))}
         />
