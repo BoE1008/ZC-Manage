@@ -107,7 +107,12 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
   useEffect(() => {
     if (!id) return;
     // 下拉任一未就绪，等下一次触发
-    if (!suppliers.length || !buyers.length || !projects.length || !yards.length)
+    if (
+      !suppliers.length ||
+      !buyers.length ||
+      !projects.length ||
+      !yards.length
+    )
       return;
     // 同一挂载周期内已请求过该 id（options 变化导致的重复触发），跳过
     if (requestedIdRef.current === id) return;
@@ -172,7 +177,11 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
     } catch (e: any) {
       // antd 校验失败：errorFields 存在
       if (e?.errorFields?.length) {
-        message.error("请检查表单：" + e.errorFields.map((x: any) => x.name?.join(".")).join("、") + " 等必填项");
+        message.error(
+          "请检查表单：" +
+            e.errorFields.map((x: any) => x.name?.join(".")).join("、") +
+            " 等必填项",
+        );
       } else {
         message.error("表单校验异常：" + (e?.message || "未知错误"));
       }
@@ -220,7 +229,9 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
       onSave();
     } catch (e: any) {
       console.error("[ContainerModal] save error:", e);
-      message.error((id ? "编辑失败：" : "新增失败：") + (e?.message || "未知错误"));
+      message.error(
+        (id ? "编辑失败：" : "新增失败：") + (e?.message || "未知错误"),
+      );
     } finally {
       setLoading(false);
     }
@@ -301,12 +312,6 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
                   .includes(i.toLowerCase())
               }
             />
-          </Form.Item>
-          <Form.Item
-            name="cost"
-            label={<span className="text-xs">成本 (USD)</span>}
-          >
-            <InputNumber style={{ width: "100%" }} placeholder="如：1880" />
           </Form.Item>
         </div>
 
@@ -409,7 +414,10 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
             getValueProps={(v) => ({ value: v ? dayjs(v) : undefined })}
             normalize={(v) => (v ? v.format("YYYY-MM-DD") : undefined)}
           >
-            <DatePicker style={{ width: "100%" }} placeholder="选择预计还箱时间" />
+            <DatePicker
+              style={{ width: "100%" }}
+              placeholder="选择预计还箱时间"
+            />
           </Form.Item>
           <Form.Item
             name="expectReturnLocation"
@@ -427,7 +435,9 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
               placeholder="选择当前堆场"
               options={yards}
               filterOption={(i, o) =>
-                ((o?.label as string) || "").toLowerCase().includes(i.toLowerCase())
+                ((o?.label as string) || "")
+                  .toLowerCase()
+                  .includes(i.toLowerCase())
               }
             />
           </Form.Item>

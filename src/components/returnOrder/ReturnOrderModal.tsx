@@ -74,9 +74,10 @@ const ReturnOrderModal: React.FC<Props> = ({ id, onSave, onClose }) => {
         orderType: d.orderType,
         yardId: d.yardId,
         remark: d.remark,
-        returnTime: d.returnTime && dayjs(d.returnTime).isValid()
-          ? dayjs(d.returnTime)
-          : undefined,
+        returnTime:
+          d.returnTime && dayjs(d.returnTime).isValid()
+            ? dayjs(d.returnTime)
+            : undefined,
       });
       // boxes 是 entity 的同级字段，不是 data 的子字段
       const selected = (Array.isArray(entity?.boxes) ? entity.boxes : [])

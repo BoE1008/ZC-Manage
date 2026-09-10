@@ -27,12 +27,11 @@ interface DashboardStats {
   usageStats: { usageType: string; num: number }[];
   monthlyFinance: {
     liftingCost: number;
-    purchaseCost: number;
-    liftingIncome: number;
+    containerIncome: number;
     netExpense: number;
-    returnCost: number;
+    purchaseCost: number;
+    releaseIncome: number;
     saleIncome: number;
-    storageCost: number;
   };
   recentActivities: { time: string; text: string }[];
 }
@@ -65,12 +64,11 @@ export const Dashboard = () => {
           usageStats: raw.usageStats ?? [],
           monthlyFinance: raw.monthlyFinance ?? {
             liftingCost: 0,
-            purchaseCost: 0,
-            liftingIncome: 0,
+            containerIncome: 0,
             netExpense: 0,
-            returnCost: 0,
+            purchaseCost: 0,
+            releaseIncome: 0,
             saleIncome: 0,
-            storageCost: 0,
           },
           recentActivities: raw.recentActivities ?? [],
         });
@@ -388,8 +386,16 @@ export const Dashboard = () => {
                 val: f.liftingCost,
                 color: "text-red-500",
               },
-              { label: "堆存成本", val: f.storageCost, color: "text-red-500" },
-              { label: "还箱费", val: f.returnCost, color: "text-red-500" },
+              {
+                label: "集装箱收入",
+                val: f.containerIncome,
+                color: "text-red-500",
+              },
+              {
+                label: "放箱收入",
+                val: f.releaseIncome,
+                color: "text-red-500",
+              },
               {
                 label: "卖出/出租收入",
                 val: f.saleIncome,
