@@ -23,6 +23,8 @@ import { getDictOptions, getDictOptionsSync } from "@/restApi/dictCache";
 import type { DictOption } from "@/types/dict";
 import { getContainerList } from "@/restApi/container";
 import { getYardList } from "@/restApi/yard";
+import { getPickupOrderList } from "@/restApi/pickupOrder";
+import { getReturnOrderList } from "@/restApi/returnOrder";
 
 interface Props {
   id: string | null;
@@ -44,6 +46,8 @@ export const ShipmentModal = ({ id, onSave, onClose }: Props) => {
   const [projects, setProjects] = useState<any[]>([]);
   const [containers, setContainers] = useState<any[]>([]);
   const [yards, setYards] = useState<any[]>([]);
+  const [pickupOrders, setPickupOrders] = useState<{ label: string; value: string }[]>([]);
+  const [returnOrders, setReturnOrders] = useState<{ label: string; value: string }[]>([]);
   const [projectLoading, setProjectLoading] = useState(false);
   const [statusOptions, setStatusOptions] = useState<DictOption[]>(
     getDictOptionsSync("container_status"),
@@ -87,6 +91,24 @@ export const ShipmentModal = ({ id, onSave, onClose }: Props) => {
         ((r.entity?.data ?? []) as any[]).map((y: any) => ({
           label: y.yardName,
           value: y.id,
+        })),
+      );
+    });
+    getPickupOrderList({ pageNo: 1, pageSize: 1000 }).then((r: any) => {
+      const list = r?.entity?.data ?? [];
+      setPickupOrders(
+        (Array.isArray(list) ? list : []).map((o: any) => ({
+          label: o.orderNo || o.id,
+          value: o.orderNo || o.id,
+        })),
+      );
+    });
+    getReturnOrderList({ pageNo: 1, pageSize: 1000 }).then((r: any) => {
+      const list = r?.entity?.data ?? [];
+      setReturnOrders(
+        (Array.isArray(list) ? list : []).map((o: any) => ({
+          label: o.orderNo || o.id,
+          value: o.orderNo || o.id,
         })),
       );
     });
@@ -277,12 +299,6 @@ export const ShipmentModal = ({ id, onSave, onClose }: Props) => {
                 {selectProject?.name || "-"}
               </div>
             </Form.Item>
-            <Form.Item
-              name="port"
-              label={<span className="text-xs">口岸</span>}
-            >
-              <Input placeholder="如：海参崴" />
-            </Form.Item>
           </div>
 
           {/* 批次信息 */}
@@ -309,6 +325,12 @@ export const ShipmentModal = ({ id, onSave, onClose }: Props) => {
           </div>
           <div className="grid grid-cols-2 gap-x-4">
             <Form.Item
+              name="port"
+              label={<span className="text-xs">口岸</span>}
+            >
+              <Input placeholder="如：海参崴" />
+            </Form.Item>
+            <Form.Item
               name="departureStation"
               label={<span className="text-xs">发运站</span>}
             >
@@ -331,7 +353,17 @@ export const ShipmentModal = ({ id, onSave, onClose }: Props) => {
               name="liftingOrderNo"
               label={<span className="text-xs">提箱令</span>}
             >
-              <Input />
+              <Select
+                allowClear
+                showSearch
+                placeholder="选择提箱令"
+                options={pickupOrders}
+                filterOption={(i, o) =>
+                  ((o?.label as string) || "")
+                    .toLowerCase()
+                    .includes(i.toLowerCase())
+                }
+              />
             </Form.Item>
             <Form.Item
               name="sendTime"
@@ -383,7 +415,17 @@ export const ShipmentModal = ({ id, onSave, onClose }: Props) => {
               name="returnOrderNo"
               label={<span className="text-xs">还箱令</span>}
             >
-              <Input />
+              <Select
+                allowClear
+                showSearch
+                placeholder="选择还箱令"
+                options={returnOrders}
+                filterOption={(i, o) =>
+                  ((o?.label as string) || "")
+                    .toLowerCase()
+                    .includes(i.toLowerCase())
+                }
+              />
             </Form.Item>
             <Form.Item
               name="dropYardId"

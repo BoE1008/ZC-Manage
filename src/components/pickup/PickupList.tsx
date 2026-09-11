@@ -4,20 +4,20 @@ import Table from "@/components/ResizeTable";
 import { Button, Tooltip, Select, Space, Modal, message } from "antd";
 import SearchInput from "@/components/SearchInput";
 import type { ColumnsType } from "antd/es/table";
-import { editReleaseOrder, ReleaseOrder } from "@/restApi/releaseOrder";
+import { editPickupOrder, PickupOrder } from "@/restApi/pickupOrder";
 import { ReleaseTypeBadge, StatusBadge } from "@/components/ui/Badge";
 import { useRouter } from "next/router";
-import { ReleaseModal } from "./ReleaseModal";
-import { ReleaseDetailModal } from "./ReleaseDetailModal";
+import { PickupModal } from "./PickupModal";
+import { PickupDetailModal } from "./PickupDetailModal";
 import { ContainerDetailModal } from "@/components/containers/ContainerDetailModal";
 import {
-  getReleaseOrderList,
-  deleteReleaseOrder,
-} from "@/restApi/releaseOrder";
+  getPickupOrderList,
+  deletePickupOrder,
+} from "@/restApi/pickupOrder";
 
 const ORDER_TYPE_OPTIONS = [
-  { label: "卖出放箱", value: "sale" },
-  { label: "回程放箱", value: "return" },
+  { label: "卖出提箱", value: "sale" },
+  { label: "回程提箱", value: "return" },
   { label: "租给客户", value: "rent" },
 ];
 
@@ -27,10 +27,10 @@ const STATUS_OPTIONS = [
   { label: "已作废", value: "cancelled" },
 ];
 
-export const ReleaseList = () => {
+export const PickupList = () => {
   const router = useRouter();
 
-  const [releases, setReleases] = useState<ReleaseOrder[]>([]);
+  const [releases, setReleases] = useState<PickupOrder[]>([]);
   const [loading, setLoading] = useState(false);
   const [typeFilter, setTypeFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -49,7 +49,7 @@ export const ReleaseList = () => {
     const tp = extra?.type ?? typeFilter;
     const st = extra?.status ?? statusFilter;
     setLoading(true);
-    getReleaseOrderList({
+    getPickupOrderList({
       pageNo,
       pageSize: 20,
       orderType: typeFilter || undefined,
@@ -60,7 +60,7 @@ export const ReleaseList = () => {
         setReleases(r.entity?.data ?? []);
         setTotal(r.entity?.total ?? 0);
       })
-      .catch(() => message.error("加载放箱令列表失败"))
+      .catch(() => message.error("加载提箱令列表失败"))
       .finally(() => setLoading(false));
   };
 
@@ -97,31 +97,31 @@ export const ReleaseList = () => {
   const handleDelete = (id: string) => {
     Modal.confirm({
       title: "确认删除",
-      content: "删除后无法恢复，确定删除这条放箱令？",
+      content: "删除后无法恢复，确定删除这条提箱令？",
       okText: "删除",
       okButtonProps: { danger: true },
       cancelText: "取消",
       onOk: async () => {
-        await deleteReleaseOrder(id);
-        message.warning("放箱令已删除");
+        await deletePickupOrder(id);
+        message.warning("提箱令已删除");
         load(page);
       },
     });
   };
 
   const handleConfirmPickup = async () => {
-    await editReleaseOrder({ id: viewId as string, status: "picked_up" });
+    await editPickupOrder({ id: viewId as string, status: "picked_up" });
     message.success("已确认提箱");
     setViewId(null);
     load(page);
   };
 
-  const columns: ColumnsType<ReleaseOrder> = [
+  const columns: ColumnsType<PickupOrder> = [
     {
-      title: "放箱令编号",
+      title: "提箱令编号",
       dataIndex: "orderNo",
       render: (v, r) => (
-        <Tooltip title={<span>查看放箱令信息</span>}>
+        <Tooltip title={<span>查看提箱令信息</span>}>
           <span
             className="text-[#198348] hover:underline cursor-pointer"
             onClick={() => setViewId(r.id ?? null)}
@@ -144,7 +144,7 @@ export const ReleaseList = () => {
       render: (v, r: any) => v ?? r.containers?.length ?? "-",
     },
     { title: "买方/租方", dataIndex: "buyerName", width: 140 },
-    { title: "放箱堆场", dataIndex: "yardName", width: 140 },
+    { title: "提箱堆场", dataIndex: "yardName", width: 140 },
     {
       title: "生成时间",
       dataIndex: "createTime",
@@ -164,7 +164,7 @@ export const ReleaseList = () => {
           : "-",
     },
     {
-      title: "放箱方式",
+      title: "提箱方式",
       dataIndex: "releaseMethod",
       width: 110,
       align: "center",
@@ -189,14 +189,14 @@ export const ReleaseList = () => {
       render: (v: any) => v || "-",
     },
     {
-      title: "放箱数量",
+      title: "提箱数量",
       dataIndex: "quantity",
       width: 100,
       align: "center",
       render: (v: any) => (v != null ? `${v} 个` : "-"),
     },
     {
-      title: "放箱地区",
+      title: "提箱地区",
       dataIndex: "region",
       width: 100,
       render: (v: any) => v || "-",
@@ -214,7 +214,7 @@ export const ReleaseList = () => {
       fixed: "right",
       render: (_, record) => (
         <Space>
-          <Tooltip title={<span>查看放箱令信息</span>}>
+          <Tooltip title={<span>查看提箱令信息</span>}>
             <Button
               type="text"
               size="small"
@@ -257,17 +257,17 @@ export const ReleaseList = () => {
     <div>
       <div className="mb-3 px-4">
         <div className="bg-yellow-50 border-l-4 border-yellow-400 px-3 py-2 text-xs text-yellow-800 rounded">
-          <b>📌 放箱令说明：</b>
-          箱子必须处于<b>堆存状态</b>（国内堆存/国外堆存）才能放箱；放箱堆场
+          <b>📌 提箱令说明：</b>
+          箱子必须处于<b>堆存状态</b>（国内堆存/国外堆存）才能提箱；提箱堆场
           <b>可指定也可不指定</b>
-          ——不指定时客户提箱后再由操作员回填"箱号+提箱时间"完成匹配。支持一次勾选多个箱子批量生成放箱令，Word
-          模板中自动生成多行放箱指令。
+          ——不指定时客户提箱后再由操作员回填"箱号+提箱时间"完成匹配。支持一次勾选多个箱子批量生成提箱令，Word
+          模板中自动生成多行提箱指令。
         </div>
       </div>
       <div className="mb-4 flex flex-wrap gap-3 justify-between px-4">
         <div className="flex gap-2">
           <Button type="primary" onClick={() => setEditId(null)}>
-            + 生成放箱令(支持批量)
+            + 生成提箱令(支持批量)
           </Button>
           <Button onClick={() => message.info("导出功能待对接")}>
             📤 导出
@@ -312,7 +312,7 @@ export const ReleaseList = () => {
           />
           <div className="w-64">
             <SearchInput
-              placeholder="放箱令编号 / 箱号"
+              placeholder="提箱令编号 / 箱号"
               onSearch={(v) => {
                 const q: Record<string, string | string[] | undefined> = {
                   ...router.query,
@@ -370,7 +370,7 @@ export const ReleaseList = () => {
       />
 
       {editId !== undefined && (
-        <ReleaseModal
+        <PickupModal
           id={editId}
           onSave={() => {
             setEditId(undefined);
@@ -380,7 +380,7 @@ export const ReleaseList = () => {
         />
       )}
       {viewId && (
-        <ReleaseDetailModal id={viewId} onClose={() => setViewId(null)} />
+        <PickupDetailModal id={viewId} onClose={() => setViewId(null)} />
       )}
 
       {/* 集装箱详情弹窗（点击箱号打开） */}

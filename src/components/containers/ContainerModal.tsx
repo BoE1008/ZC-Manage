@@ -317,12 +317,12 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
 
         {/* 提箱信息 */}
         <div className="text-xs font-bold text-[#198348] py-2 border-b border-dashed border-gray-200 mt-2">
-          提箱信息
+          初始提箱信息
         </div>
         <div className="grid grid-cols-2 gap-x-4">
           <Form.Item
             name="liftingYardId"
-            label={<span className="text-xs">提箱堆场</span>}
+            label={<span className="text-xs">初始提箱堆场</span>}
           >
             <Select
               allowClear
@@ -338,39 +338,16 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
           </Form.Item>
           <Form.Item
             name="liftingTime"
-            label={<span className="text-xs">提箱时间</span>}
+            label={<span className="text-xs">初始提箱时间</span>}
             getValueProps={(v) => ({ value: v ? dayjs(v) : undefined })}
           >
             <DatePicker style={{ width: "100%" }} />
           </Form.Item>
           <Form.Item
             name="liftingOrderNo"
-            label={<span className="text-xs">提箱令编号</span>}
+            label={<span className="text-xs">初始提箱令编号</span>}
           >
             <Input placeholder="如：S225142" />
-          </Form.Item>
-          <Form.Item
-            name="projectNum"
-            label={<span className="text-xs">项目编号</span>}
-            validateTrigger="onBlur"
-          >
-            <Select
-              allowClear
-              showSearch
-              placeholder="选择项目"
-              optionFilterProp="label"
-              loading={projectLoading}
-              options={projects.map((p) => ({
-                label: p.projectNum,
-                value: p.id,
-              }))}
-              onChange={handleProjectChanged}
-            />
-          </Form.Item>
-          <Form.Item label={<span className="text-xs">项目名称</span>}>
-            <div className="px-3 py-1 text-sm text-gray-700 bg-gray-50 rounded border border-gray-200 min-h-[32px]">
-              {selectProject?.name || "-"}
-            </div>
           </Form.Item>
         </div>
 
@@ -385,46 +362,9 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
           >
             <Select allowClear placeholder="请选择" options={statusOptions} />
           </Form.Item>
-          <Form.Item
-            name="buyerId"
-            label={<span className="text-xs">买方/租方</span>}
-          >
-            <Select
-              allowClear
-              showSearch
-              placeholder="-"
-              options={buyers}
-              filterOption={(i, o) =>
-                ((o?.label as string) || "")
-                  .toLowerCase()
-                  .includes(i.toLowerCase())
-              }
-            />
-          </Form.Item>
         </div>
 
-        {/* 还箱信息 */}
-        <div className="text-xs font-bold text-[#198348] py-2 border-b border-dashed border-gray-200 mt-2">
-          还箱信息
-        </div>
         <div className="grid grid-cols-2 gap-x-4">
-          <Form.Item
-            name="expectReturnTime"
-            label={<span className="text-xs">预计还箱时间</span>}
-            getValueProps={(v) => ({ value: v ? dayjs(v) : undefined })}
-            normalize={(v) => (v ? v.format("YYYY-MM-DD") : undefined)}
-          >
-            <DatePicker
-              style={{ width: "100%" }}
-              placeholder="选择预计还箱时间"
-            />
-          </Form.Item>
-          <Form.Item
-            name="expectReturnLocation"
-            label={<span className="text-xs">预计还箱地</span>}
-          >
-            <Input placeholder="如：宁波陆联堆场 / 莫斯科堆场" />
-          </Form.Item>
           <Form.Item
             name="dropYardId"
             label={<span className="text-xs">当前堆场</span>}

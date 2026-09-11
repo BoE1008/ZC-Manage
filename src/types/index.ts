@@ -52,7 +52,7 @@ export enum PaymentOthersType {
 /**
  * API 接口类型定义
  * 基于后端 Java 实体类自动生成
- * Container.java / ContainerTracking.java / ReleaseOrder.java / Yard.java
+ * Container.java / ContainerTracking.java / PickupOrder.java / Yard.java
  * 生成时间: 2026-08-19
  */
 
@@ -157,10 +157,10 @@ export type ContainerStatus = ContainerStatusValue;
 /** 运踪运输段（向后兼容别名，原始定义见 ./dict） */
 export type TrackingSegment = TrackingSegmentValue;
 
-/** 放箱类型（向后兼容别名） */
+/** 提箱类型（向后兼容别名） */
 export type OrderType = OrderTypeValue;
 
-/** 放箱令状态（向后兼容别名） */
+/** 提箱令状态（向后兼容别名） */
 export type ReleaseStatus = ReleaseStatusValue;
 
 // ============================================================
@@ -245,7 +245,7 @@ export interface Container {
   // ---------- 销售/客户 ----------
   /** 买方/租方客户ID */
   buyerId: string;
-  /** 放箱收入，单位：USD */
+  /** 提箱收入，单位：USD */
   saleIncome: number;
   /** 客户提箱时间 */
   pickupTime: string;
@@ -461,17 +461,17 @@ export interface ContainerTrackingPageQuery {
 }
 
 // ============================================================
-// ReleaseOrder 放箱令
+// PickupOrder 提箱令
 // table: sys_release_order
 // ============================================================
 
-/** 放箱令实体 */
-export interface ReleaseOrder {
+/** 提箱令实体 */
+export interface PickupOrder {
   /** 主键ID */
   id: string;
 
   // ---------- 单据信息 ----------
-  /** 放箱令编号 */
+  /** 提箱令编号 */
   orderNo: string;
   /** 集装箱ID */
   containerId: string;
@@ -479,7 +479,7 @@ export interface ReleaseOrder {
   containerNo: string;
 
   // ---------- 业务信息 ----------
-  /** 放箱类型（sale卖出 return回程 rent租给客户） */
+  /** 提箱类型（sale卖出 return回程 rent租给客户） */
   orderType: OrderType;
   /** 客户ID */
   buyerId: string;
@@ -487,7 +487,7 @@ export interface ReleaseOrder {
   income: number;
   /** 客户提箱时间 */
   pickupTime: string;
-  /** 放箱堆场ID */
+  /** 提箱堆场ID */
   yardId: string;
 
   // ---------- 状态 ----------
@@ -515,27 +515,27 @@ export interface ReleaseOrder {
   updateTime: string;
 }
 
-/** ReleaseOrder 新增/编辑请求参数 */
-export type ReleaseOrderForm = Omit<
-  ReleaseOrder,
+/** PickupOrder 新增/编辑请求参数 */
+export type PickupOrderForm = Omit<
+  PickupOrder,
   "id" | "orderNo" | "createBy" | "createTime" | "updateBy" | "updateTime"
 >;
 
-/** ReleaseOrder 分页查询参数 */
-export interface ReleaseOrderPageQuery {
+/** PickupOrder 分页查询参数 */
+export interface PickupOrderPageQuery {
   /** 页码，默认 1 */
   pageNo?: number;
   /** 每页条数，默认 20 */
   pageSize?: number;
-  /** 放箱令编号 */
+  /** 提箱令编号 */
   orderNo?: string;
   /** 箱号 */
   containerNo?: string;
-  /** 放箱类型 */
+  /** 提箱类型 */
   orderType?: OrderType;
   /** 客户ID */
   buyerId?: string;
-  /** 放箱堆场ID */
+  /** 提箱堆场ID */
   yardId?: string;
   /** 状态 */
   status?: ReleaseStatus;

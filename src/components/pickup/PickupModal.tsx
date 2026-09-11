@@ -19,16 +19,16 @@ import { getYardList } from "@/restApi/yard";
 import { getCustomersList } from "@/restApi/customer";
 import { getSuppliersList } from "@/restApi/supplyer";
 import {
-  addReleaseOrder,
-  editReleaseOrder,
-  getReleaseOrderDetail,
-  ReleaseOrder,
-  ReleaseOrderForm,
-} from "@/restApi/releaseOrder";
+  addPickupOrder,
+  editPickupOrder,
+  getPickupOrderDetail,
+  PickupOrder,
+  PickupOrderForm,
+} from "@/restApi/pickupOrder";
 
 const ORDER_TYPE_OPTIONS = [
-  { label: "卖出放箱", value: "sale" },
-  { label: "回程放箱", value: "return" },
+  { label: "卖出提箱", value: "sale" },
+  { label: "回程提箱", value: "return" },
   { label: "租给客户", value: "rent" },
 ];
 
@@ -37,7 +37,7 @@ const RELEASE_METHOD_OPTIONS = [
   { label: "不指定箱号", value: "undesignated" },
 ];
 
-// 放箱可见的箱子状态（堆存中）
+// 提箱可见的箱子状态（堆存中）
 const STOCK_STATUSES: ContainerStatus[] = [
   "domestic_storage",
   "overseas_storage",
@@ -49,7 +49,7 @@ interface Props {
   onClose: () => void;
 }
 
-export const ReleaseModal = ({ id, onSave, onClose }: Props) => {
+export const PickupModal = ({ id, onSave, onClose }: Props) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [initLoading, setInitLoading] = useState(true);
@@ -84,7 +84,7 @@ export const ReleaseModal = ({ id, onSave, onClose }: Props) => {
       setOrderNo("");
       return;
     }
-    getReleaseOrderDetail(id)
+    getPickupOrderDetail(id)
       .then((res: any) => {
         const entity = res?.entity ?? {};
         const d = entity.data ?? {};
@@ -177,6 +177,7 @@ export const ReleaseModal = ({ id, onSave, onClose }: Props) => {
         : undefined;
 
       const payload: any = {
+        orderNo: values.orderNo || undefined,
         orderType: values.orderType,
         releaseMethod: values.releaseMethod,
         containerType: values.containerType,
@@ -198,13 +199,13 @@ export const ReleaseModal = ({ id, onSave, onClose }: Props) => {
         })),
       };
       const api = id
-        ? editReleaseOrder({ ...payload, id } as ReleaseOrderForm & {
+        ? editPickupOrder({ ...payload, id } as PickupOrderForm & {
             id: string;
           })
-        : addReleaseOrder(payload as ReleaseOrderForm);
+        : addPickupOrder(payload as PickupOrderForm);
       api
         .then(() => {
-          message.success(id ? "放箱令已更新" : "放箱令已生成");
+          message.success(id ? "提箱令已更新" : "提箱令已生成");
           onSave();
           onClose();
         })
@@ -216,7 +217,7 @@ export const ReleaseModal = ({ id, onSave, onClose }: Props) => {
   };
 
   const downloadWord = () => {
-    message.info("📄 下载 Word 放箱单功能待对接后端 /zc/releaseOrder/doc 接口");
+    message.info("📄 下载 Word 提箱单功能待对接后端 /zc/pickupOrder/doc 接口");
   };
 
   return (
@@ -224,8 +225,8 @@ export const ReleaseModal = ({ id, onSave, onClose }: Props) => {
       title={
         <span className="text-[#198348] font-bold">
           {id
-            ? `编辑放箱令 - ${orderNo || "..."}`
-            : "生成放箱令（支持批量放箱）"}
+            ? `编辑提箱令 - ${orderNo || "..."}`
+            : "生成提箱令（支持批量提箱）"}
         </span>
       }
       open
@@ -237,9 +238,9 @@ export const ReleaseModal = ({ id, onSave, onClose }: Props) => {
           <Button onClick={onClose} disabled={loading}>
             取消
           </Button>
-          {id && <Button onClick={downloadWord}>📄 下载 Word 放箱单</Button>}
+          {id && <Button onClick={downloadWord}>📄 下载 Word 提箱单</Button>}
           <Button type="primary" onClick={handleOk} loading={loading}>
-            {id ? "保存" : "生成放箱令"}
+            {id ? "保存" : "生成提箱令"}
           </Button>
         </Space>
       }
@@ -250,24 +251,35 @@ export const ReleaseModal = ({ id, onSave, onClose }: Props) => {
         </div>
       ) : (
         <>
-          {/* 放箱信息 */}
+          {/* 提箱信息 */}
           <div className="text-xs font-bold text-[#198348] pb-1 mb-3 border-b border-dashed border-gray-200">
-            放箱信息
+            提箱信息
           </div>
           <Form
             form={form}
             layout="vertical"
-            initialValues={{ orderType: "卖出放箱" }}
+            initialValues={{ orderType: "卖出提箱" }}
           >
             <div className="grid grid-cols-2 gap-x-4">
+              <Form.Item
+                name="orderNo"
+                label={
+                  <span className="text-xs">
+                    提箱令编号 <span className="text-red-500">*</span>
+                  </span>
+                }
+                rules={[{ required: true, message: "请输入提箱令编号" }]}
+              >
+                <Input allowClear />
+              </Form.Item>
+
               <Form.Item
                 name="orderType"
                 label={
                   <span className="text-xs">
-                    放箱类型 <span className="text-red-500">*</span>
+                    提箱类型 <span className="text-red-500">*</span>
                   </span>
                 }
-                rules={[{ required: true, message: "请选择放箱类型" }]}
               >
                 <Select options={ORDER_TYPE_OPTIONS} />
               </Form.Item>
@@ -290,49 +302,29 @@ export const ReleaseModal = ({ id, onSave, onClose }: Props) => {
 
               <Form.Item
                 name="releaseMethod"
-                label={<span className="text-xs">放箱方式</span>}
+                label={<span className="text-xs">提箱方式</span>}
               >
                 <Select
                   allowClear
-                  placeholder="选择放箱方式"
+                  placeholder="选择提箱方式"
                   options={RELEASE_METHOD_OPTIONS}
                 />
               </Form.Item>
 
               <Form.Item
                 name="quantity"
-                label={<span className="text-xs">放箱数量</span>}
+                label={<span className="text-xs">提箱数量</span>}
               >
                 <Input type="number" min={1} placeholder="不指定箱号时填写" />
               </Form.Item>
 
               <Form.Item
                 name="region"
-                label={<span className="text-xs">放箱地区</span>}
+                label={<span className="text-xs">提箱地区</span>}
               >
                 <Input placeholder="如：上海 / 深圳" />
               </Form.Item>
 
-              <Form.Item
-                name="buyerId"
-                label={<span className="text-xs">买方/租方</span>}
-              >
-                <Select
-                  allowClear
-                  showSearch
-                  placeholder="-"
-                  filterOption={(i, o) =>
-                    ((o?.label as string) || "")
-                      .toLowerCase()
-                      .includes(i.toLowerCase())
-                  }
-                  options={buyers.map((b) => ({ label: b.name, value: b.id }))}
-                  onChange={(val) => {
-                    const b = buyers.find((x) => x.id === val);
-                    form.setFieldValue("buyerName", b?.name);
-                  }}
-                />
-              </Form.Item>
               <Form.Item name="buyerName" hidden>
                 <Input />
               </Form.Item>
@@ -341,7 +333,7 @@ export const ReleaseModal = ({ id, onSave, onClose }: Props) => {
                 name="yardId"
                 label={
                   <span className="text-xs">
-                    放箱堆场{" "}
+                    提箱堆场{" "}
                     <span className="text-gray-400 font-normal">
                       (可指定可不指定)
                     </span>
@@ -383,18 +375,6 @@ export const ReleaseModal = ({ id, onSave, onClose }: Props) => {
               </Form.Item>
 
               <Form.Item
-                name="pickupTime"
-                label={<span className="text-xs">客户提箱时间（统一）</span>}
-                extra={
-                  <span className="text-[11px] text-gray-400">
-                    留空则提箱后通过"匹配提箱信息"回填
-                  </span>
-                }
-              >
-                <DatePicker style={{ width: "100%" }} format="YYYY-MM-DD" />
-              </Form.Item>
-
-              <Form.Item
                 name="remark"
                 label={<span className="text-xs">备注</span>}
                 className="col-span-2"
@@ -404,9 +384,9 @@ export const ReleaseModal = ({ id, onSave, onClose }: Props) => {
             </div>
           </Form>
 
-          {/* 放箱指令 */}
+          {/* 提箱指令 */}
           <div className="text-xs font-bold text-[#198348] pb-1 mt-2 mb-2 border-b border-dashed border-gray-200 flex items-center">
-            放箱指令（勾选箱子，可多选批量放箱）
+            提箱指令（勾选箱子，可多选批量提箱）
             <span className="ml-1 font-normal text-gray-400 text-[11px]">
               — 仅显示堆存中的箱子
             </span>
@@ -418,7 +398,7 @@ export const ReleaseModal = ({ id, onSave, onClose }: Props) => {
           >
             {stockBoxes.length === 0 ? (
               <div className="text-center text-gray-400 py-4 text-xs">
-                暂无堆存中的箱子可放箱
+                暂无堆存中的箱子可提箱
               </div>
             ) : (
               stockBoxes.map((c) => {

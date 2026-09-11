@@ -426,7 +426,7 @@ const DetailFormModal: React.FC<{
             placeholder={
               type === "cost"
                 ? "如：提箱费 / 堆存费 / 吊装费 / 改单费"
-                : "如：超期堆存费 / 放箱收入 / 堆存收入"
+                : "如：超期堆存费 / 提箱收入 / 堆存收入"
             }
             maxLength={200}
           />

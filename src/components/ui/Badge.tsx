@@ -17,9 +17,10 @@ import { cn } from "@/utils";
 // 状态枚举 → 中文显示 + 颜色（数据来源：types/dict.ts CONTAINER_STATUS_MAP）
 
 export const StatusBadge = ({ status }: { status: string }) => {
-  const info =
-    CONTAINER_STATUS_MAP[status] ??
-    { label: status || "-", cls: "bg-gray-100 text-gray-600" };
+  const info = CONTAINER_STATUS_MAP[status] ?? {
+    label: status || "-",
+    cls: "bg-gray-100 text-gray-600",
+  };
   return (
     <span
       className={cn(
@@ -34,8 +35,10 @@ export const StatusBadge = ({ status }: { status: string }) => {
 
 // 使用情况（数据来源：types/dict.ts USAGE_TYPE_MAP）
 export const UsageTag = ({ usage }: { usage: UsageType | string }) => {
-  const info =
-    USAGE_TYPE_MAP[usage] ?? { label: usage || "-", cls: "bg-gray-100 text-gray-600" };
+  const info = USAGE_TYPE_MAP[usage] ?? {
+    label: usage || "-",
+    cls: "bg-gray-100 text-gray-600",
+  };
   return (
     <span
       className={cn(
@@ -50,8 +53,10 @@ export const UsageTag = ({ usage }: { usage: UsageType | string }) => {
 
 // 箱况（数据来源：types/dict.ts CONTAINER_COND_MAP）
 export const CondTag = ({ cond }: { cond: ConditionType | string }) => {
-  const info =
-    CONTAINER_COND_MAP[cond] ?? { label: cond || "-", cls: "bg-gray-100 text-gray-600" };
+  const info = CONTAINER_COND_MAP[cond] ?? {
+    label: cond || "-",
+    cls: "bg-gray-100 text-gray-600",
+  };
   return (
     <span
       className={cn(
@@ -64,10 +69,12 @@ export const CondTag = ({ cond }: { cond: ConditionType | string }) => {
   );
 };
 
-// 放箱类型（数据来源：types/dict.ts ORDER_TYPE_MAP）
+// 提箱类型（数据来源：types/dict.ts ORDER_TYPE_MAP）
 export const ReleaseTypeBadge = ({ type }: { type: OrderType | string }) => {
-  const info =
-    ORDER_TYPE_MAP[type] ?? { label: type || "-", cls: "bg-gray-100 text-gray-600" };
+  const info = ORDER_TYPE_MAP[type] ?? {
+    label: type || "-",
+    cls: "bg-gray-100 text-gray-600",
+  };
   return (
     <span
       className={cn(
@@ -80,19 +87,21 @@ export const ReleaseTypeBadge = ({ type }: { type: OrderType | string }) => {
   );
 };
 
-// 放箱令状态 badge（兼容旧 props，status 同时涵盖 container 与 release 两套）
-export const ReleaseStatusBadge = ({ status }: { status: ReleaseStatus | string }) => {
+// 提箱令状态 badge（兼容旧 props，status 同时涵盖 container 与 release 两套）
+export const ReleaseStatusBadge = ({
+  status,
+}: {
+  status: ReleaseStatus | string;
+}) => {
   return <StatusBadge status={status} />;
 };
 
 // 卖方类型（数据来源：types/dict.ts SUPPLIER_TYPE_MAP）
-export const SupplierTypeBadge = ({
-  type,
-}: {
-  type: SupplierTypeValue;
-}) => {
-  const info =
-    SUPPLIER_TYPE_MAP[type] ?? { label: type || "-", cls: "bg-gray-100 text-gray-600" };
+export const SupplierTypeBadge = ({ type }: { type: SupplierTypeValue }) => {
+  const info = SUPPLIER_TYPE_MAP[type] ?? {
+    label: type || "-",
+    cls: "bg-gray-100 text-gray-600",
+  };
   return (
     <span
       className={cn(
@@ -106,13 +115,11 @@ export const SupplierTypeBadge = ({
 };
 
 // 买方类型（数据来源：types/dict.ts BUYER_TYPE_MAP）
-export const BuyerTypeBadge = ({
-  type,
-}: {
-  type: BuyerTypeValue;
-}) => {
-  const info =
-    BUYER_TYPE_MAP[type] ?? { label: type || "-", cls: "bg-gray-100 text-gray-600" };
+export const BuyerTypeBadge = ({ type }: { type: BuyerTypeValue }) => {
+  const info = BUYER_TYPE_MAP[type] ?? {
+    label: type || "-",
+    cls: "bg-gray-100 text-gray-600",
+  };
   return (
     <span
       className={cn(

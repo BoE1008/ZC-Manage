@@ -3,7 +3,7 @@ import { message } from 'antd';
 import {
   Container,
   ContainerTracking,
-  ReleaseOrder,
+  PickupOrder,
   ContainerPageQuery,
   Yard,
   YardForm,
@@ -44,7 +44,7 @@ interface StoreState {
   // 数据
   containers: Container[];
   shipments: ContainerTracking[];
-  releases: ReleaseOrder[];
+  releases: PickupOrder[];
   suppliers: Supplier[];
   buyers: ContainerBuyer[];
   yards: Yard[];
@@ -125,7 +125,7 @@ export const useStore = create<StoreState>((set, get) => ({
   },
 
   loadReleases: async () => {
-    // ReleaseOrder 相关 API 暂未完全迁移，先保留
+    // PickupOrder 相关 API 暂未完全迁移，先保留
     set({ releasesLoading: false });
   },
 

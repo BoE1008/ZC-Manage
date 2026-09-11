@@ -13,7 +13,7 @@ export interface ContainerIncomeDetail {
   containerId?: string;
   /** 箱号（冗余） */
   containerNo?: string;
-  /** 明细名称（超期堆存费/放箱收入/堆存收入/改单费等） */
+  /** 明细名称（超期堆存费/提箱收入/堆存收入/改单费等） */
   itemName?: string;
   /** 金额（美元） */
   amount?: number;
@@ -43,9 +43,7 @@ export const getIncomeDetailList = async (containerId: string) => {
 };
 
 /** 新增收入明细 POST /zc/container/incomeDetail/add */
-export const addIncomeDetail = async (
-  data: Partial<ContainerIncomeDetail>,
-) => {
+export const addIncomeDetail = async (data: Partial<ContainerIncomeDetail>) => {
   const res = await axiosInstance.post<ApiResponse>(
     "/zc/container/incomeDetail/add",
     data,

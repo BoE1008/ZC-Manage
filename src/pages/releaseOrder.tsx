@@ -1,7 +1,7 @@
-import { ReleaseList } from "@/components/release/ReleaseList";
+import { PickupList } from "@/components/pickup/PickupList";
 
-const ReleasePage = () => {
-  return <ReleaseList />;
+const PickupPage = () => {
+  return <PickupList />;
 };
 
-export default ReleasePage;
+export default PickupPage;

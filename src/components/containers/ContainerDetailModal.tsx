@@ -7,7 +7,7 @@ import { StatusBadge, UsageTag, CondTag } from "@/components/ui/Badge";
 import { getContainerDetail } from "@/restApi/container";
 import CostIncomeDetail, { DetailFormModal } from "./CostIncomeDetail";
 
-import { ReleaseOrder } from "@/types";
+import { PickupOrder } from "@/types";
 
 interface Props {
   id: string;
@@ -18,7 +18,7 @@ interface Props {
 export const ContainerDetailModal = ({ id, onClose, onEdit }: Props) => {
   const [container, setContainer] = useState<Container | null>(null);
   const [shipments, setShipments] = useState<any[]>([]);
-  const [releases, setReleases] = useState<ReleaseOrder[]>([]);
+  const [releases, setReleases] = useState<PickupOrder[]>([]);
   const [lifecycle, setLifecycle] = useState<LifecycleNode[]>([]);
   const [tab, setTab] = useState("info");
   const [costIncomeSubTab, setCostIncomeSubTab] = useState<"cost" | "income">(
@@ -70,13 +70,13 @@ export const ContainerDetailModal = ({ id, onClose, onEdit }: Props) => {
     { key: "info", label: "基本信息" },
     { key: "timeline", label: "生命周期轨迹" },
     { key: "shipments", label: `运踪记录 (${shipments.length})` },
-    { key: "releases", label: `放箱记录 (${releases.length})` },
+    { key: "releases", label: `提箱记录 (${releases.length})` },
     { key: "costIncome", label: `成本/收入明细` },
   ];
 
   const releaseColumns: ColumnsType<any> = [
-    { title: "放箱令编号", dataIndex: "orderNo", key: "orderNo", width: 160 },
-    { title: "放箱类型", dataIndex: "orderType", key: "orderType", width: 120 },
+    { title: "提箱令编号", dataIndex: "orderNo", key: "orderNo", width: 160 },
+    { title: "提箱类型", dataIndex: "orderType", key: "orderType", width: 120 },
     { title: "买方/租方", dataIndex: "buyerName", key: "buyerName" },
     {
       title: "状态",
@@ -171,10 +171,6 @@ export const ContainerDetailModal = ({ id, onClose, onEdit }: Props) => {
               {container.liftingOrderNo || "-"}
             </span>
           </div>
-          <div>
-            <span className="text-xs text-gray-400 block">当前项目</span>
-            <span className="font-medium">{container.projectName || "-"}</span>
-          </div>
 
           <div className="col-span-2 text-xs font-bold text-[#198348] py-1 border-b border-dashed border-gray-200">
             当前状态
@@ -186,10 +182,6 @@ export const ContainerDetailModal = ({ id, onClose, onEdit }: Props) => {
           <div>
             <span className="text-xs text-gray-400 block">状态备注</span>
             <span className="font-medium">{container.statusRemark || "-"}</span>
-          </div>
-          <div>
-            <span className="text-xs text-gray-400 block">买方/租方</span>
-            <span className="font-medium">{container.buyerName || "-"}</span>
           </div>
 
           {/* 还箱信息 */}
@@ -204,29 +196,6 @@ export const ContainerDetailModal = ({ id, onClose, onEdit }: Props) => {
           <div>
             <span className="text-xs text-gray-400 block">当前堆场</span>
             <span className="font-medium">{container.dropYardName || "-"}</span>
-          </div>
-          <div>
-            <span className="text-xs text-gray-400 block">预计还箱时间</span>
-            <span className="font-medium">
-              {container.expectReturnTime &&
-              container.expectReturnTime !== "-" &&
-              dayjs(container.expectReturnTime).isValid()
-                ? dayjs(container.expectReturnTime).format("YYYY-MM-DD")
-                : container.expectReturnTime || "-"}
-            </span>
-          </div>
-          <div>
-            <span className="text-xs text-gray-400 block">预计还箱地</span>
-            <span className="font-medium">
-              {container.expectReturnLocation || container.returnCity || "-"}
-            </span>
-          </div>
-
-          <div>
-            <span className="text-xs text-gray-400 block">是否箱号待定</span>
-            <span className="font-medium">
-              {container.isTemp === "1" ? "是" : "否"}
-            </span>
           </div>
 
           {(container.sendTime ||
@@ -331,7 +300,7 @@ export const ContainerDetailModal = ({ id, onClose, onEdit }: Props) => {
         <div className="mt-2">
           {releases.length === 0 ? (
             <div className="text-xs text-gray-400 text-center py-8">
-              暂无放箱记录
+              暂无提箱记录
             </div>
           ) : (
             <Table

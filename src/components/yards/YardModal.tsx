@@ -91,6 +91,9 @@ const YardModal: React.FC<Props> = ({ id, onSave, onClose }) => {
           >
             <Input placeholder="如：宁波陆联堆场" />
           </Form.Item>
+          <Form.Item label="堆场简称" name="shortName">
+            <Input placeholder="如：陆联" />
+          </Form.Item>
           <Form.Item label="区域" name="region">
             <Select
               placeholder="请选择区域"
@@ -112,7 +115,7 @@ const YardModal: React.FC<Props> = ({ id, onSave, onClose }) => {
           <Form.Item label="对接人" name="contactName">
             <Input placeholder="联系人姓名" />
           </Form.Item>
-          <Form.Item label="联系电话" name="contactPhone">
+          <Form.Item label="堆场电话" name="contactPhone">
             <Input placeholder="电话" />
           </Form.Item>
           <Form.Item label="箱管电话" name="boxMgrPhone">

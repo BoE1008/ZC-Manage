@@ -71,6 +71,7 @@ const ReturnOrderModal: React.FC<Props> = ({ id, onSave, onClose }) => {
       const entity = res?.entity ?? {};
       const d = entity?.data ?? entity ?? {};
       form.setFieldsValue({
+        orderNo: d.orderNo,
         orderType: d.orderType,
         yardId: d.yardId,
         remark: d.remark,
@@ -106,6 +107,7 @@ const ReturnOrderModal: React.FC<Props> = ({ id, onSave, onClose }) => {
       });
 
       const payload: any = {
+        orderNo: vals.orderNo || undefined,
         orderType: vals.orderType,
         yardId: vals.yardId || undefined,
         yardName: vals.yardName || undefined,
@@ -143,6 +145,13 @@ const ReturnOrderModal: React.FC<Props> = ({ id, onSave, onClose }) => {
       <Form form={form} layout="vertical" className="mt-2">
         <div className="grid grid-cols-2 gap-x-4">
           <Form.Item
+            label="还箱令编号"
+            name="orderNo"
+            rules={[{ required: true, message: "请输入还箱令编号" }]}
+          >
+            <Input allowClear />
+          </Form.Item>
+          <Form.Item
             label="还箱类型"
             name="orderType"
             rules={[{ required: true }]}
@@ -171,14 +180,14 @@ const ReturnOrderModal: React.FC<Props> = ({ id, onSave, onClose }) => {
               }))}
             />
           </Form.Item>
+          <Form.Item label="还箱时间" name="returnTime">
+            <DatePicker
+              className="w-full"
+              format="YYYY-MM-DD"
+              placeholder="选择时间"
+            />
+          </Form.Item>
         </div>
-        <Form.Item label="还箱时间" name="returnTime">
-          <DatePicker
-            className="w-full"
-            format="YYYY-MM-DD"
-            placeholder="选择时间"
-          />
-        </Form.Item>
 
         <Form.Item label="备注" name="remark">
           <Input.TextArea rows={2} placeholder="如有额外说明" />

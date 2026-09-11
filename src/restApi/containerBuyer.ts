@@ -7,7 +7,7 @@ import axiosInstance from "./axiosInstance";
 import { PageResult, ApiResponse } from "@/types";
 
 // ========================
-// 买方数据结构（推断自 Container.buyerId / ReleaseOrder.buyerId 关联）
+// 买方数据结构（推断自 Container.buyerId / PickupOrder.buyerId 关联）
 // ========================
 
 export interface ContainerBuyer {

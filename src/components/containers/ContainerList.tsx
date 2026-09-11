@@ -203,11 +203,7 @@ export const ContainerList = () => {
       align: "center",
       render: (v) => v || "-",
     },
-    {
-      title: "当前项目",
-      dataIndex: "projectName",
-      align: "center",
-    },
+
     {
       title: "当前状态",
       dataIndex: "status",
@@ -220,12 +216,7 @@ export const ContainerList = () => {
       align: "center",
       render: (v) => v || "-",
     },
-    {
-      title: "买方",
-      dataIndex: "buyerName",
-      align: "center",
-      render: (v) => v || "-",
-    },
+
     {
       title: "操作",
       align: "center",

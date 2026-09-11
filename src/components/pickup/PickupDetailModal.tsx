@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import { Modal, Space, Button, Spin, message } from "antd";
 import dayjs from "dayjs";
 import {
-  getReleaseOrderDetail,
-  downloadReleaseOrderDoc,
-} from "@/restApi/releaseOrder";
+  getPickupOrderDetail,
+  downloadPickupOrderDoc,
+} from "@/restApi/pickupOrder";
 import { ReleaseTypeBadge, StatusBadge } from "@/components/ui/Badge";
 
 interface Props {
@@ -51,7 +51,7 @@ interface ReleaseData {
   createTime?: string;
 }
 
-export const ReleaseDetailModal = ({
+export const PickupDetailModal = ({
   id,
   onClose,
   onEdit,
@@ -63,7 +63,7 @@ export const ReleaseDetailModal = ({
 
   useEffect(() => {
     setLoading(true);
-    getReleaseOrderDetail(id)
+    getPickupOrderDetail(id)
       .then((res: any) => {
         const entity = res?.entity ?? {};
         setR(entity.data ?? null);
@@ -75,7 +75,7 @@ export const ReleaseDetailModal = ({
   if (loading) {
     return (
       <Modal
-        title="放箱令详情"
+        title="提箱令详情"
         open
         onCancel={onClose}
         footer={null}
@@ -92,16 +92,16 @@ export const ReleaseDetailModal = ({
 
   const downloadWord = async () => {
     if (!id) {
-      message.error("放箱令 id 缺失");
+      message.error("提箱令 id 缺失");
       return;
     }
     try {
-      message.loading({ content: "正在下载放箱单...", key: "doc" });
-      const res: any = await downloadReleaseOrderDoc(id);
+      message.loading({ content: "正在下载提箱单...", key: "doc" });
+      const res: any = await downloadPickupOrderDoc(id);
       const blob = res.data as Blob;
 
       // 优先解析服务端 Content-Disposition 的文件名
-      let filename = `放箱单_${r?.orderNo ?? id}.docx`;
+      let filename = `提箱单_${r?.orderNo ?? id}.docx`;
       const cd =
         res.headers?.["content-disposition"] ??
         res.headers?.["Content-Disposition"] ??
@@ -132,7 +132,7 @@ export const ReleaseDetailModal = ({
     <Modal
       title={
         <span className="text-[#198348] font-bold">
-          放箱令详情 - {r.orderNo}
+          提箱令详情 - {r.orderNo}
         </span>
       }
       open
@@ -142,7 +142,7 @@ export const ReleaseDetailModal = ({
       footer={
         <Space>
           <Button onClick={onClose}>关闭</Button>
-          <Button onClick={downloadWord}>📄 下载 Word 放箱单</Button>
+          <Button onClick={downloadWord}>📄 下载 Word 提箱单</Button>
           {onEdit && (
             <Button type="primary" onClick={onEdit}>
               编辑
@@ -152,18 +152,18 @@ export const ReleaseDetailModal = ({
       }
     >
       <div className="text-xs text-gray-400 mb-2">
-        <span className="text-[#198348]">📋</span> 放箱令基本信息 + Word
+        <span className="text-[#198348]">📋</span> 提箱令基本信息 + Word
         模板中同款明细表
       </div>
 
-      {/* 放箱令信息 9 项栅格 */}
+      {/* 提箱令信息 9 项栅格 */}
       <div className="grid grid-cols-3 gap-y-2.5 gap-x-4 text-sm bg-white">
         <div className="col-span-3 text-xs font-bold text-[#198348] pb-1 border-b border-dashed border-gray-200 mb-1">
-          放箱令信息
+          提箱令信息
         </div>
 
         <div>
-          <div className="text-xs text-gray-400">放箱令编号</div>
+          <div className="text-xs text-gray-400">提箱令编号</div>
           <div className="font-medium text-[#198348]">{r.orderNo || "-"}</div>
         </div>
         <div>
@@ -177,7 +177,7 @@ export const ReleaseDetailModal = ({
           <div className="font-medium">{boxes.length || "-"}</div>
         </div>
         <div>
-          <div className="text-xs text-gray-400">放箱方式</div>
+          <div className="text-xs text-gray-400">提箱方式</div>
           <div className="font-medium">
             {r.releaseMethod === "designated"
               ? "指定箱号"
@@ -193,23 +193,19 @@ export const ReleaseDetailModal = ({
         </div>
 
         <div>
-          <div className="text-xs text-gray-400">放箱数量</div>
+          <div className="text-xs text-gray-400">提箱数量</div>
           <div className="font-medium">
             {r.quantity != null ? r.quantity : "-"}
           </div>
         </div>
 
         <div>
-          <div className="text-xs text-gray-400">放箱地区</div>
+          <div className="text-xs text-gray-400">提箱地区</div>
           <div className="font-medium">{r.region || "-"}</div>
         </div>
 
         <div>
-          <div className="text-xs text-gray-400">买方/租方</div>
-          <div className="font-medium">{r.buyerName || "-"}</div>
-        </div>
-        <div>
-          <div className="text-xs text-gray-400">放箱堆场</div>
+          <div className="text-xs text-gray-400">提箱堆场</div>
           <div className="font-medium">
             {r.yardName && r.yardName !== "-" ? (
               r.yardName
@@ -251,10 +247,10 @@ export const ReleaseDetailModal = ({
         )}
       </div>
 
-      {/* 放箱指令明细表 */}
+      {/* 提箱指令明细表 */}
       <div className="mt-4">
         <div className="text-xs font-bold text-[#198348] pb-1 border-b border-dashed border-gray-200 mb-2">
-          放箱指令明细（Word 模板中同款表格）—{" "}
+          提箱指令明细（Word 模板中同款表格）—{" "}
           <span className="font-normal text-gray-500">
             {boxes.length} 个箱子
           </span>
@@ -309,7 +305,7 @@ export const ReleaseDetailModal = ({
               ) : (
                 <tr>
                   <td colSpan={6} className="py-4 text-center text-gray-400">
-                    暂无放箱指令
+                    暂无提箱指令
                   </td>
                 </tr>
               )}

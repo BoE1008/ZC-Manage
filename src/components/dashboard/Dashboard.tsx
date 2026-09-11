@@ -152,7 +152,7 @@ export const Dashboard = () => {
 
   // 待办数据：完全数据驱动渲染，按 todoStats.items 的 key 顺序输出
   const todoKeyAction: Record<string, () => void> = {
-    releasePending: () => router.push("/releaseOrder"),
+    releasePending: () => router.push("/pickupOrder"),
     inTransit: () => goFilter("outbound"),
     arrivalImminent: () => goFilter("inbound"),
     arrivalOverdue: () => goFilter("domestic_storage"),
@@ -216,7 +216,7 @@ export const Dashboard = () => {
         const act = todoKeyAction[key];
         if (act) act();
         else if (key.toLowerCase().includes("release"))
-          router.push("/releaseOrder");
+          router.push("/pickupOrder");
         else goFilter(null);
       },
     }),
@@ -239,90 +239,6 @@ export const Dashboard = () => {
             <div className="text-[11px] text-gray-400 mt-0.5">{s.sub}</div>
           </div>
         ))}
-      </div>
-
-      {/* 流转全景 */}
-      <div className="bg-white rounded-md p-4 shadow-sm">
-        <div className="flex items-center text-sm font-bold mb-3 text-gray-800">
-          <div className="w-1 h-4 bg-[#198348] rounded mr-2 flex-shrink-0" />
-          集装箱流转全景
-          <span className="ml-auto text-xs font-normal text-gray-500">
-            点击节点查看对应状态集装箱
-          </span>
-        </div>
-        <div className="flex items-center gap-2 flex-wrap mb-2">
-          {[
-            {
-              label: "国内堆存",
-              cnt: statusOf("domestic_storage"),
-              color: "text-cyan-700",
-              filter: "domestic_storage",
-            },
-            {
-              label: "去程在途",
-              cnt: statusOf("outbound"),
-              color: "text-blue-500",
-              filter: "outbound",
-            },
-            {
-              label: "国外堆存",
-              cnt: statusOf("overseas_storage"),
-              color: "text-yellow-500",
-              filter: "overseas_storage",
-            },
-          ].map((f, i) => (
-            <div key={i} className="flex items-center gap-1.5">
-              {i > 0 && <span className="text-gray-400">→</span>}
-              <div
-                className="bg-white border border-gray-200 rounded-md px-3 py-1.5 text-center cursor-pointer hover:shadow-md transition-all"
-                onClick={() => goFilter(f.filter)}
-              >
-                <div className={`text-xs font-bold ${f.color}`}>{f.label}</div>
-                <div className="text-base font-bold text-gray-900 mt-0.5">
-                  {loading ? "—" : f.cnt}
-                </div>
-              </div>
-            </div>
-          ))}
-          <span className="text-xs text-gray-400 ml-1">⤴ 卖出 / ⤵ 回程</span>
-        </div>
-        <div className="flex items-center gap-2 flex-wrap mb-2">
-          <div className="flex items-center gap-1.5">
-            <div
-              className="bg-white border border-gray-200 rounded-md px-3 py-1.5 text-center cursor-pointer hover:shadow-md transition-all"
-              onClick={() => goFilter("inbound")}
-            >
-              <div className="text-xs font-bold text-purple-500">回程在途</div>
-              <div className="text-base font-bold text-gray-900 mt-0.5">
-                {loading ? "—" : statusOf("inbound")}
-              </div>
-            </div>
-          </div>
-          <span className="text-gray-400 text-xs">→</span>
-          <div className="bg-white border border-gray-200 rounded-md px-3 py-1.5 text-center">
-            <div className="text-xs font-bold text-gray-500">国内堆存</div>
-            <div className="text-base font-bold text-gray-900 mt-0.5">→</div>
-          </div>
-          <span className="text-gray-400 text-xs">→</span>
-          <div className="bg-white border border-gray-200 rounded-md px-3 py-1.5 text-center">
-            <div className="text-xs font-bold text-blue-500">再次去程</div>
-            <div className="text-base font-bold text-gray-900 mt-0.5">循环</div>
-          </div>
-        </div>
-        <div className="flex items-center gap-2 mt-2">
-          <div
-            className="bg-green-50 border border-green-400 rounded-md px-3 py-1.5 text-center cursor-pointer hover:shadow transition-all"
-            onClick={() => goFilter("sold")}
-          >
-            <div className="text-xs font-bold text-green-600">已卖出</div>
-            <div className="text-base font-bold text-green-600 mt-0.5">
-              {loading ? "—" : statusOf("sold")}
-            </div>
-          </div>
-          <span className="text-[11px] text-gray-400 ml-2">
-            买箱发运到国外后卖出，业务结束
-          </span>
-        </div>
       </div>
 
       {/* 最近操作记录 + 本月财务概览 */}
@@ -392,7 +308,7 @@ export const Dashboard = () => {
                 color: "text-red-500",
               },
               {
-                label: "放箱收入",
+                label: "提箱收入",
                 val: f.releaseIncome,
                 color: "text-red-500",
               },

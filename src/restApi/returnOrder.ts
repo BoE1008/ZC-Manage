@@ -97,9 +97,10 @@ export const addReturnOrder = async (data: Partial<ReturnOrder>) => {
 export const editReturnOrder = async (
   data: Partial<ReturnOrder> & { id: string },
 ) => {
-  const res = await axiosInstance.post<ApiResponse>("/zc/returnOrder/update", {
+  const res = await axiosInstance.post<ApiResponse>(
+    "/zc/returnOrder/update",
     data,
-  });
+  );
   return res.data;
 };
 
