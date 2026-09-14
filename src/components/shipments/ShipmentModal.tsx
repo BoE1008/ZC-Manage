@@ -40,9 +40,6 @@ const SEGMENT_OPTIONS = [
 export const ShipmentModal = ({ id, onSave, onClose }: Props) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-  const [suppliers, setSuppliers] = useState<
-    { label: string; value: string }[]
-  >([]);
   const [projects, setProjects] = useState<any[]>([]);
   const [containers, setContainers] = useState<any[]>([]);
   const [yards, setYards] = useState<any[]>([]);
@@ -74,14 +71,6 @@ export const ShipmentModal = ({ id, onSave, onClose }: Props) => {
 
   // 独立加载下拉选项，互不等待
   useEffect(() => {
-    getSuppliersList(1, 1000).then((r: any) => {
-      setSuppliers(
-        ((r.entity?.data ?? []) as any[]).map((s: any) => ({
-          label: s.name,
-          value: s.id,
-        })),
-      );
-    });
     getContainerList({ pageNo: 1, pageSize: 1000 }).then((r: any) => {
       setContainers(
         ((r.entity?.data ?? []) as any[]).map((s: any) => ({
@@ -183,7 +172,7 @@ export const ShipmentModal = ({ id, onSave, onClose }: Props) => {
       }
     }
     form.setFieldsValue(vals);
-  }, [suppliers, projects]);
+  }, [projects]);
 
   // 项目编号变化：回填项目名称到 selectProject
   const handleProjectChanged = (param: any) => {
@@ -472,6 +461,20 @@ export const ShipmentModal = ({ id, onSave, onClose }: Props) => {
                   { label: "卖出已交付", value: "sold_delivered" },
                   { label: "卖出未交付", value: "sold_pending" },
                   { label: "未卖出", value: "unsold" },
+                ]}
+              />
+            </Form.Item>
+            <Form.Item
+              name="isEnd"
+              label={<span className="text-xs">是否结束</span>}
+              initialValue="0"
+            >
+              <Select
+                allowClear
+                placeholder="默认否"
+                options={[
+                  { label: "否", value: "0" },
+                  { label: "是", value: "1" },
                 ]}
               />
             </Form.Item>

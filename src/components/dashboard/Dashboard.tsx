@@ -152,7 +152,7 @@ export const Dashboard = () => {
 
   // 待办数据：完全数据驱动渲染，按 todoStats.items 的 key 顺序输出
   const todoKeyAction: Record<string, () => void> = {
-    releasePending: () => router.push("/pickupOrder"),
+    releasePending: () => router.push("/releaseOrder"),
     inTransit: () => goFilter("outbound"),
     arrivalImminent: () => goFilter("inbound"),
     arrivalOverdue: () => goFilter("domestic_storage"),
@@ -216,7 +216,7 @@ export const Dashboard = () => {
         const act = todoKeyAction[key];
         if (act) act();
         else if (key.toLowerCase().includes("release"))
-          router.push("/pickupOrder");
+          router.push("/releaseOrder");
         else goFilter(null);
       },
     }),

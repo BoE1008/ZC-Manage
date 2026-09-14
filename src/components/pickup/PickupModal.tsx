@@ -50,7 +50,6 @@ export const PickupModal = ({ id, onSave, onClose }: Props) => {
   const [initLoading, setInitLoading] = useState(true);
   const [containers, setContainers] = useState<Container[]>([]);
   const [containersLoading, setContainersLoading] = useState(false);
-  const [buyers, setBuyers] = useState<any[]>([]);
   const [yards, setYards] = useState<any[]>([]);
   const [cityOptions, setCityOptions] = useState<
     { label: string; value: string }[]
@@ -86,13 +85,8 @@ export const PickupModal = ({ id, onSave, onClose }: Props) => {
   // 加载下拉选项（买方/供应商/堆场/城市字典）
   useEffect(() => {
     setInitLoading(true);
-    Promise.all([
-      getCustomersList(1, 1000),
-      getSuppliersList(1, 1000),
-      getYardList({ pageNo: 1, pageSize: 1000 }),
-    ])
-      .then(([cusRes, supRes, yardRes]) => {
-        setBuyers(cusRes.entity?.data ?? []);
+    getYardList({ pageNo: 1, pageSize: 1000 })
+      .then((yardRes) => {
         setYards(yardRes?.entity?.data ?? []);
       })
       .finally(() => setInitLoading(false));
@@ -154,11 +148,7 @@ export const PickupModal = ({ id, onSave, onClose }: Props) => {
         const d = entity.data ?? {};
         setOrderNo(d.orderNo ?? "");
         const vals: any = { ...d };
-        // 旧数据只存名称未存 id：按名称反查
-        if (!vals.buyerId && vals.buyerName) {
-          const o = buyers.find((x: any) => x.name === vals.buyerName);
-          if (o) vals.buyerId = o.id;
-        }
+
         if (!vals.yardId && vals.yardName) {
           const o = yards.find((x: any) => x.name === vals.yardName);
           if (o) vals.yardId = o.id;
@@ -194,7 +184,7 @@ export const PickupModal = ({ id, onSave, onClose }: Props) => {
         );
       })
       .catch(() => {});
-  }, [id, buyers, yards]);
+  }, [id, yards]);
 
   // 监听 yardId 变化以驱动列表过滤（重名变量已被上面抢在主级定义，保留此处仅为类型推断）
   // const watchedYardId = Form.useWatch("yardId", form);
@@ -249,8 +239,6 @@ export const PickupModal = ({ id, onSave, onClose }: Props) => {
         containerType: values.containerType,
         quantity: values.quantity ? Number(values.quantity) : undefined,
         city: values.city,
-        buyerId: values.buyerId,
-        buyerName: values.buyerName,
         yardId: values.yardId,
         yardName: values.yardName,
         deadline: deadlineStr,

@@ -188,6 +188,22 @@ export const ShipmentDetailModal = ({ id, onClose }: Props) => {
                 ),
             },
             {
+              key: "isEnd",
+              label: "是否结束",
+              children:
+                r.isEnd === "1" ? (
+                  <span className="px-2 py-0.5 rounded text-xs bg-green-100 text-green-700">
+                    是
+                  </span>
+                ) : r.isEnd === "0" ? (
+                  <span className="px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-600">
+                    否
+                  </span>
+                ) : (
+                  "-"
+                ),
+            },
+            {
               key: "returnTime",
               label: "还箱时间",
               children: r.returnTime || "-",

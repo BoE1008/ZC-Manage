@@ -243,6 +243,24 @@ export const ShipmentList = () => {
         ),
     },
     {
+      title: "是否结束",
+      dataIndex: "isEnd",
+      width: 90,
+      align: "center",
+      render: (v: string) =>
+        v === "1" ? (
+          <span className="px-2 py-0.5 rounded text-xs bg-green-100 text-green-700">
+            是
+          </span>
+        ) : v === "0" ? (
+          <span className="px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-600">
+            否
+          </span>
+        ) : (
+          "-"
+        ),
+    },
+    {
       title: "操作",
       align: "center",
       fixed: "right",

@@ -37,11 +37,9 @@ interface Props {
 export const ContainerModal = ({ id, onSave, onClose }: Props) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-  const [container, setContainer] = useState<any>(null);
   const [suppliers, setSuppliers] = useState<
     { label: string; value: string }[]
   >([]);
-  const [buyers, setBuyers] = useState<{ label: string; value: string }[]>([]);
   const [yards, setYards] = useState<{ label: string; value: string }[]>([]);
   const [projects, setProjects] = useState<any[]>([]);
   const [pickupOrders, setPickupOrders] = useState<
@@ -90,14 +88,7 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
         })),
       );
     });
-    getCustomersList(1, 1000).then((r: any) => {
-      setBuyers(
-        ((r.entity?.data ?? []) as any[]).map((b: any) => ({
-          label: b.name,
-          value: b.id,
-        })),
-      );
-    });
+
     getDictByCode("container_sale_status")
       .then((res: any) => {
         const list = res?.entity?.data ?? res?.entity ?? [];
@@ -135,29 +126,18 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
   useEffect(() => {
     if (!id) return;
     // 下拉任一未就绪，等下一次触发
-    if (
-      !suppliers.length ||
-      !buyers.length ||
-      !projects.length ||
-      !yards.length
-    )
-      return;
+    if (!suppliers.length || !projects.length || !yards.length) return;
     // 同一挂载周期内已请求过该 id（options 变化导致的重复触发），跳过
     if (requestedIdRef.current === id) return;
     requestedIdRef.current = id;
     getContainerDetail(id).then((r: any) => {
       const d = r?.entity?.data ?? r?.entity ?? r;
       if (!d) return;
-      setContainer(d);
       const vals: any = { ...d };
       // 供应商/买方/提箱堆场 id 反查
       if (!vals.supplierId && vals.supplierName) {
         const o = suppliers.find((x) => x.label === vals.supplierName);
         if (o) vals.supplierId = o.value;
-      }
-      if (!vals.buyerId && vals.buyerName) {
-        const o = buyers.find((x) => x.label === vals.buyerName);
-        if (o) vals.buyerId = o.value;
       }
       if (!vals.liftingYardId && vals.liftingYardName) {
         const o = yards.find((x) => x.label === vals.liftingYardName);
@@ -189,7 +169,7 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
       form.setFieldsValue(vals);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, projects, suppliers, buyers, yards]);
+  }, [id, projects, suppliers, yards]);
 
   // 项目编号变化：回填项目名称到 selectProject
   const handleProjectChanged = (param: any) => {
@@ -238,9 +218,6 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
       // 当前堆场名称（dropYardId → dropYardName，与 id 一并传后端）
       const dropYard = yards.find((x) => x.value === values.dropYardId);
       if (dropYard) values.dropYardName = dropYard.label;
-      // 买方名称
-      const buyer = buyers.find((x) => x.value === values.buyerId);
-      if (buyer) values.buyerName = buyer.label;
       // 项目：values.projectNum 是真实 id；selectProject 持有完整对象
       values.projectId = values.projectNum || "";
       values.projectName = selectProject?.name || "";
