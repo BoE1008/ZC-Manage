@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Button, Space, Input, Select, message, Modal } from "antd";
 import ResizeTable from "@/components/ResizeTable";
+import SearchInput from "@/components/SearchInput";
 import YardModal from "./YardModal";
 import YardDetailModal from "./YardDetailModal";
 import { getYardList, deleteYard } from "@/restApi/yard";
+import { getDictByCode } from "@/restApi/dict";
 
 const YardList: React.FC = () => {
   const [data, setData] = useState<any[]>([]);
@@ -11,14 +13,22 @@ const YardList: React.FC = () => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const [total, setTotal] = useState(0);
-  const [regionFilter, setRegionFilter] = useState("");
-  const [keyword, setKeyword] = useState("");
+  const [cityFilter, setCityFilter] = useState("");
+  const [cityOptions, setCityOptions] = useState<
+    { label: string; value: string }[]
+  >([]);
+  const [nameFilter, setNameFilter] = useState("");
   const [editId, setEditId] = useState<string | null | undefined>(undefined);
   const [viewId, setViewId] = useState<string | null>(null);
 
-  const load = (p = page) => {
+  const load = (p = page, c = cityFilter, n = nameFilter) => {
     setLoading(true);
-    getYardList({ pageNo: p, pageSize })
+    getYardList({
+      pageNo: p,
+      pageSize,
+      city: c || undefined,
+      yardName: n || undefined,
+    })
       .then((r: any) => {
         setData(r.entity?.data ?? []);
         setTotal(r.entity?.total ?? 0);
@@ -27,23 +37,22 @@ const YardList: React.FC = () => {
   };
 
   useEffect(() => {
-    load(page);
-  }, [page]);
+    load(page, cityFilter, nameFilter);
+  }, [page, cityFilter, nameFilter]);
 
-  const filteredData = data.filter((y: any) => {
-    if (regionFilter && y.region !== regionFilter) return false;
-    if (keyword) {
-      const kw = keyword.toLowerCase();
-      if (
-        !(y.name ?? "").toLowerCase().includes(kw) &&
-        !(y.city ?? "").toLowerCase().includes(kw) &&
-        !(y.supplierName ?? "").toLowerCase().includes(kw) &&
-        !(y.contactsName ?? "").toLowerCase().includes(kw)
-      )
-        return false;
-    }
-    return true;
-  });
+  useEffect(() => {
+    getDictByCode("yard_city")
+      .then((res: any) => {
+        const list = res?.entity?.data ?? res?.entity ?? [];
+        setCityOptions(
+          (Array.isArray(list) ? list : []).map((d: any) => ({
+            label: d.dictLabel ?? d.label ?? d.dictValue,
+            value: d.dictValue ?? d.value,
+          })),
+        );
+      })
+      .catch(() => setCityOptions([]));
+  }, []);
 
   const handleDelete = (r: any) => {
     Modal.confirm({
@@ -147,7 +156,7 @@ const YardList: React.FC = () => {
 
   return (
     <div className="p-4 space-y-3">
-      <div className="grid grid-cols-4 gap-2.5">
+      {/* <div className="grid grid-cols-4 gap-2.5">
         <div className="bg-white rounded-md p-3 shadow-sm border-l-4 border-l-gray-400">
           <div className="text-xs text-gray-500 mb-1">国内堆场</div>
           <div className="text-2xl font-bold text-gray-700">
@@ -174,7 +183,7 @@ const YardList: React.FC = () => {
           </div>
           <div className="text-xs text-gray-400 mt-0.5">Boxes in yard</div>
         </div>
-      </div>
+      </div> */}
 
       <div className="flex items-center gap-2 flex-wrap">
         <Button type="primary" size="small" onClick={() => setEditId(null)}>
@@ -187,23 +196,30 @@ const YardList: React.FC = () => {
           <Select
             size="small"
             allowClear
-            placeholder="区域"
-            style={{ width: 100 }}
-            value={regionFilter || undefined}
-            onChange={(v) => setRegionFilter(v ?? "")}
-            options={[
-              { label: "国内", value: "国内" },
-              { label: "国外", value: "国外" },
-            ]}
+            showSearch
+            placeholder="城市"
+            style={{ width: 140 }}
+            value={cityFilter || undefined}
+            onChange={(v) => {
+              setPage(1);
+              setCityFilter(v ?? "");
+            }}
+            options={cityOptions}
+            filterOption={(i, o) =>
+              ((o?.label as string) || "")
+                .toLowerCase()
+                .includes(i.toLowerCase())
+            }
           />
-          <Input
-            size="small"
-            placeholder="堆场名称"
-            style={{ width: 200 }}
-            allowClear
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-          />
+          <div style={{ width: 200 }}>
+            <SearchInput
+              placeholder="堆场名称"
+              onSearch={(v) => {
+                setPage(1);
+                setNameFilter(v);
+              }}
+            />
+          </div>
         </div>
       </div>
 
@@ -217,7 +233,7 @@ const YardList: React.FC = () => {
       <div className="bg-white rounded shadow-sm overflow-hidden">
         <ResizeTable
           columns={columns}
-          dataSource={filteredData}
+          dataSource={data}
           loading={loading}
           rowKey="id"
           size="small"

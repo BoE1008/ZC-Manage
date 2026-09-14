@@ -21,6 +21,8 @@ export interface ReturnOrder {
   orderNo?: string;
   /** 还箱类型 customer_return 客户还箱 / rent_return 租箱归还 */
   orderType?: string;
+  /** 还箱地区（如：国内/国外/宁波/Vladivostok） */
+  returnRegion?: string;
   /** 指定归还堆场ID（关联sys_yard，可不指定） */
   yardId?: string;
   /** 堆场名称（list 接口回填） */
@@ -53,6 +55,7 @@ export interface ReturnOrderPageQuery {
   status?: string;
   yardId?: string;
   keyword?: string;
+  orderType?: string;
 }
 
 /** 列表分页结果 */

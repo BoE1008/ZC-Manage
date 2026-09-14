@@ -29,6 +29,7 @@ export const ContainerList = () => {
   const [statusFilter, setStatusFilter] = useState("");
   const [usageFilter, setUsageFilter] = useState("");
   const [condFilter, setCondFilter] = useState("");
+  const [saleFilter, setSaleFilter] = useState("");
 
   // 字典选项
   const [statusOptions, setStatusOptions] = useState<DictOption[]>(
@@ -65,6 +66,11 @@ export const ContainerList = () => {
       const u = typeof qs.usage === "string" ? qs.usage : "";
       const c = typeof qs.cond === "string" ? qs.cond : "";
       const k = typeof qs.q === "string" ? qs.q : "";
+      const sa = typeof qs.sale === "string" ? qs.sale : "";
+      setStatusFilter(s);
+      setUsageFilter(u);
+      setCondFilter(c);
+      setSaleFilter(sa);
       setLoading(true);
       getContainerList({
         pageNo: p,
@@ -73,6 +79,7 @@ export const ContainerList = () => {
         usageType: u || undefined,
         conditionType: c || undefined,
         containerNo: k || undefined,
+        saleStatus: sa || undefined,
       })
         .then((res) => {
           setContainers(res.entity?.data ?? []);
@@ -166,6 +173,30 @@ export const ContainerList = () => {
       dataIndex: "usageType",
       align: "center",
       render: (v) => <UsageTag usage={v} />,
+    },
+    {
+      title: "售卖状态",
+      dataIndex: "saleStatus",
+      align: "center",
+      width: 110,
+      render: (v) =>
+        v === "sold_delivered" ? (
+          <span className="px-2 py-0.5 rounded text-xs bg-green-100 text-green-700">
+            卖出已交付
+          </span>
+        ) : v === "sold_pending" ? (
+          <span className="px-2 py-0.5 rounded text-xs bg-amber-100 text-amber-700">
+            卖出未交付
+          </span>
+        ) : v === "unsold" ? (
+          <span className="px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-600">
+            未卖出
+          </span>
+        ) : (
+          <span className="px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-600">
+            -
+          </span>
+        ),
     },
     {
       title: "箱况",
@@ -287,6 +318,19 @@ export const ContainerList = () => {
             className="w-32"
             size="small"
             options={usageOptions}
+          />
+          <Select
+            placeholder="全部售卖状态"
+            allowClear
+            value={saleFilter || undefined}
+            onChange={handleFilterChange("sale")}
+            className="w-32"
+            size="small"
+            options={[
+              { label: "未卖出", value: "unsold" },
+              { label: "卖出未交付", value: "sold_pending" },
+              { label: "卖出已交付", value: "sold_delivered" },
+            ]}
           />
           <Select
             placeholder="全部箱况"

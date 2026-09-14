@@ -46,6 +46,7 @@ export const getTrackingList = async (params: {
   dropSupplierId?: string;
   storageCost?: number;
   storageIncome?: number;
+  saleStatus?: string;
 }) => {
   const res = await axiosInstance.get<
     ApiResponse<PageResult<ContainerTracking>>

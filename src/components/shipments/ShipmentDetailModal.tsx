@@ -168,6 +168,26 @@ export const ShipmentDetailModal = ({ id, onClose }: Props) => {
               children: r.statusRemark || "-",
             },
             {
+              key: "saleStatus",
+              label: "售卖状态",
+              children:
+                r.saleStatus === "sold_delivered" ? (
+                  <span className="px-2 py-0.5 rounded text-xs bg-green-100 text-green-700">
+                    卖出已交付
+                  </span>
+                ) : r.saleStatus === "sold_pending" ? (
+                  <span className="px-2 py-0.5 rounded text-xs bg-amber-100 text-amber-700">
+                    卖出未交付
+                  </span>
+                ) : r.saleStatus === "unsold" ? (
+                  <span className="px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-600">
+                    未卖出
+                  </span>
+                ) : (
+                  "-"
+                ),
+            },
+            {
               key: "returnTime",
               label: "还箱时间",
               children: r.returnTime || "-",

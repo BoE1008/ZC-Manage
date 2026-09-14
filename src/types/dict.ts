@@ -60,7 +60,7 @@ export type ReleaseStatusValue =
   | string;
 
 /** 提箱方式（designated 指定箱号 / undesignated 不指定箱号） */
-export type ReleaseMethodValue = "designated" | "undesignated" | string;
+export type pickupMethodValue = "designated" | "undesignated" | string;
 
 /** 卖方/供应商类型（seller 卖方 / rental_provider 出租方 / yard 堆场） */
 export type SupplierTypeValue = "seller" | "rental_provider" | "yard" | string;

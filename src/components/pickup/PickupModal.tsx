@@ -16,6 +16,7 @@ import dayjs from "dayjs";
 import { Container, ContainerStatus } from "@/types";
 import { getContainerList } from "@/restApi/container";
 import { getYardList } from "@/restApi/yard";
+import { getDictByCode } from "@/restApi/dict";
 import { getCustomersList } from "@/restApi/customer";
 import { getSuppliersList } from "@/restApi/supplyer";
 import {
@@ -25,12 +26,6 @@ import {
   PickupOrder,
   PickupOrderForm,
 } from "@/restApi/pickupOrder";
-
-const ORDER_TYPE_OPTIONS = [
-  { label: "卖出提箱", value: "sale" },
-  { label: "回程提箱", value: "return" },
-  { label: "租给客户", value: "rent" },
-];
 
 const RELEASE_METHOD_OPTIONS = [
   { label: "指定箱号", value: "designated" },
@@ -54,27 +49,96 @@ export const PickupModal = ({ id, onSave, onClose }: Props) => {
   const [loading, setLoading] = useState(false);
   const [initLoading, setInitLoading] = useState(true);
   const [containers, setContainers] = useState<Container[]>([]);
+  const [containersLoading, setContainersLoading] = useState(false);
   const [buyers, setBuyers] = useState<any[]>([]);
   const [yards, setYards] = useState<any[]>([]);
+  const [cityOptions, setCityOptions] = useState<
+    { label: string; value: string }[]
+  >([]);
+  const [selectedCity, setSelectedCity] = useState<string | undefined>(
+    undefined,
+  );
   const [selectedBoxes, setSelectedBoxes] = useState<string[]>([]);
   const [orderNo, setOrderNo] = useState<string>("");
+  const [typeOptions, setTypeOptions] = useState<
+    { label: string; value: string }[]
+  >([]);
 
-  // 加载下拉选项
+  // 加载提箱类型字典
+  useEffect(() => {
+    getDictByCode("pickup_order_type")
+      .then((res: any) => {
+        const list = res?.entity?.data ?? res?.entity ?? [];
+        setTypeOptions(
+          (Array.isArray(list) ? list : []).map((d: any) => ({
+            label: d.dictLabel ?? d.label ?? d.dictValue,
+            value: d.dictValue ?? d.value,
+          })),
+        );
+      })
+      .catch(() => setTypeOptions([]));
+  }, []);
+
+  // 监听 yardId/city 变化以驱动联动逻辑
+  const watchedYardId = Form.useWatch("yardId", form);
+  const watchedCity = Form.useWatch("city", form);
+
+  // 加载下拉选项（买方/供应商/堆场/城市字典）
   useEffect(() => {
     setInitLoading(true);
     Promise.all([
-      getContainerList({ pageNo: 1, pageSize: 1000 }),
       getCustomersList(1, 1000),
       getSuppliersList(1, 1000),
       getYardList({ pageNo: 1, pageSize: 1000 }),
     ])
-      .then(([cRes, cusRes, supRes, yardRes]) => {
-        setContainers(cRes.entity?.data ?? []);
+      .then(([cusRes, supRes, yardRes]) => {
         setBuyers(cusRes.entity?.data ?? []);
         setYards(yardRes?.entity?.data ?? []);
       })
       .finally(() => setInitLoading(false));
+    getDictByCode("yard_city")
+      .then((res: any) => {
+        const list = res?.entity?.data ?? res?.entity ?? [];
+        setCityOptions(
+          (Array.isArray(list) ? list : []).map((d: any) => ({
+            label: d.dictLabel ?? d.label ?? d.dictValue,
+            value: d.dictValue ?? d.value,
+          })),
+        );
+      })
+      .catch(() => setCityOptions([]));
   }, []);
+
+  // 选择了提箱堆场后再拉箱子列表：后端筛 liftingYardId + 状态堆存中
+  useEffect(() => {
+    if (!watchedYardId) {
+      setContainers([]);
+      return;
+    }
+    // 切堆场后清掉之前选的箱子
+    setSelectedBoxes([]);
+    setContainersLoading(true);
+    Promise.all([
+      getContainerList({
+        pageNo: 1,
+        pageSize: 1000,
+        liftingYardId: watchedYardId,
+        status: "domestic_storage",
+      } as any).catch(() => ({ entity: { data: [] } }) as any),
+      getContainerList({
+        pageNo: 1,
+        pageSize: 1000,
+        liftingYardId: watchedYardId,
+        status: "overseas_storage",
+      } as any).catch(() => ({ entity: { data: [] } }) as any),
+    ])
+      .then(([dRes, oRes]) => {
+        const a = (dRes?.entity?.data ?? []) as Container[];
+        const b = (oRes?.entity?.data ?? []) as Container[];
+        setContainers([...a, ...b]);
+      })
+      .finally(() => setContainersLoading(false));
+  }, [watchedYardId]);
 
   // 编辑回显
   useEffect(() => {
@@ -98,6 +162,13 @@ export const PickupModal = ({ id, onSave, onClose }: Props) => {
         if (!vals.yardId && vals.yardName) {
           const o = yards.find((x: any) => x.name === vals.yardName);
           if (o) vals.yardId = o.id;
+        }
+        // 根据已选 yard 反查城市并同步 selectedCity（联动过滤）
+        const pickedYard = yards.find((x: any) => x.id === vals.yardId);
+        if (pickedYard?.city) {
+          setSelectedCity(pickedYard.city);
+        } else if (vals.city) {
+          setSelectedCity(vals.city);
         }
         if (vals.pickupTime) {
           const v = dayjs(vals.pickupTime as string);
@@ -125,14 +196,9 @@ export const PickupModal = ({ id, onSave, onClose }: Props) => {
       .catch(() => {});
   }, [id, buyers, yards]);
 
-  // 仅显示堆存中的箱子
-  const stockBoxes = useMemo(
-    () =>
-      containers.filter((c) =>
-        STOCK_STATUSES.includes(c.status as ContainerStatus),
-      ),
-    [containers],
-  );
+  // 监听 yardId 变化以驱动列表过滤（重名变量已被上面抢在主级定义，保留此处仅为类型推断）
+  // const watchedYardId = Form.useWatch("yardId", form);
+  // const watchedCity = Form.useWatch("city", form);
 
   // 按 type 计数（已选箱子）
   const typeCount = useMemo(() => {
@@ -154,14 +220,14 @@ export const PickupModal = ({ id, onSave, onClose }: Props) => {
   };
 
   const toggleAll = (checked: boolean) => {
-    setSelectedBoxes(checked ? stockBoxes.map((c) => c.containerNo) : []);
+    setSelectedBoxes(checked ? containers.map((c) => c.containerNo) : []);
   };
 
   const handleOk = () => {
     return form.validateFields().then((values) => {
       // 不指定箱号时，无需勾选集装箱
       if (
-        values.releaseMethod !== "undesignated" &&
+        values.pickupMethod !== "undesignated" &&
         selectedBoxes.length === 0
       ) {
         message.error("请至少勾选一个箱子");
@@ -179,10 +245,10 @@ export const PickupModal = ({ id, onSave, onClose }: Props) => {
       const payload: any = {
         orderNo: values.orderNo || undefined,
         orderType: values.orderType,
-        releaseMethod: values.releaseMethod,
+        pickupMethod: values.pickupMethod,
         containerType: values.containerType,
         quantity: values.quantity ? Number(values.quantity) : undefined,
-        region: values.region,
+        city: values.city,
         buyerId: values.buyerId,
         buyerName: values.buyerName,
         yardId: values.yardId,
@@ -255,11 +321,7 @@ export const PickupModal = ({ id, onSave, onClose }: Props) => {
           <div className="text-xs font-bold text-[#198348] pb-1 mb-3 border-b border-dashed border-gray-200">
             提箱信息
           </div>
-          <Form
-            form={form}
-            layout="vertical"
-            initialValues={{ orderType: "卖出提箱" }}
-          >
+          <Form form={form} layout="vertical">
             <div className="grid grid-cols-2 gap-x-4">
               <Form.Item
                 name="orderNo"
@@ -281,7 +343,7 @@ export const PickupModal = ({ id, onSave, onClose }: Props) => {
                   </span>
                 }
               >
-                <Select options={ORDER_TYPE_OPTIONS} />
+                <Select options={typeOptions} />
               </Form.Item>
 
               <Form.Item
@@ -301,7 +363,7 @@ export const PickupModal = ({ id, onSave, onClose }: Props) => {
               </Form.Item>
 
               <Form.Item
-                name="releaseMethod"
+                name="pickupMethod"
                 label={<span className="text-xs">提箱方式</span>}
               >
                 <Select
@@ -319,10 +381,37 @@ export const PickupModal = ({ id, onSave, onClose }: Props) => {
               </Form.Item>
 
               <Form.Item
-                name="region"
-                label={<span className="text-xs">提箱地区</span>}
+                name="deadline"
+                label={<span className="text-xs">指令期限</span>}
               >
-                <Input placeholder="如：上海 / 深圳" />
+                <RangePicker
+                  style={{ width: "100%" }}
+                  format="YYYY-MM-DD"
+                  placeholder={["起始日期", "截止日期"]}
+                />
+              </Form.Item>
+
+              <Form.Item
+                name="city"
+                label={<span className="text-xs">提箱城市</span>}
+              >
+                <Select
+                  allowClear
+                  showSearch
+                  placeholder="选择城市"
+                  options={cityOptions}
+                  filterOption={(i, o) =>
+                    ((o?.label as string) || "")
+                      .toLowerCase()
+                      .includes(i.toLowerCase())
+                  }
+                  onChange={(v) => {
+                    setSelectedCity(v);
+                    // 切了城市后清掉之前选的堆场
+                    form.setFieldValue("yardId", undefined);
+                    form.setFieldValue("yardName", undefined);
+                  }}
+                />
               </Form.Item>
 
               <Form.Item name="buyerName" hidden>
@@ -343,14 +432,22 @@ export const PickupModal = ({ id, onSave, onClose }: Props) => {
                 <Select
                   allowClear
                   showSearch
-                  placeholder="不指定（提箱后回填匹配）"
+                  disabled={!watchedCity}
+                  placeholder={
+                    watchedCity
+                      ? "不指定（提箱后回填匹配）"
+                      : "请先选择提箱城市"
+                  }
                   filterOption={(i, o) =>
                     ((o?.label as string) || "")
                       .toLowerCase()
                       .includes(i.toLowerCase())
                   }
-                  options={yards.map((y) => ({
-                    label: y.yardName,
+                  options={(selectedCity
+                    ? yards.filter((y) => y.city === selectedCity)
+                    : yards
+                  ).map((y) => ({
+                    label: y.city ? `${y.yardName}（${y.city}）` : y.yardName,
                     value: y.id,
                   }))}
                   onChange={(val) => {
@@ -364,17 +461,6 @@ export const PickupModal = ({ id, onSave, onClose }: Props) => {
               </Form.Item>
 
               <Form.Item
-                name="deadline"
-                label={<span className="text-xs">指令期限</span>}
-              >
-                <RangePicker
-                  style={{ width: "100%" }}
-                  format="YYYY-MM-DD"
-                  placeholder={["起始日期", "截止日期"]}
-                />
-              </Form.Item>
-
-              <Form.Item
                 name="remark"
                 label={<span className="text-xs">备注</span>}
                 className="col-span-2"
@@ -385,81 +471,87 @@ export const PickupModal = ({ id, onSave, onClose }: Props) => {
           </Form>
 
           {/* 提箱指令 */}
-          <div className="text-xs font-bold text-[#198348] pb-1 mt-2 mb-2 border-b border-dashed border-gray-200 flex items-center">
-            提箱指令（勾选箱子，可多选批量提箱）
-            <span className="ml-1 font-normal text-gray-400 text-[11px]">
-              — 仅显示堆存中的箱子
-            </span>
-          </div>
+          <>
+            <div className="text-xs font-bold text-[#198348] pb-1 mt-2 mb-2 border-b border-dashed border-gray-200 flex items-center">
+              提箱指令（勾选箱子，可多选批量提箱）
+              <span className="ml-1 font-normal text-gray-400 text-[11px]">
+                — 仅显示堆存中的箱子
+              </span>
+            </div>
 
-          <div
-            className="border border-gray-200 rounded p-2 mb-2"
-            style={{ maxHeight: 240, overflowY: "auto" }}
-          >
-            {stockBoxes.length === 0 ? (
-              <div className="text-center text-gray-400 py-4 text-xs">
-                暂无堆存中的箱子可提箱
-              </div>
-            ) : (
-              stockBoxes.map((c) => {
-                const checked = selectedBoxes.includes(c.containerNo);
-                return (
-                  <label
-                    key={c.id}
-                    className="flex items-center gap-2 py-1 px-1 cursor-pointer hover:bg-gray-50 rounded"
-                  >
-                    <input
-                      type="checkbox"
-                      className="w-4 h-4 accent-[#198348]"
-                      checked={checked}
-                      onChange={(e) =>
-                        toggleBox(c.containerNo, e.target.checked)
-                      }
-                    />
-                    <span className="font-mono text-xs text-[#198348] w-32">
-                      {c.containerNo}
-                    </span>
-                    <span
-                      className={`text-[10px] px-1.5 py-0.5 rounded ${
-                        c.status === "domestic_storage"
-                          ? "bg-cyan-50 text-cyan-700 border border-cyan-200"
-                          : c.status === "overseas_storage"
-                            ? "bg-orange-100 text-orange-700"
-                            : "bg-gray-100 text-gray-600"
-                      }`}
+            <div
+              className="border border-gray-200 rounded p-2 mb-2"
+              style={{ maxHeight: 240, overflowY: "auto" }}
+            >
+              {containers.length === 0 ? (
+                <div className="text-center text-gray-400 py-4 text-xs">
+                  {containersLoading
+                    ? "加载中..."
+                    : !watchedYardId
+                      ? "请选择堆场"
+                      : "该堆场暂无堆存中的箱子可提箱"}
+                </div>
+              ) : (
+                containers.map((c) => {
+                  const checked = selectedBoxes.includes(c.containerNo);
+                  return (
+                    <label
+                      key={c.id}
+                      className="flex items-center gap-2 py-1 px-1 cursor-pointer hover:bg-gray-50 rounded"
                     >
-                      {c.status === "domestic_storage"
-                        ? "国内堆存"
-                        : c.status === "overseas_storage"
-                          ? "国外堆存"
-                          : c.status || "其他"}
-                    </span>
-                    <span className="text-[11px] text-gray-400 truncate flex-1">
-                      {c.liftingYardId || ""}
-                    </span>
-                  </label>
-                );
-              })
-            )}
-          </div>
+                      <input
+                        type="checkbox"
+                        className="w-4 h-4 accent-[#198348]"
+                        checked={checked}
+                        onChange={(e) =>
+                          toggleBox(c.containerNo, e.target.checked)
+                        }
+                      />
+                      <span className="font-mono text-xs text-[#198348] w-32">
+                        {c.containerNo}
+                      </span>
+                      <span
+                        className={`text-[10px] px-1.5 py-0.5 rounded ${
+                          c.status === "domestic_storage"
+                            ? "bg-cyan-50 text-cyan-700 border border-cyan-200"
+                            : c.status === "overseas_storage"
+                              ? "bg-orange-100 text-orange-700"
+                              : "bg-gray-100 text-gray-600"
+                        }`}
+                      >
+                        {c.status === "domestic_storage"
+                          ? "国内堆存"
+                          : c.status === "overseas_storage"
+                            ? "国外堆存"
+                            : c.status || "其他"}
+                      </span>
+                      <span className="text-[11px] text-gray-400 truncate flex-1">
+                        {c.liftingYardId || ""}
+                      </span>
+                    </label>
+                  );
+                })
+              )}
+            </div>
 
-          <div className="flex items-center gap-2 text-xs mb-2">
-            <Button size="small" onClick={() => toggleAll(true)}>
-              全选
-            </Button>
-            <Button size="small" onClick={() => toggleAll(false)}>
-              取消全选
-            </Button>
-            <span className="text-gray-500">
-              已勾选 <b className="text-[#198348]">{selectedBoxes.length}</b>{" "}
-              个箱子
-            </span>
-            <span className="ml-auto text-[11px] text-gray-500">
-              {Object.entries(typeCount)
-                .map(([k, v]) => `${k} ${v}`)
-                .join(" / ")}
-            </span>
-          </div>
+            <div className="flex items-center gap-2 text-xs mb-2">
+              <Button size="small" onClick={() => toggleAll(true)}>
+                全选
+              </Button>
+              <Button size="small" onClick={() => toggleAll(false)}>
+                取消全选
+              </Button>
+              <span className="text-gray-500">
+                已勾选 <b className="text-[#198348]">{selectedBoxes.length}</b>{" "}
+                个箱子
+              </span>
+              <span className="ml-auto text-[11px] text-gray-500">
+                {Object.entries(typeCount)
+                  .map(([k, v]) => `${k} ${v}`)
+                  .join(" / ")}
+              </span>
+            </div>
+          </>
         </>
       )}
     </Modal>

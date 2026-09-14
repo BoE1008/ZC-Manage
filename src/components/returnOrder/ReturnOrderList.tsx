@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import dayjs from "dayjs";
-import { Button, Space, Input, Select, message, Modal } from "antd";
+import { Button, Space, Select, message, Modal } from "antd";
+import SearchInput from "@/components/SearchInput";
 import ResizeTable from "@/components/ResizeTable";
 import ReturnOrderModal from "./ReturnOrderModal";
 import ReturnOrderDetailModal from "./ReturnOrderDetailModal";
 import ReturnOrderConfirmModal from "./ReturnOrderConfirmModal";
 import { getReturnOrderList, deleteReturnOrder } from "@/restApi/returnOrder";
+import { getDictByCode } from "@/restApi/dict";
 
-const TYPE_MAP: Record<string, string> = {
-  customer_return: "客户还箱",
-  rent_return: "租箱归还",
-};
 const STATUS_MAP: Record<string, string> = {
   pending: "待还箱",
   returned: "已还箱",
@@ -27,12 +25,34 @@ const ReturnOrderList: React.FC = () => {
   const [editId, setEditId] = useState<string | null | undefined>(undefined);
   const [viewId, setViewId] = useState<string | null | undefined>(null);
   const [confirmId, setConfirmId] = useState<string | null | undefined>(null);
+  const [typeOptions, setTypeOptions] = useState<
+    { label: string; value: string }[]
+  >([]);
 
-  const load = (p = 1, extra?: { status?: string; keyword?: string }) => {
+  // 加载还箱类型字典
+  useEffect(() => {
+    getDictByCode("return_order_type")
+      .then((res: any) => {
+        const list = res?.entity?.data ?? res?.entity ?? [];
+        setTypeOptions(
+          (Array.isArray(list) ? list : []).map((d: any) => ({
+            label: d.dictLabel ?? d.label ?? d.dictValue,
+            value: d.dictValue ?? d.value,
+          })),
+        );
+      })
+      .catch(() => setTypeOptions([]));
+  }, []);
+
+  const load = (
+    p = 1,
+    extra?: { status?: string; keyword?: string; type?: string },
+  ) => {
     const q = router.query;
     const s = extra?.status ?? (typeof q.status === "string" ? q.status : "");
     const k =
       extra?.keyword ?? (typeof q.keyword === "string" ? q.keyword : "");
+    const t = extra?.type ?? (typeof q.type === "string" ? q.type : "");
     const pn = typeof q.page === "string" ? Number(q.page) : p;
     setLoading(true);
     setPage(pn);
@@ -40,6 +60,7 @@ const ReturnOrderList: React.FC = () => {
       pageNo: pn,
       pageSize: 20,
       status: s || undefined,
+      orderType: t || undefined,
       orderNo: k || undefined,
     })
       .then((r: any) => {
@@ -87,7 +108,8 @@ const ReturnOrderList: React.FC = () => {
       dataIndex: "orderType",
       width: 100,
       render: (v: string) => {
-        const label = TYPE_MAP[v] ?? v;
+        const found = typeOptions.find((o) => o.value === v);
+        const label = found?.label ?? v;
         return (
           <span
             className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
@@ -100,6 +122,24 @@ const ReturnOrderList: React.FC = () => {
           </span>
         );
       },
+    },
+    {
+      title: "状态",
+      dataIndex: "status",
+      width: 90,
+      render: (v: string) => (
+        <span
+          className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
+            v === "pending"
+              ? "bg-amber-100 text-amber-700"
+              : v === "returned"
+                ? "bg-green-100 text-green-700"
+                : "bg-gray-100 text-gray-600"
+          }`}
+        >
+          {STATUS_MAP[v] ?? v ?? "-"}
+        </span>
+      ),
     },
     {
       title: "箱数",
@@ -119,6 +159,13 @@ const ReturnOrderList: React.FC = () => {
           "0"
         );
       },
+    },
+    {
+      title: "还箱城市",
+      dataIndex: "city",
+      width: 150,
+      render: (v: string) =>
+        v ? <span>{v}</span> : <span className="text-gray-400">-</span>,
     },
     {
       title: "还箱堆场",
@@ -152,24 +199,7 @@ const ReturnOrderList: React.FC = () => {
           ? dayjs(v).format("YYYY-MM-DD")
           : "-",
     },
-    {
-      title: "状态",
-      dataIndex: "status",
-      width: 90,
-      render: (v: string) => (
-        <span
-          className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
-            v === "pending"
-              ? "bg-amber-100 text-amber-700"
-              : v === "returned"
-                ? "bg-green-100 text-green-700"
-                : "bg-gray-100 text-gray-600"
-          }`}
-        >
-          {STATUS_MAP[v] ?? v ?? "-"}
-        </span>
-      ),
-    },
+
     {
       title: "操作",
       width: 140,
@@ -220,25 +250,6 @@ const ReturnOrderList: React.FC = () => {
 
   return (
     <div className="p-4 space-y-3">
-      <div className="grid grid-cols-3 gap-2.5">
-        <div className="bg-white rounded-md p-3 shadow-sm border-l-4 border-l-purple-500">
-          <div className="text-xs text-gray-500 mb-1">待还箱</div>
-          <div className="text-2xl font-bold text-purple-600">
-            {data.filter((t: any) => t.status === "pending").length}
-          </div>
-        </div>
-        <div className="bg-white rounded-md p-3 shadow-sm border-l-4 border-l-green-500">
-          <div className="text-xs text-gray-500 mb-1">已还箱</div>
-          <div className="text-2xl font-bold text-green-600">
-            {data.filter((t: any) => t.status === "returned").length}
-          </div>
-        </div>
-        <div className="bg-white rounded-md p-3 shadow-sm border-l-4 border-l-[#198348]">
-          <div className="text-xs text-gray-500 mb-1">还箱令总数</div>
-          <div className="text-2xl font-bold text-[#198348]">{total}</div>
-        </div>
-      </div>
-
       <div className="flex items-center gap-2 flex-wrap">
         <Button type="primary" size="small" onClick={() => setEditId(null)}>
           + 生成还箱令
@@ -247,6 +258,29 @@ const ReturnOrderList: React.FC = () => {
           导出
         </Button>
         <div className="ml-auto flex items-center gap-2">
+          <Select
+            size="small"
+            allowClear
+            placeholder="类型"
+            style={{ width: 120 }}
+            value={
+              typeof router.query.type === "string"
+                ? router.query.type
+                : undefined
+            }
+            onChange={(v) => {
+              const q: Record<string, string | string[] | undefined> = {
+                ...router.query,
+                type: v || undefined,
+              };
+              if (!v) delete q.type;
+              q.page = "1";
+              router.push({ pathname: router.pathname, query: q }, undefined, {
+                shallow: true,
+              });
+            }}
+            options={typeOptions}
+          />
           <Select
             size="small"
             allowClear
@@ -273,34 +307,22 @@ const ReturnOrderList: React.FC = () => {
               { label: "已还箱", value: "returned" },
             ]}
           />
-          <Input
-            size="small"
-            placeholder="还箱令编号"
-            style={{ width: 220 }}
-            allowClear
-            onChange={(e) => {
-              const q: Record<string, string | string[] | undefined> = {
-                ...router.query,
-                keyword: e.target.value || undefined,
-              };
-              if (!e.target.value) delete q.keyword;
-              q.page = "1";
-              router.push({ pathname: router.pathname, query: q }, undefined, {
-                shallow: true,
-              });
-            }}
-            onPressEnter={(e) => {
-              const q: Record<string, string | string[] | undefined> = {
-                ...router.query,
-                keyword: (e.target as any).value || undefined,
-              };
-              if (!(e.target as any).value) delete q.keyword;
-              q.page = "1";
-              router.push({ pathname: router.pathname, query: q }, undefined, {
-                shallow: true,
-              });
-            }}
-          />
+          <div style={{ width: 220 }}>
+            <SearchInput
+              placeholder="还箱令编号"
+              onSearch={(v) => {
+                const q: Record<string, string | string[] | undefined> = {
+                  ...router.query,
+                  keyword: v || undefined,
+                };
+                if (!v) delete q.keyword;
+                q.page = "1";
+                router.push({ pathname: router.pathname, query: q }, undefined, {
+                  shallow: true,
+                });
+              }}
+            />
+          </div>
         </div>
       </div>
 

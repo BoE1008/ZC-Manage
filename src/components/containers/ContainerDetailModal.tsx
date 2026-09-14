@@ -180,6 +180,28 @@ export const ContainerDetailModal = ({ id, onClose, onEdit }: Props) => {
             <StatusBadge status={container.status} />
           </div>
           <div>
+            <span className="text-xs text-gray-400 block">当前售卖状态</span>
+            <span className="font-medium">
+              {(container as any).saleStatus === "sold_delivered" ? (
+                <span className="px-2 py-0.5 rounded text-xs bg-green-100 text-green-700">
+                  卖出已交付
+                </span>
+              ) : (container as any).saleStatus === "sold_pending" ? (
+                <span className="px-2 py-0.5 rounded text-xs bg-amber-100 text-amber-700">
+                  卖出未交付
+                </span>
+              ) : (container as any).saleStatus === "unsold" ? (
+                <span className="px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-600">
+                  未卖出
+                </span>
+              ) : (
+                <span className="px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-600">
+                  -
+                </span>
+              )}
+            </span>
+          </div>
+          <div>
             <span className="text-xs text-gray-400 block">状态备注</span>
             <span className="font-medium">{container.statusRemark || "-"}</span>
           </div>

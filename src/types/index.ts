@@ -103,7 +103,7 @@ export type {
   TrackingSegmentValue,
   OrderTypeValue,
   ReleaseStatusValue,
-  ReleaseMethodValue,
+  pickupMethodValue,
   SupplierTypeValue,
   BuyerTypeValue,
 } from "./dict";
@@ -303,6 +303,8 @@ export interface ContainerPageQuery {
   usageType?: UsageType;
   /** 箱况，精确匹配 */
   conditionType?: ConditionType;
+  /** 售卖状态 */
+  saleStatus?: string;
   /** 项目ID */
   projectId?: string;
   /** 供应商ID */
@@ -388,6 +390,8 @@ export interface ContainerTracking {
   status: ContainerStatus;
   /** 状态备注 */
   statusRemark: string;
+  /** 售卖状态：sold_delivered 卖出已交付 / sold_pending 卖出未交付 / unsold 未卖出，默认 unsold */
+  saleStatus?: string;
 
   // ---------- 还箱 ----------
   /** 还箱令编号 */
@@ -458,6 +462,8 @@ export interface ContainerTrackingPageQuery {
   returnTimeStart?: string;
   /** 还箱时间止 */
   returnTimeEnd?: string;
+  /** 售卖状态 */
+  saleStatus?: string;
 }
 
 // ============================================================
@@ -557,7 +563,7 @@ export interface Yard {
 
   // ---------- 基本信息 ----------
   /** 堆场名称 */
-  name: string;
+  yardName: string;
   /** 所在城市 */
   city: string;
   /** 堆场地址 */
@@ -597,7 +603,7 @@ export interface YardPageQuery {
   /** 每页条数，默认 20 */
   pageSize?: number;
   /** 堆场名称（模糊匹配） */
-  name?: string;
+  yardName?: string;
   /** 所在城市 */
   city?: string;
 }

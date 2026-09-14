@@ -46,8 +46,12 @@ export const ShipmentModal = ({ id, onSave, onClose }: Props) => {
   const [projects, setProjects] = useState<any[]>([]);
   const [containers, setContainers] = useState<any[]>([]);
   const [yards, setYards] = useState<any[]>([]);
-  const [pickupOrders, setPickupOrders] = useState<{ label: string; value: string }[]>([]);
-  const [returnOrders, setReturnOrders] = useState<{ label: string; value: string }[]>([]);
+  const [pickupOrders, setPickupOrders] = useState<
+    { label: string; value: string }[]
+  >([]);
+  const [returnOrders, setReturnOrders] = useState<
+    { label: string; value: string }[]
+  >([]);
   const [projectLoading, setProjectLoading] = useState(false);
   const [statusOptions, setStatusOptions] = useState<DictOption[]>(
     getDictOptionsSync("container_status"),
@@ -203,6 +207,8 @@ export const ShipmentModal = ({ id, onSave, onClose }: Props) => {
       payload.projectId = values.projectNum || "";
       payload.projectName = selectProject?.name || "";
       delete payload.projectNum;
+      // 售卖状态默认未卖出
+      payload.saleStatus = values.saleStatus || "unsold";
       setLoading(true);
       if (id) {
         await editTracking({ ...payload, id });
@@ -244,7 +250,11 @@ export const ShipmentModal = ({ id, onSave, onClose }: Props) => {
         <div className="text-xs font-bold text-[#198348] pb-1 mb-3 border-b border-dashed border-gray-200">
           集装箱与项目
         </div>
-        <Form form={form} layout="vertical" initialValues={editingRecord || {}}>
+        <Form
+          form={form}
+          layout="vertical"
+          initialValues={editingRecord || { saleStatus: "unsold" }}
+        >
           <div className="grid grid-cols-2 gap-x-4">
             <Form.Item
               name="containerNo"
@@ -449,6 +459,21 @@ export const ShipmentModal = ({ id, onSave, onClose }: Props) => {
             </Form.Item>
             <Form.Item name="dropYardName" hidden>
               <Input />
+            </Form.Item>
+            <Form.Item
+              name="saleStatus"
+              label={<span className="text-xs">售卖状态</span>}
+              initialValue="unsold"
+            >
+              <Select
+                allowClear
+                placeholder="默认未卖出"
+                options={[
+                  { label: "卖出已交付", value: "sold_delivered" },
+                  { label: "卖出未交付", value: "sold_pending" },
+                  { label: "未卖出", value: "unsold" },
+                ]}
+              />
             </Form.Item>
           </div>
         </Form>

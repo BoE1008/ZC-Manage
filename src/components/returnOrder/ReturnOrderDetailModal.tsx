@@ -5,6 +5,7 @@ import {
   getReturnOrderDetail,
   downloadReturnOrderDoc,
 } from "@/restApi/returnOrder";
+import { getDictByCode } from "@/restApi/dict";
 
 interface Props {
   id: string;
@@ -13,10 +14,6 @@ interface Props {
   onConfirm: () => void;
 }
 
-const TYPE_MAP: Record<string, string> = {
-  customer_return: "客户还箱",
-  rent_return: "租箱归还",
-};
 const STATUS_MAP: Record<string, string> = {
   pending: "待还箱",
   returned: "已还箱",
@@ -32,6 +29,24 @@ const ReturnOrderDetailModal: React.FC<Props> = ({
   const [boxes, setBoxes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);
+  const [typeOptions, setTypeOptions] = useState<
+    { label: string; value: string }[]
+  >([]);
+
+  // 加载还箱类型字典
+  useEffect(() => {
+    getDictByCode("return_order_type")
+      .then((res: any) => {
+        const list = res?.entity?.data ?? res?.entity ?? [];
+        setTypeOptions(
+          (Array.isArray(list) ? list : []).map((d: any) => ({
+            label: d.dictLabel ?? d.label ?? d.dictValue,
+            value: d.dictValue ?? d.value,
+          })),
+        );
+      })
+      .catch(() => setTypeOptions([]));
+  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -167,12 +182,18 @@ const ReturnOrderDetailModal: React.FC<Props> = ({
                       : "bg-blue-100 text-blue-700"
                   }`}
                 >
-                  {TYPE_MAP[r.orderType] ?? r.orderType ?? "-"}
+                  {(typeOptions.find((o) => o.value === r.orderType)?.label) ||
+                    r.orderType ||
+                    "-"}
                 </span>
               </div>
             </div>
             <div>
-              <div className="text-xs text-gray-400">还箱堆场（计划）</div>
+              <div className="text-xs text-gray-400">还箱城市</div>
+              <div className="text-gray-800">{r.city || "-"}</div>
+            </div>
+            <div>
+              <div className="text-xs text-gray-400">还箱堆场</div>
               <div className="text-gray-800">
                 {r.yardName ? (
                   <span className="text-[#198348]">{r.yardName}</span>
@@ -197,12 +218,6 @@ const ReturnOrderDetailModal: React.FC<Props> = ({
                 >
                   {STATUS_MAP[r.status] ?? r.status ?? "-"}
                 </span>
-              </div>
-            </div>
-            <div>
-              <div className="text-xs text-gray-400">制单人</div>
-              <div className="text-gray-800">
-                {r.maker || r.createBy || "-"}
               </div>
             </div>
             <div>

@@ -5,7 +5,8 @@ import {
   getPickupOrderDetail,
   downloadPickupOrderDoc,
 } from "@/restApi/pickupOrder";
-import { ReleaseTypeBadge, StatusBadge } from "@/components/ui/Badge";
+import { StatusBadge } from "@/components/ui/Badge";
+import { getDictByCode } from "@/restApi/dict";
 
 interface Props {
   id: string;
@@ -30,7 +31,7 @@ interface ReleaseData {
   id?: string;
   orderNo?: string;
   orderType?: string;
-  region?: string;
+  city?: string;
   buyerId?: string;
   buyerName?: string;
   yardId?: string;
@@ -43,7 +44,7 @@ interface ReleaseData {
   pickupTime?: string;
   income?: number;
   remark?: string;
-  releaseMethod?: string;
+  pickupMethod?: string;
   containerType?: string;
   quantity?: number;
   releaseDate?: string;
@@ -60,6 +61,24 @@ export const PickupDetailModal = ({
   const [r, setR] = useState<ReleaseData | null>(null);
   const [boxes, setBoxes] = useState<BoxItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [typeOptions, setTypeOptions] = useState<
+    { label: string; value: string }[]
+  >([]);
+
+  // 加载提箱类型字典
+  useEffect(() => {
+    getDictByCode("pickup_order_type")
+      .then((res: any) => {
+        const list = res?.entity?.data ?? res?.entity ?? [];
+        setTypeOptions(
+          (Array.isArray(list) ? list : []).map((d: any) => ({
+            label: d.dictLabel ?? d.label ?? d.dictValue,
+            value: d.dictValue ?? d.value,
+          })),
+        );
+      })
+      .catch(() => setTypeOptions([]));
+  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -169,7 +188,9 @@ export const PickupDetailModal = ({
         <div>
           <div className="text-xs text-gray-400">类型</div>
           <div className="font-medium">
-            <ReleaseTypeBadge type={(r.orderType as string) || ""} />
+            {(typeOptions.find((o) => o.value === (r.orderType as string))?.label) ||
+              r.orderType ||
+              "-"}
           </div>
         </div>
         <div>
@@ -179,9 +200,9 @@ export const PickupDetailModal = ({
         <div>
           <div className="text-xs text-gray-400">提箱方式</div>
           <div className="font-medium">
-            {r.releaseMethod === "designated"
+            {r.pickupMethod === "designated"
               ? "指定箱号"
-              : r.releaseMethod === "undesignated"
+              : r.pickupMethod === "undesignated"
                 ? "不指定箱号"
                 : "-"}
           </div>
@@ -200,8 +221,8 @@ export const PickupDetailModal = ({
         </div>
 
         <div>
-          <div className="text-xs text-gray-400">提箱地区</div>
-          <div className="font-medium">{r.region || "-"}</div>
+          <div className="text-xs text-gray-400">提箱城市</div>
+          <div className="font-medium">{r.city || "-"}</div>
         </div>
 
         <div>
@@ -224,12 +245,11 @@ export const PickupDetailModal = ({
         </div>
 
         <div>
-          <div className="text-xs text-gray-400">生成时间 / 制单</div>
+          <div className="text-xs text-gray-400">生成时间</div>
           <div className="font-medium text-xs">
             {r.createTime && dayjs(r.createTime).isValid()
               ? dayjs(r.createTime).format("YYYY-MM-DD")
-              : "-"}{" "}
-            / {r.maker || r.createBy || "-"}
+              : "-"}
           </div>
         </div>
         <div>

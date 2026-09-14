@@ -23,6 +23,7 @@ export const ShipmentList = () => {
   const [shipments, setShipments] = useState<ContainerTracking[]>([]);
   const [loading, setLoading] = useState(false);
   const [statusFilter, setStatusFilter] = useState("");
+  const [saleFilter, setSaleFilter] = useState("");
   const [keyword, setKeyword] = useState("");
   const [projectFilter, setProjectFilter] = useState<string>("");
   const [page, setPage] = useState(1);
@@ -42,20 +43,26 @@ export const ShipmentList = () => {
 
   const loadShipments = (
     pageNo = page,
-    extra?: { status?: string; keyword?: string; projectId?: string },
+    extra?: {
+      status?: string;
+      keyword?: string;
+      projectId?: string;
+      saleStatus?: string;
+    },
   ) => {
     const status = extra?.status ?? statusFilter;
     const kw = extra?.keyword ?? keyword;
     const pid =
       extra?.projectId !== undefined ? extra.projectId : projectFilter;
+    const sale = extra?.saleStatus ?? saleFilter;
     setLoading(true);
     getTrackingList({
       pageNo,
       pageSize: 20,
       status: status || undefined,
       containerNo: kw || undefined,
-      returnOrderNo: kw || undefined,
       projectId: pid || undefined,
+      saleStatus: sale || undefined,
     })
       .then((r) => {
         setShipments(r.entity?.data ?? []);
@@ -121,11 +128,18 @@ export const ShipmentList = () => {
     const nk = typeof q.keyword === "string" ? q.keyword : "";
     const np = typeof q.page === "string" ? Number(q.page) : 1;
     const npid = typeof q.projectId === "string" ? q.projectId : "";
+    const nsale = typeof q.sale === "string" ? q.sale : "";
     setStatusFilter(ns);
     setKeyword(nk);
     setPage(np);
     setProjectFilter(npid);
-    loadShipments(np, { status: ns, keyword: nk, projectId: npid });
+    setSaleFilter(nsale);
+    loadShipments(np, {
+      status: ns,
+      keyword: nk,
+      projectId: npid,
+      saleStatus: nsale,
+    });
   }, [router.isReady, router.query]);
 
   const columns: ColumnsType<ContainerTracking> = [
@@ -205,6 +219,28 @@ export const ShipmentList = () => {
       dataIndex: "returnOrderNo",
       ellipsis: true,
       render: (v) => v || "-",
+    },
+    {
+      title: "售卖状态",
+      dataIndex: "saleStatus",
+      width: 110,
+      align: "center",
+      render: (v) =>
+        v === "sold_delivered" ? (
+          <span className="px-2 py-0.5 rounded text-xs bg-green-100 text-green-700">
+            卖出已交付
+          </span>
+        ) : v === "sold_pending" ? (
+          <span className="px-2 py-0.5 rounded text-xs bg-amber-100 text-amber-700">
+            卖出未交付
+          </span>
+        ) : v === "unsold" ? (
+          <span className="px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-600">
+            未卖出
+          </span>
+        ) : (
+          "-"
+        ),
     },
     {
       title: "操作",
@@ -347,6 +383,29 @@ export const ShipmentList = () => {
             className="w-32"
             size="small"
             options={statusOptions}
+          />
+          <Select
+            placeholder="全部售卖状态"
+            allowClear
+            value={saleFilter || undefined}
+            onChange={(v) => {
+              const q: Record<string, string | string[] | undefined> = {
+                ...router.query,
+                sale: v || undefined,
+                page: "1",
+              };
+              if (!v) delete q.sale;
+              router.push({ pathname: router.pathname, query: q }, undefined, {
+                shallow: true,
+              });
+            }}
+            className="w-32"
+            size="small"
+            options={[
+              { label: "未卖出", value: "unsold" },
+              { label: "卖出未交付", value: "sold_pending" },
+              { label: "卖出已交付", value: "sold_delivered" },
+            ]}
           />
           <div className="!w-48">
             <SearchInput

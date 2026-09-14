@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Modal, Form, Input, Select, message } from "antd";
 import { getSuppliersList } from "@/restApi/supplyer";
 import { addYard, editYard, getYardDetail } from "@/restApi/yard";
+import { getDictByCode } from "@/restApi/dict";
 
 interface Props {
   id: string | null;
@@ -13,9 +14,19 @@ const YardModal: React.FC<Props> = ({ id, onSave, onClose }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [suppliers, setSuppliers] = useState<any[]>([]); // { label, value, id, name }
+  const [cityOptions, setCityOptions] = useState<{ label: string; value: string }[]>([]);
   const supplierMapRef = useRef<Map<string, string>>(new Map()); // id → name
 
   useEffect(() => {
+    getDictByCode("yard_city").then((res: any) => {
+      const list = res?.entity?.data ?? res?.entity ?? [];
+      setCityOptions(
+        (Array.isArray(list) ? list : []).map((d: any) => ({
+          label: d.dictLabel ?? d.label ?? d.dictValue,
+          value: d.dictValue ?? d.value,
+        })),
+      );
+    }).catch(() => setCityOptions([]));
     getSuppliersList(1, 1000).then((r) => {
       const opts = (r.entity?.data ?? []).map((s: any) => {
         supplierMapRef.current.set(s.id, s.name);
@@ -104,7 +115,17 @@ const YardModal: React.FC<Props> = ({ id, onSave, onClose }) => {
             />
           </Form.Item>
           <Form.Item label="所在城市" name="city">
-            <Input placeholder="如：宁波 / Vladivostok" />
+            <Select
+              allowClear
+              showSearch
+              placeholder="选择城市"
+              options={cityOptions}
+              filterOption={(i, o) =>
+                ((o?.label as string) || "")
+                  .toLowerCase()
+                  .includes(i.toLowerCase())
+              }
+            />
           </Form.Item>
           <Form.Item label="堆场地址" name="address">
             <Input placeholder="详细地址" />

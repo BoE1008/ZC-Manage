@@ -11,6 +11,7 @@ import {
 } from "antd";
 import { getContainerList } from "@/restApi/container";
 import { getYardList } from "@/restApi/yard";
+import { getDictByCode } from "@/restApi/dict";
 import {
   addReturnOrder,
   editReturnOrder,
@@ -28,19 +29,66 @@ const ReturnOrderModal: React.FC<Props> = ({ id, onSave, onClose }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [yards, setYards] = useState<any[]>([]);
+  const [cityOptions, setCityOptions] = useState<
+    { label: string; value: string }[]
+  >([]);
+  const [selectedCity, setSelectedCity] = useState<string | undefined>(
+    undefined,
+  );
   const [returnable, setReturnable] = useState<any[]>([]);
   const [selectedBoxes, setSelectedBoxes] = useState<string[]>([]);
   const [initLoading, setInitLoading] = useState(true);
+  const [returnableLoading, setReturnableLoading] = useState(false);
+  const [typeOptions, setTypeOptions] = useState<
+    { label: string; value: string }[]
+  >([]);
 
-  // 加载堆场下拉
+  // 监听 form 字段驱动联动
+  const watchedCity = Form.useWatch("city", form);
+  const watchedYardId = Form.useWatch("yardId", form);
+
+  // 加载还箱类型字典
+  useEffect(() => {
+    getDictByCode("return_order_type")
+      .then((res: any) => {
+        const list = res?.entity?.data ?? res?.entity ?? [];
+        setTypeOptions(
+          (Array.isArray(list) ? list : []).map((d: any) => ({
+            label: d.dictLabel ?? d.label ?? d.dictValue,
+            value: d.dictValue ?? d.value,
+          })),
+        );
+      })
+      .catch(() => setTypeOptions([]));
+  }, []);
+
+  // 加载堆场下拉 + 城市字典
   useEffect(() => {
     getYardList({ pageNo: 1, pageSize: 1000 }).then((r: any) => {
       setYards(r?.entity.data ?? []);
     });
+    getDictByCode("yard_city")
+      .then((res: any) => {
+        const list = res?.entity?.data ?? res?.entity ?? [];
+        setCityOptions(
+          (Array.isArray(list) ? list : []).map((d: any) => ({
+            label: d.dictLabel ?? d.label ?? d.dictValue,
+            value: d.dictValue ?? d.value,
+          })),
+        );
+      })
+      .catch(() => setCityOptions([]));
   }, []);
 
   // 加载可还箱的集装箱（国内堆存/在途/国外堆存/回程在途/待提箱）
   useEffect(() => {
+    if (!watchedYardId) {
+      setReturnable([]);
+      setReturnableLoading(false);
+      setInitLoading(false);
+      return;
+    }
+    setReturnableLoading(true);
     const statuses = [
       "domestic_storage",
       "outbound",
@@ -60,8 +108,11 @@ const ReturnOrderModal: React.FC<Props> = ({ id, onSave, onClose }) => {
         });
         setReturnable(boxes);
       })
-      .finally(() => setInitLoading(false));
-  }, []);
+      .finally(() => {
+        setReturnableLoading(false);
+        setInitLoading(false);
+      });
+  }, [watchedYardId]);
 
   // 编辑时加载详情
   useEffect(() => {
@@ -73,6 +124,7 @@ const ReturnOrderModal: React.FC<Props> = ({ id, onSave, onClose }) => {
       form.setFieldsValue({
         orderNo: d.orderNo,
         orderType: d.orderType,
+        city: d.city,
         yardId: d.yardId,
         remark: d.remark,
         returnTime:
@@ -80,6 +132,13 @@ const ReturnOrderModal: React.FC<Props> = ({ id, onSave, onClose }) => {
             ? dayjs(d.returnTime)
             : undefined,
       });
+      // 根据已选 yard 反查 city 同步 selectedCity（联动过滤）
+      // 编辑回显通常在 yards 加载前触发，用一次微任务延迟处理
+      setTimeout(() => {
+        const y = yards.find((x: any) => x.id === d.yardId);
+        if (y?.city) setSelectedCity(y.city);
+        else if (d.city) setSelectedCity(d.city);
+      }, 0);
       // boxes 是 entity 的同级字段，不是 data 的子字段
       const selected = (Array.isArray(entity?.boxes) ? entity.boxes : [])
         .map((b: any) => b.containerNo)
@@ -109,6 +168,7 @@ const ReturnOrderModal: React.FC<Props> = ({ id, onSave, onClose }) => {
       const payload: any = {
         orderNo: vals.orderNo || undefined,
         orderType: vals.orderType,
+        city: vals.city || undefined,
         yardId: vals.yardId || undefined,
         yardName: vals.yardName || undefined,
         remark: vals.remark,
@@ -158,24 +218,42 @@ const ReturnOrderModal: React.FC<Props> = ({ id, onSave, onClose }) => {
           >
             <Select
               placeholder="选择类型"
-              options={[
-                { label: "客户还箱", value: "customer_return" },
-                { label: "租箱归还", value: "rent_return" },
-              ]}
+              options={typeOptions}
+            />
+          </Form.Item>
+          <Form.Item label="还箱城市" name="city">
+            <Select
+              allowClear
+              showSearch
+              placeholder="选择城市"
+              options={cityOptions}
+              filterOption={(i, o) =>
+                ((o?.label as string) || "")
+                  .toLowerCase()
+                  .includes(i.toLowerCase())
+              }
+              onChange={(v) => {
+                setSelectedCity(v);
+                form.setFieldValue("yardId", undefined);
+              }}
             />
           </Form.Item>
           <Form.Item label="还箱堆场" name="yardId">
             <Select
               allowClear
-              placeholder="不指定（还箱时回填实际堆场）"
+              placeholder={watchedCity ? "不指定（还箱时回填实际堆场）" : "请先选择还箱城市"}
+              disabled={!watchedCity}
               showSearch
               filterOption={(i, o) =>
                 ((o?.label as string) || "")
                   .toLowerCase()
                   .includes(i.toLowerCase())
               }
-              options={yards.map((y: any) => ({
-                label: `${y.yardName}（${y.city ?? ""}）`,
+              options={(watchedCity
+                ? yards.filter((y: any) => y.city === watchedCity)
+                : yards
+              ).map((y: any) => ({
+                label: y.city ? `${y.yardName}（${y.city}）` : y.yardName,
                 value: y.id,
               }))}
             />
@@ -201,8 +279,12 @@ const ReturnOrderModal: React.FC<Props> = ({ id, onSave, onClose }) => {
       </div>
       {initLoading ? (
         <div className="text-center text-gray-400 py-4">加载中...</div>
+      ) : !watchedYardId ? (
+        <div className="text-center text-gray-400 py-4">请先选择还箱堆场</div>
+      ) : returnableLoading ? (
+        <div className="text-center text-gray-400 py-4">加载中...</div>
       ) : returnable.length === 0 ? (
-        <div className="text-center text-gray-400 py-4">暂无可还箱的集装箱</div>
+        <div className="text-center text-gray-400 py-4">该堆场暂无可还箱的集装箱</div>
       ) : (
         <div
           className="border border-gray-200 rounded p-2 max-h-56 overflow-y-auto"

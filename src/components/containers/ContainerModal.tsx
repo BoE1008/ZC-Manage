@@ -14,6 +14,7 @@ import dayjs from "dayjs";
 
 import { ContainerForm } from "@/types";
 import { getDictOptions, getDictOptionsSync } from "@/restApi/dictCache";
+import { getDictByCode } from "@/restApi/dict";
 import type { DictOption } from "@/types/dict";
 import {
   getContainerDetail,
@@ -25,6 +26,7 @@ import { getSuppliersList } from "@/restApi/supplyer";
 import { getYardList } from "@/restApi/yard";
 import { getCustomersList } from "@/restApi/customer";
 import { getAllProjectList } from "@/restApi/project";
+import { getPickupOrderList } from "@/restApi/pickupOrder";
 
 interface Props {
   id: string | null;
@@ -42,6 +44,9 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
   const [buyers, setBuyers] = useState<{ label: string; value: string }[]>([]);
   const [yards, setYards] = useState<{ label: string; value: string }[]>([]);
   const [projects, setProjects] = useState<any[]>([]);
+  const [pickupOrders, setPickupOrders] = useState<
+    { label: string; value: string }[]
+  >([]);
   const [projectLoading, setProjectLoading] = useState(false);
   const [selectProject, setSelectProject] = useState<
     { id: string; name: string; num: string } | undefined
@@ -58,6 +63,9 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
   const [condOptions, setCondOptions] = useState<DictOption[]>(
     getDictOptionsSync("container_cond"),
   );
+  const [saleStatusOptions, setSaleStatusOptions] = useState<
+    { label: string; value: string }[]
+  >([]);
 
   // 加载下拉选项
   useEffect(() => {
@@ -73,6 +81,15 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
         })),
       );
     });
+    getPickupOrderList({ pageNo: 1, pageSize: 1000 }).then((r: any) => {
+      const list = r?.entity?.data ?? [];
+      setPickupOrders(
+        (Array.isArray(list) ? list : []).map((o: any) => ({
+          label: o.orderNo || o.id,
+          value: o.orderNo || o.id,
+        })),
+      );
+    });
     getCustomersList(1, 1000).then((r: any) => {
       setBuyers(
         ((r.entity?.data ?? []) as any[]).map((b: any) => ({
@@ -81,6 +98,17 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
         })),
       );
     });
+    getDictByCode("container_sale_status")
+      .then((res: any) => {
+        const list = res?.entity?.data ?? res?.entity ?? [];
+        setSaleStatusOptions(
+          (Array.isArray(list) ? list : []).map((d: any) => ({
+            label: d.dictLabel ?? d.label ?? d.dictValue,
+            value: d.dictValue ?? d.value,
+          })),
+        );
+      })
+      .catch(() => setSaleStatusOptions([]));
     setProjectLoading(true);
     getAllProjectList()
       .then((r: any) => {
@@ -347,7 +375,17 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
             name="liftingOrderNo"
             label={<span className="text-xs">初始提箱令编号</span>}
           >
-            <Input placeholder="如：S225142" />
+            <Select
+              allowClear
+              showSearch
+              placeholder="选择提箱令"
+              options={pickupOrders}
+              filterOption={(i, o) =>
+                ((o?.label as string) || "")
+                  .toLowerCase()
+                  .includes(i.toLowerCase())
+              }
+            />
           </Form.Item>
         </div>
 
@@ -361,6 +399,22 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
             label={<span className="text-xs">当前状态</span>}
           >
             <Select allowClear placeholder="请选择" options={statusOptions} />
+          </Form.Item>
+          <Form.Item
+            name="saleStatus"
+            label={<span className="text-xs">当前售卖状态</span>}
+          >
+            <Select
+              allowClear
+              showSearch
+              placeholder="请选择"
+              options={saleStatusOptions}
+              filterOption={(i, o) =>
+                ((o?.label as string) || "")
+                  .toLowerCase()
+                  .includes(i.toLowerCase())
+              }
+            />
           </Form.Item>
         </div>
 

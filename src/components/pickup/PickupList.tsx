@@ -1,25 +1,17 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import Table from "@/components/ResizeTable";
 import { Button, Tooltip, Select, Space, Modal, message } from "antd";
 import SearchInput from "@/components/SearchInput";
 import type { ColumnsType } from "antd/es/table";
 import { editPickupOrder, PickupOrder } from "@/restApi/pickupOrder";
-import { ReleaseTypeBadge, StatusBadge } from "@/components/ui/Badge";
+import { StatusBadge } from "@/components/ui/Badge";
 import { useRouter } from "next/router";
 import { PickupModal } from "./PickupModal";
 import { PickupDetailModal } from "./PickupDetailModal";
 import { ContainerDetailModal } from "@/components/containers/ContainerDetailModal";
-import {
-  getPickupOrderList,
-  deletePickupOrder,
-} from "@/restApi/pickupOrder";
-
-const ORDER_TYPE_OPTIONS = [
-  { label: "卖出提箱", value: "sale" },
-  { label: "回程提箱", value: "return" },
-  { label: "租给客户", value: "rent" },
-];
+import { getPickupOrderList, deletePickupOrder } from "@/restApi/pickupOrder";
+import { getDictByCode } from "@/restApi/dict";
 
 const STATUS_OPTIONS = [
   { label: "待提箱", value: "pending" },
@@ -40,6 +32,24 @@ export const PickupList = () => {
   const [editId, setEditId] = useState<string | null | undefined>(undefined);
   const [viewId, setViewId] = useState<string | null>(null);
   const [viewContainerId, setViewContainerId] = useState<string | null>(null);
+  const [typeOptions, setTypeOptions] = useState<
+    { label: string; value: string }[]
+  >([]);
+
+  // 加载提箱类型字典
+  useEffect(() => {
+    getDictByCode("pickup_order_type")
+      .then((res: any) => {
+        const list = res?.entity?.data ?? res?.entity ?? [];
+        setTypeOptions(
+          (Array.isArray(list) ? list : []).map((d: any) => ({
+            label: d.dictLabel ?? d.label ?? d.dictValue,
+            value: d.dictValue ?? d.value,
+          })),
+        );
+      })
+      .catch(() => setTypeOptions([]));
+  }, []);
 
   const load = (
     pageNo = page,
@@ -52,8 +62,8 @@ export const PickupList = () => {
     getPickupOrderList({
       pageNo,
       pageSize: 20,
-      orderType: typeFilter || undefined,
-      status: statusFilter || undefined,
+      orderType: tp || undefined,
+      status: st || undefined,
       orderNo: kw || undefined,
     })
       .then((r) => {
@@ -77,22 +87,6 @@ export const PickupList = () => {
     setPage(np);
     load(np, { type: nt, status: ns, keyword: nk });
   }, [router.isReady, router.query]);
-
-  const filtered = useMemo(
-    () =>
-      releases.filter((r) => {
-        if (keyword) {
-          const k = keyword.toLowerCase();
-          if (
-            !(r.orderNo ?? "").toLowerCase().includes(k) &&
-            !(r.containerNo ?? "").toLowerCase().includes(k)
-          )
-            return false;
-        }
-        return true;
-      }),
-    [releases, keyword],
-  );
 
   const handleDelete = (id: string) => {
     Modal.confirm({
@@ -134,7 +128,23 @@ export const PickupList = () => {
     {
       title: "类型",
       dataIndex: "orderType",
-      render: (v) => <ReleaseTypeBadge type={v} />,
+      render: (v) => {
+        const found = typeOptions.find((o) => o.value === v);
+        const label = found?.label ?? v;
+        return (
+          <span
+            className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
+              v === "rent"
+                ? "bg-purple-100 text-purple-700"
+                : v === "return"
+                  ? "bg-blue-100 text-blue-700"
+                  : "bg-green-100 text-green-700"
+            }`}
+          >
+            {label}
+          </span>
+        );
+      },
     },
     {
       title: "箱数",
@@ -143,7 +153,6 @@ export const PickupList = () => {
       align: "center",
       render: (v, r: any) => v ?? r.containers?.length ?? "-",
     },
-    { title: "买方/租方", dataIndex: "buyerName", width: 140 },
     { title: "提箱堆场", dataIndex: "yardName", width: 140 },
     {
       title: "生成时间",
@@ -156,7 +165,7 @@ export const PickupList = () => {
     },
     {
       title: "客户提箱时间",
-      dataIndex: "pickupTime",
+      dataIndex: "pickupDate",
       width: 130,
       render: (v: string) =>
         v && v !== "-" && dayjs(v).isValid()
@@ -165,7 +174,7 @@ export const PickupList = () => {
     },
     {
       title: "提箱方式",
-      dataIndex: "releaseMethod",
+      dataIndex: "pickupMethod",
       width: 110,
       align: "center",
       render: (v: any) =>
@@ -196,8 +205,8 @@ export const PickupList = () => {
       render: (v: any) => (v != null ? `${v} 个` : "-"),
     },
     {
-      title: "提箱地区",
-      dataIndex: "region",
+      title: "提箱城市",
+      dataIndex: "city",
       width: 100,
       render: (v: any) => v || "-",
     },
@@ -278,7 +287,7 @@ export const PickupList = () => {
             allowClear
             className="w-36"
             placeholder="类型"
-            options={ORDER_TYPE_OPTIONS}
+            options={typeOptions}
             onChange={(v) => {
               const q: Record<string, string | string[] | undefined> = {
                 ...router.query,
@@ -312,7 +321,7 @@ export const PickupList = () => {
           />
           <div className="w-64">
             <SearchInput
-              placeholder="提箱令编号 / 箱号"
+              placeholder="提箱令编号"
               onSearch={(v) => {
                 const q: Record<string, string | string[] | undefined> = {
                   ...router.query,
@@ -337,7 +346,7 @@ export const PickupList = () => {
 
       <Table
         columns={columns}
-        dataSource={filtered}
+        dataSource={releases}
         rowKey="id"
         loading={loading}
         scroll={{ x: 1400 }}
