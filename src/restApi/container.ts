@@ -147,3 +147,19 @@ export const bindContainerNo = async (id: string, containerNo: string) => {
   );
   return res.data;
 };
+
+/**
+ * 批量导入集装箱（Excel）
+ * POST /zc/container/import
+ * 表单字段 file
+ */
+export const importContainer = async (file: File) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  const res = await axiosInstance.post<ApiResponse>(
+    "/zc/container/import",
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } },
+  );
+  return res.data;
+};

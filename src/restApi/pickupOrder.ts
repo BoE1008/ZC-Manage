@@ -21,6 +21,8 @@ export interface PickupOrder {
   yardName?: string; // 提箱堆场名称
   pickupTime?: string; // 客户提箱时间
   income?: number; // 提箱收入
+  deadlineStart?: string; // 指令期限 起始日期
+  deadlineEnd?: string; // 指令期限 截止日期
   status?: string; // 状态
   remark?: string; // 备注
   createBy?: string;
@@ -127,4 +129,20 @@ export const downloadPickupOrderDoc = async (id: string) => {
     responseType: "blob",
   });
   return res;
+};
+
+/**
+ * 批量导入提箱令（Excel）
+ * POST /zc/pickupOrder/import
+ * 表单字段 file
+ */
+export const importPickupOrder = async (file: File) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  const res = await axiosInstance.post<ApiResponse>(
+    "/zc/pickupOrder/import",
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } },
+  );
+  return res.data;
 };

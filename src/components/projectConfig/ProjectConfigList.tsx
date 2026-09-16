@@ -101,7 +101,6 @@ const ProjectConfigList: React.FC = () => {
     {
       title: "项目编号",
       dataIndex: "projectNum",
-      width: 140,
       fixed: "left",
       render: (v) => (
         <span className="font-mono text-[#198348]">{v || "-"}</span>
@@ -110,35 +109,30 @@ const ProjectConfigList: React.FC = () => {
     {
       title: "项目名称",
       dataIndex: "projectName",
-      width: 200,
       ellipsis: true,
       render: (v) => v || "-",
     },
     {
       title: "堆存超期提醒",
       dataIndex: "overdueAlertDays",
-      width: 130,
       align: "center",
       render: (v) => (v != null ? `${v} 天` : "-"),
     },
     {
       title: "到站提醒",
       dataIndex: "etaAlertDays",
-      width: 110,
       align: "center",
       render: (v) => (v != null ? `${v} 天` : "-"),
     },
     {
       title: "免费天数",
       dataIndex: "arrivalOverdueDays",
-      width: 100,
       align: "center",
       render: (v) => (v != null ? `${v} 天` : "-"),
     },
     {
       title: "超期单价",
       dataIndex: "arrivalOverdueUnitPrice",
-      width: 140,
       align: "right",
       render: (v) => (v != null ? `USD ${Number(v).toFixed(2)} / 天/柜` : "-"),
     },
@@ -150,7 +144,6 @@ const ProjectConfigList: React.FC = () => {
     },
     {
       title: "操作",
-      width: 130,
       align: "center",
       fixed: "right",
       render: (_, r) => (

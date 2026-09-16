@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Table from "@/components/ResizeTable";
 import { Button, Select, Space, Modal, message, Tooltip } from "antd";
+import { DownloadOutlined } from "@ant-design/icons";
 import SearchInput from "@/components/SearchInput";
 import { ContainerDetailModal } from "@/components/containers/ContainerDetailModal";
 import { ShipmentDetailModal } from "./ShipmentDetailModal";
@@ -12,11 +13,13 @@ import {
   getTrackingList,
   deleteTracking,
   getTrackingProjectSummary,
+  importTracking,
 } from "@/restApi/tracking";
 import { getAllProjectList } from "@/restApi/project";
 import { getDictOptions, getDictOptionsSync } from "@/restApi/dictCache";
 import type { DictOption } from "@/types/dict";
 import { useRouter } from "next/router";
+import ImportButton from "../ImportButton";
 
 export const ShipmentList = () => {
   const router = useRouter();
@@ -204,26 +207,8 @@ export const ShipmentList = () => {
       render: (v) => <StatusBadge status={v as ContainerStatus} />,
     },
     {
-      title: "状态备注",
-      dataIndex: "statusRemark",
-      ellipsis: true,
-      render: (v) => v || "-",
-    },
-    {
-      title: "还箱时间",
-      dataIndex: "returnTime",
-      render: (v) => v || "-",
-    },
-    {
-      title: "还箱令",
-      dataIndex: "returnOrderNo",
-      ellipsis: true,
-      render: (v) => v || "-",
-    },
-    {
       title: "售卖状态",
       dataIndex: "saleStatus",
-      width: 110,
       align: "center",
       render: (v) =>
         v === "sold_delivered" ? (
@@ -245,7 +230,6 @@ export const ShipmentList = () => {
     {
       title: "是否结束",
       dataIndex: "isEnd",
-      width: 90,
       align: "center",
       render: (v: string) =>
         v === "1" ? (
@@ -259,6 +243,23 @@ export const ShipmentList = () => {
         ) : (
           "-"
         ),
+    },
+    {
+      title: "状态备注",
+      dataIndex: "statusRemark",
+      ellipsis: true,
+      render: (v) => v || "-",
+    },
+    {
+      title: "还箱时间",
+      dataIndex: "returnTime",
+      render: (v) => v || "-",
+    },
+    {
+      title: "还箱令",
+      dataIndex: "returnOrderNo",
+      ellipsis: true,
+      render: (v) => v || "-",
     },
     {
       title: "操作",
@@ -330,6 +331,21 @@ export const ShipmentList = () => {
         <Button type="primary" onClick={() => setEditId(null)}>
           + 新增运踪
         </Button>
+        <Button>
+          <a
+            href="/templates/yunzong.xlsx"
+            download
+            className="flex items-center gap-1"
+          >
+            <DownloadOutlined />
+            模板下载
+          </a>
+        </Button>
+        <ImportButton
+          importFn={importTracking}
+          onSuccess={() => loadShipments(page)}
+          label="批量导入"
+        />
 
         <div className="ml-auto flex items-center gap-2">
           <Select

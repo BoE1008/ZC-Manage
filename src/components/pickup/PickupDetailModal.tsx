@@ -38,7 +38,8 @@ interface ReleaseData {
   yardName?: string;
   containerId?: string;
   containerNo?: string;
-  deadline?: string;
+  deadlineStart?: string;
+  deadlineEnd?: string;
   maker?: string;
   status?: string;
   pickupTime?: string;
@@ -240,8 +241,20 @@ export const PickupDetailModal = ({
           </div>
         </div>
         <div>
-          <div className="text-xs text-gray-400">指令期限</div>
-          <div className="font-medium">{r.deadline || "-"}</div>
+          <div className="text-xs text-gray-400">指令期限-起</div>
+          <div className="font-medium">
+            {r.deadlineStart && dayjs(r.deadlineStart).isValid()
+              ? dayjs(r.deadlineStart).format("YYYY-MM-DD")
+              : "-"}
+          </div>
+        </div>
+        <div>
+          <div className="text-xs text-gray-400">指令期限-止</div>
+          <div className="font-medium">
+            {r.deadlineEnd && dayjs(r.deadlineEnd).isValid()
+              ? dayjs(r.deadlineEnd).format("YYYY-MM-DD")
+              : "-"}
+          </div>
         </div>
 
         <div>

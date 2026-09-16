@@ -13,14 +13,20 @@ interface Props {
   id: string;
   onClose: () => void;
   onEdit?: () => void;
+  initialTab?: string;
 }
 
-export const ContainerDetailModal = ({ id, onClose, onEdit }: Props) => {
+export const ContainerDetailModal = ({
+  id,
+  onClose,
+  onEdit,
+  initialTab,
+}: Props) => {
   const [container, setContainer] = useState<Container | null>(null);
   const [shipments, setShipments] = useState<any[]>([]);
   const [releases, setReleases] = useState<PickupOrder[]>([]);
   const [lifecycle, setLifecycle] = useState<LifecycleNode[]>([]);
-  const [tab, setTab] = useState("info");
+  const [tab, setTab] = useState(initialTab ?? "info");
   const [costIncomeSubTab, setCostIncomeSubTab] = useState<"cost" | "income">(
     "cost",
   );

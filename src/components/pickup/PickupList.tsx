@@ -2,15 +2,21 @@ import { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import Table from "@/components/ResizeTable";
 import { Button, Tooltip, Select, Space, Modal, message } from "antd";
+import { DownloadOutlined } from "@ant-design/icons";
 import SearchInput from "@/components/SearchInput";
 import type { ColumnsType } from "antd/es/table";
 import { editPickupOrder, PickupOrder } from "@/restApi/pickupOrder";
 import { StatusBadge } from "@/components/ui/Badge";
 import { useRouter } from "next/router";
+import ImportButton from "../ImportButton";
 import { PickupModal } from "./PickupModal";
 import { PickupDetailModal } from "./PickupDetailModal";
 import { ContainerDetailModal } from "@/components/containers/ContainerDetailModal";
-import { getPickupOrderList, deletePickupOrder } from "@/restApi/pickupOrder";
+import {
+  getPickupOrderList,
+  deletePickupOrder,
+  importPickupOrder,
+} from "@/restApi/pickupOrder";
 import { getDictByCode } from "@/restApi/dict";
 
 const STATUS_OPTIONS = [
@@ -126,6 +132,11 @@ export const PickupList = () => {
       ),
     },
     {
+      title: "状态",
+      dataIndex: "status",
+      render: (v) => <StatusBadge status={v} />,
+    },
+    {
       title: "类型",
       dataIndex: "orderType",
       render: (v) => {
@@ -149,24 +160,13 @@ export const PickupList = () => {
     {
       title: "箱数",
       dataIndex: "boxCount",
-      width: 70,
       align: "center",
       render: (v, r: any) => v ?? r.containers?.length ?? "-",
     },
-    { title: "提箱堆场", dataIndex: "yardName", width: 140 },
+    { title: "提箱堆场", dataIndex: "yardName" },
     {
       title: "生成时间",
       dataIndex: "createTime",
-      width: 120,
-      render: (v: string) =>
-        v && v !== "-" && dayjs(v).isValid()
-          ? dayjs(v).format("YYYY-MM-DD")
-          : "-",
-    },
-    {
-      title: "客户提箱时间",
-      dataIndex: "pickupDate",
-      width: 130,
       render: (v: string) =>
         v && v !== "-" && dayjs(v).isValid()
           ? dayjs(v).format("YYYY-MM-DD")
@@ -175,7 +175,6 @@ export const PickupList = () => {
     {
       title: "提箱方式",
       dataIndex: "pickupMethod",
-      width: 110,
       align: "center",
       render: (v: any) =>
         v === "designated" ? (
@@ -193,32 +192,36 @@ export const PickupList = () => {
     {
       title: "箱型",
       dataIndex: "containerType",
-      width: 90,
       align: "center",
       render: (v: any) => v || "-",
     },
     {
       title: "提箱数量",
       dataIndex: "quantity",
-      width: 100,
       align: "center",
       render: (v: any) => (v != null ? `${v} 个` : "-"),
     },
     {
+      title: "指令期限-起",
+      dataIndex: "deadlineStart",
+      width: 110,
+      render: (v: any) =>
+        v && dayjs(v).isValid() ? dayjs(v).format("YYYY-MM-DD") : "-",
+    },
+    {
+      title: "指令期限-止",
+      dataIndex: "deadlineEnd",
+      width: 110,
+      render: (v: any) =>
+        v && dayjs(v).isValid() ? dayjs(v).format("YYYY-MM-DD") : "-",
+    },
+    {
       title: "提箱城市",
       dataIndex: "city",
-      width: 100,
       render: (v: any) => v || "-",
     },
     {
-      title: "状态",
-      dataIndex: "status",
-      width: 100,
-      render: (v) => <StatusBadge status={v} />,
-    },
-    {
       title: "操作",
-      width: 120,
       align: "center",
       fixed: "right",
       render: (_, record) => (
@@ -278,6 +281,22 @@ export const PickupList = () => {
           <Button type="primary" onClick={() => setEditId(null)}>
             + 生成提箱令(支持批量)
           </Button>
+
+          <Button>
+            <a
+              href="/templates/pickup_order.xlsx"
+              download
+              className="flex items-center gap-1"
+            >
+              <DownloadOutlined />
+              模板下载
+            </a>
+          </Button>
+          <ImportButton
+            importFn={importPickupOrder}
+            onSuccess={() => load(page)}
+            label="批量导入"
+          />
           <Button onClick={() => message.info("导出功能待对接")}>
             📤 导出
           </Button>

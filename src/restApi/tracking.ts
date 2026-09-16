@@ -116,3 +116,19 @@ export const getTrackingProjectSummary = async (projectId?: string) => {
   );
   return res.data;
 };
+
+/**
+ * 批量导入运踪（Excel）
+ * POST /zc/containerTracking/import
+ * 表单字段 file
+ */
+export const importTracking = async (file: File) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  const res = await axiosInstance.post<ApiResponse>(
+    "/zc/containerTracking/import",
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } },
+  );
+  return res.data;
+};

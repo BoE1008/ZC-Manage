@@ -134,3 +134,19 @@ export const downloadReturnOrderDoc = async (id: string) => {
   });
   return res.data;
 };
+
+/**
+ * 批量导入还箱令（Excel）
+ * POST /zc/returnOrder/import
+ * 表单字段 file
+ */
+export const importReturnOrder = async (file: File) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  const res = await axiosInstance.post<ApiResponse>(
+    "/zc/returnOrder/import",
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } },
+  );
+  return res.data;
+};

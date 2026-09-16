@@ -2,13 +2,19 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import dayjs from "dayjs";
 import { Button, Space, Select, message, Modal } from "antd";
+import { DownloadOutlined } from "@ant-design/icons";
 import SearchInput from "@/components/SearchInput";
 import ResizeTable from "@/components/ResizeTable";
 import ReturnOrderModal from "./ReturnOrderModal";
 import ReturnOrderDetailModal from "./ReturnOrderDetailModal";
 import ReturnOrderConfirmModal from "./ReturnOrderConfirmModal";
-import { getReturnOrderList, deleteReturnOrder } from "@/restApi/returnOrder";
+import {
+  getReturnOrderList,
+  deleteReturnOrder,
+  importReturnOrder,
+} from "@/restApi/returnOrder";
 import { getDictByCode } from "@/restApi/dict";
+import ImportButton from "../ImportButton";
 
 const STATUS_MAP: Record<string, string> = {
   pending: "待还箱",
@@ -96,7 +102,6 @@ const ReturnOrderList: React.FC = () => {
     {
       title: "还箱令编号",
       dataIndex: "orderNo",
-      width: 180,
       render: (v: string, r: any) => (
         <a className="text-[#198348]" onClick={() => setViewId(r.id)}>
           {v || "-"}
@@ -106,7 +111,6 @@ const ReturnOrderList: React.FC = () => {
     {
       title: "类型",
       dataIndex: "orderType",
-      width: 100,
       render: (v: string) => {
         const found = typeOptions.find((o) => o.value === v);
         const label = found?.label ?? v;
@@ -126,7 +130,6 @@ const ReturnOrderList: React.FC = () => {
     {
       title: "状态",
       dataIndex: "status",
-      width: 90,
       render: (v: string) => (
         <span
           className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
@@ -144,7 +147,6 @@ const ReturnOrderList: React.FC = () => {
     {
       title: "箱数",
       dataIndex: "boxCount",
-      width: 70,
       align: "center" as const,
       render: (v: number, r: any) => {
         const n = v ?? r.boxes?.length ?? 0;
@@ -163,14 +165,12 @@ const ReturnOrderList: React.FC = () => {
     {
       title: "还箱城市",
       dataIndex: "city",
-      width: 150,
       render: (v: string) =>
         v ? <span>{v}</span> : <span className="text-gray-400">-</span>,
     },
     {
       title: "还箱堆场",
       dataIndex: "yardName",
-      width: 150,
       render: (v: string) =>
         v && v !== "-" ? (
           <span className="text-[#198348]">{v}</span>
@@ -181,7 +181,6 @@ const ReturnOrderList: React.FC = () => {
     {
       title: "确认进度",
       dataIndex: "confirmProgress",
-      width: 90,
       align: "center" as const,
       render: (v: string) =>
         v ? (
@@ -193,7 +192,6 @@ const ReturnOrderList: React.FC = () => {
     {
       title: "实际还箱时间",
       dataIndex: "returnTime",
-      width: 120,
       render: (v: string) =>
         v && v !== "-" && dayjs(v).isValid()
           ? dayjs(v).format("YYYY-MM-DD")
@@ -202,7 +200,6 @@ const ReturnOrderList: React.FC = () => {
 
     {
       title: "操作",
-      width: 140,
       fixed: "right" as const,
       render: (_: any, r: any) => (
         <Space size={4}>
@@ -254,6 +251,22 @@ const ReturnOrderList: React.FC = () => {
         <Button type="primary" size="small" onClick={() => setEditId(null)}>
           + 生成还箱令
         </Button>
+        <Button size="small">
+          <a
+            href="/templates/return_order.xlsx"
+            download
+            className="flex items-center gap-1"
+          >
+            <DownloadOutlined />
+            模板下载
+          </a>
+        </Button>
+        <ImportButton
+          importFn={importReturnOrder}
+          onSuccess={() => load(page)}
+          size="small"
+          label="批量导入"
+        />
         <Button size="small" onClick={() => message.info("导出功能开发中")}>
           导出
         </Button>
@@ -317,9 +330,13 @@ const ReturnOrderList: React.FC = () => {
                 };
                 if (!v) delete q.keyword;
                 q.page = "1";
-                router.push({ pathname: router.pathname, query: q }, undefined, {
-                  shallow: true,
-                });
+                router.push(
+                  { pathname: router.pathname, query: q },
+                  undefined,
+                  {
+                    shallow: true,
+                  },
+                );
               }}
             />
           </div>

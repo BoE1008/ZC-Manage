@@ -1,16 +1,30 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/router";
 import { Button, Tooltip, Select, Space, Modal, message } from "antd";
+import {
+  PlusCircleOutlined,
+  RiseOutlined,
+  MinusCircleOutlined,
+  FallOutlined,
+  FileTextOutlined,
+  DownloadOutlined,
+} from "@ant-design/icons";
 import Table from "@/components/ResizeTable";
 import type { ColumnsType } from "antd/es/table";
 import { Container } from "@/types";
 import { StatusBadge, UsageTag, CondTag } from "@/components/ui/Badge";
 import { ContainerModal } from "./ContainerModal";
 import { ContainerDetailModal } from "./ContainerDetailModal";
-import { getContainerList, deleteContainer } from "@/restApi/container";
+import { DetailFormModal } from "./CostIncomeDetail";
+import {
+  getContainerList,
+  deleteContainer,
+  importContainer,
+} from "@/restApi/container";
 import { getDictOptions, getDictOptionsSync } from "@/restApi/dictCache";
 import type { DictOption } from "@/types/dict";
 import SearchInput from "../SearchInput";
+import ImportButton from "../ImportButton";
 
 export const ContainerList = () => {
   const router = useRouter();
@@ -44,6 +58,19 @@ export const ContainerList = () => {
   // 编辑 & 预览
   const [editId, setEditId] = useState<string | null | undefined>(undefined);
   const [viewId, setViewId] = useState<string | null>(null);
+
+  // 成本/收入明细快捷新增
+  const [detailForm, setDetailForm] = useState<{
+    type: "cost" | "income";
+    id: string | null;
+    containerId: string;
+    containerNo: string;
+  } | null>(null);
+
+  // 查看明细时详情 tab 切换
+  const [viewInitialTab, setViewInitialTab] = useState<string | undefined>(
+    undefined,
+  );
 
   // 加载字典
   useEffect(() => {
@@ -168,6 +195,12 @@ export const ContainerList = () => {
       render: (v) => v || "-",
     },
     {
+      title: "当前状态",
+      dataIndex: "status",
+      align: "center",
+      render: (v) => <StatusBadge status={v} />,
+    },
+    {
       title: "使用情况",
       dataIndex: "usageType",
       align: "center",
@@ -233,13 +266,6 @@ export const ContainerList = () => {
       align: "center",
       render: (v) => v || "-",
     },
-
-    {
-      title: "当前状态",
-      dataIndex: "status",
-      align: "center",
-      render: (v) => <StatusBadge status={v} />,
-    },
     {
       title: "当前堆场",
       dataIndex: "dropYardName",
@@ -252,41 +278,104 @@ export const ContainerList = () => {
       align: "center",
       fixed: "right",
       render: (_, r) => (
-        <Space size={2}>
-          <Tooltip title={<span>查看集装箱信息</span>}>
-            <Button
-              type="text"
-              size="small"
-              className="!px-1 !py-0.5 !text-xs"
-              onClick={() => setViewId(r.id)}
-              title="查看"
-            >
-              👁
-            </Button>
-          </Tooltip>
-          <Tooltip title={<span>编辑</span>}>
-            <Button
-              type="text"
-              size="small"
-              className="!px-1 !py-0.5 !text-xs"
-              onClick={() => setEditId(r.id)}
-              title="编辑"
-            >
-              ✎
-            </Button>
-          </Tooltip>
-          <Tooltip title={<span>删除</span>}>
-            <Button
-              type="text"
-              size="small"
-              danger
-              className="!px-1 !py-0.5 !text-xs"
-              onClick={() => handleDelete(r.id)}
-              title="删除"
-            >
-              🗑
-            </Button>
-          </Tooltip>
+        <Space size={2} direction="vertical" className="items-center">
+          <Space size={2}>
+            <Tooltip title={<span>查看集装箱信息</span>}>
+              <Button
+                type="text"
+                size="small"
+                className="!px-1 !py-0.5 !text-xs"
+                onClick={() => {
+                  setViewInitialTab(undefined);
+                  setViewId(r.id);
+                }}
+                title="查看"
+              >
+                👁
+              </Button>
+            </Tooltip>
+            <Tooltip title={<span>编辑</span>}>
+              <Button
+                type="text"
+                size="small"
+                className="!px-1 !py-0.5 !text-xs"
+                onClick={() => setEditId(r.id)}
+                title="编辑"
+              >
+                ✎
+              </Button>
+            </Tooltip>
+            <Tooltip title={<span>删除</span>}>
+              <Button
+                type="text"
+                size="small"
+                className="!px-1 !py-0.5 !text-xs"
+                onClick={() => handleDelete(r.id)}
+                title="删除"
+              >
+                🗑
+              </Button>
+            </Tooltip>
+          </Space>
+          <Space size={2}>
+            <Tooltip title={<span>新增成本明细</span>}>
+              <Button
+                type="text"
+                size="small"
+                className="!px-1 !py-0.5 !text-xs"
+                onClick={() =>
+                  setDetailForm({
+                    type: "cost",
+                    id: null,
+                    containerId: r.id,
+                    containerNo: r.containerNo ?? "",
+                  })
+                }
+                title="新增成本"
+              >
+                <span className="inline-flex items-center gap-0.5">
+                  <MinusCircleOutlined />
+                  <FallOutlined />
+                </span>
+              </Button>
+            </Tooltip>
+            <Tooltip title={<span>新增收入明细</span>}>
+              <Button
+                type="text"
+                size="small"
+                className="!px-1 !py-0.5 !text-xs"
+                onClick={() =>
+                  setDetailForm({
+                    type: "income",
+                    id: null,
+                    containerId: r.id,
+                    containerNo: r.containerNo ?? "",
+                  })
+                }
+                title="新增收入"
+              >
+                <span className="inline-flex items-center gap-0.5">
+                  <PlusCircleOutlined />
+                  <RiseOutlined />
+                </span>
+              </Button>
+            </Tooltip>
+
+            <Tooltip title={<span>查看成本/收入明细</span>}>
+              <Button
+                type="text"
+                size="small"
+                className="!px-1 !py-0.5 !text-xs"
+                onClick={() => {
+                  setViewInitialTab("costIncome");
+                  setViewId(r.id);
+                }}
+                title="查看明细"
+              >
+                <FileTextOutlined className="" />
+              </Button>
+            </Tooltip>
+          </Space>
         </Space>
       ),
     },
@@ -299,6 +388,21 @@ export const ContainerList = () => {
         <Button type="primary" onClick={() => setEditId(null)}>
           + 新增集装箱
         </Button>
+        <Button>
+          <a
+            href="/templates/container.xlsx"
+            download
+            className="flex items-center gap-1"
+          >
+            <DownloadOutlined />
+            下载模板
+          </a>
+        </Button>
+        <ImportButton
+          importFn={importContainer}
+          onSuccess={() => loadData(router.query, page)}
+          label="批量导入"
+        />
         <div className="ml-auto flex items-center gap-2">
           <Select
             placeholder="全部状态"
@@ -408,11 +512,28 @@ export const ContainerList = () => {
       {viewId !== null && (
         <ContainerDetailModal
           id={viewId}
-          onClose={() => setViewId(null)}
+          initialTab={viewInitialTab}
+          onClose={() => {
+            setViewId(null);
+            setViewInitialTab(undefined);
+          }}
           onEdit={() => {
             setViewId(null);
+            setViewInitialTab(undefined);
             setEditId(viewId);
           }}
+        />
+      )}
+
+      {/* 成本/收入明细快捷新增弹窗 */}
+      {detailForm && (
+        <DetailFormModal
+          type={detailForm.type}
+          id={detailForm.id}
+          containerId={detailForm.containerId}
+          containerNo={detailForm.containerNo}
+          onClose={() => setDetailForm(null)}
+          onSaved={() => setDetailForm(null)}
         />
       )}
     </div>

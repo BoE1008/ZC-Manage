@@ -11,7 +11,6 @@ import {
   Spin,
   message,
 } from "antd";
-const { RangePicker } = DatePicker;
 import dayjs from "dayjs";
 import { Container, ContainerStatus } from "@/types";
 import { getContainerList } from "@/restApi/container";
@@ -23,6 +22,7 @@ import {
   addPickupOrder,
   editPickupOrder,
   getPickupOrderDetail,
+  downloadPickupOrderDoc,
   PickupOrder,
   PickupOrderForm,
 } from "@/restApi/pickupOrder";
@@ -164,17 +164,16 @@ export const PickupModal = ({ id, onSave, onClose }: Props) => {
           const v = dayjs(vals.pickupTime as string);
           if (v.isValid()) vals.pickupTime = v;
         }
-        // 指令期限：字符串 "2026-08-10 至 2026-08-20" → [dayjs, dayjs]
-        if (vals.deadline && typeof vals.deadline === "string") {
-          const parts = vals.deadline.split(/\s*至\s*/);
-          if (parts.length === 2) {
-            const a = dayjs(parts[0]);
-            const b = dayjs(parts[1]);
-            if (a.isValid() && b.isValid()) vals.deadline = [a, b];
-            else delete vals.deadline;
-          } else {
-            delete vals.deadline;
-          }
+        // 指令期限-起 / 指令期限-止（字符串 → dayjs）
+        if (vals.deadlineStart) {
+          const v = dayjs(vals.deadlineStart as string);
+          if (v.isValid()) vals.deadlineStart = v;
+          else delete vals.deadlineStart;
+        }
+        if (vals.deadlineEnd) {
+          const v = dayjs(vals.deadlineEnd as string);
+          if (v.isValid()) vals.deadlineEnd = v;
+          else delete vals.deadlineEnd;
         }
         form.setFieldsValue(vals);
         // 已选箱子
@@ -224,12 +223,14 @@ export const PickupModal = ({ id, onSave, onClose }: Props) => {
         return;
       }
       setLoading(true);
-      const deadlineStr =
-        values.deadline && Array.isArray(values.deadline)
-          ? `${values.deadline[0].format("YYYY-MM-DD")} 至 ${values.deadline[1].format("YYYY-MM-DD")}`
-          : undefined;
       const pickupTimeStr = values.pickupTime
         ? dayjs(values.pickupTime).format("YYYY-MM-DD")
+        : undefined;
+      const deadlineStartStr = values.deadlineStart
+        ? dayjs(values.deadlineStart).format("YYYY-MM-DD")
+        : undefined;
+      const deadlineEndStr = values.deadlineEnd
+        ? dayjs(values.deadlineEnd).format("YYYY-MM-DD")
         : undefined;
 
       const payload: any = {
@@ -241,7 +242,8 @@ export const PickupModal = ({ id, onSave, onClose }: Props) => {
         city: values.city,
         yardId: values.yardId,
         yardName: values.yardName,
-        deadline: deadlineStr,
+        deadlineStart: deadlineStartStr,
+        deadlineEnd: deadlineEndStr,
         income: values.income,
         pickupTime: pickupTimeStr,
         remark: values.remark,
@@ -270,8 +272,45 @@ export const PickupModal = ({ id, onSave, onClose }: Props) => {
     });
   };
 
-  const downloadWord = () => {
-    message.info("📄 下载 Word 提箱单功能待对接后端 /zc/pickupOrder/doc 接口");
+  const downloadWord = async () => {
+    if (!id) {
+      message.error("提箱令 id 缺失");
+      return;
+    }
+    const hide = message.loading({ content: "正在下载提箱单...", key: "doc" });
+    try {
+      const res: any = await downloadPickupOrderDoc(id);
+      const blob = (res?.data ?? res) as Blob;
+
+      // 优先解析服务端 Content-Disposition 的文件名
+      let filename = `提箱单_${orderNo || id}.docx`;
+      const cd =
+        res?.headers?.["content-disposition"] ??
+        res?.headers?.["Content-Disposition"] ??
+        "";
+      const match = /filename\*?=(?:UTF-8''|")?([^;"]+)/i.exec(cd);
+      if (match && match[1]) {
+        try {
+          filename = decodeURIComponent(match[1].trim().replace(/\\"/g, ""));
+        } catch {
+          filename = match[1].trim().replace(/\\"/g, "");
+        }
+      }
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      hide();
+      message.success({ content: "下载完成", key: "doc" });
+    } catch (e) {
+      hide();
+      message.error({ content: "下载失败", key: "doc" });
+    }
   };
 
   return (
@@ -369,13 +408,24 @@ export const PickupModal = ({ id, onSave, onClose }: Props) => {
               </Form.Item>
 
               <Form.Item
-                name="deadline"
-                label={<span className="text-xs">指令期限</span>}
+                name="deadlineStart"
+                label={<span className="text-xs">指令期限-起</span>}
               >
-                <RangePicker
+                <DatePicker
                   style={{ width: "100%" }}
                   format="YYYY-MM-DD"
-                  placeholder={["起始日期", "截止日期"]}
+                  placeholder="起始日期"
+                />
+              </Form.Item>
+
+              <Form.Item
+                name="deadlineEnd"
+                label={<span className="text-xs">指令期限-止</span>}
+              >
+                <DatePicker
+                  style={{ width: "100%" }}
+                  format="YYYY-MM-DD"
+                  placeholder="截止日期"
                 />
               </Form.Item>
 
