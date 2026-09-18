@@ -5,6 +5,7 @@ import {
   confirmReturnOrderApi,
 } from "@/restApi/returnOrder";
 import { getYardList } from "@/restApi/yard";
+import { unwrapList } from "@/utils";
 
 interface Props {
   id: string;
@@ -37,7 +38,7 @@ const ReturnOrderConfirmModal: React.FC<Props> = ({ id, onSave, onClose }) => {
         setR(d);
         const bs = res?.entity?.boxes ?? [];
         setBoxes(bs);
-        setYards(yardRes?.entity?.data ?? []);
+        setYards(unwrapList(yardRes));
       })
       .finally(() => setLoading(false));
   }, [id]);

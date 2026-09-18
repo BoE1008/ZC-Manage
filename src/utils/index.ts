@@ -69,3 +69,11 @@ export const arrayToTree = (arr, parentId: string = "0") =>
 export const cn = (...inputs: ClassValue[]) => {
   return twMerge(clsx(inputs));
 };
+
+// 公共格式化与空值兜底（详见 ./format.ts）
+export { formatDate, displayValue, isEmpty } from "./format";
+// 后端响应解构（详见 ./api.ts）
+export { unwrapEntity, unwrapList } from "./api";
+// 字典归一化（详见 ./dict.ts）
+export { normalizeDictOptions } from "./dict";
+export type { DictItem, DictOption } from "./dict";

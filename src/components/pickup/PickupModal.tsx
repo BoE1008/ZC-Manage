@@ -4,7 +4,6 @@ import {
   Form,
   Select,
   Input,
-  InputNumber,
   DatePicker,
   Space,
   Button,
@@ -12,30 +11,22 @@ import {
   message,
 } from "antd";
 import dayjs from "dayjs";
-import { Container, ContainerStatus } from "@/types";
+import { Container } from "@/types";
 import { getContainerList } from "@/restApi/container";
 import { getYardList } from "@/restApi/yard";
 import { getDictByCode } from "@/restApi/dict";
-import { getCustomersList } from "@/restApi/customer";
-import { getSuppliersList } from "@/restApi/supplyer";
 import {
   addPickupOrder,
   editPickupOrder,
   getPickupOrderDetail,
   downloadPickupOrderDoc,
-  PickupOrder,
   PickupOrderForm,
 } from "@/restApi/pickupOrder";
+import { unwrapList, normalizeDictOptions } from "@/utils";
 
 const RELEASE_METHOD_OPTIONS = [
   { label: "指定箱号", value: "designated" },
   { label: "不指定箱号", value: "undesignated" },
-];
-
-// 提箱可见的箱子状态（堆存中）
-const STOCK_STATUSES: ContainerStatus[] = [
-  "domestic_storage",
-  "overseas_storage",
 ];
 
 interface Props {
@@ -67,38 +58,29 @@ export const PickupModal = ({ id, onSave, onClose }: Props) => {
   useEffect(() => {
     getDictByCode("pickup_order_type")
       .then((res: any) => {
-        const list = res?.entity?.data ?? res?.entity ?? [];
-        setTypeOptions(
-          (Array.isArray(list) ? list : []).map((d: any) => ({
-            label: d.dictLabel ?? d.label ?? d.dictValue,
-            value: d.dictValue ?? d.value,
-          })),
-        );
+        const list = unwrapList(res);
+        setTypeOptions(normalizeDictOptions(list));
       })
       .catch(() => setTypeOptions([]));
   }, []);
 
-  // 监听 yardId/city 变化以驱动联动逻辑
+  // 监听 yardId/city/pickupMethod 变化以驱动联动逻辑
   const watchedYardId = Form.useWatch("yardId", form);
   const watchedCity = Form.useWatch("city", form);
+  const watchedPickupMethod = Form.useWatch("pickupMethod", form);
 
   // 加载下拉选项（买方/供应商/堆场/城市字典）
   useEffect(() => {
     setInitLoading(true);
     getYardList({ pageNo: 1, pageSize: 1000 })
       .then((yardRes) => {
-        setYards(yardRes?.entity?.data ?? []);
+        setYards(unwrapList(yardRes));
       })
       .finally(() => setInitLoading(false));
     getDictByCode("yard_city")
       .then((res: any) => {
-        const list = res?.entity?.data ?? res?.entity ?? [];
-        setCityOptions(
-          (Array.isArray(list) ? list : []).map((d: any) => ({
-            label: d.dictLabel ?? d.label ?? d.dictValue,
-            value: d.dictValue ?? d.value,
-          })),
-        );
+        const list = unwrapList(res);
+        setCityOptions(normalizeDictOptions(list));
       })
       .catch(() => setCityOptions([]));
   }, []);
@@ -127,8 +109,8 @@ export const PickupModal = ({ id, onSave, onClose }: Props) => {
       } as any).catch(() => ({ entity: { data: [] } }) as any),
     ])
       .then(([dRes, oRes]) => {
-        const a = (dRes?.entity?.data ?? []) as Container[];
-        const b = (oRes?.entity?.data ?? []) as Container[];
+        const a = unwrapList(dRes) as Container[];
+        const b = unwrapList(oRes) as Container[];
         setContainers([...a, ...b]);
       })
       .finally(() => setContainersLoading(false));
@@ -185,10 +167,6 @@ export const PickupModal = ({ id, onSave, onClose }: Props) => {
       .catch(() => {});
   }, [id, yards]);
 
-  // 监听 yardId 变化以驱动列表过滤（重名变量已被上面抢在主级定义，保留此处仅为类型推断）
-  // const watchedYardId = Form.useWatch("yardId", form);
-  // const watchedCity = Form.useWatch("city", form);
-
   // 按 type 计数（已选箱子）
   const typeCount = useMemo(() => {
     const map: Record<string, number> = {};
@@ -238,7 +216,10 @@ export const PickupModal = ({ id, onSave, onClose }: Props) => {
         orderType: values.orderType,
         pickupMethod: values.pickupMethod,
         containerType: values.containerType,
-        quantity: values.quantity ? Number(values.quantity) : undefined,
+        quantity:
+          values.pickupMethod === "undesignated" && values.quantity
+            ? Number(values.quantity)
+            : undefined,
         city: values.city,
         yardId: values.yardId,
         yardName: values.yardName,
@@ -374,22 +355,6 @@ export const PickupModal = ({ id, onSave, onClose }: Props) => {
               </Form.Item>
 
               <Form.Item
-                name="containerType"
-                label={<span className="text-xs">箱型</span>}
-              >
-                <Select
-                  allowClear
-                  placeholder="选择箱型"
-                  options={[
-                    { label: "20GP", value: "20GP" },
-                    { label: "40GP", value: "40GP" },
-                    { label: "40HQ", value: "40HQ" },
-                    { label: "45HQ", value: "45HQ" },
-                  ]}
-                />
-              </Form.Item>
-
-              <Form.Item
                 name="pickupMethod"
                 label={<span className="text-xs">提箱方式</span>}
               >
@@ -397,6 +362,12 @@ export const PickupModal = ({ id, onSave, onClose }: Props) => {
                   allowClear
                   placeholder="选择提箱方式"
                   options={RELEASE_METHOD_OPTIONS}
+                  onChange={(val) => {
+                    // 非「不指定箱号」时禁用并清空提箱数量，避免脏值提交
+                    if (val !== "undesignated") {
+                      form.setFieldValue("quantity", undefined);
+                    }
+                  }}
                 />
               </Form.Item>
 
@@ -404,7 +375,12 @@ export const PickupModal = ({ id, onSave, onClose }: Props) => {
                 name="quantity"
                 label={<span className="text-xs">提箱数量</span>}
               >
-                <Input type="number" min={1} placeholder="不指定箱号时填写" />
+                <Input
+                  type="number"
+                  min={1}
+                  placeholder="不指定箱号时填写"
+                  disabled={watchedPickupMethod !== "undesignated"}
+                />
               </Form.Item>
 
               <Form.Item
@@ -452,20 +428,9 @@ export const PickupModal = ({ id, onSave, onClose }: Props) => {
                 />
               </Form.Item>
 
-              <Form.Item name="buyerName" hidden>
-                <Input />
-              </Form.Item>
-
               <Form.Item
                 name="yardId"
-                label={
-                  <span className="text-xs">
-                    提箱堆场{" "}
-                    <span className="text-gray-400 font-normal">
-                      (可指定可不指定)
-                    </span>
-                  </span>
-                }
+                label={<span className="text-xs">提箱堆场 </span>}
               >
                 <Select
                   allowClear
@@ -494,8 +459,21 @@ export const PickupModal = ({ id, onSave, onClose }: Props) => {
                   }}
                 />
               </Form.Item>
-              <Form.Item name="yardName" hidden>
-                <Input />
+
+              <Form.Item
+                name="containerType"
+                label={<span className="text-xs">箱型</span>}
+              >
+                <Select
+                  allowClear
+                  placeholder="选择箱型"
+                  options={[
+                    { label: "20GP", value: "20GP" },
+                    { label: "40GP", value: "40GP" },
+                    { label: "40HQ", value: "40HQ" },
+                    { label: "45HQ", value: "45HQ" },
+                  ]}
+                />
               </Form.Item>
 
               <Form.Item

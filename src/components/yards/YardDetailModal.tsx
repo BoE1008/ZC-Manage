@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Space, Button, Spin } from "antd";
 import { getYardDetail } from "@/restApi/yard";
+import { unwrapEntity } from "@/utils";
+import { InfoItem, SectionTitle } from "@/components/ui/InfoItem";
 
 interface Props {
   id: string;
@@ -30,8 +32,7 @@ const YardDetailModal: React.FC<Props> = ({ id, onClose, onEdit }) => {
     setLoading(true);
     getYardDetail(id)
       .then((res: any) => {
-        const d = res?.entity?.data ?? res?.entity ?? null;
-        setR(d);
+        setR(unwrapEntity(res));
       })
       .finally(() => setLoading(false));
   }, [id]);
@@ -47,8 +48,6 @@ const YardDetailModal: React.FC<Props> = ({ id, onClose, onEdit }) => {
   }
 
   if (!r) return null;
-
-  console.log(r);
 
   return (
     <Modal
@@ -73,93 +72,51 @@ const YardDetailModal: React.FC<Props> = ({ id, onClose, onEdit }) => {
       }
     >
       <div className="space-y-3">
-        {/* 基本信息 */}
-        <div>
-          <div className="text-xs font-bold text-[#198348] pb-1 border-b border-dashed border-gray-200 mb-2">
-            基本信息
-          </div>
-          <div className="grid grid-cols-2 gap-y-2 text-sm">
-            <div>
-              <div className="text-xs text-gray-400">堆场名称</div>
-              <div className="text-gray-800 font-medium">
-                {r.yardName || "-"}
-              </div>
-            </div>
-            <div>
-              <div className="text-xs text-gray-400">区域</div>
-              <div className="text-gray-800">
-                {r.region ? (
-                  <span
-                    className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
-                      r.region === "国内"
-                        ? "bg-gray-100 text-gray-600"
-                        : "bg-orange-100 text-orange-600"
-                    }`}
-                  >
-                    {r.region}
-                  </span>
-                ) : (
-                  "-"
-                )}
-              </div>
-            </div>
-            <div>
-              <div className="text-xs text-gray-400">所在城市</div>
-              <div className="text-gray-800">{r.city || "-"}</div>
-            </div>
-            <div>
-              <div className="text-xs text-gray-400">堆场地址</div>
-              <div className="text-gray-800">{r.address || "-"}</div>
-            </div>
-            <div>
-              <div className="text-xs text-gray-400">作业时间</div>
-              <div className="text-gray-800">{r.workingTime || "-"}</div>
-            </div>
-            <div>
-              <div className="text-xs text-gray-400">箱管电话</div>
-              <div className="text-gray-800">{r.boxMgrPhone || "-"}</div>
-            </div>
-          </div>
+        <SectionTitle>基本信息</SectionTitle>
+        <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+          <InfoItem label="堆场名称" value={r.yardName} />
+          <InfoItem
+            label="区域"
+            value={
+              r.region ? (
+                <span
+                  className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
+                    r.region === "国内"
+                      ? "bg-gray-100 text-gray-600"
+                      : "bg-orange-100 text-orange-600"
+                  }`}
+                >
+                  {r.region}
+                </span>
+              ) : undefined
+            }
+          />
+          <InfoItem label="所在城市" value={r.city} />
+          <InfoItem label="堆场地址" value={r.address} />
+          <InfoItem label="作业时间" value={r.workingTime} />
+          <InfoItem label="箱管电话" value={r.boxMgrPhone} />
         </div>
 
-        {/* 联系方式 */}
-        <div>
-          <div className="text-xs font-bold text-[#198348] pb-1 border-b border-dashed border-gray-200 mb-2">
-            联系方式
-          </div>
-          <div className="grid grid-cols-2 gap-y-2 text-sm">
-            <div>
-              <div className="text-xs text-gray-400">对接人</div>
-              <div className="text-gray-800">{r.contactName || "-"}</div>
-            </div>
-            <div>
-              <div className="text-xs text-gray-400">联系电话</div>
-              <div className="text-gray-800">{r.contactPhone || "-"}</div>
-            </div>
-          </div>
+        <SectionTitle>联系方式</SectionTitle>
+        <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+          <InfoItem label="对接人" value={r.contactName} />
+          <InfoItem label="联系电话" value={r.contactPhone} />
         </div>
 
-        {/* 关联供应商 */}
-        <div>
-          <div className="text-xs font-bold text-[#198348] pb-1 border-b border-dashed border-gray-200 mb-2">
-            关联供应商（付款对象）
-          </div>
-          <div className="text-sm">
-            <div className="text-xs text-gray-400">供应商</div>
-            <div className="text-gray-800 font-medium">
-              {r.supplierName || <span className="text-gray-400">未关联</span>}
-            </div>
-          </div>
+        <SectionTitle>关联供应商（付款对象）</SectionTitle>
+        <div className="grid grid-cols-1 gap-y-3">
+          <InfoItem
+            label="供应商"
+            value={r.supplierName || undefined}
+            emptyClassName="text-gray-400"
+          />
         </div>
 
-        {/* 备注 */}
         {(r.remark || r.remark === "") && (
-          <div>
-            <div className="text-xs font-bold text-[#198348] pb-1 border-b border-dashed border-gray-200 mb-2">
-              备注
-            </div>
+          <>
+            <SectionTitle>备注</SectionTitle>
             <div className="text-sm text-gray-600">{r.remark || "-"}</div>
-          </div>
+          </>
         )}
       </div>
     </Modal>

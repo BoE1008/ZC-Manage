@@ -12,6 +12,7 @@ import {
   ProjectContainerConfig,
 } from "@/restApi/projectConfig";
 import { getAllProjectList } from "@/restApi/project";
+import { unwrapList } from "@/utils";
 
 const ProjectConfigList: React.FC = () => {
   const pageSize = 20;
@@ -62,7 +63,7 @@ const ProjectConfigList: React.FC = () => {
       try {
         const r: any = await getAllProjectList();
         setProjects(
-          (r?.entity?.data ?? []).map((p: any) => ({
+          (unwrapList(r)).map((p: any) => ({
             id: p.id,
             name: p.name,
             num: p.num ?? p.projectNum ?? "",
@@ -181,7 +182,6 @@ const ProjectConfigList: React.FC = () => {
     },
   ];
 
-  console.log(list);
 
   return (
     <div className="p-2">

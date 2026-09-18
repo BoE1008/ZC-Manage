@@ -201,6 +201,13 @@ export const BUYER_TYPE_MAP: DictBadgeMap = {
   rental: { label: "租方", cls: "bg-purple-100 text-purple-700" },
 };
 
+/** 售卖状态 → 中文标签 + 配色（与 sys_dict_data.container_sale_status 对齐） */
+export const SALE_STATUS_MAP: DictBadgeMap = {
+  unsold: { label: "未卖出", cls: "bg-gray-100 text-gray-600" },
+  sold_pending: { label: "卖出未交付", cls: "bg-amber-100 text-amber-700" },
+  sold_delivered: { label: "卖出已交付", cls: "bg-green-100 text-green-700" },
+};
+
 // ========================
 // 5. 容器相关 Select 选项（硬编码兜底，运行时由字典接口覆盖）
 // ========================
@@ -234,6 +241,13 @@ export const CONTAINER_STATUS_OPTIONS: DictOption[] = [
   { label: "已卖出", value: "sold" },
   { label: "回程在途", value: "inbound" },
   { label: "灭失", value: "lost" },
+];
+
+/** 售卖状态 Select 选项（与 sys_dict_data.container_sale_status 对齐） */
+export const SALE_STATUS_OPTIONS: DictOption[] = [
+  { label: "未卖出", value: "unsold" },
+  { label: "卖出未交付", value: "sold_pending" },
+  { label: "卖出已交付", value: "sold_delivered" },
 ];
 
 /** 运踪运输段 Select 选项 */

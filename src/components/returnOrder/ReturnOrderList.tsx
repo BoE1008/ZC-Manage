@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import dayjs from "dayjs";
 import { Button, Space, Select, message, Modal } from "antd";
 import { DownloadOutlined } from "@ant-design/icons";
 import SearchInput from "@/components/SearchInput";
@@ -15,6 +14,7 @@ import {
 } from "@/restApi/returnOrder";
 import { getDictByCode } from "@/restApi/dict";
 import ImportButton from "../ImportButton";
+import { unwrapList, normalizeDictOptions, formatDate } from "@/utils";
 
 const STATUS_MAP: Record<string, string> = {
   pending: "待还箱",
@@ -39,12 +39,9 @@ const ReturnOrderList: React.FC = () => {
   useEffect(() => {
     getDictByCode("return_order_type")
       .then((res: any) => {
-        const list = res?.entity?.data ?? res?.entity ?? [];
+        const list = unwrapList(res);
         setTypeOptions(
-          (Array.isArray(list) ? list : []).map((d: any) => ({
-            label: d.dictLabel ?? d.label ?? d.dictValue,
-            value: d.dictValue ?? d.value,
-          })),
+          normalizeDictOptions(list),
         );
       })
       .catch(() => setTypeOptions([]));
@@ -70,7 +67,7 @@ const ReturnOrderList: React.FC = () => {
       orderNo: k || undefined,
     })
       .then((r: any) => {
-        const list = r?.entity?.data ?? [];
+        const list = unwrapList(r);
         setData(list);
         setTotal(r?.entity?.total ?? list.length);
       })
@@ -193,9 +190,7 @@ const ReturnOrderList: React.FC = () => {
       title: "实际还箱时间",
       dataIndex: "returnTime",
       render: (v: string) =>
-        v && v !== "-" && dayjs(v).isValid()
-          ? dayjs(v).format("YYYY-MM-DD")
-          : "-",
+        formatDate(v),
     },
 
     {

@@ -3,6 +3,7 @@ import { Modal, Form, Input, Select, message } from "antd";
 import { getSuppliersList } from "@/restApi/supplyer";
 import { addYard, editYard, getYardDetail } from "@/restApi/yard";
 import { getDictByCode } from "@/restApi/dict";
+import { unwrapList, unwrapEntity, normalizeDictOptions } from "@/utils";
 
 interface Props {
   id: string | null;
@@ -14,21 +15,20 @@ const YardModal: React.FC<Props> = ({ id, onSave, onClose }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [suppliers, setSuppliers] = useState<any[]>([]); // { label, value, id, name }
-  const [cityOptions, setCityOptions] = useState<{ label: string; value: string }[]>([]);
+  const [cityOptions, setCityOptions] = useState<
+    { label: string; value: string }[]
+  >([]);
   const supplierMapRef = useRef<Map<string, string>>(new Map()); // id → name
 
   useEffect(() => {
-    getDictByCode("yard_city").then((res: any) => {
-      const list = res?.entity?.data ?? res?.entity ?? [];
-      setCityOptions(
-        (Array.isArray(list) ? list : []).map((d: any) => ({
-          label: d.dictLabel ?? d.label ?? d.dictValue,
-          value: d.dictValue ?? d.value,
-        })),
-      );
-    }).catch(() => setCityOptions([]));
+    getDictByCode("yard_city")
+      .then((res: any) => {
+        const list = unwrapList(res);
+        setCityOptions(normalizeDictOptions(list));
+      })
+      .catch(() => setCityOptions([]));
     getSuppliersList(1, 1000).then((r) => {
-      const opts = (r.entity?.data ?? []).map((s: any) => {
+      const opts = unwrapList(r).map((s: any) => {
         supplierMapRef.current.set(s.id, s.name);
         return { label: s.name, value: s.id, id: s.id, name: s.name };
       });
@@ -40,7 +40,7 @@ const YardModal: React.FC<Props> = ({ id, onSave, onClose }) => {
   useEffect(() => {
     if (!id) return;
     getYardDetail(id).then((res: any) => {
-      const d = res?.entity?.data ?? res?.entity ?? {};
+      const d = unwrapEntity(res);
       form.setFieldsValue({
         ...d,
         supplierName: d.supplierId ?? d.supplierName,
@@ -86,14 +86,7 @@ const YardModal: React.FC<Props> = ({ id, onSave, onClose }) => {
       cancelText="取消"
       confirmLoading={loading}
     >
-      <Form
-        form={form}
-        layout="vertical"
-        className="mt-2"
-        initialValues={{
-          workingTime: "8:00-17:30",
-        }}
-      >
+      <Form form={form} layout="vertical" className="mt-2">
         <div className="grid grid-cols-2 gap-x-4">
           <Form.Item
             label="堆场名称"
@@ -131,7 +124,7 @@ const YardModal: React.FC<Props> = ({ id, onSave, onClose }) => {
             <Input placeholder="详细地址" />
           </Form.Item>
           <Form.Item label="作业时间" name="workingTime">
-            <Input placeholder="如：8:00-17:30" />
+            <Input placeholder="作业时间" />
           </Form.Item>
           <Form.Item label="对接人" name="contactName">
             <Input placeholder="联系人姓名" />

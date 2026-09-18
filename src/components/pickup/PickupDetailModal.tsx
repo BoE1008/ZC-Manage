@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { Modal, Space, Button, Spin, message } from "antd";
-import dayjs from "dayjs";
 import {
   getPickupOrderDetail,
   downloadPickupOrderDoc,
 } from "@/restApi/pickupOrder";
 import { StatusBadge } from "@/components/ui/Badge";
 import { getDictByCode } from "@/restApi/dict";
+import { unwrapList, normalizeDictOptions, formatDate } from "@/utils";
+import { InfoItem, SectionTitle } from "@/components/ui/InfoItem";
 
 interface Props {
   id: string;
@@ -70,12 +71,9 @@ export const PickupDetailModal = ({
   useEffect(() => {
     getDictByCode("pickup_order_type")
       .then((res: any) => {
-        const list = res?.entity?.data ?? res?.entity ?? [];
+        const list = unwrapList(res);
         setTypeOptions(
-          (Array.isArray(list) ? list : []).map((d: any) => ({
-            label: d.dictLabel ?? d.label ?? d.dictValue,
-            value: d.dictValue ?? d.value,
-          })),
+          normalizeDictOptions(list),
         );
       })
       .catch(() => setTypeOptions([]));
@@ -178,105 +176,56 @@ export const PickupDetailModal = ({
 
       {/* 提箱令信息 9 项栅格 */}
       <div className="grid grid-cols-3 gap-y-2.5 gap-x-4 text-sm bg-white">
-        <div className="col-span-3 text-xs font-bold text-[#198348] pb-1 border-b border-dashed border-gray-200 mb-1">
-          提箱令信息
-        </div>
+        <SectionTitle className="col-span-3">提箱令信息</SectionTitle>
 
-        <div>
-          <div className="text-xs text-gray-400">提箱令编号</div>
-          <div className="font-medium text-[#198348]">{r.orderNo || "-"}</div>
-        </div>
-        <div>
-          <div className="text-xs text-gray-400">类型</div>
-          <div className="font-medium">
-            {(typeOptions.find((o) => o.value === (r.orderType as string))?.label) ||
-              r.orderType ||
-              "-"}
-          </div>
-        </div>
-        <div>
-          <div className="text-xs text-gray-400">箱数</div>
-          <div className="font-medium">{boxes.length || "-"}</div>
-        </div>
-        <div>
-          <div className="text-xs text-gray-400">提箱方式</div>
-          <div className="font-medium">
-            {r.pickupMethod === "designated"
+        <InfoItem
+          label="提箱令编号"
+          value={r.orderNo}
+          valueClassName="text-[#198348] font-medium"
+        />
+        <InfoItem
+          label="类型"
+          value={
+            (typeOptions.find((o) => o.value === (r.orderType as string))?.label) ||
+            r.orderType
+          }
+        />
+        <InfoItem label="箱数" value={boxes.length} />
+        <InfoItem
+          label="提箱方式"
+          value={
+            r.pickupMethod === "designated"
               ? "指定箱号"
               : r.pickupMethod === "undesignated"
                 ? "不指定箱号"
-                : "-"}
-          </div>
-        </div>
-
-        <div>
-          <div className="text-xs text-gray-400">箱型</div>
-          <div className="font-medium">{r.containerType || "-"}</div>
-        </div>
-
-        <div>
-          <div className="text-xs text-gray-400">提箱数量</div>
-          <div className="font-medium">
-            {r.quantity != null ? r.quantity : "-"}
-          </div>
-        </div>
-
-        <div>
-          <div className="text-xs text-gray-400">提箱城市</div>
-          <div className="font-medium">{r.city || "-"}</div>
-        </div>
-
-        <div>
-          <div className="text-xs text-gray-400">提箱堆场</div>
-          <div className="font-medium">
-            {r.yardName && r.yardName !== "-" ? (
-              r.yardName
-            ) : r.yardId ? (
-              <span className="text-xs text-gray-500">堆场ID: {r.yardId}</span>
-            ) : (
-              <span className="px-2 py-0.5 rounded bg-gray-100 text-gray-500 text-xs">
-                未指定
-              </span>
-            )}
-          </div>
-        </div>
-        <div>
-          <div className="text-xs text-gray-400">指令期限-起</div>
-          <div className="font-medium">
-            {r.deadlineStart && dayjs(r.deadlineStart).isValid()
-              ? dayjs(r.deadlineStart).format("YYYY-MM-DD")
-              : "-"}
-          </div>
-        </div>
-        <div>
-          <div className="text-xs text-gray-400">指令期限-止</div>
-          <div className="font-medium">
-            {r.deadlineEnd && dayjs(r.deadlineEnd).isValid()
-              ? dayjs(r.deadlineEnd).format("YYYY-MM-DD")
-              : "-"}
-          </div>
-        </div>
-
-        <div>
-          <div className="text-xs text-gray-400">生成时间</div>
-          <div className="font-medium text-xs">
-            {r.createTime && dayjs(r.createTime).isValid()
-              ? dayjs(r.createTime).format("YYYY-MM-DD")
-              : "-"}
-          </div>
-        </div>
-        <div>
-          <div className="text-xs text-gray-400">状态</div>
-          <div className="font-medium">
-            <StatusBadge status={(r.status as string) || ""} />
-          </div>
-        </div>
-
+                : undefined
+          }
+        />
+        <InfoItem label="箱型" value={r.containerType} />
+        <InfoItem
+          label="提箱数量"
+          value={r.quantity != null ? r.quantity : undefined}
+        />
+        <InfoItem label="提箱城市" value={r.city} />
+        <InfoItem
+          label="提箱堆场"
+          value={
+            r.yardName && r.yardName !== "-"
+              ? r.yardName
+              : r.yardId
+                ? `堆场ID: ${r.yardId}`
+                : "未指定"
+          }
+        />
+        <InfoItem label="指令期限-起" value={formatDate(r.deadlineStart)} />
+        <InfoItem label="指令期限-止" value={formatDate(r.deadlineEnd)} />
+        <InfoItem label="生成时间" value={formatDate(r.createTime)} valueClassName="text-xs font-medium" />
+        <InfoItem
+          label="状态"
+          value={<StatusBadge status={(r.status as string) || ""} />}
+        />
         {r.remark && (
-          <div className="col-span-3">
-            <div className="text-xs text-gray-400">备注</div>
-            <div className="text-xs">{r.remark}</div>
-          </div>
+          <InfoItem label="备注" value={r.remark} colSpan="col-span-3" valueClassName="text-xs" />
         )}
       </div>
 
@@ -311,9 +260,7 @@ export const PickupDetailModal = ({
                       {b.containerNo || "-"}
                     </td>
                     <td className="py-2 px-2">
-                      {b.pickupTime && dayjs(b.pickupTime).isValid()
-                        ? dayjs(b.pickupTime).format("YYYY-MM-DD")
-                        : b.pickupTime || "-"}
+                      {formatDate(b.pickupTime, b.pickupTime || "-")}
                     </td>
                     <td className="py-2 px-2 text-gray-600">
                       {b.specialDescr || "-"}

@@ -1,21 +1,12 @@
-import { useEffect, useRef, useState } from "react";
-import {
-  Modal,
-  Form,
-  Input,
-  Select,
-  InputNumber,
-  Space,
-  Button,
-  message,
-  DatePicker,
-} from "antd";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { Modal, Form, Input, Select, Button, message, DatePicker } from "antd";
 import dayjs from "dayjs";
 
 import { ContainerForm } from "@/types";
 import { getDictOptions, getDictOptionsSync } from "@/restApi/dictCache";
 import { getDictByCode } from "@/restApi/dict";
 import type { DictOption } from "@/types/dict";
+import { unwrapEntity, unwrapList, normalizeDictOptions } from "@/utils";
 import {
   getContainerDetail,
   addContainer,
@@ -24,7 +15,6 @@ import {
 
 import { getSuppliersList } from "@/restApi/supplyer";
 import { getYardList } from "@/restApi/yard";
-import { getCustomersList } from "@/restApi/customer";
 import { getAllProjectList } from "@/restApi/project";
 import { getPickupOrderList } from "@/restApi/pickupOrder";
 
@@ -34,18 +24,46 @@ interface Props {
   onClose: () => void;
 }
 
+type Option = { label: string; value: string };
+
+/** 需要 dayjs 转换的日期字段 */
+const DATE_FIELDS = ["liftingTime", "expectReturnTime"] as const;
+
+/** 下拉搜索：按 label 模糊匹配 */
+const filterByLabel = (input: string, option?: { label?: ReactNode }) =>
+  String(option?.label ?? "")
+    .toLowerCase()
+    .includes(input.toLowerCase());
+
+/**
+ * 归一化日期字段：
+ * - mode="dayjs"：转成 dayjs 对象（表单回填用）
+ * - mode="string"：转成 "YYYY-MM-DD" 字符串（提交用）
+ * 空值 / "0000-00-00" / 非法日期一律删除该字段
+ */
+const normalizeDates = (
+  vals: Record<string, any>,
+  mode: "dayjs" | "string",
+) => {
+  DATE_FIELDS.forEach((f) => {
+    const raw = vals[f];
+    if (!raw || raw === "0000-00-00") {
+      delete vals[f];
+      return;
+    }
+    const d = dayjs.isDayjs(raw) ? raw : dayjs(raw);
+    if (d.isValid()) vals[f] = mode === "dayjs" ? d : d.format("YYYY-MM-DD");
+    else delete vals[f];
+  });
+};
+
 export const ContainerModal = ({ id, onSave, onClose }: Props) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-  const [suppliers, setSuppliers] = useState<
-    { label: string; value: string }[]
-  >([]);
-  const [yards, setYards] = useState<{ label: string; value: string }[]>([]);
+  const [suppliers, setSuppliers] = useState<Option[]>([]);
+  const [yards, setYards] = useState<Option[]>([]);
   const [projects, setProjects] = useState<any[]>([]);
-  const [pickupOrders, setPickupOrders] = useState<
-    { label: string; value: string }[]
-  >([]);
-  const [projectLoading, setProjectLoading] = useState(false);
+  const [pickupOrders, setPickupOrders] = useState<Option[]>([]);
   const [selectProject, setSelectProject] = useState<
     { id: string; name: string; num: string } | undefined
   >();
@@ -61,52 +79,45 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
   const [condOptions, setCondOptions] = useState<DictOption[]>(
     getDictOptionsSync("container_cond"),
   );
-  const [saleStatusOptions, setSaleStatusOptions] = useState<
-    { label: string; value: string }[]
-  >([]);
+  const [saleStatusOptions, setSaleStatusOptions] = useState<Option[]>([]);
 
   // 加载下拉选项
   useEffect(() => {
     getSuppliersList(1, 1000).then((r: any) => {
-      const supList = r.entity?.data ?? [];
-      setSuppliers(supList.map((s: any) => ({ label: s.name, value: s.id })));
+      setSuppliers(
+        unwrapList(r).map((s: any) => ({
+          label: s.name,
+          value: s.id,
+        })),
+      );
     });
     getYardList({ pageNo: 1, pageSize: 1000 }).then((r: any) => {
       setYards(
-        (r?.entity?.data ?? []).map((y: any) => ({
+        unwrapList(r).map((y: any) => ({
           label: y.name ?? y.yardName,
           value: y.id,
         })),
       );
     });
     getPickupOrderList({ pageNo: 1, pageSize: 1000 }).then((r: any) => {
-      const list = r?.entity?.data ?? [];
       setPickupOrders(
-        (Array.isArray(list) ? list : []).map((o: any) => ({
-          label: o.orderNo || o.id,
-          value: o.orderNo || o.id,
-        })),
+        unwrapList(r).map((o: any) => {
+          const v = o.orderNo || o.id;
+          return { label: v, value: v };
+        }),
       );
     });
 
     getDictByCode("container_sale_status")
       .then((res: any) => {
-        const list = res?.entity?.data ?? res?.entity ?? [];
-        setSaleStatusOptions(
-          (Array.isArray(list) ? list : []).map((d: any) => ({
-            label: d.dictLabel ?? d.label ?? d.dictValue,
-            value: d.dictValue ?? d.value,
-          })),
-        );
+        setSaleStatusOptions(normalizeDictOptions(unwrapList(res)));
       })
       .catch(() => setSaleStatusOptions([]));
-    setProjectLoading(true);
+
     getAllProjectList()
-      .then((r: any) => {
-        const list = r?.entity?.data ?? [];
-        setProjects(list);
-      })
-      .finally(() => setProjectLoading(false));
+      .then((r: any) => setProjects(unwrapList(r)))
+      .catch(() => setProjects([]));
+
     // 字典加载（状态/箱型/使用情况/箱况）
     Promise.all([
       getDictOptions("container_status"),
@@ -131,22 +142,22 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
     if (requestedIdRef.current === id) return;
     requestedIdRef.current = id;
     getContainerDetail(id).then((r: any) => {
-      const d = r?.entity?.data ?? r?.entity ?? r;
+      const d = unwrapEntity(r);
       if (!d) return;
       const vals: any = { ...d };
-      // 供应商/买方/提箱堆场 id 反查
-      if (!vals.supplierId && vals.supplierName) {
-        const o = suppliers.find((x) => x.label === vals.supplierName);
-        if (o) vals.supplierId = o.value;
-      }
-      if (!vals.liftingYardId && vals.liftingYardName) {
-        const o = yards.find((x) => x.label === vals.liftingYardName);
-        if (o) vals.liftingYardId = o.value;
-      }
-      if (!vals.dropYardId && vals.dropYardName) {
-        const o = yards.find((x) => x.label === vals.dropYardName);
-        if (o) vals.dropYardId = o.value;
-      }
+      // 供应商/提箱堆场/当前堆场 id 反查（缺少 id 时按名称匹配）
+      const backfillId = (
+        idKey: string,
+        nameKey: string,
+        options: Option[],
+      ) => {
+        if (vals[idKey] || !vals[nameKey]) return;
+        const o = options.find((x) => x.label === vals[nameKey]);
+        if (o) vals[idKey] = o.value;
+      };
+      backfillId("supplierId", "supplierName", suppliers);
+      backfillId("liftingYardId", "liftingYardName", yards);
+      backfillId("dropYardId", "dropYardName", yards);
       // 项目：根据 projectName 找到 selectProject，把 id 写到 projectNum（Select value）
       if (vals.projectName) {
         const proj = projects.find((p) => p.name === vals.projectName);
@@ -155,27 +166,11 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
           setSelectProject(proj);
         }
       }
-      // 日期 dayjs 化（处理 "0000-00-00"）
-      ["liftingTime", "expectReturnTime"].forEach((f) => {
-        const raw = vals[f];
-        if (!raw || raw === "0000-00-00") {
-          delete vals[f];
-          return;
-        }
-        const dd = dayjs(raw);
-        if (dd.isValid()) vals[f] = dd;
-        else delete vals[f];
-      });
+      normalizeDates(vals, "dayjs");
       form.setFieldsValue(vals);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, projects, suppliers, yards]);
-
-  // 项目编号变化：回填项目名称到 selectProject
-  const handleProjectChanged = (param: any) => {
-    const proj = projects.find((p) => p.id === param);
-    setSelectProject(proj);
-  };
 
   const handleOk = async () => {
     let values: any;
@@ -197,31 +192,20 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
       return;
     }
     try {
-      // 日期字段：v 可能是 dayjs 对象（liftingTime）或字符串（expectReturnTime 已 normalize）
-      // 用 dayjs(v).format() 同时兼容两种形态
-      (["liftingTime", "expectReturnTime"] as const).forEach((f) => {
-        const v = (values as any)[f];
-        if (!v) {
-          delete (values as any)[f];
-          return;
-        }
-        const d = dayjs.isDayjs(v) ? v : dayjs(v);
-        if (d.isValid()) (values as any)[f] = d.format("YYYY-MM-DD");
-        else delete (values as any)[f];
-      });
-      // 供应商名称
-      const sup = suppliers.find((x) => x.value === values.supplierId);
-      if (sup) values.supplierName = sup.label;
-      // 提箱堆场名称（id → name）
-      const yard = yards.find((x) => x.value === values.liftingYardId);
-      if (yard) values.liftingYardName = yard.label;
-      // 当前堆场名称（dropYardId → dropYardName，与 id 一并传后端）
-      const dropYard = yards.find((x) => x.value === values.dropYardId);
-      if (dropYard) values.dropYardName = dropYard.label;
+      normalizeDates(values, "string");
+      // id → name 回填（后端需要名称快照）
+      const withName = (idKey: string, nameKey: string, options: Option[]) => {
+        const o = options.find((x) => x.value === values[idKey]);
+        if (o) values[nameKey] = o.label;
+      };
+      withName("supplierId", "supplierName", suppliers);
+      withName("liftingYardId", "liftingYardName", yards);
+      withName("dropYardId", "dropYardName", yards);
       // 项目：values.projectNum 是真实 id；selectProject 持有完整对象
       values.projectId = values.projectNum || "";
       values.projectName = selectProject?.name || "";
       delete values.projectNum;
+
       const payload: any = { ...values };
       if (id) {
         await editContainer({ ...payload, id } as ContainerForm & {
@@ -311,11 +295,7 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
               showSearch
               placeholder="请选择"
               options={suppliers}
-              filterOption={(i, o) =>
-                ((o?.label as string) || "")
-                  .toLowerCase()
-                  .includes(i.toLowerCase())
-              }
+              filterOption={filterByLabel}
             />
           </Form.Item>
         </div>
@@ -334,11 +314,7 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
               showSearch
               placeholder="请选择"
               options={yards}
-              filterOption={(i, o) =>
-                ((o?.label as string) || "")
-                  .toLowerCase()
-                  .includes(i.toLowerCase())
-              }
+              filterOption={filterByLabel}
             />
           </Form.Item>
           <Form.Item
@@ -357,11 +333,7 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
               showSearch
               placeholder="选择提箱令"
               options={pickupOrders}
-              filterOption={(i, o) =>
-                ((o?.label as string) || "")
-                  .toLowerCase()
-                  .includes(i.toLowerCase())
-              }
+              filterOption={filterByLabel}
             />
           </Form.Item>
         </div>
@@ -386,11 +358,7 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
               showSearch
               placeholder="请选择"
               options={saleStatusOptions}
-              filterOption={(i, o) =>
-                ((o?.label as string) || "")
-                  .toLowerCase()
-                  .includes(i.toLowerCase())
-              }
+              filterOption={filterByLabel}
             />
           </Form.Item>
         </div>
@@ -405,11 +373,7 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
               showSearch
               placeholder="选择当前堆场"
               options={yards}
-              filterOption={(i, o) =>
-                ((o?.label as string) || "")
-                  .toLowerCase()
-                  .includes(i.toLowerCase())
-              }
+              filterOption={filterByLabel}
             />
           </Form.Item>
         </div>
@@ -419,7 +383,7 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
           label={<span className="text-xs">状态备注</span>}
           className="mt-2"
         >
-          <Input.TextArea rows={2} placeholder="如：Vladivostok 港口中转" />
+          <Input.TextArea rows={2} />
         </Form.Item>
 
         <div className="flex justify-end gap-2 mt-4">

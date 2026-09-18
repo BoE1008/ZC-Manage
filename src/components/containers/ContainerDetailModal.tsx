@@ -1,13 +1,21 @@
-import { useState, useEffect } from "react";
-import dayjs from "dayjs";
+import { useState, useEffect, type ReactNode } from "react";
 import { Modal, Tabs, Button, Space, Spin, Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { Container, ContainerStatus, LifecycleNode } from "@/types";
-import { StatusBadge, UsageTag, CondTag } from "@/components/ui/Badge";
+import {
+  Container,
+  ContainerStatus,
+  LifecycleNode,
+  PickupOrder,
+} from "@/types";
+import {
+  StatusBadge,
+  UsageTag,
+  CondTag,
+  SaleStatusTag,
+} from "@/components/ui/Badge";
+import { InfoItem, SectionTitle } from "@/components/ui/InfoItem";
 import { getContainerDetail } from "@/restApi/container";
-import CostIncomeDetail, { DetailFormModal } from "./CostIncomeDetail";
-
-import { PickupOrder } from "@/types";
+import CostIncomeDetail from "./CostIncomeDetail";
 
 interface Props {
   id: string;
@@ -15,6 +23,8 @@ interface Props {
   onEdit?: () => void;
   initialTab?: string;
 }
+
+/** 分区标题 */
 
 export const ContainerDetailModal = ({
   id,
@@ -27,12 +37,6 @@ export const ContainerDetailModal = ({
   const [releases, setReleases] = useState<PickupOrder[]>([]);
   const [lifecycle, setLifecycle] = useState<LifecycleNode[]>([]);
   const [tab, setTab] = useState(initialTab ?? "info");
-  const [costIncomeSubTab, setCostIncomeSubTab] = useState<"cost" | "income">(
-    "cost",
-  );
-  const [addCostOpen, setAddCostOpen] = useState(false);
-  const [addIncomeOpen, setAddIncomeOpen] = useState(false);
-  const [costIncomeKey, setCostIncomeKey] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -93,6 +97,26 @@ export const ContainerDetailModal = ({
     },
   ];
 
+  const shipmentColumns: ColumnsType<any> = [
+    { title: "项目", dataIndex: "projectName" },
+    {
+      title: "发运→目的",
+      render: (_, r: any) =>
+        `${r.departureStation || "-"} → ${r.arrivalStation || "-"}`,
+    },
+    { title: "ATD", dataIndex: "sendTime", render: (v) => v || "-" },
+    { title: "ETA", dataIndex: "eta", render: (v) => v || "-" },
+    { title: "ATA", dataIndex: "ata", render: (v) => v || "-" },
+    {
+      title: "状态",
+      dataIndex: "status",
+      render: (v) => <StatusBadge status={v} />,
+    },
+    { title: "备注", dataIndex: "remark", render: (v) => v || "-" },
+  ];
+
+  const saleStatus = (container as any).saleStatus;
+
   return (
     <Modal
       title={`集装箱详情 - ${container.containerNo}`}
@@ -120,111 +144,33 @@ export const ContainerDetailModal = ({
 
       {tab === "info" && (
         <div className="grid grid-cols-2 gap-y-3 gap-x-5 text-sm">
-          <div className="col-span-2 text-xs font-bold text-[#198348] pb-1 border-b border-dashed border-gray-200 -mt-2">
-            基础信息
-          </div>
-          <div>
-            <span className="text-xs text-gray-400 block">箱号</span>
-            <span className="font-medium">{container.containerNo || "-"}</span>
-          </div>
-          <div>
-            <span className="text-xs text-gray-400 block">箱型</span>
-            <span className="font-medium">
-              {container.containerType || "-"}
-            </span>
-          </div>
-          <div>
-            <span className="text-xs text-gray-400 block">使用情况</span>
-            <UsageTag usage={container.usageType} />
-          </div>
-          <div>
-            <span className="text-xs text-gray-400 block">箱况</span>
-            <CondTag cond={container.conditionType} />
-          </div>
-          <div>
-            <span className="text-xs text-gray-400 block">卖方/出租方</span>
-            <span className="font-medium">{container.supplierName || "-"}</span>
-          </div>
-          <div>
-            <span className="text-xs text-gray-400 block">成本 (USD)</span>
-            <span className="font-medium">
-              {container.cost != null ? `$${container.cost}` : "-"}
-            </span>
-          </div>
-          <div>
-            <span className="text-xs text-gray-400 block">收入 (USD)</span>
-            <span className="font-medium">
-              {container.income != null ? `$${container.income}` : "-"}
-            </span>
-          </div>
+          <SectionTitle className="col-span-2 pb-1 -mt-2">基础信息</SectionTitle>
+          <InfoItem label="箱号" value={container.containerNo || "-"} />
+          <InfoItem label="箱型" value={container.containerType || "-"} />
+          <InfoItem label="使用情况" value={ <UsageTag usage={container.usageType} /> } />
+          <InfoItem label="箱况" value={ <CondTag cond={container.conditionType} /> } />
+          <InfoItem label="卖方/出租方" value={container.supplierName || "-"} />
+          <InfoItem label="成本 (USD)" value={container.cost != null ? `$${container.cost}` : "-"} />
+          <InfoItem label="收入 (USD)" value={container.income != null ? `$${container.income}` : "-"} />
 
-          <div className="col-span-2 text-~xs font-bold text-[#198348] py-1 border-b border-dashed border-gray-200">
-            提箱信息
-          </div>
-          <div>
-            <span className="text-xs text-gray-400 block">提箱堆场</span>
-            <span className="font-medium">
-              {container.liftingYardName || "-"}
-            </span>
-          </div>
-          <div>
-            <span className="text-xs text-gray-400 block">提箱时间</span>
-            <span className="font-medium">{container.liftingTime || "-"}</span>
-          </div>
-          <div>
-            <span className="text-xs text-gray-400 block">提箱令</span>
-            <span className="font-medium">
-              {container.liftingOrderNo || "-"}
-            </span>
-          </div>
+          <SectionTitle className="col-span-2 py-1">提箱信息</SectionTitle>
+          <InfoItem label="提箱堆场" value={container.liftingYardName || "-"} />
+          <InfoItem label="提箱时间" value={container.liftingTime || "-"} />
+          <InfoItem label="提箱令" value={container.liftingOrderNo || "-"} />
 
-          <div className="col-span-2 text-xs font-bold text-[#198348] py-1 border-b border-dashed border-gray-200">
-            当前状态
-          </div>
-          <div>
-            <span className="text-xs text-gray-400 block">状态</span>
-            <StatusBadge status={container.status} />
-          </div>
-          <div>
-            <span className="text-xs text-gray-400 block">当前售卖状态</span>
-            <span className="font-medium">
-              {(container as any).saleStatus === "sold_delivered" ? (
-                <span className="px-2 py-0.5 rounded text-xs bg-green-100 text-green-700">
-                  卖出已交付
-                </span>
-              ) : (container as any).saleStatus === "sold_pending" ? (
-                <span className="px-2 py-0.5 rounded text-xs bg-amber-100 text-amber-700">
-                  卖出未交付
-                </span>
-              ) : (container as any).saleStatus === "unsold" ? (
-                <span className="px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-600">
-                  未卖出
-                </span>
-              ) : (
-                <span className="px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-600">
-                  -
-                </span>
-              )}
-            </span>
-          </div>
-          <div>
-            <span className="text-xs text-gray-400 block">状态备注</span>
-            <span className="font-medium">{container.statusRemark || "-"}</span>
-          </div>
+          <SectionTitle className="col-span-2 py-1">当前状态</SectionTitle>
+          <InfoItem label="状态" value={ <StatusBadge status={container.status} /> } />
+          <InfoItem label="当前售卖状态" value={ <SaleStatusTag saleStatus={saleStatus} /> } />
+          <InfoItem label="状态备注" value={container.statusRemark || "-"} />
 
           {/* 还箱信息 */}
           {(container.dropYardName ||
             container.expectReturnTime ||
             container.expectReturnLocation ||
             container.returnCity) && (
-            <div className="col-span-2 text-xs font-bold text-[#198348] py-1 border-b border-dashed border-gray-200">
-              还箱信息
-            </div>
+            <SectionTitle className="col-span-2 py-1">还箱信息</SectionTitle>
           )}
-          <div>
-            <span className="text-xs text-gray-400 block">当前堆场</span>
-            <span className="font-medium">{container.dropYardName || "-"}</span>
-          </div>
+          <InfoItem label="当前堆场" value={container.dropYardName || "-"} />
 
           {(container.sendTime ||
             container.eta ||
@@ -232,37 +178,12 @@ export const ContainerDetailModal = ({
             container.storageCost != null ||
             container.storageIncome != null) && (
             <>
-              <div className="col-span-2 text-xs font-bold text-[#198348] py-1 border-b border-dashed border-gray-200">
-                运输 &amp; 费用
-              </div>
-              <div>
-                <span className="text-xs text-gray-400 block">发运时间</span>
-                <span className="font-medium">{container.sendTime || "-"}</span>
-              </div>
-              <div>
-                <span className="text-xs text-gray-400 block">预计到达</span>
-                <span className="font-medium">{container.eta || "-"}</span>
-              </div>
-              <div>
-                <span className="text-xs text-gray-400 block">实际到达</span>
-                <span className="font-medium">{container.ata || "-"}</span>
-              </div>
-              <div>
-                <span className="text-xs text-gray-400 block">堆存成本</span>
-                <span className="font-medium">
-                  {container.storageCost != null
-                    ? `$${container.storageCost}`
-                    : "-"}
-                </span>
-              </div>
-              <div>
-                <span className="text-xs text-gray-400 block">堆存收入</span>
-                <span className="font-medium">
-                  {container.storageIncome != null
-                    ? `$${container.storageIncome}`
-                    : "-"}
-                </span>
-              </div>
+              <SectionTitle className="col-span-2 py-1">运输 &amp; 费用</SectionTitle>
+              <InfoItem label="发运时间" value={container.sendTime || "-"} />
+              <InfoItem label="预计到达" value={container.eta || "-"} />
+              <InfoItem label="实际到达" value={container.ata || "-"} />
+              <InfoItem label="堆存成本" value={container.storageCost != null ? `$${container.storageCost}` : "-"} />
+              <InfoItem label="堆存收入" value={container.storageIncome != null ? `$${container.storageIncome}` : "-"} />
             </>
           )}
         </div>
@@ -300,26 +221,7 @@ export const ContainerDetailModal = ({
           rowKey="id"
           pagination={false}
           dataSource={shipments}
-          columns={[
-            {
-              title: "项目",
-              dataIndex: "projectName",
-            },
-            {
-              title: "发运→目的",
-              render: (_, r: any) =>
-                `${r.departureStation || "-"} → ${r.arrivalStation || "-"}`,
-            },
-            { title: "ATD", dataIndex: "sendTime", render: (v) => v || "-" },
-            { title: "ETA", dataIndex: "eta", render: (v) => v || "-" },
-            { title: "ATA", dataIndex: "ata", render: (v) => v || "-" },
-            {
-              title: "状态",
-              dataIndex: "status",
-              render: (v) => <StatusBadge status={v} />,
-            },
-            { title: "备注", dataIndex: "remark", render: (v) => v || "-" },
-          ]}
+          columns={shipmentColumns}
           locale={{ emptyText: "暂无运踪记录" }}
         />
       )}
@@ -342,43 +244,11 @@ export const ContainerDetailModal = ({
           )}
         </div>
       )}
-      {tab === "costIncome" && container && (
+
+      {tab === "costIncome" && (
         <CostIncomeDetail
           containerId={container.id ?? id}
           containerNo={container.containerNo ?? ""}
-        />
-      )}
-
-      {/* 新增成本明细弹框 */}
-      {addCostOpen && container && (
-        <DetailFormModal
-          type="cost"
-          id={null}
-          containerId={container.id ?? id ?? ""}
-          containerNo={container.containerNo ?? ""}
-          onClose={() => setAddCostOpen(false)}
-          onSaved={() => {
-            setAddCostOpen(false);
-            setCostIncomeSubTab("cost");
-            setCostIncomeKey((k) => k + 1);
-            setTab("costIncome");
-          }}
-        />
-      )}
-      {/* 新增收入明细弹框 */}
-      {addIncomeOpen && container && (
-        <DetailFormModal
-          type="income"
-          id={null}
-          containerId={container.id ?? id ?? ""}
-          containerNo={container.containerNo ?? ""}
-          onClose={() => setAddIncomeOpen(false)}
-          onSaved={() => {
-            setAddIncomeOpen(false);
-            setCostIncomeSubTab("income");
-            setCostIncomeKey((k) => k + 1);
-            setTab("costIncome");
-          }}
         />
       )}
     </Modal>

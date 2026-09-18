@@ -21,6 +21,7 @@ import { getSuppliersList } from "@/restApi/supplyer";
 import { getAllProjectList } from "@/restApi/project";
 import { getDictOptions, getDictOptionsSync } from "@/restApi/dictCache";
 import type { DictOption } from "@/types/dict";
+import { SALE_STATUS_OPTIONS } from "@/types/dict";
 import { getContainerList } from "@/restApi/container";
 import { getYardList } from "@/restApi/yard";
 import { getPickupOrderList } from "@/restApi/pickupOrder";
@@ -327,19 +328,19 @@ export const ShipmentModal = ({ id, onSave, onClose }: Props) => {
               name="port"
               label={<span className="text-xs">口岸</span>}
             >
-              <Input placeholder="如：海参崴" />
+              <Input placeholder="" />
             </Form.Item>
             <Form.Item
               name="departureStation"
               label={<span className="text-xs">发运站</span>}
             >
-              <Input placeholder="如：宁波" />
+              <Input placeholder="" />
             </Form.Item>
             <Form.Item
               name="arrivalStation"
               label={<span className="text-xs">目的站</span>}
             >
-              <Input placeholder="如：若季诺" />
+              <Input placeholder="" />
             </Form.Item>
             <Form.Item
               name="liftingTime"
@@ -401,7 +402,7 @@ export const ShipmentModal = ({ id, onSave, onClose }: Props) => {
               name="statusRemark"
               label={<span className="text-xs">状态备注</span>}
             >
-              <Input placeholder="如：MYC堆场" />
+              <Input placeholder="" />
             </Form.Item>
             <Form.Item
               name="returnTime"
@@ -454,15 +455,7 @@ export const ShipmentModal = ({ id, onSave, onClose }: Props) => {
               label={<span className="text-xs">售卖状态</span>}
               initialValue="unsold"
             >
-              <Select
-                allowClear
-                placeholder="默认未卖出"
-                options={[
-                  { label: "卖出已交付", value: "sold_delivered" },
-                  { label: "卖出未交付", value: "sold_pending" },
-                  { label: "未卖出", value: "unsold" },
-                ]}
-              />
+              <Select allowClear options={SALE_STATUS_OPTIONS} />
             </Form.Item>
             <Form.Item
               name="isEnd"
@@ -471,7 +464,6 @@ export const ShipmentModal = ({ id, onSave, onClose }: Props) => {
             >
               <Select
                 allowClear
-                placeholder="默认否"
                 options={[
                   { label: "否", value: "0" },
                   { label: "是", value: "1" },

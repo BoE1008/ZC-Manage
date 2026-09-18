@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, type ReactNode } from "react";
 import { useRouter } from "next/router";
 import { Button, Tooltip, Select, Space, Modal, message } from "antd";
 import {
@@ -12,7 +12,12 @@ import {
 import Table from "@/components/ResizeTable";
 import type { ColumnsType } from "antd/es/table";
 import { Container } from "@/types";
-import { StatusBadge, UsageTag, CondTag } from "@/components/ui/Badge";
+import {
+  StatusBadge,
+  UsageTag,
+  CondTag,
+  SaleStatusTag,
+} from "@/components/ui/Badge";
 import { ContainerModal } from "./ContainerModal";
 import { ContainerDetailModal } from "./ContainerDetailModal";
 import { DetailFormModal } from "./CostIncomeDetail";
@@ -23,12 +28,37 @@ import {
 } from "@/restApi/container";
 import { getDictOptions, getDictOptionsSync } from "@/restApi/dictCache";
 import type { DictOption } from "@/types/dict";
+import { SALE_STATUS_OPTIONS } from "@/types/dict";
 import SearchInput from "../SearchInput";
 import ImportButton from "../ImportButton";
 
+const PAGE_SIZE = 20;
+
+/** 操作列图标按钮：Tooltip + text Button 的统一封装 */
+const ActionButton = ({
+  title,
+  onClick,
+  children,
+}: {
+  title: string;
+  onClick: () => void;
+  children: ReactNode;
+}) => (
+  <Tooltip title={<span>{title}</span>}>
+    <Button
+      type="text"
+      size="small"
+      className="!px-1 !py-0.5 !text-xs"
+      onClick={onClick}
+      title={title}
+    >
+      {children}
+    </Button>
+  </Tooltip>
+);
+
 export const ContainerList = () => {
   const router = useRouter();
-  const pageSize = 20;
 
   // 分页
   const [page, setPage] = useState(1);
@@ -88,11 +118,13 @@ export const ContainerList = () => {
   // 加载数据（URL 是唯一数据源）
   const loadData = useCallback(
     (qs: Record<string, string | string[] | undefined>, p: number) => {
-      const s = typeof qs.status === "string" ? qs.status : "";
-      const u = typeof qs.usage === "string" ? qs.usage : "";
-      const c = typeof qs.cond === "string" ? qs.cond : "";
-      const k = typeof qs.q === "string" ? qs.q : "";
-      const sa = typeof qs.sale === "string" ? qs.sale : "";
+      const pick = (key: string) =>
+        typeof qs[key] === "string" ? (qs[key] as string) : "";
+      const s = pick("status");
+      const u = pick("usage");
+      const c = pick("cond");
+      const k = pick("q");
+      const sa = pick("sale");
       setStatusFilter(s);
       setUsageFilter(u);
       setCondFilter(c);
@@ -100,7 +132,7 @@ export const ContainerList = () => {
       setLoading(true);
       getContainerList({
         pageNo: p,
-        pageSize,
+        pageSize: PAGE_SIZE,
         status: s || undefined,
         usageType: u || undefined,
         conditionType: c || undefined,
@@ -117,33 +149,36 @@ export const ContainerList = () => {
     [],
   );
 
+  // 统一的 URL 写入入口，避免各处手写 shallow push
+  const pushQuery = useCallback(
+    (patch: Record<string, string | undefined>) => {
+      const q = { ...router.query } as Record<
+        string,
+        string | string[] | undefined
+      >;
+      Object.entries(patch).forEach(([key, value]) => {
+        if (value === undefined) delete q[key];
+        else q[key] = value;
+      });
+      router.push({ pathname: router.pathname, query: q }, undefined, {
+        shallow: true,
+      });
+    },
+    [router],
+  );
+
   // URL sync effect（唯一数据加载入口）
   useEffect(() => {
     if (!router.isReady) return;
-    const q = router.query;
-    setStatusFilter(typeof q.status === "string" ? q.status : "");
-    setUsageFilter(typeof q.usage === "string" ? q.usage : "");
-    setCondFilter(typeof q.cond === "string" ? q.cond : "");
-    const p = typeof q.page === "string" ? Number(q.page) : 1;
+    const p = typeof router.query.page === "string" ? Number(router.query.page) : 1;
     setPage(p);
+    // loadData 内部已同步各筛选项 state
     loadData(router.query, p);
   }, [router.isReady, router.query, loadData]);
 
   // 工具栏筛选 / 关键词回车 → 更新 URL
-  const updateUrl = (field: string, value: string) => {
-    const q = { ...router.query } as Record<
-      string,
-      string | string[] | undefined
-    >;
-    if (value) q[field] = value;
-    else delete q[field];
-    delete q.page;
-    router.push({ pathname: router.pathname, query: q }, undefined, {
-      shallow: true,
-    });
-  };
-  const handleFilterChange = (field: string) => (v: string) =>
-    updateUrl(field, v);
+  const handleFilterChange = (field: string) => (value: string) =>
+    pushQuery({ [field]: value || undefined, page: undefined });
 
   // 删除
   const handleDelete = (id: string) => {
@@ -172,6 +207,11 @@ export const ContainerList = () => {
     loadData(router.query, page);
   };
 
+  const openDetail = (id: string, tab?: string) => {
+    setViewInitialTab(tab);
+    setViewId(id);
+  };
+
   const columns: ColumnsType<Container> = [
     {
       title: "箱号",
@@ -181,7 +221,7 @@ export const ContainerList = () => {
         <Tooltip title={<span>查看集装箱信息</span>}>
           <a
             className="text-[#198348] hover:underline cursor-pointer"
-            onClick={() => setViewId(r.id)}
+            onClick={() => openDetail(r.id)}
           >
             {v}
           </a>
@@ -211,24 +251,7 @@ export const ContainerList = () => {
       dataIndex: "saleStatus",
       align: "center",
       width: 110,
-      render: (v) =>
-        v === "sold_delivered" ? (
-          <span className="px-2 py-0.5 rounded text-xs bg-green-100 text-green-700">
-            卖出已交付
-          </span>
-        ) : v === "sold_pending" ? (
-          <span className="px-2 py-0.5 rounded text-xs bg-amber-100 text-amber-700">
-            卖出未交付
-          </span>
-        ) : v === "unsold" ? (
-          <span className="px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-600">
-            未卖出
-          </span>
-        ) : (
-          <span className="px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-600">
-            -
-          </span>
-        ),
+      render: (v) => <SaleStatusTag saleStatus={v} />,
     },
     {
       title: "箱况",
@@ -280,101 +303,55 @@ export const ContainerList = () => {
       render: (_, r) => (
         <Space size={2} direction="vertical" className="items-center">
           <Space size={2}>
-            <Tooltip title={<span>查看集装箱信息</span>}>
-              <Button
-                type="text"
-                size="small"
-                className="!px-1 !py-0.5 !text-xs"
-                onClick={() => {
-                  setViewInitialTab(undefined);
-                  setViewId(r.id);
-                }}
-                title="查看"
-              >
-                👁
-              </Button>
-            </Tooltip>
-            <Tooltip title={<span>编辑</span>}>
-              <Button
-                type="text"
-                size="small"
-                className="!px-1 !py-0.5 !text-xs"
-                onClick={() => setEditId(r.id)}
-                title="编辑"
-              >
-                ✎
-              </Button>
-            </Tooltip>
-            <Tooltip title={<span>删除</span>}>
-              <Button
-                type="text"
-                size="small"
-                className="!px-1 !py-0.5 !text-xs"
-                onClick={() => handleDelete(r.id)}
-                title="删除"
-              >
-                🗑
-              </Button>
-            </Tooltip>
+            <ActionButton title="查看" onClick={() => openDetail(r.id)}>
+              👁
+            </ActionButton>
+            <ActionButton title="编辑" onClick={() => setEditId(r.id)}>
+              ✎
+            </ActionButton>
+            <ActionButton title="删除" onClick={() => handleDelete(r.id)}>
+              🗑
+            </ActionButton>
           </Space>
           <Space size={2}>
-            <Tooltip title={<span>新增成本明细</span>}>
-              <Button
-                type="text"
-                size="small"
-                className="!px-1 !py-0.5 !text-xs"
-                onClick={() =>
-                  setDetailForm({
-                    type: "cost",
-                    id: null,
-                    containerId: r.id,
-                    containerNo: r.containerNo ?? "",
-                  })
-                }
-                title="新增成本"
-              >
-                <span className="inline-flex items-center gap-0.5">
-                  <MinusCircleOutlined />
-                  <FallOutlined />
-                </span>
-              </Button>
-            </Tooltip>
-            <Tooltip title={<span>新增收入明细</span>}>
-              <Button
-                type="text"
-                size="small"
-                className="!px-1 !py-0.5 !text-xs"
-                onClick={() =>
-                  setDetailForm({
-                    type: "income",
-                    id: null,
-                    containerId: r.id,
-                    containerNo: r.containerNo ?? "",
-                  })
-                }
-                title="新增收入"
-              >
-                <span className="inline-flex items-center gap-0.5">
-                  <PlusCircleOutlined />
-                  <RiseOutlined />
-                </span>
-              </Button>
-            </Tooltip>
-
-            <Tooltip title={<span>查看成本/收入明细</span>}>
-              <Button
-                type="text"
-                size="small"
-                className="!px-1 !py-0.5 !text-xs"
-                onClick={() => {
-                  setViewInitialTab("costIncome");
-                  setViewId(r.id);
-                }}
-                title="查看明细"
-              >
-                <FileTextOutlined className="" />
-              </Button>
-            </Tooltip>
+            <ActionButton
+              title="新增成本明细"
+              onClick={() =>
+                setDetailForm({
+                  type: "cost",
+                  id: null,
+                  containerId: r.id,
+                  containerNo: r.containerNo ?? "",
+                })
+              }
+            >
+              <span className="inline-flex items-center gap-0.5">
+                <MinusCircleOutlined />
+                <FallOutlined />
+              </span>
+            </ActionButton>
+            <ActionButton
+              title="新增收入明细"
+              onClick={() =>
+                setDetailForm({
+                  type: "income",
+                  id: null,
+                  containerId: r.id,
+                  containerNo: r.containerNo ?? "",
+                })
+              }
+            >
+              <span className="inline-flex items-center gap-0.5">
+                <PlusCircleOutlined />
+                <RiseOutlined />
+              </span>
+            </ActionButton>
+            <ActionButton
+              title="查看成本/收入明细"
+              onClick={() => openDetail(r.id, "costIncome")}
+            >
+              <FileTextOutlined />
+            </ActionButton>
           </Space>
         </Space>
       ),
@@ -429,11 +406,7 @@ export const ContainerList = () => {
             onChange={handleFilterChange("sale")}
             className="w-32"
             size="small"
-            options={[
-              { label: "未卖出", value: "unsold" },
-              { label: "卖出未交付", value: "sold_pending" },
-              { label: "卖出已交付", value: "sold_delivered" },
-            ]}
+            options={SALE_STATUS_OPTIONS}
           />
           <Select
             placeholder="全部箱况"
@@ -446,17 +419,7 @@ export const ContainerList = () => {
           />
           <SearchInput
             placeholder="箱号"
-            onSearch={(v) => {
-              const q: Record<string, string | string[] | undefined> = {
-                ...router.query,
-              };
-              if (v) q.q = v;
-              else delete q.q;
-              delete q.page;
-              router.push({ pathname: router.pathname, query: q }, undefined, {
-                shallow: true,
-              });
-            }}
+            onSearch={(v) => pushQuery({ q: v || undefined, page: undefined })}
           />
         </div>
       </div>
@@ -469,31 +432,15 @@ export const ContainerList = () => {
         loading={loading}
         pagination={{
           current: page,
-          pageSize,
+          pageSize: PAGE_SIZE,
           total,
-          onChange: (p, ps) => {
-            const q = { ...router.query } as Record<
-              string,
-              string | string[] | undefined
-            >;
-            q.page = String(p);
-            if (ps !== 20) q.pageSize = String(ps);
-            else delete q.pageSize;
-            router.push({ pathname: router.pathname, query: q }, undefined, {
-              shallow: true,
-            });
-          },
-          onShowSizeChange: (_p, ps) => {
-            const q = { ...router.query } as Record<
-              string,
-              string | string[] | undefined
-            >;
-            q.page = "1";
-            q.pageSize = String(ps);
-            router.push({ pathname: router.pathname, query: q }, undefined, {
-              shallow: true,
-            });
-          },
+          onChange: (p, ps) =>
+            pushQuery({
+              page: String(p),
+              pageSize: ps !== PAGE_SIZE ? String(ps) : undefined,
+            }),
+          onShowSizeChange: (_p, ps) =>
+            pushQuery({ page: "1", pageSize: String(ps) }),
           showTotal: (t) => `共 ${t} 条`,
         }}
         scroll={{ x: 1700 }}
@@ -518,9 +465,10 @@ export const ContainerList = () => {
             setViewInitialTab(undefined);
           }}
           onEdit={() => {
+            const current = viewId;
             setViewId(null);
             setViewInitialTab(undefined);
-            setEditId(viewId);
+            setEditId(current);
           }}
         />
       )}

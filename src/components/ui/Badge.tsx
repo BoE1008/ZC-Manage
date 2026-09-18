@@ -11,6 +11,7 @@ import {
   ORDER_TYPE_MAP,
   SUPPLIER_TYPE_MAP,
   BUYER_TYPE_MAP,
+  SALE_STATUS_MAP,
 } from "@/types";
 import { cn } from "@/utils";
 
@@ -126,6 +127,21 @@ export const BuyerTypeBadge = ({ type }: { type: BuyerTypeValue }) => {
         "inline-block px-2 py-0.5 rounded-full text-xs font-medium",
         info.cls,
       )}
+    >
+      {info.label}
+    </span>
+  );
+};
+
+// 售卖状态（数据来源：types/dict.ts SALE_STATUS_MAP）
+export const SaleStatusTag = ({ saleStatus }: { saleStatus?: string }) => {
+  const info = SALE_STATUS_MAP[saleStatus ?? ""] ?? {
+    label: "-",
+    cls: "bg-gray-100 text-gray-600",
+  };
+  return (
+    <span
+      className={cn("inline-block px-2 py-0.5 rounded text-xs", info.cls)}
     >
       {info.label}
     </span>

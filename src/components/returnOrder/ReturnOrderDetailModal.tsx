@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from "react";
-import dayjs from "dayjs";
-import { Modal, Space, Button, Spin, Table, message } from "antd";
-import {
-  getReturnOrderDetail,
-  downloadReturnOrderDoc,
-} from "@/restApi/returnOrder";
+import { Modal, Spin, Button, Table, message } from "antd";
+import { getReturnOrderDetail, downloadReturnOrderDoc } from "@/restApi/returnOrder";
 import { getDictByCode } from "@/restApi/dict";
+import { unwrapList, unwrapEntity, normalizeDictOptions, formatDate } from "@/utils";
+import { InfoItem, SectionTitle } from "@/components/ui/InfoItem";
 
 interface Props {
   id: string;
   onClose: () => void;
-  onEdit: () => void;
-  onConfirm: () => void;
+  onEdit?: () => void;
+  onConfirm?: () => void;
 }
 
 const STATUS_MAP: Record<string, string> = {
@@ -19,32 +17,14 @@ const STATUS_MAP: Record<string, string> = {
   returned: "已还箱",
 };
 
-const ReturnOrderDetailModal: React.FC<Props> = ({
-  id,
-  onClose,
-  onEdit,
-  onConfirm,
-}) => {
-  const [r, setR] = useState<any>(null);
-  const [boxes, setBoxes] = useState<any[]>([]);
+const ReturnOrderDetailModal: React.FC<Props> = ({ id, onClose, onEdit, onConfirm }) => {
   const [loading, setLoading] = useState(true);
-  const [downloading, setDownloading] = useState(false);
-  const [typeOptions, setTypeOptions] = useState<
-    { label: string; value: string }[]
-  >([]);
+  const [r, setR] = useState<any>(null);
+  const [typeOptions, setTypeOptions] = useState<{ label: string; value: string }[]>([]);
 
-  // 加载还箱类型字典
   useEffect(() => {
     getDictByCode("return_order_type")
-      .then((res: any) => {
-        const list = res?.entity?.data ?? res?.entity ?? [];
-        setTypeOptions(
-          (Array.isArray(list) ? list : []).map((d: any) => ({
-            label: d.dictLabel ?? d.label ?? d.dictValue,
-            value: d.dictValue ?? d.value,
-          })),
-        );
-      })
+      .then((res) => setTypeOptions(normalizeDictOptions(unwrapList(res))))
       .catch(() => setTypeOptions([]));
   }, []);
 
@@ -52,27 +32,28 @@ const ReturnOrderDetailModal: React.FC<Props> = ({
     setLoading(true);
     getReturnOrderDetail(id)
       .then((res: any) => {
-        const entity = res?.entity ?? {};
-        setR(entity?.data ?? null);
-        setBoxes(Array.isArray(entity?.boxes) ? entity.boxes : []);
+        const entity = unwrapEntity(res);
+        setR(entity);
       })
       .finally(() => setLoading(false));
   }, [id]);
 
+  const typeLabel = (v?: string) =>
+    typeOptions.find((o) => o.value === v)?.label ?? v ?? "-";
+
   const handleDownload = async () => {
-    setDownloading(true);
     try {
-      const blob = (await downloadReturnOrderDoc(id)) as Blob;
+      const blob = await downloadReturnOrderDoc(id);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `还箱单-${r?.orderNo ?? id}.doc`;
+      a.download = `还箱单-${r?.orderNo || id}.doc`;
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
     } catch {
       message.error("下载失败");
-    } finally {
-      setDownloading(false);
     }
   };
 
@@ -85,8 +66,8 @@ const ReturnOrderDetailModal: React.FC<Props> = ({
         footer={null}
         width={640}
       >
-        <div className="flex justify-center py-8">
-          <Spin />
+        <div className="flex justify-center py-10">
+          <Spin size="large" />
         </div>
       </Modal>
     );
@@ -95,24 +76,28 @@ const ReturnOrderDetailModal: React.FC<Props> = ({
   if (!r) return null;
 
   const isPending = r.status === "pending";
+  const boxes = r.boxes ?? [];
   const boxCount = boxes.length;
 
-  const detailColumns: any[] = [
-    { title: "箱号", dataIndex: "containerNo", width: 150 },
+  const columns: any[] = [
+    {
+      title: "箱号",
+      dataIndex: "containerNo",
+      key: "containerNo",
+      render: (v: any) => <span className="font-mono">{v ?? "-"}</span>,
+    },
     {
       title: "还箱时间",
       dataIndex: "returnTime",
-      width: 120,
-      render: (v: string) =>
-        v && v !== "-" && dayjs(v).isValid()
-          ? dayjs(v).format("YYYY-MM-DD")
-          : "-",
+      key: "returnTime",
+      render: (v: any) => formatDate(v),
     },
     {
       title: "实际还箱堆场",
       dataIndex: "actualYardName",
-      render: (v: string) =>
-        v && v !== "-" ? (
+      key: "actualYardName",
+      render: (v: any) =>
+        v ? (
           <span className="text-[#198348] font-medium">{v}</span>
         ) : (
           <span className="text-gray-400">待确认</span>
@@ -122,19 +107,25 @@ const ReturnOrderDetailModal: React.FC<Props> = ({
 
   return (
     <Modal
-      title={`还箱令详情 - ${r.orderNo ?? ""}`}
+      title={
+        <span className="text-[#198348] font-bold">还箱令详情 - {r.orderNo}</span>
+      }
       open
       onCancel={onClose}
       width={640}
       destroyOnClose
-      footer={
-        <Space>
-          <Button onClick={onClose}>关闭</Button>
-          <Button onClick={handleDownload} loading={downloading}>
-            📄 下载 Word 还箱单
-          </Button>
+      footer={[
+        <Button key="close" onClick={onClose}>
+          关闭
+        </Button>,
+        <Button key="download" onClick={handleDownload}>
+          下载 Word 还箱单
+        </Button>,
+        onEdit ? (
           <Button
+            key="edit"
             type="primary"
+            style={{ background: "#198348", borderColor: "#198348" }}
             onClick={() => {
               onClose();
               onEdit();
@@ -142,126 +133,77 @@ const ReturnOrderDetailModal: React.FC<Props> = ({
           >
             编辑
           </Button>
-          {isPending && (
-            <Button
-              onClick={() => {
-                onClose();
-                onConfirm();
-              }}
-              style={{
-                background: "#8B5CF6",
-                borderColor: "#8B5CF6",
-                color: "#fff",
-              }}
-            >
-              确认还箱
-            </Button>
-          )}
-        </Space>
-      }
+        ) : null,
+        isPending && onConfirm ? (
+          <Button
+            key="confirm"
+            type="primary"
+            style={{ background: "#8B5CF6", borderColor: "#8B5CF6" }}
+            onClick={() => {
+              onClose();
+              onConfirm();
+            }}
+          >
+            确认还箱
+          </Button>
+        ) : null,
+      ]}
     >
-      <div className="space-y-3">
-        <div>
-          <div className="text-xs font-bold text-[#198348] pb-1 border-b border-dashed border-gray-200 mb-2">
-            还箱令信息
-          </div>
-          <div className="grid grid-cols-2 gap-y-2 text-sm">
-            <div>
-              <div className="text-xs text-gray-400">还箱令编号</div>
-              <div className="text-gray-800 font-medium">
-                {r.orderNo ?? "-"}
-              </div>
-            </div>
-            <div>
-              <div className="text-xs text-gray-400">类型</div>
-              <div>
-                <span
-                  className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
-                    r.orderType === "rent_return"
-                      ? "bg-purple-100 text-purple-700"
-                      : "bg-blue-100 text-blue-700"
-                  }`}
-                >
-                  {(typeOptions.find((o) => o.value === r.orderType)?.label) ||
-                    r.orderType ||
-                    "-"}
-                </span>
-              </div>
-            </div>
-            <div>
-              <div className="text-xs text-gray-400">还箱城市</div>
-              <div className="text-gray-800">{r.city || "-"}</div>
-            </div>
-            <div>
-              <div className="text-xs text-gray-400">还箱堆场</div>
-              <div className="text-gray-800">
-                {r.yardName ? (
-                  <span className="text-[#198348]">{r.yardName}</span>
-                ) : r.yardId ? (
-                  <span className="text-[#198348]">ID: {r.yardId}</span>
-                ) : (
-                  <span className="text-gray-400">未指定</span>
-                )}
-              </div>
-            </div>
-            <div>
-              <div className="text-xs text-gray-400">状态</div>
-              <div>
-                <span
-                  className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
-                    r.status === "pending"
-                      ? "bg-amber-100 text-amber-700"
-                      : r.status === "returned"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-gray-100 text-gray-600"
-                  }`}
-                >
-                  {STATUS_MAP[r.status] ?? r.status ?? "-"}
-                </span>
-              </div>
-            </div>
-            <div>
-              <div className="text-xs text-gray-400">实际还箱时间</div>
-              <div className="text-gray-800">
-                {r.returnTime &&
-                r.returnTime !== "-" &&
-                dayjs(r.returnTime).isValid()
-                  ? dayjs(r.returnTime).format("YYYY-MM-DD")
-                  : "-"}
-              </div>
-            </div>
-            <div>
-              <div className="text-xs text-gray-400">创建时间</div>
-              <div className="text-gray-800">
-                {r.createTime && dayjs(r.createTime).isValid()
-                  ? dayjs(r.createTime).format("YYYY-MM-DD")
-                  : r.createTime || "-"}
-              </div>
-            </div>
-            <div className="col-span-2">
-              <div className="text-xs text-gray-400">备注</div>
-              <div className="text-gray-800">{r.remark || "-"}</div>
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <div className="text-xs font-bold text-[#198348] pb-1 border-b border-dashed border-gray-200 mb-2">
-            还箱明细（{boxCount} 个箱子）
-          </div>
-          <Table
-            columns={detailColumns}
-            dataSource={boxes.map((b: any, i: number) => ({
-              ...b,
-              key: i,
-            }))}
-            size="small"
-            pagination={false}
-            scroll={{ x: 400 }}
-            locale={{ emptyText: "暂无明细" }}
-          />
-        </div>
+      <SectionTitle>还箱令信息</SectionTitle>
+      <div className="grid grid-cols-2 gap-x-6 gap-y-3 mt-1">
+        <InfoItem label="还箱令编号" value={r.orderNo} />
+        <InfoItem
+          label="还箱类型"
+          value={
+            r.orderType ? (
+              <span
+                className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
+                  r.orderType === "rent_return"
+                    ? "bg-purple-100 text-purple-700"
+                    : "bg-blue-100 text-blue-700"
+                }`}
+              >
+                {typeLabel(r.orderType)}
+              </span>
+            ) : undefined
+          }
+        />
+        <InfoItem label="还箱城市" value={r.city} />
+        <InfoItem
+          label="堆场"
+          value={r.yardName ?? (r.yardId ? `ID: ${r.yardId}` : undefined) ?? "未指定"}
+        />
+        <InfoItem
+          label="状态"
+          value={
+            <span
+              className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
+                isPending
+                  ? "bg-yellow-100 text-yellow-700"
+                  : "bg-green-100 text-green-700"
+              }`}
+            >
+              {STATUS_MAP[r.status] ?? r.status ?? "-"}
+            </span>
+          }
+        />
+        <InfoItem label="还箱时间" value={formatDate(r.returnTime)} />
+        <InfoItem label="创建时间" value={formatDate(r.createTime, r.createTime || "-")} />
+        <InfoItem label="备注" value={r.remark} colSpan="col-span-2" />
       </div>
+
+      <div className="text-xs font-bold text-[#198348] py-1 border-b border-dashed border-gray-200 my-3">
+        还箱明细（{boxCount} 个箱子）
+      </div>
+      <Table
+        columns={columns}
+        dataSource={boxes}
+        rowKey="containerNo"
+        size="small"
+        pagination={false}
+        scroll={{ x: 400 }}
+        locale={{ emptyText: "暂无明细" }}
+      />
     </Modal>
   );
 };

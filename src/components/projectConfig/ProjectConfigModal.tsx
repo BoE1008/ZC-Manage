@@ -6,6 +6,7 @@ import {
   ProjectContainerConfig,
 } from "@/restApi/projectConfig";
 import { getAllProjectList } from "@/restApi/project";
+import { unwrapList, unwrapEntity } from "@/utils";
 
 interface Props {
   id: string | null | undefined;
@@ -27,7 +28,7 @@ export const ProjectConfigModal: React.FC<Props> = ({ id, onClose, onSaved }) =>
     (async () => {
       try {
         const r: any = await getAllProjectList();
-        const list = r?.entity?.data ?? [];
+        const list = unwrapList(r);
         setProjects(
           list.map((p: any) => ({
             id: p.id,
@@ -51,7 +52,7 @@ export const ProjectConfigModal: React.FC<Props> = ({ id, onClose, onSaved }) =>
     setInitLoading(true);
     getProjectConfigByProjectId(id as string)
       .then((res: any) => {
-        const d = res?.entity?.data ?? res?.entity ?? {};
+        const d = unwrapEntity(res);
         // 反查 selectProject：先用本地列表，匹配不到时用响应里的 name/num 兜底
         const proj = projects.find((p) => p.id === d.projectId);
         setSelectProject(

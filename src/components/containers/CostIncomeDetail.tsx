@@ -28,6 +28,7 @@ import {
   editIncomeDetail,
   deleteIncomeDetail,
 } from "@/restApi/incomeDetail";
+import { unwrapList } from "@/utils";
 
 interface Props {
   containerId: string;
@@ -52,9 +53,7 @@ const CostPanel: React.FC<Props> = ({ containerId, containerNo }) => {
     setLoading(true);
     try {
       const r: any = await getCostDetailList(containerId);
-      const data = (r?.entity?.data ??
-        r?.entity ??
-        []) as ContainerCostDetail[];
+      const data = (unwrapList(r)) as ContainerCostDetail[];
       setList(Array.isArray(data) ? data : []);
     } finally {
       setLoading(false);
@@ -182,9 +181,7 @@ const IncomePanel: React.FC<Props> = ({ containerId, containerNo }) => {
     setLoading(true);
     try {
       const r: any = await getIncomeDetailList(containerId);
-      const data = (r?.entity?.data ??
-        r?.entity ??
-        []) as ContainerIncomeDetail[];
+      const data = (unwrapList(r)) as ContainerIncomeDetail[];
       setList(Array.isArray(data) ? data : []);
     } finally {
       setLoading(false);
@@ -341,7 +338,7 @@ const DetailFormModal: React.FC<{
     const api = type === "cost" ? getCostDetailList : getIncomeDetailList;
     api(containerId)
       .then((r: any) => {
-        const list = (r?.entity?.data ?? r?.entity ?? []) as any[];
+        const list = (unwrapList(r)) as any[];
         const arr = Array.isArray(list) ? list : [];
         const d = arr.find((x) => x.id === id);
         if (d) {

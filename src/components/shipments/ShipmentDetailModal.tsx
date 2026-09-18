@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Modal, Button, Space, Spin, Descriptions } from "antd";
 import { ContainerTracking, ContainerStatus } from "@/types";
-import { StatusBadge } from "@/components/ui/Badge";
+import { StatusBadge, SaleStatusTag } from "@/components/ui/Badge";
 import { getTrackingDetail } from "@/restApi/tracking";
 import { getAllProjectList } from "@/restApi/project";
 
@@ -170,22 +170,7 @@ export const ShipmentDetailModal = ({ id, onClose }: Props) => {
             {
               key: "saleStatus",
               label: "售卖状态",
-              children:
-                r.saleStatus === "sold_delivered" ? (
-                  <span className="px-2 py-0.5 rounded text-xs bg-green-100 text-green-700">
-                    卖出已交付
-                  </span>
-                ) : r.saleStatus === "sold_pending" ? (
-                  <span className="px-2 py-0.5 rounded text-xs bg-amber-100 text-amber-700">
-                    卖出未交付
-                  </span>
-                ) : r.saleStatus === "unsold" ? (
-                  <span className="px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-600">
-                    未卖出
-                  </span>
-                ) : (
-                  "-"
-                ),
+              children: <SaleStatusTag saleStatus={r.saleStatus} />,
             },
             {
               key: "isEnd",

@@ -6,6 +6,7 @@ import YardModal from "./YardModal";
 import YardDetailModal from "./YardDetailModal";
 import { getYardList, deleteYard } from "@/restApi/yard";
 import { getDictByCode } from "@/restApi/dict";
+import { unwrapList, normalizeDictOptions } from "@/utils";
 
 const YardList: React.FC = () => {
   const [data, setData] = useState<any[]>([]);
@@ -30,7 +31,7 @@ const YardList: React.FC = () => {
       yardName: n || undefined,
     })
       .then((r: any) => {
-        setData(r.entity?.data ?? []);
+        setData(unwrapList(r));
         setTotal(r.entity?.total ?? 0);
       })
       .finally(() => setLoading(false));
@@ -43,12 +44,9 @@ const YardList: React.FC = () => {
   useEffect(() => {
     getDictByCode("yard_city")
       .then((res: any) => {
-        const list = res?.entity?.data ?? res?.entity ?? [];
+        const list = unwrapList(res);
         setCityOptions(
-          (Array.isArray(list) ? list : []).map((d: any) => ({
-            label: d.dictLabel ?? d.label ?? d.dictValue,
-            value: d.dictValue ?? d.value,
-          })),
+          normalizeDictOptions(list),
         );
       })
       .catch(() => setCityOptions([]));

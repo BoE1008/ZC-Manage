@@ -7,7 +7,8 @@ import { ContainerDetailModal } from "@/components/containers/ContainerDetailMod
 import { ShipmentDetailModal } from "./ShipmentDetailModal";
 import type { ColumnsType } from "antd/es/table";
 import { Container, ContainerTracking, ContainerStatus } from "@/types";
-import { StatusBadge } from "@/components/ui/Badge";
+import { SALE_STATUS_OPTIONS } from "@/types/dict";
+import { StatusBadge, SaleStatusTag } from "@/components/ui/Badge";
 import { ShipmentModal } from "./ShipmentModal";
 import {
   getTrackingList,
@@ -210,22 +211,7 @@ export const ShipmentList = () => {
       title: "售卖状态",
       dataIndex: "saleStatus",
       align: "center",
-      render: (v) =>
-        v === "sold_delivered" ? (
-          <span className="px-2 py-0.5 rounded text-xs bg-green-100 text-green-700">
-            卖出已交付
-          </span>
-        ) : v === "sold_pending" ? (
-          <span className="px-2 py-0.5 rounded text-xs bg-amber-100 text-amber-700">
-            卖出未交付
-          </span>
-        ) : v === "unsold" ? (
-          <span className="px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-600">
-            未卖出
-          </span>
-        ) : (
-          "-"
-        ),
+      render: (v) => <SaleStatusTag saleStatus={v} />,
     },
     {
       title: "是否结束",
@@ -333,7 +319,7 @@ export const ShipmentList = () => {
         </Button>
         <Button>
           <a
-            href="/templates/yunzong.xlsx"
+            href="/templates/tracking.xlsx"
             download
             className="flex items-center gap-1"
           >
@@ -435,11 +421,7 @@ export const ShipmentList = () => {
             }}
             className="w-32"
             size="small"
-            options={[
-              { label: "未卖出", value: "unsold" },
-              { label: "卖出未交付", value: "sold_pending" },
-              { label: "卖出已交付", value: "sold_delivered" },
-            ]}
+            options={SALE_STATUS_OPTIONS}
           />
           <div className="!w-48">
             <SearchInput

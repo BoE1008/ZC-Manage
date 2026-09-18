@@ -18,6 +18,7 @@ import {
   getReturnOrderDetail,
 } from "@/restApi/returnOrder";
 import dayjs from "dayjs";
+import { unwrapList, normalizeDictOptions } from "@/utils";
 
 interface Props {
   id: string | null;
@@ -51,13 +52,8 @@ const ReturnOrderModal: React.FC<Props> = ({ id, onSave, onClose }) => {
   useEffect(() => {
     getDictByCode("return_order_type")
       .then((res: any) => {
-        const list = res?.entity?.data ?? res?.entity ?? [];
-        setTypeOptions(
-          (Array.isArray(list) ? list : []).map((d: any) => ({
-            label: d.dictLabel ?? d.label ?? d.dictValue,
-            value: d.dictValue ?? d.value,
-          })),
-        );
+        const list = unwrapList(res);
+        setTypeOptions(normalizeDictOptions(list));
       })
       .catch(() => setTypeOptions([]));
   }, []);
@@ -69,13 +65,8 @@ const ReturnOrderModal: React.FC<Props> = ({ id, onSave, onClose }) => {
     });
     getDictByCode("yard_city")
       .then((res: any) => {
-        const list = res?.entity?.data ?? res?.entity ?? [];
-        setCityOptions(
-          (Array.isArray(list) ? list : []).map((d: any) => ({
-            label: d.dictLabel ?? d.label ?? d.dictValue,
-            value: d.dictValue ?? d.value,
-          })),
-        );
+        const list = unwrapList(res);
+        setCityOptions(normalizeDictOptions(list));
       })
       .catch(() => setCityOptions([]));
   }, []);
@@ -104,7 +95,7 @@ const ReturnOrderModal: React.FC<Props> = ({ id, onSave, onClose }) => {
       .then((results) => {
         const boxes: any[] = [];
         (results as any[]).forEach((r: any) => {
-          (r?.entity?.data ?? []).forEach((c: any) => boxes.push(c));
+          unwrapList(r).forEach((c: any) => boxes.push(c));
         });
         setReturnable(boxes);
       })
@@ -216,10 +207,7 @@ const ReturnOrderModal: React.FC<Props> = ({ id, onSave, onClose }) => {
             name="orderType"
             rules={[{ required: true }]}
           >
-            <Select
-              placeholder="选择类型"
-              options={typeOptions}
-            />
+            <Select placeholder="选择类型" options={typeOptions} />
           </Form.Item>
           <Form.Item label="还箱城市" name="city">
             <Select
@@ -241,7 +229,7 @@ const ReturnOrderModal: React.FC<Props> = ({ id, onSave, onClose }) => {
           <Form.Item label="还箱堆场" name="yardId">
             <Select
               allowClear
-              placeholder={watchedCity ? "不指定（还箱时回填实际堆场）" : "请先选择还箱城市"}
+              placeholder={watchedCity ? "请选择还箱堆场" : "请先选择还箱城市"}
               disabled={!watchedCity}
               showSearch
               filterOption={(i, o) =>
@@ -284,7 +272,9 @@ const ReturnOrderModal: React.FC<Props> = ({ id, onSave, onClose }) => {
       ) : returnableLoading ? (
         <div className="text-center text-gray-400 py-4">加载中...</div>
       ) : returnable.length === 0 ? (
-        <div className="text-center text-gray-400 py-4">该堆场暂无可还箱的集装箱</div>
+        <div className="text-center text-gray-400 py-4">
+          该堆场暂无可还箱的集装箱
+        </div>
       ) : (
         <div
           className="border border-gray-200 rounded p-2 max-h-56 overflow-y-auto"

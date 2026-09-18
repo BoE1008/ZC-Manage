@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import dayjs from "dayjs";
 import Table from "@/components/ResizeTable";
 import { Button, Tooltip, Select, Space, Modal, message } from "antd";
 import { DownloadOutlined } from "@ant-design/icons";
@@ -18,6 +17,7 @@ import {
   importPickupOrder,
 } from "@/restApi/pickupOrder";
 import { getDictByCode } from "@/restApi/dict";
+import { unwrapList, normalizeDictOptions, formatDate } from "@/utils";
 
 const STATUS_OPTIONS = [
   { label: "待提箱", value: "pending" },
@@ -46,12 +46,9 @@ export const PickupList = () => {
   useEffect(() => {
     getDictByCode("pickup_order_type")
       .then((res: any) => {
-        const list = res?.entity?.data ?? res?.entity ?? [];
+        const list = unwrapList(res);
         setTypeOptions(
-          (Array.isArray(list) ? list : []).map((d: any) => ({
-            label: d.dictLabel ?? d.label ?? d.dictValue,
-            value: d.dictValue ?? d.value,
-          })),
+          normalizeDictOptions(list),
         );
       })
       .catch(() => setTypeOptions([]));
@@ -73,7 +70,7 @@ export const PickupList = () => {
       orderNo: kw || undefined,
     })
       .then((r) => {
-        setReleases(r.entity?.data ?? []);
+        setReleases(unwrapList(r));
         setTotal(r.entity?.total ?? 0);
       })
       .catch(() => message.error("加载提箱令列表失败"))
@@ -168,9 +165,7 @@ export const PickupList = () => {
       title: "生成时间",
       dataIndex: "createTime",
       render: (v: string) =>
-        v && v !== "-" && dayjs(v).isValid()
-          ? dayjs(v).format("YYYY-MM-DD")
-          : "-",
+        formatDate(v),
     },
     {
       title: "提箱方式",
@@ -206,14 +201,14 @@ export const PickupList = () => {
       dataIndex: "deadlineStart",
       width: 110,
       render: (v: any) =>
-        v && dayjs(v).isValid() ? dayjs(v).format("YYYY-MM-DD") : "-",
+        formatDate(v),
     },
     {
       title: "指令期限-止",
       dataIndex: "deadlineEnd",
       width: 110,
       render: (v: any) =>
-        v && dayjs(v).isValid() ? dayjs(v).format("YYYY-MM-DD") : "-",
+        formatDate(v),
     },
     {
       title: "提箱城市",
