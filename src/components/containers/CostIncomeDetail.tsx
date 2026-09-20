@@ -53,7 +53,7 @@ const CostPanel: React.FC<Props> = ({ containerId, containerNo }) => {
     setLoading(true);
     try {
       const r: any = await getCostDetailList(containerId);
-      const data = (unwrapList(r)) as ContainerCostDetail[];
+      const data = unwrapList(r) as ContainerCostDetail[];
       setList(Array.isArray(data) ? data : []);
     } finally {
       setLoading(false);
@@ -93,6 +93,12 @@ const CostPanel: React.FC<Props> = ({ containerId, containerNo }) => {
         v != null ? `${r.currency || "USD"} ${Number(v).toFixed(2)}` : "-",
     },
     { title: "币种", dataIndex: "currency", width: 80, align: "center" },
+    {
+      title: "对美元汇率",
+      dataIndex: "exchangeRate",
+      width: 120,
+      render: (v) => (v != null ? `${v.toFixed(4)}` : "-"),
+    },
     {
       title: "发生日期",
       dataIndex: "occurDate",
@@ -181,7 +187,7 @@ const IncomePanel: React.FC<Props> = ({ containerId, containerNo }) => {
     setLoading(true);
     try {
       const r: any = await getIncomeDetailList(containerId);
-      const data = (unwrapList(r)) as ContainerIncomeDetail[];
+      const data = unwrapList(r) as ContainerIncomeDetail[];
       setList(Array.isArray(data) ? data : []);
     } finally {
       setLoading(false);
@@ -221,6 +227,11 @@ const IncomePanel: React.FC<Props> = ({ containerId, containerNo }) => {
         v != null ? `${r.currency || "USD"} ${Number(v).toFixed(2)}` : "-",
     },
     { title: "币种", dataIndex: "currency", width: 80, align: "center" },
+    {
+      title: "对美元汇率",
+      dataIndex: "exchangeRate",
+      render: (v) => (v != null ? `${v.toFixed(4)}` : "-"),
+    },
     {
       title: "发生日期",
       dataIndex: "occurDate",
@@ -338,13 +349,14 @@ const DetailFormModal: React.FC<{
     const api = type === "cost" ? getCostDetailList : getIncomeDetailList;
     api(containerId)
       .then((r: any) => {
-        const list = (unwrapList(r)) as any[];
+        const list = unwrapList(r) as any[];
         const arr = Array.isArray(list) ? list : [];
         const d = arr.find((x) => x.id === id);
         if (d) {
           form.setFieldsValue({
             itemName: d.itemName,
             amount: d.amount,
+            exchangeRate: d.exchangeRate,
             currency: d.currency || "USD",
             occurDate:
               d.occurDate && dayjs(d.occurDate).isValid()
@@ -367,6 +379,10 @@ const DetailFormModal: React.FC<{
         itemName: values.itemName,
         amount: values.amount,
         currency: values.currency || "USD",
+        exchangeRate:
+          values.exchangeRate != null && values.exchangeRate !== ""
+            ? Number(values.exchangeRate)
+            : undefined,
         occurDate: values.occurDate
           ? dayjs.isDayjs(values.occurDate)
             ? values.occurDate.format("YYYY-MM-DD")
@@ -428,7 +444,7 @@ const DetailFormModal: React.FC<{
             maxLength={200}
           />
         </Form.Item>
-        <div className="grid grid-cols-3 gap-x-3">
+        <div className="grid grid-cols-4 gap-x-3">
           <Form.Item
             name="amount"
             label={<span className="text-xs">金额 *</span>}
@@ -446,6 +462,7 @@ const DetailFormModal: React.FC<{
           <Form.Item
             name="currency"
             label={<span className="text-xs">币种</span>}
+            rules={[{ required: true, message: "请选择币种" }]}
           >
             <Select
               options={[
@@ -453,6 +470,26 @@ const DetailFormModal: React.FC<{
                 { label: "CNY", value: "CNY" },
                 { label: "EUR", value: "EUR" },
               ]}
+            />
+          </Form.Item>
+          <Form.Item
+            name="exchangeRate"
+            label={<span className="text-xs">对美元汇率</span>}
+            rules={[{ required: true, message: "请填写对美元汇率" }]}
+          >
+            <InputNumber
+              min={0}
+              step={0.01}
+              precision={4}
+              className="w-full"
+              placeholder="USD 时为 1"
+              parser={(v) => {
+                if (v === "" || v == null) return 0 as any;
+                const s = String(v).replace(/[^\d.]/g, "");
+                const m = /^(\d*)(\.\d{0,4})?/.exec(s);
+                const num = m ? Number(m[0] || 0) : 0;
+                return num as any;
+              }}
             />
           </Form.Item>
         </div>

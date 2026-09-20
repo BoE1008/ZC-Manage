@@ -392,7 +392,7 @@ export interface ContainerTracking {
   status: ContainerStatus;
   /** 状态备注 */
   statusRemark: string;
-  /** 售卖状态：sold_delivered 卖出已交付 / sold_pending 卖出未交付 / unsold 未卖出，默认 unsold */
+  /** 售卖状态：sold_delivered 卖出已交付 / sold_undelivered 卖出未交付 / unsold 未卖出，默认 unsold */
   saleStatus?: string;
   /** 是否结束：0否 1是（均为字符串） */
   isEnd?: string;

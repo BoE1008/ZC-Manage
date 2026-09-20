@@ -28,7 +28,6 @@ import {
 } from "@/restApi/container";
 import { getDictOptions, getDictOptionsSync } from "@/restApi/dictCache";
 import type { DictOption } from "@/types/dict";
-import { SALE_STATUS_OPTIONS } from "@/types/dict";
 import SearchInput from "../SearchInput";
 import ImportButton from "../ImportButton";
 
@@ -84,6 +83,9 @@ export const ContainerList = () => {
   const [condOptions, setCondOptions] = useState<DictOption[]>(
     getDictOptionsSync("container_cond"),
   );
+  const [saleOptions, setSaleOptions] = useState<DictOption[]>(
+    getDictOptionsSync("container_sale_status"),
+  );
 
   // 编辑 & 预览
   const [editId, setEditId] = useState<string | null | undefined>(undefined);
@@ -108,10 +110,12 @@ export const ContainerList = () => {
       getDictOptions("container_status"),
       getDictOptions("container_usage"),
       getDictOptions("container_cond"),
-    ]).then(([s, u, c]) => {
+      getDictOptions("container_sale_status"),
+    ]).then(([s, u, c, sa]) => {
       setStatusOptions(s);
       setUsageOptions(u);
       setCondOptions(c);
+      setSaleOptions(sa);
     });
   }, []);
 
@@ -170,7 +174,8 @@ export const ContainerList = () => {
   // URL sync effect（唯一数据加载入口）
   useEffect(() => {
     if (!router.isReady) return;
-    const p = typeof router.query.page === "string" ? Number(router.query.page) : 1;
+    const p =
+      typeof router.query.page === "string" ? Number(router.query.page) : 1;
     setPage(p);
     // loadData 内部已同步各筛选项 state
     loadData(router.query, p);
@@ -406,7 +411,7 @@ export const ContainerList = () => {
             onChange={handleFilterChange("sale")}
             className="w-32"
             size="small"
-            options={SALE_STATUS_OPTIONS}
+            options={saleOptions}
           />
           <Select
             placeholder="全部箱况"

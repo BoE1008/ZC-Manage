@@ -79,7 +79,9 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
   const [condOptions, setCondOptions] = useState<DictOption[]>(
     getDictOptionsSync("container_cond"),
   );
-  const [saleStatusOptions, setSaleStatusOptions] = useState<Option[]>([]);
+  const [saleStatusOptions, setSaleStatusOptions] = useState<Option[]>(
+    getDictOptionsSync("container_sale_status"),
+  );
 
   // 加载下拉选项
   useEffect(() => {
@@ -108,12 +110,6 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
       );
     });
 
-    getDictByCode("container_sale_status")
-      .then((res: any) => {
-        setSaleStatusOptions(normalizeDictOptions(unwrapList(res)));
-      })
-      .catch(() => setSaleStatusOptions([]));
-
     getAllProjectList()
       .then((r: any) => setProjects(unwrapList(r)))
       .catch(() => setProjects([]));
@@ -124,11 +120,13 @@ export const ContainerModal = ({ id, onSave, onClose }: Props) => {
       getDictOptions("container_type"),
       getDictOptions("container_usage"),
       getDictOptions("container_cond"),
-    ]).then(([s, t, u, c]) => {
+      getDictOptions("container_sale_status"),
+    ]).then(([s, t, u, c, ss]) => {
       setStatusOptions(s);
       setTypeOptions(t);
       setUsageOptions(u);
       setCondOptions(c);
+      setSaleStatusOptions(ss);
     });
   }, []);
 

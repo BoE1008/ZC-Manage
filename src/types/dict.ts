@@ -19,6 +19,9 @@ export type ContainerUsageCode = "container_usage";
 /** 集装箱状态字典类型编码 */
 export type ContainerStatusCode = "container_status";
 
+/** 售卖状态字典类型编码 */
+export type ContainerSaleStatusCode = "container_sale_status";
+
 /** 箱型枚举值（container_type.sys_dict_data.dict_value） */
 export type ContainerTypeValue = "20GP" | "40GP" | "40HQ" | "45HQ" | string;
 
@@ -38,12 +41,13 @@ export type ContainerStatusValue =
   | "lost"
   | string;
 
-/** 4 个容器字典 code 集合 */
+/** 5 个容器字典 code 集合 */
 export type ContainerDictCode =
   | ContainerTypeCode
   | ContainerCondCode
   | ContainerUsageCode
-  | ContainerStatusCode;
+  | ContainerStatusCode
+  | ContainerSaleStatusCode;
 
 /** 运踪运输段（去程 outbound / 回程 inbound） */
 export type TrackingSegmentValue = "outbound" | "inbound" | string;
@@ -204,7 +208,7 @@ export const BUYER_TYPE_MAP: DictBadgeMap = {
 /** 售卖状态 → 中文标签 + 配色（与 sys_dict_data.container_sale_status 对齐） */
 export const SALE_STATUS_MAP: DictBadgeMap = {
   unsold: { label: "未卖出", cls: "bg-gray-100 text-gray-600" },
-  sold_pending: { label: "卖出未交付", cls: "bg-amber-100 text-amber-700" },
+  sold_undelivered: { label: "卖出未交付", cls: "bg-amber-100 text-amber-700" },
   sold_delivered: { label: "卖出已交付", cls: "bg-green-100 text-green-700" },
 };
 
@@ -246,7 +250,7 @@ export const CONTAINER_STATUS_OPTIONS: DictOption[] = [
 /** 售卖状态 Select 选项（与 sys_dict_data.container_sale_status 对齐） */
 export const SALE_STATUS_OPTIONS: DictOption[] = [
   { label: "未卖出", value: "unsold" },
-  { label: "卖出未交付", value: "sold_pending" },
+  { label: "卖出未交付", value: "sold_undelivered" },
   { label: "卖出已交付", value: "sold_delivered" },
 ];
 

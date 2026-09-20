@@ -17,6 +17,8 @@ export interface ContainerCostDetail {
   itemName?: string;
   /** 金额（美元） */
   amount?: number;
+  /** 对美元汇率（非 USD 时必填，USD 时为 1） */
+  exchangeRate?: number;
   /** 币种 USD */
   currency?: string;
   /** 费用发生日期 */

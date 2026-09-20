@@ -4,6 +4,7 @@ import {
   getContainerDashboardStats,
   getContainerTodoStats,
 } from "@/restApi/container";
+import { CONTAINER_COND_MAP, SALE_STATUS_MAP } from "@/types";
 
 /** 后端 dashboardStats 响应结构 */
 /** 待办项单条结构（接口 /zc/container/todoStats 返回） */
@@ -25,6 +26,10 @@ interface DashboardStats {
   statusStats: Record<string, number> & { total?: number };
   typeStats: { containerType: string; num: number }[];
   usageStats: { usageType: string; num: number }[];
+  /** 箱况分布：status → {conditionType → num} */
+  statusConditionMap: Record<string, Record<string, number>>;
+  /** 售卖状态分布：[{saleStatus, num}] */
+  saleStatusStats: { saleStatus: string; num: number }[];
   monthlyFinance: {
     liftingCost: number;
     containerIncome: number;
@@ -62,6 +67,8 @@ export const Dashboard = () => {
           statusStats: raw.statusStats ?? {},
           typeStats: raw.typeStats ?? [],
           usageStats: raw.usageStats ?? [],
+          statusConditionMap: raw.statusConditionMap ?? {},
+          saleStatusStats: raw.saleStatusStats ?? [],
           monthlyFinance: raw.monthlyFinance ?? {
             liftingCost: 0,
             containerIncome: 0,
@@ -82,7 +89,10 @@ export const Dashboard = () => {
 
   const statusOf = (k: string) => stats?.statusStats?.[k] ?? 0;
   const totalCount = stats?.statusStats?.total ?? 0;
-
+  const soldCount = (stats?.saleStatusStats ?? []).reduce(
+    (acc, x) => acc + (Number(x.num) || 0),
+    0,
+  );
   const goFilter = (status: string | null) => {
     router.push(
       status
@@ -125,20 +135,20 @@ export const Dashboard = () => {
       filter: "inbound",
     },
     {
-      cls: "border-l-green-500",
-      val: statusOf("sold"),
-      label: "已卖出",
-      sub: "业务结束",
-      color: "text-green-500",
-      filter: "sold",
-    },
-    {
       cls: "border-l-red-500",
       val: statusOf("lost"),
       label: "灭失",
       sub: "已灭失/丢失",
       color: "text-red-500",
       filter: "lost",
+    },
+    {
+      cls: "border-l-green-500",
+      val: soldCount,
+      label: "已卖出",
+      sub: "业务结束",
+      color: "text-green-500",
+      filter: "sold",
     },
     {
       cls: "border-l-[#198348]",
@@ -226,19 +236,82 @@ export const Dashboard = () => {
     <div className="space-y-3">
       {/* 统计卡片 */}
       <div className="grid grid-cols-7 gap-2.5">
-        {statCards.map((s, i) => (
-          <div
-            key={i}
-            className={`bg-white rounded-md p-3 shadow-sm cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all border-l-4 ${s.cls}`}
-            onClick={() => goFilter(s.filter)}
-          >
-            <div className="text-xs text-gray-500 mb-1">{s.label}</div>
-            <div className={`text-2xl font-bold ${s.color}`}>
-              {loading ? "—" : s.val}
+        {statCards.map((s, i) => {
+          const conds: { label: string; cls: string; num: number }[] = (() => {
+            if (!stats?.statusConditionMap) return [];
+            // 集装箱总数卡片：聚合全部 status 的箱况分布
+            const map =
+              s.filter == null
+                ? Object.values(stats.statusConditionMap).reduce<
+                    Record<string, number>
+                  >((acc, m) => {
+                    Object.entries(m ?? {}).forEach(([k, v]) => {
+                      acc[k] = (acc[k] ?? 0) + (Number(v) || 0);
+                    });
+                    return acc;
+                  }, {})
+                : (stats.statusConditionMap[s.filter] ?? {});
+            return Object.entries(map)
+              .map(([k, v]) => {
+                const entry = CONTAINER_COND_MAP[k] ?? {
+                  label: k,
+                  cls: "bg-gray-100 text-gray-600",
+                };
+                return { label: entry.label, cls: entry.cls, num: v };
+              })
+              .filter((x) => x.num > 0);
+          })();
+          // 「已售出」卡片：展示售卖状态分布
+          const sales: { label: string; cls: string; num: number }[] =
+            s.filter === "sold"
+              ? (stats?.saleStatusStats ?? [])
+                  .map((x) => {
+                    const entry = SALE_STATUS_MAP[x.saleStatus];
+                    return entry
+                      ? { label: entry.label, cls: entry.cls, num: x.num }
+                      : null;
+                  })
+                  .filter((x): x is NonNullable<typeof x> => x !== null)
+                  .filter((x) => x.num > 0)
+              : [];
+          return (
+            <div
+              key={i}
+              className={`bg-white rounded-md p-3 shadow-sm cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all border-l-4 ${s.cls}`}
+              onClick={() => goFilter(s.filter)}
+            >
+              <div className="text-xs text-gray-500 mb-1">{s.label}</div>
+              <div className={`text-2xl font-bold ${s.color}`}>
+                {loading ? "—" : s.val}
+              </div>
+              <div className="text-[11px] text-gray-400 mt-0.5">{s.sub}</div>
+              {s.filter !== "sold" && conds.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-1.5">
+                  {conds.map((c, idx) => (
+                    <span
+                      key={idx}
+                      className={`text-[10px] px-1.5 py-0.5 rounded ${c.cls}`}
+                    >
+                      {c.label} {c.num}
+                    </span>
+                  ))}
+                </div>
+              )}
+              {sales.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-1.5">
+                  {sales.map((c, idx) => (
+                    <span
+                      key={`s-${idx}`}
+                      className={`text-[10px] px-1.5 py-0.5 rounded ${c.cls}`}
+                    >
+                      {c.label} {c.num}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
-            <div className="text-[11px] text-gray-400 mt-0.5">{s.sub}</div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* 最近操作记录 + 本月财务概览 */}

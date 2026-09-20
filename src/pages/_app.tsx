@@ -63,10 +63,6 @@ export default function App({ Component, pageProps }: AppProps) {
     } else {
       console.log("%c构建时间: 开发模式", "font-size: 12px; color: #666;");
     }
-    console.log(
-      "%c----------------------------------------",
-      "color: #198348;",
-    );
   }, []);
 
   // 防止未授权时组件提前渲染

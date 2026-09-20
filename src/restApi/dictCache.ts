@@ -1,9 +1,5 @@
 import { getDictByCode } from "./dict";
-import type {
-  ContainerDictCode,
-  DictOption,
-  DictItem,
-} from "@/types/dict";
+import type { ContainerDictCode, DictOption, DictItem } from "@/types/dict";
 
 export type { ContainerDictCode, DictOption, DictItem };
 
@@ -16,6 +12,7 @@ const labelMap: Record<string, string> = {
   container_type: "箱型",
   container_cond: "箱况",
   container_usage: "使用情况",
+  container_sale_status: "售卖状态",
 };
 
 /**
@@ -37,7 +34,7 @@ export const getDictOptionsSync = (code: ContainerDictCode): DictOption[] =>
  * 异步获取字典选项，优先用缓存
  */
 export const getDictOptions = async (
-  code: ContainerDictCode
+  code: ContainerDictCode,
 ): Promise<DictOption[]> => {
   if (cache[code]) return cache[code];
   if (pending[code]) return pending[code]!;
@@ -46,7 +43,7 @@ export const getDictOptions = async (
     const res = await getDictByCode(code);
     // 后端响应：{ code, entity: { data: [...] } | [...] }
     const entity = (res as any)?.entity ?? res;
-    const list = Array.isArray(entity) ? entity : entity?.data ?? [];
+    const list = Array.isArray(entity) ? entity : (entity?.data ?? []);
     const opts = normalize(list);
     cache[code] = opts;
     return opts;
@@ -79,6 +76,7 @@ export const DICT_LABEL_MAP: Record<ContainerDictCode, string> = {
   container_type: "箱型",
   container_cond: "箱况",
   container_usage: "使用情况",
+  container_sale_status: "售卖状态",
 };
 
 // 保留一份 labelMap 引用供调试日志使用
