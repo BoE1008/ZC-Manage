@@ -117,7 +117,7 @@ export const deleteReturnOrder = async (id: string) => {
 
 /** 确认还箱：逐箱记录还箱时间与实际归还堆场 POST /zc/returnOrder/confirm */
 export const confirmReturnOrderApi = async (
-  data: { id: string } & Partial<ReturnOrder>,
+  data: { id: string; defaultReturnTime: string } & Partial<ReturnOrder>,
 ) => {
   const res = await axiosInstance.post<ApiResponse>(
     "/zc/returnOrder/confirm",

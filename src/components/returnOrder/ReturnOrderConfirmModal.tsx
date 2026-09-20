@@ -63,7 +63,11 @@ const ReturnOrderConfirmModal: React.FC<Props> = ({ id, onSave, onClose }) => {
         actualYardId: b.actualYardId || "",
         actualYardName: b.actualYardName || "",
       }));
-      await confirmReturnOrderApi({ id, ...finalBoxes });
+      await confirmReturnOrderApi({
+        id,
+        defaultReturnTime: unifiedDate,
+        boxes: finalBoxes,
+      });
       const allSet = finalBoxes.every((b) => b.returnTime && b.actualYardId);
       message.success(
         allSet ? "还箱确认完成" : "部分箱子未选择堆场，已保存其余信息",
@@ -150,11 +154,8 @@ const ReturnOrderConfirmModal: React.FC<Props> = ({ id, onSave, onClose }) => {
           value={unifiedDate}
           onChange={(e) => setUnifiedDate(e.target.value)}
           onBlur={applyUnifiedDate}
-          placeholder="设置后应用到所有未填的箱子"
+          placeholder="设置后应用到所有的箱子"
         />
-        <span className="text-xs text-gray-400">
-          （失焦后应用到所有未单独填写的箱子）
-        </span>
       </div>
 
       <Table

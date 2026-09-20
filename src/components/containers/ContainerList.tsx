@@ -28,6 +28,7 @@ import { DetailFormModal } from "./CostIncomeDetail";
 import {
   getContainerList,
   deleteContainer,
+  batchDeleteContainers,
   importContainer,
 } from "@/restApi/container";
 import { getDictOptions, getDictOptionsSync } from "@/restApi/dictCache";
@@ -94,6 +95,9 @@ export const ContainerList = () => {
   // 编辑 & 预览
   const [editId, setEditId] = useState<string | null | undefined>(undefined);
   const [viewId, setViewId] = useState<string | null>(null);
+
+  // 批量选中
+  const [selectedRows, setSelectedRows] = useState<Container[]>([]);
 
   // 成本/收入明细快捷新增
   const [detailForm, setDetailForm] = useState<{
@@ -205,6 +209,34 @@ export const ContainerList = () => {
           loadData(router.query, page);
         } catch {
           message.error("删除失败");
+        }
+      },
+    });
+  };
+
+  // 批量删除
+  const handleBatchDelete = () => {
+    if (selectedRows.length === 0) return;
+    const list = [...selectedRows];
+    const preview = list
+      .slice(0, 3)
+      .map((x) => x.containerNo)
+      .join("、");
+    const more = list.length > 3 ? ` 等 ${list.length} 个` : "";
+    Modal.confirm({
+      okText: "删除",
+      okButtonProps: { className: "!bg-[#198348] !border-[#198348]" },
+      cancelText: "取消",
+      title: "确认批量删除",
+      content: `确定删除集装箱 ${preview}${more} 吗？`,
+      onOk: async () => {
+        try {
+          await batchDeleteContainers(list.map((x) => x.id));
+          message.warning(`已批量删除 ${list.length} 个集装箱`);
+          setSelectedRows([]);
+          loadData(router.query, page);
+        } catch {
+          message.error("批量删除失败");
         }
       },
     });
@@ -378,6 +410,7 @@ export const ContainerList = () => {
         <Button type="primary" onClick={() => setEditId(null)}>
           + 新增集装箱
         </Button>
+
         <Button>
           <a
             href="/templates/container.xlsx"
@@ -393,6 +426,15 @@ export const ContainerList = () => {
           onSuccess={() => loadData(router.query, page)}
           label="批量导入"
         />
+        {selectedRows.length > 0 && (
+          <Button
+            danger
+            onClick={handleBatchDelete}
+            className="!border-[#ff4d4f] !text-[#ff4d4f]"
+          >
+            批量删除 ({selectedRows.length})
+          </Button>
+        )}
         <div className="ml-auto flex items-center gap-2">
           <Select
             placeholder="全部状态"
@@ -440,9 +482,14 @@ export const ContainerList = () => {
       {/* 表格 */}
       <Table
         bordered
+        rowKey="id"
         columns={columns}
         dataSource={containers}
         loading={loading}
+        rowSelection={{
+          selectedRowKeys: selectedRows.map((r) => r.id),
+          onChange: (_keys, rows) => setSelectedRows(rows),
+        }}
         pagination={{
           current: page,
           pageSize: PAGE_SIZE,

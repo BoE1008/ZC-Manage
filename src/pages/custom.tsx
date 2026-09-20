@@ -262,18 +262,6 @@ const Customer = () => {
       render: (_, record: Company) => {
         return (
           <Space size="middle" className="flex flex-row !gap-x-1">
-            {userId && [...adminUserIds, record.createBy].includes(userId) && (
-              <Button
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "3px 5px",
-                }}
-                onClick={() => handleEditOne(record)}
-              >
-                <Edit size={16} />
-              </Button>
-            )}
             <Tooltip title={<span>查看银行账户信息</span>}>
               <Button
                 onClick={() => handleCheckBank(record.id)}
@@ -286,6 +274,18 @@ const Customer = () => {
                 <Eye size={16} />
               </Button>
             </Tooltip>
+            {userId && [...adminUserIds, record.createBy].includes(userId) && (
+              <Button
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  padding: "3px 5px",
+                }}
+                onClick={() => handleEditOne(record)}
+              >
+                <Edit size={16} />
+              </Button>
+            )}
             {userId && [...adminUserIds, record.createBy].includes(userId) && (
               <Tooltip title="删除">
                 <Popconfirm

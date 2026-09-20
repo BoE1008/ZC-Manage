@@ -71,6 +71,18 @@ export const deleteContainer = async (id: string) => {
   return res.data;
 };
 
+/**
+ * 批量删除集装箱
+ * GET /zc/container/batchDel?ids=id1&ids=id2&ids=id3
+ */
+export const batchDeleteContainers = async (ids: string[]) => {
+  const res = await axiosInstance.get<ApiResponse>(
+    "/zc/container/batchDel",
+    { params: { ids } },
+  );
+  return res.data;
+};
+
 // ========================
 // Dashboard 统计
 // ========================
