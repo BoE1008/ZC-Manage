@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { Button, message, Upload } from "antd";
 import type { UploadProps } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
+import { Upload as ReiconUpload } from "reicon-react";
 
 interface Props {
   /** 后端导入接口 */
@@ -53,7 +53,7 @@ const ImportButton = ({
 
   return (
     <Upload {...uploadProps}>
-      <Button type={type} size={size} loading={loading} icon={<UploadOutlined />}>
+      <Button type={type} size={size} loading={loading} icon={<ReiconUpload size={16} />}>
         {label}
       </Button>
     </Upload>

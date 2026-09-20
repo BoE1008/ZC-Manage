@@ -37,15 +37,15 @@ import {
   Switch,
 } from "antd";
 import {
-  EditTwoTone,
-  PlusSquareTwoTone,
-  DeleteTwoTone,
-  CheckCircleTwoTone,
-  StopTwoTone,
-  CalendarTwoTone,
-  InteractionTwoTone,
-  WalletTwoTone,
-} from "@ant-design/icons";
+  Edit,
+  PlusSquare,
+  Trash,
+  CheckCircle,
+  Stop,
+  Calendar,
+  Chat,
+  Wallet,
+} from "reicon-react";
 import { Operation, ModalType } from "@/types";
 import { getCustomersList } from "@/restApi/customer";
 import { getSuppliersList } from "@/restApi/supplyer";
@@ -731,6 +731,8 @@ const Item: FC<{
               title: "操作",
               key: "operation",
               align: "center",
+              width: 120,
+              fixed: "right",
               render: (_, record) => {
                 return (
                   <Space size="middle" className="flex flex-row !gap-x-1">
@@ -749,7 +751,7 @@ const Item: FC<{
                                 }}
                                 onClick={() => handleEditYfOne(record)}
                               >
-                                <EditTwoTone twoToneColor="#198348" />
+                                <Edit size={16} />
                               </Button>
                             </Tooltip>
                           )}
@@ -764,7 +766,7 @@ const Item: FC<{
                                 }}
                                 onClick={() => handleSubmitYF(record)}
                               >
-                                <InteractionTwoTone twoToneColor="#198348" />
+                                <Chat size={16} />
                               </Button>
                             </Tooltip>
                           )}
@@ -788,7 +790,7 @@ const Item: FC<{
                                       padding: "3px 5px",
                                     }}
                                   >
-                                    <DeleteTwoTone twoToneColor="#198348" />
+                                    <Trash size={16} color="#ff4d4f" />
                                   </Button>
                                 </Popconfirm>
                               </Tooltip>
@@ -806,7 +808,7 @@ const Item: FC<{
                               padding: "3px 5px",
                             }}
                           >
-                            <WalletTwoTone twoToneColor="#198348" />
+                            <Wallet size={16} />
                           </Button>
                         </Tooltip>
                       )}
@@ -821,7 +823,7 @@ const Item: FC<{
                               padding: "3px 5px",
                             }}
                           >
-                            <StopTwoTone twoToneColor="#198348" />
+                            <Stop size={16} />
                           </Button>
                         </Tooltip>
                       )}
@@ -846,7 +848,7 @@ const Item: FC<{
                                     padding: "3px 5px",
                                   }}
                                 >
-                                  <CheckCircleTwoTone twoToneColor="#198348" />
+                                  <CheckCircle size={16} />
                                 </Button>
                               </Popconfirm>
                             </Tooltip>
@@ -879,7 +881,7 @@ const Item: FC<{
                                 padding: "3px 5px",
                               }}
                             >
-                              <StopTwoTone twoToneColor="#198348" />
+                              <Stop size={16} />
                             </Button>
                           </Popconfirm>
                         </Tooltip>
@@ -895,7 +897,7 @@ const Item: FC<{
                           }}
                           onClick={() => handleEditYfOne(record)}
                         >
-                          <EditTwoTone twoToneColor="#198348" />
+                          <Edit size={16} />
                         </Button>
                       </Tooltip>
                     )}
@@ -909,7 +911,7 @@ const Item: FC<{
                           padding: "3px 5px",
                         }}
                       >
-                        <CalendarTwoTone twoToneColor="#198348" />
+                        <Calendar size={16} />
                       </Button>
                     </Tooltip>
                   </Space>
@@ -1161,6 +1163,8 @@ const Item: FC<{
           {
             title: "操作",
             align: "center",
+            width: 120,
+            fixed: "right",
             key: "action",
             render: (_, record) => {
               return (
@@ -1180,7 +1184,7 @@ const Item: FC<{
                               }}
                               onClick={() => handleEditYsOne(record)}
                             >
-                              <EditTwoTone twoToneColor="#198348" />
+                              <Edit size={16} />
                             </Button>
                           </Tooltip>
                         )}
@@ -1195,7 +1199,7 @@ const Item: FC<{
                             }}
                             onClick={() => handleYfAddClick(record)}
                           >
-                            <PlusSquareTwoTone twoToneColor="#198348" />
+                            <PlusSquare size={16} />
                           </Button>
                         </Tooltip>
                       )}
@@ -1221,7 +1225,7 @@ const Item: FC<{
                                 }}
                                 // onClick={() => handleSubmitYS(record)}
                               >
-                                <InteractionTwoTone twoToneColor="#198348" />
+                                <Chat size={16} />
                               </Button>
                             </Popconfirm>
                           </Tooltip>
@@ -1246,7 +1250,7 @@ const Item: FC<{
                                   padding: "3px 5px",
                                 }}
                               >
-                                <StopTwoTone twoToneColor="#198348" />
+                                <Stop size={16} />
                               </Button>
                             </Popconfirm>
                           </Tooltip>
@@ -1272,7 +1276,7 @@ const Item: FC<{
                                   padding: "3px 5px",
                                 }}
                               >
-                                <DeleteTwoTone twoToneColor="#198348" />
+                                <Trash size={16} color="#ff4d4f" />
                               </Button>
                             </Popconfirm>
                           </Tooltip>
@@ -1289,7 +1293,7 @@ const Item: FC<{
                         }}
                         onClick={() => handleEditYsOne(record)}
                       >
-                        <EditTwoTone twoToneColor="#198348" />
+                        <Edit size={16} />
                       </Button>
                     </Tooltip>
                   )}
@@ -1313,7 +1317,7 @@ const Item: FC<{
                               padding: "3px 5px",
                             }}
                           >
-                            <CheckCircleTwoTone twoToneColor="#198348" />
+                            <CheckCircle size={16} />
                           </Button>
                         </Popconfirm>
                       </Tooltip>
@@ -1342,7 +1346,7 @@ const Item: FC<{
                               padding: "3px 5px",
                             }}
                           >
-                            <StopTwoTone twoToneColor="#198348" />
+                            <Stop size={16} />
                           </Button>
                         </Popconfirm>
                       </Tooltip>
@@ -1358,7 +1362,7 @@ const Item: FC<{
                             padding: "3px 5px",
                           }}
                         >
-                          <WalletTwoTone twoToneColor="#198348" />
+                          <Wallet size={16} />
                         </Button>
                       </Tooltip>
                     )}
@@ -1371,7 +1375,7 @@ const Item: FC<{
                         padding: "3px 5px",
                       }}
                     >
-                      <CalendarTwoTone twoToneColor="#198348" />
+                      <Calendar size={16} />
                     </Button>
                   </Tooltip>
                 </Space>

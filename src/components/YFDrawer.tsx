@@ -12,7 +12,7 @@ import {
   DatePicker,
 } from "antd";
 import { memo, useEffect, useState } from "react";
-import { UploadOutlined } from "@ant-design/icons";
+import { Upload as UploadIcon } from "reicon-react";
 import { getDictByCode } from "@/restApi/dict";
 import { deleteFileById, addAndSubmitPayment } from "@/restApi/payment";
 import { getProjectDetailById } from "@/restApi/project";
@@ -249,7 +249,7 @@ const YFDrawer = ({ yfRecord, onClose }) => {
           getValueFromEvent={({ file }) => file.originFileObj}
         >
           <Upload {...uploadProps}>
-            <Button icon={<UploadOutlined />}>点击上传</Button>
+            <Button icon={<UploadIcon size={16} />}>点击上传</Button>
           </Upload>
         </Form.Item>
       </Form>

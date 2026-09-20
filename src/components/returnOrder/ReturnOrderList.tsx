@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { Button, Space, Select, message, Modal } from "antd";
-import { DownloadOutlined } from "@ant-design/icons";
+import { Button, Dropdown, Tooltip, Space, Select, message, Modal } from "antd";
+import { Download, Eye, Edit, Trash, Check, More } from "reicon-react";
 import SearchInput from "@/components/SearchInput";
 import ResizeTable from "@/components/ResizeTable";
 import ReturnOrderModal from "./ReturnOrderModal";
@@ -40,9 +40,7 @@ const ReturnOrderList: React.FC = () => {
     getDictByCode("return_order_type")
       .then((res: any) => {
         const list = unwrapList(res);
-        setTypeOptions(
-          normalizeDictOptions(list),
-        );
+        setTypeOptions(normalizeDictOptions(list));
       })
       .catch(() => setTypeOptions([]));
   }, []);
@@ -189,52 +187,72 @@ const ReturnOrderList: React.FC = () => {
     {
       title: "实际还箱时间",
       dataIndex: "returnTime",
-      render: (v: string) =>
-        formatDate(v),
+      render: (v: string) => formatDate(v),
     },
 
     {
       title: "操作",
+      align: "center",
+      width: 120,
       fixed: "right" as const,
       render: (_: any, r: any) => (
-        <Space size={4}>
-          <Button
-            type="link"
-            size="small"
-            className="!px-1"
-            onClick={() => setViewId(r.id)}
-          >
-            详情
-          </Button>
-          {r.status === "pending" && (
+        <Space size={4} className="justify-center">
+          <Tooltip title="详情">
             <Button
-              type="link"
+              type="text"
               size="small"
-              className="!px-1 !text-purple-600"
-              onClick={() => {
-                setConfirmId(r.id);
+              className="!px-1 !py-0.5 !text-xs"
+              onClick={() => setViewId(r.id)}
+            >
+              <Eye size={16} />
+            </Button>
+          </Tooltip>
+          <Tooltip title="编辑">
+            <Button
+              type="text"
+              size="small"
+              className="!px-1 !py-0.5 !text-xs"
+              onClick={() => setEditId(r.id)}
+            >
+              <Edit size={16} />
+            </Button>
+          </Tooltip>
+          <Tooltip title="更多">
+            <Dropdown
+              trigger={["click"]}
+              menu={{
+                items: [
+                  ...(r.status === "pending"
+                    ? [
+                        {
+                          key: "confirm",
+                          label: "确认",
+                          icon: <Check size={16} />,
+                          onClick: () => {
+                            setConfirmId(r.id);
+                          },
+                        },
+                      ]
+                    : []),
+                  {
+                    key: "delete",
+                    label: "删除",
+                    icon: <Trash size={16} color="#ff4d4f" />,
+                    danger: true,
+                    onClick: () => handleDelete(r),
+                  },
+                ],
               }}
             >
-              确认
-            </Button>
-          )}
-          <Button
-            type="link"
-            size="small"
-            className="!px-1"
-            onClick={() => setEditId(r.id)}
-          >
-            编辑
-          </Button>
-          <Button
-            type="link"
-            size="small"
-            danger
-            className="!px-1"
-            onClick={() => handleDelete(r)}
-          >
-            删除
-          </Button>
+              <Button
+                type="text"
+                size="small"
+                className="!px-1 !py-0.5 !text-xs"
+              >
+                <More size={16} />
+              </Button>
+            </Dropdown>
+          </Tooltip>
         </Space>
       ),
     },
@@ -252,7 +270,7 @@ const ReturnOrderList: React.FC = () => {
             download
             className="flex items-center gap-1"
           >
-            <DownloadOutlined />
+            <Download size={16} />
             模板下载
           </a>
         </Button>
@@ -353,7 +371,6 @@ const ReturnOrderList: React.FC = () => {
           loading={loading}
           rowKey="id"
           size="small"
-          scroll={{ x: 1300, y: 500 }}
           pagination={{
             current: page,
             pageSize,

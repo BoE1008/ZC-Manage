@@ -11,14 +11,9 @@ import {
   Avatar,
   Statistic,
   DatePicker,
+  Dropdown,
 } from "antd";
-import {
-  CheckCircleTwoTone,
-  StopTwoTone,
-  ProfileTwoTone,
-  CalendarTwoTone,
-  AccountBookTwoTone,
-} from "@ant-design/icons";
+import { CheckCircle, Stop, Eye, Calendar, Book, More } from "reicon-react";
 import {
   getPaymentCWList,
   approveOne,
@@ -91,7 +86,7 @@ const Payment = () => {
           projectNum,
           moneyType,
           date,
-          updateTimeSort
+          updateTimeSort,
         );
         setData(res);
         setLoading(false);
@@ -139,7 +134,7 @@ const Payment = () => {
       userName,
       projectNum,
       moneyType,
-      date
+      date,
     );
     setData(res);
     message.success({ content: "审批通过", type: "success" });
@@ -158,7 +153,7 @@ const Payment = () => {
       userName,
       projectNum,
       moneyType,
-      date
+      date,
     );
     setData(res);
     message.success({ content: "申请已退回", type: "success" });
@@ -358,76 +353,71 @@ const Payment = () => {
     {
       title: "操作",
       align: "center",
+      width: 120,
+      fixed: "right",
       key: "action",
       render: (_, record) => {
         const isSubmit = record.state === "待财务审批";
-
+        const moreItems: any[] = [
+          ...(isSubmit
+            ? [
+                {
+                  key: "approve",
+                  label: "审核通过",
+                  icon: <CheckCircle size={16} />,
+                  onClick: () =>
+                    Modal.confirm({
+                      title: "是否批准？",
+                      okButtonProps: { style: { backgroundColor: "#198348" } },
+                      onOk: () => handleDetail(record.id),
+                    }),
+                },
+              ]
+            : []),
+          {
+            key: "reject",
+            label: "退回",
+            icon: <Stop size={16} />,
+            danger: true,
+            onClick: () =>
+              Modal.confirm({
+                title: "是否退回？",
+                okButtonProps: { style: { backgroundColor: "#198348" } },
+                onOk: () => setRejectId(record.id),
+              }),
+          },
+          {
+            key: "logs",
+            label: "查看审核日志",
+            icon: <Calendar size={16} />,
+            onClick: () => handleLogsOne(record.id),
+          },
+        ];
         return (
-          <Space size="middle" className="flex flex-row !gap-x-1">
+          <Space size={4} className="justify-center">
             <Tooltip title={<span>查看应收应付</span>}>
               <Button
+                type="text"
+                size="small"
+                className="!px-1 !py-0.5 !text-xs"
                 onClick={() => setProjectId(record.projectId)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "3px 5px",
-                }}
               >
-                <ProfileTwoTone twoToneColor="#198348" />
+                <Eye size={16} />
               </Button>
             </Tooltip>
-            {isSubmit && (
-              <Tooltip title="审核通过">
-                <Popconfirm
-                  title="是否批准？"
-                  placement="bottom"
-                  okButtonProps={{ style: { backgroundColor: "#198348" } }}
-                  onConfirm={() => handleDetail(record.id)}
-                >
+            {moreItems.length > 0 && (
+              <Tooltip title="更多">
+                <Dropdown trigger={["click"]} menu={{ items: moreItems }}>
                   <Button
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      padding: "3px 5px",
-                    }}
+                    type="text"
+                    size="small"
+                    className="!px-1 !py-0.5 !text-xs"
                   >
-                    <CheckCircleTwoTone twoToneColor="#198348" />
+                    <More size={16} />
                   </Button>
-                </Popconfirm>
+                </Dropdown>
               </Tooltip>
             )}
-            {
-              <Tooltip title="退回">
-                <Popconfirm
-                  title="是否退回？"
-                  getPopupContainer={() => document.body}
-                  okButtonProps={{ style: { backgroundColor: "#198348" } }}
-                  onConfirm={() => setRejectId(record.id)}
-                >
-                  <Button
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      padding: "3px 5px",
-                    }}
-                  >
-                    <StopTwoTone twoToneColor="#198348" />
-                  </Button>
-                </Popconfirm>
-              </Tooltip>
-            }
-            <Tooltip title="查看审核日志">
-              <Button
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "3px 5px",
-                }}
-                onClick={() => handleLogsOne(record.id)}
-              >
-                <CalendarTwoTone twoToneColor="#198348" />
-              </Button>
-            </Tooltip>
           </Space>
         );
       },
@@ -474,7 +464,7 @@ const Payment = () => {
             padding: "10px",
           }}
           title="选中项总金额"
-          prefix={<AccountBookTwoTone twoToneColor="#198348" />}
+          prefix={<Book size={16} />}
           value={selectedFee}
           precision={2}
         />

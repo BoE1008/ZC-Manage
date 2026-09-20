@@ -15,13 +15,7 @@ import {
   Popover,
   Checkbox,
 } from "antd";
-import {
-  ProfileTwoTone,
-  StopTwoTone,
-  CheckCircleTwoTone,
-  AppstoreTwoTone,
-  FundTwoTone,
-} from "@ant-design/icons";
+import { Eye, Stop, CheckCircle, Grid, Chart } from "reicon-react";
 import {
   getProjectsApproveList,
   addProject,
@@ -121,7 +115,7 @@ const Project = () => {
         businessGroupId,
         businessLineId,
         projectYear,
-        trainNumName
+        trainNumName,
       );
       // const file = await exportProject();
       setLoading(false);
@@ -253,7 +247,7 @@ const Project = () => {
       const file = await exportProject();
       setExportEnabled(true);
       window.open(
-        `http://115.175.21.89/zc/common/download?fileName=${file.msg}&delete=false`
+        `http://115.175.21.89/zc/common/download?fileName=${file.msg}&delete=false`,
       );
     } catch {}
   };
@@ -544,6 +538,7 @@ const Project = () => {
         title: "操作",
         align: "center",
         fixed: "right",
+        width: 120,
         key: "action",
         render: (_, record: Company) => {
           const unSubmit =
@@ -561,7 +556,7 @@ const Project = () => {
                   }}
                   onClick={() => setProjectId(record.id)}
                 >
-                  <ProfileTwoTone twoToneColor="#198348" />
+                  <Eye size={16} />
                 </Button>
               </Tooltip>
 
@@ -581,7 +576,7 @@ const Project = () => {
                         padding: "3px 5px",
                       }}
                     >
-                      <CheckCircleTwoTone twoToneColor="#198348" />
+                      <CheckCircle size={16} />
                     </Button>
                   </Popconfirm>
                 </Tooltip>
@@ -603,7 +598,7 @@ const Project = () => {
                         padding: "3px 5px",
                       }}
                     >
-                      <StopTwoTone twoToneColor="#198348" />
+                      <Stop size={16} />
                     </Button>
                   </Popconfirm>
                 </Tooltip>
@@ -619,7 +614,7 @@ const Project = () => {
 
   const filterOption = (
     input: string,
-    option?: { label: string; value: string }
+    option?: { label: string; value: string },
   ) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
 
   const validateName = () => {
@@ -735,15 +730,11 @@ const Project = () => {
             title="显隐列"
             trigger="click"
           >
-            <AppstoreTwoTone
-              style={{ fontSize: "30px" }}
-              twoToneColor="#198348"
-              className="mr-15"
-            />
+            <Grid size={16} style={{ fontSize: "30px" }} className="mr-15" />
           </Popover>
           <Tooltip title="统计数据">
-            <FundTwoTone
-              twoToneColor="#198348"
+            <Chart
+              size={16}
               style={{ fontSize: "30px", cursor: "pointer" }}
               onClick={() => setStaticModal(true)}
             />

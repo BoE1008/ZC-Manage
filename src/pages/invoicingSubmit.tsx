@@ -22,6 +22,7 @@ import {
   message,
   List,
   Avatar,
+  Dropdown,
   Tooltip,
   Popconfirm,
   Typography,
@@ -31,14 +32,15 @@ import {
 import { Operation } from "@/types";
 import { getProjectsSubmitList, getYSFByProjectId } from "@/restApi/project";
 import {
-  EditTwoTone,
-  DeleteTwoTone,
-  CalendarTwoTone,
-  InteractionTwoTone,
-  UploadOutlined,
-  ProfileTwoTone,
-  StopTwoTone,
-} from "@ant-design/icons";
+  Edit,
+  Trash,
+  Calendar,
+  Chat,
+  Upload as UploadIcon,
+  Eye,
+  Stop,
+  More,
+} from "reicon-react";
 import { getCustomersYSList, getCustomersList } from "@/restApi/customer";
 import { InvoicingTypeArr } from "@/utils/const";
 import { getDictByCode } from "@/restApi/dict";
@@ -575,111 +577,102 @@ const InvoicingSubmit = () => {
     {
       title: "操作",
       align: "center",
+      width: 120,
+      fixed: "right",
       key: "action",
       render: (_, record) => {
         const isFinished =
           record.state !== "未提交" && record.state !== "已退回";
+        const moreItems: any[] = [
+          ...(!isFinished
+            ? [
+                {
+                  key: "submit",
+                  label: "提交业务审核",
+                  icon: <Chat size={16} />,
+                  onClick: () =>
+                    Modal.confirm({
+                      title: "是否提交审核？",
+                      okButtonProps: { style: { backgroundColor: "#198348" } },
+                      onOk: () => handleDetail(record.id),
+                    }),
+                },
+              ]
+            : []),
+          {
+            key: "logs",
+            label: "查看审核日志",
+            icon: <Calendar size={16} />,
+            onClick: () => handleLogsOne(record.id),
+          },
+          ...(record.state === "待业务审批"
+            ? [
+                {
+                  key: "withdraw",
+                  label: "撤回",
+                  icon: <Stop size={16} />,
+                  danger: true,
+                  onClick: () =>
+                    Modal.confirm({
+                      title: "是否撤回？",
+                      okButtonProps: { style: { backgroundColor: "#198348" } },
+                      onOk: () => handleWithdraw(record.id),
+                    }),
+                },
+              ]
+            : []),
+          ...(!isFinished
+            ? [
+                {
+                  key: "delete",
+                  label: "删除",
+                  icon: <Trash size={16} color="#ff4d4f" />,
+                  danger: true,
+                  onClick: () =>
+                    Modal.confirm({
+                      title: "是否删除？",
+                      okButtonProps: { style: { backgroundColor: "#198348" } },
+                      onOk: () => handleDeleteOne(record.id),
+                    }),
+                },
+              ]
+            : []),
+        ];
         return (
-          <Space size="middle" className="flex flex-row !gap-x-1">
+          <Space size={4} className="justify-center">
             <Tooltip title={<span>查看应收应付</span>}>
               <Button
+                type="text"
+                size="small"
+                className="!px-1 !py-0.5 !text-xs"
                 onClick={() => setProjectId(record.projectId)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "3px 5px",
-                }}
               >
-                <ProfileTwoTone twoToneColor="#198348" />
+                <Eye size={16} />
               </Button>
             </Tooltip>
-            {!isFinished && (
-              <Tooltip title={<span>提交业务审核</span>}>
-                <Popconfirm
-                  title="是否提交审核？"
-                  placement="bottom"
-                  getPopupContainer={() => document.body}
-                  okButtonProps={{ style: { backgroundColor: "#198348" } }}
-                  onConfirm={() => handleDetail(record.id)}
-                >
-                  <Button
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      padding: "3px 5px",
-                    }}
-                  >
-                    <InteractionTwoTone twoToneColor="#198348" />
-                  </Button>
-                </Popconfirm>
-              </Tooltip>
-            )}
             {!isFinished && (
               <Tooltip title="编辑">
                 <Button
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    padding: "3px 5px",
-                  }}
+                  type="text"
+                  size="small"
+                  className="!px-1 !py-0.5 !text-xs"
                   onClick={() => handleEditOne(record)}
                 >
-                  <EditTwoTone twoToneColor="#198348" />
+                  <Edit size={16} />
                 </Button>
               </Tooltip>
             )}
-            <Tooltip title="查看审核日志">
-              <Button
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "3px 5px",
-                }}
-                onClick={() => handleLogsOne(record.id)}
-              >
-                <CalendarTwoTone twoToneColor="#198348" />
-              </Button>
-            </Tooltip>
-            {record.state === "待业务审批" && (
-              <Tooltip title="撤回">
-                <Popconfirm
-                  title="是否撤回？"
-                  placement="bottom"
-                  getPopupContainer={() => document.body}
-                  okButtonProps={{ style: { backgroundColor: "#198348" } }}
-                  onConfirm={() => handleWithdraw(record.id)}
-                >
+            {moreItems.length > 0 && (
+              <Tooltip title="更多">
+                <Dropdown trigger={["click"]} menu={{ items: moreItems }}>
                   <Button
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      padding: "3px 5px",
-                    }}
+                    type="text"
+                    size="small"
+                    className="!px-1 !py-0.5 !text-xs"
                   >
-                    <StopTwoTone twoToneColor="#198348" />
+                    <More size={16} />
                   </Button>
-                </Popconfirm>
-              </Tooltip>
-            )}
-            {!isFinished && (
-              <Tooltip title="删除">
-                <Popconfirm
-                  title="是否删除？"
-                  placement="bottom"
-                  getPopupContainer={() => document.body}
-                  okButtonProps={{ style: { backgroundColor: "#198348" } }}
-                  onConfirm={() => handleDeleteOne(record.id)}
-                >
-                  <Button
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      padding: "3px 5px",
-                    }}
-                  >
-                    <DeleteTwoTone twoToneColor="#198348" />
-                  </Button>
-                </Popconfirm>
+                </Dropdown>
               </Tooltip>
             )}
           </Space>
@@ -1002,7 +995,7 @@ const InvoicingSubmit = () => {
             getValueFromEvent={({ file }) => file.originFileObj}
           >
             <Upload {...uploadProps}>
-              <Button icon={<UploadOutlined />}>点击上传</Button>
+              <Button icon={<UploadIcon size={16} />}>点击上传</Button>
             </Upload>
           </Form.Item>
         </Form>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Table from "@/components/ResizeTable";
 import { Button, Tooltip, Select, Space, Modal, message } from "antd";
-import { DownloadOutlined } from "@ant-design/icons";
+import { Download, Eye, Edit, Trash } from "reicon-react";
 import SearchInput from "@/components/SearchInput";
 import type { ColumnsType } from "antd/es/table";
 import { editPickupOrder, PickupOrder } from "@/restApi/pickupOrder";
@@ -47,9 +47,7 @@ export const PickupList = () => {
     getDictByCode("pickup_order_type")
       .then((res: any) => {
         const list = unwrapList(res);
-        setTypeOptions(
-          normalizeDictOptions(list),
-        );
+        setTypeOptions(normalizeDictOptions(list));
       })
       .catch(() => setTypeOptions([]));
   }, []);
@@ -164,8 +162,7 @@ export const PickupList = () => {
     {
       title: "生成时间",
       dataIndex: "createTime",
-      render: (v: string) =>
-        formatDate(v),
+      render: (v: string) => formatDate(v),
     },
     {
       title: "提箱方式",
@@ -200,15 +197,13 @@ export const PickupList = () => {
       title: "指令期限-起",
       dataIndex: "deadlineStart",
       width: 110,
-      render: (v: any) =>
-        formatDate(v),
+      render: (v: any) => formatDate(v),
     },
     {
       title: "指令期限-止",
       dataIndex: "deadlineEnd",
       width: 110,
-      render: (v: any) =>
-        formatDate(v),
+      render: (v: any) => formatDate(v),
     },
     {
       title: "提箱城市",
@@ -218,9 +213,10 @@ export const PickupList = () => {
     {
       title: "操作",
       align: "center",
+      width: 120,
       fixed: "right",
       render: (_, record) => (
-        <Space>
+        <Space size={4} className="justify-center">
           <Tooltip title={<span>查看提箱令信息</span>}>
             <Button
               type="text"
@@ -229,7 +225,7 @@ export const PickupList = () => {
               onClick={() => setViewId(record.id ?? null)}
               title="查看"
             >
-              👁
+              <Eye size={16} />
             </Button>
           </Tooltip>
           <Tooltip title={<span>编辑</span>}>
@@ -240,7 +236,7 @@ export const PickupList = () => {
               onClick={() => setEditId(record.id ?? null)}
               title="编辑"
             >
-              ✎
+              <Edit size={16} />
             </Button>
           </Tooltip>
           <Tooltip title={<span>删除</span>}>
@@ -252,7 +248,7 @@ export const PickupList = () => {
               onClick={() => handleDelete(record.id!)}
               title="删除"
             >
-              🗑
+              <Trash size={16} color="#ff4d4f" />
             </Button>
           </Tooltip>
         </Space>
@@ -283,7 +279,7 @@ export const PickupList = () => {
               download
               className="flex items-center gap-1"
             >
-              <DownloadOutlined />
+              <Download size={16} />
               模板下载
             </a>
           </Button>
@@ -363,7 +359,6 @@ export const PickupList = () => {
         dataSource={releases}
         rowKey="id"
         loading={loading}
-        scroll={{ x: 1400 }}
         pagination={{
           current: page,
           total,

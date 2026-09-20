@@ -1,13 +1,7 @@
 import { useRouter } from "next/router";
 import { useState, useEffect, useRef, useMemo } from "react";
 import clsx from "clsx";
-import {
-  DownOutlined,
-  SoundTwoTone,
-  SettingOutlined,
-  EditOutlined,
-  EllipsisOutlined,
-} from "@ant-design/icons";
+import { ChevronDown, Sound } from "reicon-react";
 import { logout } from "@/restApi/user";
 import {
   Modal,
@@ -27,7 +21,6 @@ import { SM_PUBLIC_KEY } from "@/utils/const";
 import { getBadge } from "@/restApi/menu";
 import Link from "next/link";
 import { useClickAway } from "ahooks";
-import Image from "next/image";
 
 const User = () => {
   const router = useRouter();
@@ -104,8 +97,9 @@ const User = () => {
         >
           <div className="absolute inset-0 w-full h-full">
             <Badge size="small" color="red" count={badges ? count : 0}>
-              <SoundTwoTone
-                twoToneColor="#198348"
+              <Sound
+                size={22}
+                color="#198348"
                 style={{ fontSize: "25px", cursor: "pointer" }}
               />
             </Badge>
@@ -114,7 +108,7 @@ const User = () => {
           <section
             className={clsx(
               "absolute top-10 right-0 z-10 border-[1px] px-5 py-2 bg-[#fff] w-max  flex flex-col gap-y-4",
-              !noticeModal && "hidden"
+              !noticeModal && "hidden",
             )}
           >
             <Row gutter={[16, 16]}>
@@ -247,19 +241,20 @@ const User = () => {
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
-        <div className="flex flex-row gap-x-3">
+        <div className="flex flex-row gap-x-3 items-center">
           <span className="text-[#198348]">{username}</span>
-          <DownOutlined
+          <ChevronDown
+            size={16}
             className={clsx(
               "w-5 stroke-white transform transition-transform",
-              hovered && "rotate-180"
+              hovered && "rotate-180",
             )}
           />
         </div>
         <ul
           className={clsx(
             "font-medium tracking-wider leading-8 <md:w-full min-w-20 w-max top-12 md:top-16 z-[102] absolute border-[1px] px-5 py-2 bg-[#fff] flex flex-col gap-y-2",
-            !hovered && "hidden"
+            !hovered && "hidden",
           )}
         >
           <li
@@ -348,16 +343,16 @@ const User = () => {
                   let total = 0;
                   const oSpeArr = value.split("");
                   const oNumberItem = oSpeArr.find(
-                    (item: any) => oNumber.indexOf(item) !== -1
+                    (item: any) => oNumber.indexOf(item) !== -1,
                   );
                   const oLetterItem = oSpeArr.find(
-                    (item: any) => oLetter.indexOf(item) !== -1
+                    (item: any) => oLetter.indexOf(item) !== -1,
                   );
                   const oSpeItem = oSpeArr.find(
-                    (item: any) => oSpecial.indexOf(item) !== -1
+                    (item: any) => oSpecial.indexOf(item) !== -1,
                   );
                   const oTherItem = oSpeArr.find(
-                    (item: any) => oTher.indexOf(item) === -1
+                    (item: any) => oTher.indexOf(item) === -1,
                   );
 
                   if (value.length < 6 || oTherItem !== undefined) {

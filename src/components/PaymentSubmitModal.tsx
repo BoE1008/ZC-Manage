@@ -5,7 +5,7 @@ import {
   deleteFileById,
   updateFileById,
 } from "@/restApi/payment";
-import { UploadOutlined } from "@ant-design/icons";
+import { Upload as UploadIcon } from "reicon-react";
 import { formatNumber } from "@/utils";
 
 const PaymentDetailModal: FC<{
@@ -355,7 +355,7 @@ const PaymentDetailModal: FC<{
       </table>
 
       <Upload {...uploadProps}>
-        <Button icon={<UploadOutlined />}>点击上传</Button>
+        <Button icon={<UploadIcon size={16} />}>点击上传</Button>
       </Upload>
     </Modal>
   );

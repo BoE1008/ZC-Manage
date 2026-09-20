@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Button, Space, Select, Modal, message, Tooltip } from "antd";
-import { EyeOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { Eye, Edit, Trash } from "reicon-react";
 import Table from "@/components/ResizeTable";
 import type { ColumnsType } from "antd/es/table";
 import SearchInput from "../SearchInput";
@@ -63,7 +63,7 @@ const ProjectConfigList: React.FC = () => {
       try {
         const r: any = await getAllProjectList();
         setProjects(
-          (unwrapList(r)).map((p: any) => ({
+          unwrapList(r).map((p: any) => ({
             id: p.id,
             name: p.name,
             num: p.num ?? p.projectNum ?? "",
@@ -146,16 +146,17 @@ const ProjectConfigList: React.FC = () => {
     {
       title: "操作",
       align: "center",
+      width: 120,
       fixed: "right",
       render: (_, r) => (
-        <Space size="small">
+        <Space size={4} className="justify-center">
           <Tooltip title="详情">
             <Button
               type="text"
               size="small"
               onClick={() => setViewId(r.projectId)}
             >
-              👁
+              <Eye size={16} />
             </Button>
           </Tooltip>
           <Tooltip title="编辑">
@@ -164,7 +165,7 @@ const ProjectConfigList: React.FC = () => {
               size="small"
               onClick={() => setEditId(r.projectId)}
             >
-              ✎
+              <Edit size={16} />
             </Button>
           </Tooltip>
           <Tooltip title="删除">
@@ -174,14 +175,13 @@ const ProjectConfigList: React.FC = () => {
               danger
               onClick={() => handleDelete(r)}
             >
-              🗑
+              <Trash size={16} color="#ff4d4f" />
             </Button>
           </Tooltip>
         </Space>
       ),
     },
   ];
-
 
   return (
     <div className="p-2">
@@ -261,7 +261,6 @@ const ProjectConfigList: React.FC = () => {
         loading={loading}
         columns={columns}
         dataSource={list}
-        scroll={{ x: 1200 }}
         pagination={{
           current: page,
           pageSize,

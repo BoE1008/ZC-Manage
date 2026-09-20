@@ -5,7 +5,7 @@ import {
   deleteFileById,
   updateFileById,
 } from "@/restApi/invoicing";
-import { UploadOutlined } from "@ant-design/icons";
+import { Upload as UploadIcon } from "reicon-react";
 import { formatNumber } from "@/utils";
 
 const InvoicingDetailModal = ({ onClose, data, onConfirm }) => {
@@ -30,7 +30,7 @@ const InvoicingDetailModal = ({ onClose, data, onConfirm }) => {
 
   const handleConfirm = async () => {
     const fileList = files.filter(
-      (itemA) => !oldFiles.some((itemB) => itemA.name === itemB.name)
+      (itemA) => !oldFiles.some((itemB) => itemA.name === itemB.name),
     );
 
     const formData = new FormData();
@@ -78,7 +78,7 @@ const InvoicingDetailModal = ({ onClose, data, onConfirm }) => {
     },
     onDownload: async (file) => {
       window.open(
-        `http://115.175.21.89/zc/common/download/resource?resource=${file?.url}`
+        `http://115.175.21.89/zc/common/download/resource?resource=${file?.url}`,
         // `http://123.60.88.8/zc/common/download/resource?resource=${file?.url}`
       );
     },
@@ -389,7 +389,7 @@ const InvoicingDetailModal = ({ onClose, data, onConfirm }) => {
       </table>
 
       <Upload {...uploadProps}>
-        <Button icon={<UploadOutlined />}>点击上传</Button>
+        <Button icon={<UploadIcon size={16} />}>点击上传</Button>
       </Upload>
     </Modal>
   );

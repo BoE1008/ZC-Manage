@@ -8,6 +8,7 @@ import {
   Space,
   Select,
   DatePicker,
+  Dropdown,
   message,
   List,
   Avatar,
@@ -17,15 +18,7 @@ import {
   Checkbox,
   InputNumber,
 } from "antd";
-import {
-  EditTwoTone,
-  ProfileTwoTone,
-  DeleteTwoTone,
-  InteractionTwoTone,
-  AppstoreTwoTone,
-  GiftTwoTone,
-  RocketTwoTone,
-} from "@ant-design/icons";
+import { Edit, Eye, Trash, Chat, Grid, Gift, Rocket, More } from "reicon-react";
 import {
   getProjectsSubmitList,
   addProject,
@@ -548,111 +541,96 @@ const Project = () => {
         label: "操作",
         value: "操作",
         align: "center",
+        width: 120,
         fixed: "right",
         key: "action",
         render: (_, record) => {
           const unFinished =
             record.state === "未完结" || record.state === "已退回";
+          const moreItems: any[] = [
+            ...(unFinished
+              ? [
+                  {
+                    key: "submit",
+                    label: "提交业务审核",
+                    icon: <Chat size={16} />,
+                    onClick: () =>
+                      Modal.confirm({
+                        title: "是否提交审核？",
+                        okButtonProps: {
+                          style: { backgroundColor: "#198348" },
+                        },
+                        onOk: () => handleSubmitOne(record.id),
+                      }),
+                  },
+                  {
+                    key: "delete",
+                    label: "删除",
+                    icon: <Trash size={16} color="#ff4d4f" />,
+                    danger: true,
+                    onClick: () =>
+                      Modal.confirm({
+                        title: "是否删除？",
+                        okButtonProps: {
+                          style: { backgroundColor: "#198348" },
+                        },
+                        onOk: () => handleDeleteOne(record.id),
+                      }),
+                  },
+                ]
+              : []),
+            ...(hasMoveRight
+              ? [
+                  {
+                    key: "normalTrans",
+                    label: "普通转移",
+                    icon: <Rocket size={16} />,
+                    onClick: () => setNormalTransId(record.id),
+                  },
+                  {
+                    key: "leaveTrans",
+                    label: "离职转移",
+                    icon: <Gift size={16} />,
+                    onClick: () => setLeaveTransId(record.id),
+                  },
+                ]
+              : []),
+          ];
           return (
-            <Space
-              size="middle"
-              className="!grid grid-cols-2 xl:grid-cols-4 !gap-x-1"
-            >
+            <Space size={4} className="justify-center">
+              <Tooltip title={<span>查看应收应付</span>}>
+                <Button
+                  type="text"
+                  size="small"
+                  className="!px-1 !py-0.5 !text-xs"
+                  onClick={() => setProjectId(record.id)}
+                >
+                  <Eye size={16} />
+                </Button>
+              </Tooltip>
               {unFinished && (
                 <Tooltip title={<span>编辑</span>}>
                   <Button
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      padding: "3px 5px",
-                    }}
+                    type="text"
+                    size="small"
+                    className="!px-1 !py-0.5 !text-xs"
                     onClick={() => handleEditOne(record)}
                   >
-                    <EditTwoTone twoToneColor="#198348" />
+                    <Edit size={16} />
                   </Button>
                 </Tooltip>
               )}
-              <Tooltip title={<span>查看应收应付</span>}>
-                <Button
-                  onClick={() => setProjectId(record.id)}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    padding: "3px 5px",
-                  }}
-                >
-                  <ProfileTwoTone twoToneColor="#198348" />
-                </Button>
-              </Tooltip>
-
-              {unFinished && (
-                <Tooltip title={<span>提交业务审核</span>}>
-                  <Popconfirm
-                    placement="bottom"
-                    getPopupContainer={() => document.body}
-                    title="是否提交审核？"
-                    okButtonProps={{ style: { backgroundColor: "#198348" } }}
-                    onConfirm={() => handleSubmitOne(record.id)}
-                  >
+              {moreItems.length > 0 && (
+                <Tooltip title="更多">
+                  <Dropdown trigger={["click"]} menu={{ items: moreItems }}>
                     <Button
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        padding: "3px 5px",
-                      }}
+                      type="text"
+                      size="small"
+                      className="!px-1 !py-0.5 !text-xs"
                     >
-                      <InteractionTwoTone twoToneColor="#198348" />
+                      <More size={16} />
                     </Button>
-                  </Popconfirm>
-                </Tooltip>
-              )}
-              {unFinished && (
-                <Tooltip title={<span>删除</span>}>
-                  <Popconfirm
-                    placement="bottom"
-                    getPopupContainer={() => document.body}
-                    title="是否删除？"
-                    okButtonProps={{ style: { backgroundColor: "#198348" } }}
-                    onConfirm={() => handleDeleteOne(record.id)}
-                  >
-                    <Button
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        padding: "3px 5px",
-                      }}
-                    >
-                      <DeleteTwoTone twoToneColor="#198348" />
-                    </Button>
-                  </Popconfirm>
-                </Tooltip>
-              )}
-              {hasMoveRight && (
-                <Tooltip title={<span>普通转移</span>}>
-                  <Button
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      padding: "3px 5px",
-                    }}
-                    onClick={() => setNormalTransId(record.id)}
-                  >
-                    <RocketTwoTone twoToneColor="#198348" />
-                  </Button>
-                </Tooltip>
-              )}
-              {hasMoveRight && (
-                <Tooltip title={<span>离职转移</span>}>
-                  <Button
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      padding: "3px 5px",
-                    }}
-                    onClick={() => setLeaveTransId(record.id)}
-                  >
-                    <GiftTwoTone twoToneColor="#198348" />
-                  </Button>
+                  </Dropdown>
                 </Tooltip>
               )}
             </Space>
@@ -843,10 +821,7 @@ const Project = () => {
             title="显隐列"
             trigger="click"
           >
-            <AppstoreTwoTone
-              style={{ fontSize: "30px" }}
-              twoToneColor="#198348"
-            />
+            <Grid size={16} style={{ fontSize: "30px" }} />
           </Popover>
         </Space>
       </div>

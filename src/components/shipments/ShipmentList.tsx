@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Table from "@/components/ResizeTable";
 import { Button, Select, Space, Modal, message, Tooltip } from "antd";
-import { DownloadOutlined } from "@ant-design/icons";
+import { Download, Eye, Edit, Trash } from "reicon-react";
 import SearchInput from "@/components/SearchInput";
 import { ContainerDetailModal } from "@/components/containers/ContainerDetailModal";
 import { ShipmentDetailModal } from "./ShipmentDetailModal";
@@ -250,9 +250,10 @@ export const ShipmentList = () => {
     {
       title: "操作",
       align: "center",
+      width: 120,
       fixed: "right",
       render: (_, r) => (
-        <Space size={2}>
+        <Space size={4} className="justify-center">
           <Tooltip title={<span>查看运踪详细信息</span>}>
             <Button
               type="text"
@@ -260,7 +261,7 @@ export const ShipmentList = () => {
               className="!px-1 !py-0.5 !text-xs"
               onClick={() => setDetailId(r.id)}
             >
-              👁
+              <Eye size={16} />
             </Button>
           </Tooltip>
           <Tooltip title={<span>编辑</span>}>
@@ -270,7 +271,7 @@ export const ShipmentList = () => {
               className="!px-1 !py-0.5 !text-xs"
               onClick={() => setEditId(r.id)}
             >
-              ✎
+              <Edit size={16} />
             </Button>
           </Tooltip>
           <Tooltip title={<span>删除</span>}>
@@ -281,7 +282,7 @@ export const ShipmentList = () => {
               className="!px-1 !py-0.5 !text-xs"
               onClick={() => handleDelete(r.id)}
             >
-              🗑
+              <Trash size={16} color="#ff4d4f" />
             </Button>
           </Tooltip>
         </Space>
@@ -323,7 +324,7 @@ export const ShipmentList = () => {
             download
             className="flex items-center gap-1"
           >
-            <DownloadOutlined />
+            <Download size={16} />
             模板下载
           </a>
         </Button>
@@ -602,7 +603,6 @@ export const ShipmentList = () => {
               });
             },
           }}
-          scroll={{ x: 1700 }}
         />
       </div>
 

@@ -39,14 +39,12 @@ export default function App({ Component, pageProps }: AppProps) {
   useEffect(() => {
     const checkLogin = () => {
       const authed = isLogged();
-
       if (!isNoLayout && !authed) {
         router.replace("/login");
       } else {
         setIsReady(true);
       }
     };
-
     checkLogin();
   }, [router.pathname, isNoLayout, router]);
 

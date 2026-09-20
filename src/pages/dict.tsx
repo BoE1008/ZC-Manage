@@ -10,7 +10,7 @@ import {
   Tag,
   Select,
 } from "antd";
-import { EditTwoTone, DeleteTwoTone } from "@ant-design/icons";
+import { Edit, Trash } from "reicon-react";
 import {
   getDictList,
   addDict,
@@ -186,6 +186,8 @@ const Dict = () => {
     {
       title: "操作",
       align: "center",
+      width: 120,
+      fixed: "right",
       key: "action",
       render: (_, record: Company) => {
         return (
@@ -198,7 +200,7 @@ const Dict = () => {
               }}
               onClick={() => handleEditOne(record)}
             >
-              <EditTwoTone twoToneColor="#198348" />
+              <Edit size={16} />
             </Button>
             <Button
               style={{
@@ -208,7 +210,7 @@ const Dict = () => {
               }}
               onClick={() => handleDeleteOne(record.id)}
             >
-              <DeleteTwoTone twoToneColor="#198348" />
+              <Trash size={16} color="#ff4d4f" />
             </Button>
           </Space>
         );
@@ -262,6 +264,8 @@ const Dict = () => {
     {
       title: "操作",
       align: "center",
+      width: 120,
+      fixed: "right",
       key: "action",
       render: (_, record: Company) => {
         return (
@@ -274,7 +278,7 @@ const Dict = () => {
               }}
               onClick={() => handleDataEdit(record)}
             >
-              <EditTwoTone twoToneColor="#198348" />
+              <Edit size={16} />
             </Button>
             <Button
               style={{
@@ -284,7 +288,7 @@ const Dict = () => {
               }}
               onClick={() => handleDeleteDataOne(record.id)}
             >
-              <DeleteTwoTone twoToneColor="#198348" />
+              <Trash size={16} color="#ff4d4f" />
             </Button>
           </Space>
         );

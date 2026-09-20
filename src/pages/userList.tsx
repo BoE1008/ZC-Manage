@@ -12,11 +12,11 @@ import {
   Select,
 } from "antd";
 import {
-  EditTwoTone,
-  DeleteTwoTone,
-  DownOutlined,
-  ThunderboltTwoTone,
-} from "@ant-design/icons";
+  Edit,
+  Trash,
+  ChevronDown,
+  Bolt,
+} from "reicon-react";
 import {
   getUserList,
   updateUser,
@@ -179,6 +179,8 @@ const User = () => {
     {
       title: "操作",
       align: "center",
+      width: 120,
+      fixed: "right",
       key: "action",
       render: (_, record: Company) => {
         return (
@@ -192,7 +194,7 @@ const User = () => {
                 }}
                 onClick={() => handleEditOne(record)}
               >
-                <EditTwoTone twoToneColor="#198348" />
+                <Edit size={16} />
               </Button>
             </Tooltip>
             <Tooltip title="重置密码">
@@ -209,7 +211,7 @@ const User = () => {
                     padding: "3px 5px",
                   }}
                 >
-                  <ThunderboltTwoTone twoToneColor="#198348" />
+                  <Bolt size={16} />
                 </Button>
               </Popconfirm>
             </Tooltip>
@@ -227,7 +229,7 @@ const User = () => {
                     padding: "3px 5px",
                   }}
                 >
-                  <DeleteTwoTone twoToneColor="#198348" />
+                  <Trash size={16} color="#ff4d4f" />
                 </Button>
               </Popconfirm>
             </Tooltip>
@@ -280,7 +282,7 @@ const User = () => {
               defaultExpandAll={true}
               // defaultExpandedKeys={["100"]}
               defaultSelectedKeys={["100"]}
-              switcherIcon={<DownOutlined />}
+              switcherIcon={<ChevronDown size={16} />}
               onSelect={onSelect}
               treeData={depts}
             />
@@ -382,7 +384,7 @@ const User = () => {
                       ? ["100"]
                       : [form.getFieldValue("deptId")]
                   }
-                  switcherIcon={<DownOutlined />}
+                  switcherIcon={<ChevronDown size={16} />}
                   onSelect={onDeptSelect}
                   treeData={depts}
                 />

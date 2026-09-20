@@ -12,7 +12,7 @@ import {
   Popconfirm,
 } from "antd";
 import { Operation } from "@/types";
-import { EditTwoTone, DeleteTwoTone } from "@ant-design/icons";
+import { Edit, Trash } from "reicon-react";
 import { addDept, updateDept, deleteDept, getDeptList } from "@/restApi/dept";
 import { arrayToTree, formatDept } from "@/utils";
 
@@ -104,6 +104,8 @@ const Dept = () => {
     {
       title: "操作",
       align: "center",
+      width: 120,
+      fixed: "right",
       key: "action",
       render: (_, record) => {
         return (
@@ -117,7 +119,7 @@ const Dept = () => {
                 }}
                 onClick={() => handleEditOne(record)}
               >
-                <EditTwoTone twoToneColor="#198348" />
+                <Edit size={16} />
               </Button>
             </Tooltip>
 
@@ -136,7 +138,7 @@ const Dept = () => {
                     padding: "3px 5px",
                   }}
                 >
-                  <DeleteTwoTone twoToneColor="#198348" />
+                  <Trash size={16} color="#ff4d4f" />
                 </Button>
               </Popconfirm>
             </Tooltip>

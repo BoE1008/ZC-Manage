@@ -15,7 +15,7 @@ import {
   InputNumber,
 } from "antd";
 import { Operation } from "@/types";
-import { EditTwoTone, DeleteTwoTone } from "@ant-design/icons";
+import { Edit, Trash } from "reicon-react";
 import {
   addExchangeRate,
   updateExchangeRate,
@@ -148,6 +148,8 @@ const ExchangeRate = () => {
     {
       title: "操作",
       align: "center",
+      width: 120,
+      fixed: "right",
       key: "action",
       render: (_, record) => {
         return (
@@ -161,7 +163,7 @@ const ExchangeRate = () => {
                 }}
                 onClick={() => handleEditOne(record)}
               >
-                <EditTwoTone twoToneColor="#198348" />
+                <Edit size={16} />
               </Button>
             </Tooltip>
 
@@ -180,7 +182,7 @@ const ExchangeRate = () => {
                     padding: "3px 5px",
                   }}
                 >
-                  <DeleteTwoTone twoToneColor="#198348" />
+                  <Trash size={16} color="#ff4d4f" />
                 </Button>
               </Popconfirm>
             </Tooltip>

@@ -11,12 +11,7 @@ import {
   Avatar,
   DatePicker,
 } from "antd";
-import {
-  CheckCircleTwoTone,
-  StopTwoTone,
-  CalendarTwoTone,
-  ProfileTwoTone,
-} from "@ant-design/icons";
+import { CheckCircle, Stop, Calendar, Eye } from "reicon-react";
 import {
   getPaymentLDList,
   submitLDToCW,
@@ -81,7 +76,7 @@ const Payment = () => {
           userName,
           projectNum,
           date,
-          updateTimeSort
+          updateTimeSort,
         );
         setData(res);
         setLoading(false);
@@ -119,7 +114,7 @@ const Payment = () => {
       projectState,
       userName,
       projectNum,
-      date
+      date,
     );
     setData(res);
     message.success({ content: "已提交至财务审核", type: "success" });
@@ -137,7 +132,7 @@ const Payment = () => {
       projectState,
       userName,
       projectNum,
-      date
+      date,
     );
     setData(res);
     message.success({ content: "申请已退回", type: "success" });
@@ -319,6 +314,8 @@ const Payment = () => {
     {
       title: "操作",
       align: "center",
+      width: 120,
+      fixed: "right",
       key: "action",
       render: (_, record) => {
         const isSubmit = record.state === "待总经理审批";
@@ -334,7 +331,7 @@ const Payment = () => {
                   padding: "3px 5px",
                 }}
               >
-                <ProfileTwoTone twoToneColor="#198348" />
+                <Eye size={16} />
               </Button>
             </Tooltip>
             {isSubmit && (
@@ -352,7 +349,7 @@ const Payment = () => {
                       padding: "3px 5px",
                     }}
                   >
-                    <CheckCircleTwoTone twoToneColor="#198348" />
+                    <CheckCircle size={16} />
                   </Button>
                 </Popconfirm>
               </Tooltip>
@@ -372,7 +369,7 @@ const Payment = () => {
                       padding: "3px 5px",
                     }}
                   >
-                    <StopTwoTone twoToneColor="#198348" />
+                    <Stop size={16} />
                   </Button>
                 </Popconfirm>
               </Tooltip>
@@ -386,7 +383,7 @@ const Payment = () => {
                 }}
                 onClick={() => handleLogsOne(record.id)}
               >
-                <CalendarTwoTone twoToneColor="#198348" />
+                <Calendar size={16} />
               </Button>
             </Tooltip>
           </Space>

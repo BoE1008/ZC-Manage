@@ -11,7 +11,7 @@ import {
   message,
   Table,
 } from "antd";
-import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { Plus, Edit, Trash } from "reicon-react";
 import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
 import {
@@ -102,14 +102,14 @@ const CostPanel: React.FC<Props> = ({ containerId, containerNo }) => {
     {
       title: "发生日期",
       dataIndex: "occurDate",
-      width: 110,
+      width: 120,
       align: "center",
       render: (v) => fmtDate(v),
     },
     { title: "备注", dataIndex: "remark", ellipsis: true },
     {
       title: "操作",
-      width: 110,
+      width: 120,
       align: "center",
       fixed: "right",
       render: (_, r) => (
@@ -117,13 +117,13 @@ const CostPanel: React.FC<Props> = ({ containerId, containerNo }) => {
           <Button
             type="text"
             size="small"
-            icon={<EditOutlined />}
+            icon={<Edit size={16} />}
             onClick={() => setEditId(r.id)}
           />
           <Button
             type="text"
             size="small"
-            icon={<DeleteOutlined />}
+            icon={<Trash size={16} color="#ff4d4f" />}
             onClick={() => handleDelete(r.id)}
           />
         </Space>
@@ -142,7 +142,7 @@ const CostPanel: React.FC<Props> = ({ containerId, containerNo }) => {
         <Button
           type="primary"
           size="small"
-          icon={<PlusOutlined />}
+          icon={<Plus size={16} />}
           className="ml-auto"
           style={{ background: "#198348", borderColor: "#198348" }}
           onClick={() => setEditId(null)}
@@ -235,7 +235,7 @@ const IncomePanel: React.FC<Props> = ({ containerId, containerNo }) => {
     {
       title: "发生日期",
       dataIndex: "occurDate",
-      width: 110,
+      width: 120,
       align: "center",
       render: (v) => fmtDate(v),
     },
@@ -258,7 +258,7 @@ const IncomePanel: React.FC<Props> = ({ containerId, containerNo }) => {
     { title: "备注", dataIndex: "remark", ellipsis: true },
     {
       title: "操作",
-      width: 110,
+      width: 120,
       align: "center",
       fixed: "right",
       render: (_, r) => (
@@ -266,13 +266,13 @@ const IncomePanel: React.FC<Props> = ({ containerId, containerNo }) => {
           <Button
             type="text"
             size="small"
-            icon={<EditOutlined />}
+            icon={<Edit size={16} />}
             onClick={() => setEditId(r.id)}
           />
           <Button
             type="text"
             size="small"
-            icon={<DeleteOutlined />}
+            icon={<Trash size={16} color="#ff4d4f" />}
             onClick={() => handleDelete(r.id)}
           />
         </Space>
@@ -291,7 +291,7 @@ const IncomePanel: React.FC<Props> = ({ containerId, containerNo }) => {
         <Button
           type="primary"
           size="small"
-          icon={<PlusOutlined />}
+          icon={<Plus size={16} />}
           className="ml-auto"
           style={{ background: "#198348", borderColor: "#198348" }}
           onClick={() => setEditId(null)}

@@ -11,7 +11,7 @@ import {
   Select,
   Popconfirm,
 } from "antd";
-import { EditTwoTone, DeleteTwoTone, ProfileTwoTone } from "@ant-design/icons";
+import { Edit, Trash, Eye } from "reicon-react";
 import {
   getCustomersList,
   addCustomer,
@@ -256,6 +256,8 @@ const Customer = () => {
     {
       title: "操作",
       align: "center",
+      width: 120,
+      fixed: "right",
       key: "action",
       render: (_, record: Company) => {
         return (
@@ -269,7 +271,7 @@ const Customer = () => {
                 }}
                 onClick={() => handleEditOne(record)}
               >
-                <EditTwoTone twoToneColor="#198348" />
+                <Edit size={16} />
               </Button>
             )}
             <Tooltip title={<span>查看银行账户信息</span>}>
@@ -281,7 +283,7 @@ const Customer = () => {
                   padding: "3px 5px",
                 }}
               >
-                <ProfileTwoTone twoToneColor="#198348" />
+                <Eye size={16} />
               </Button>
             </Tooltip>
             {userId && [...adminUserIds, record.createBy].includes(userId) && (
@@ -300,7 +302,7 @@ const Customer = () => {
                       padding: "3px 5px",
                     }}
                   >
-                    <DeleteTwoTone twoToneColor="#198348" />
+                    <Trash size={16} color="#ff4d4f" />
                   </Button>
                 </Popconfirm>
               </Tooltip>
@@ -339,6 +341,8 @@ const Customer = () => {
     {
       title: "操作",
       align: "center",
+      width: 120,
+      fixed: "right",
       key: "action",
       render: (_, record) => {
         return (
@@ -351,7 +355,7 @@ const Customer = () => {
               }}
               onClick={() => handleEditBank(record)}
             >
-              <EditTwoTone twoToneColor="#198348" />
+              <Edit size={16} />
             </Button>
             <Tooltip title="删除">
               <Popconfirm
@@ -369,7 +373,7 @@ const Customer = () => {
                   }}
                   onClick={() => handleDeleteBank(record.id)}
                 >
-                  <DeleteTwoTone twoToneColor="#198348" />
+                  <Trash size={16} color="#ff4d4f" />
                 </Button>
               </Popconfirm>
             </Tooltip>

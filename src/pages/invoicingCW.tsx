@@ -17,14 +17,9 @@ import {
   Tooltip,
   Popconfirm,
   Statistic,
+  Dropdown,
 } from "antd";
-import {
-  CheckCircleTwoTone,
-  StopTwoTone,
-  CalendarTwoTone,
-  ProfileTwoTone,
-  AccountBookTwoTone,
-} from "@ant-design/icons";
+import { CheckCircle, Stop, Calendar, Eye, Book, More } from "reicon-react";
 import { getCustomersList } from "@/restApi/customer";
 import RejectModal from "@/components/RejectModal";
 import InvoicingSubmitModal from "@/components/InvoicingSubmitModal";
@@ -342,79 +337,71 @@ const InvoicingCW = () => {
     {
       title: "操作",
       align: "center",
+      width: 120,
+      fixed: "right",
       key: "action",
       render: (_, record) => {
         const isSubmit = record.state === "待财务审批";
+        const moreItems: any[] = [
+          ...(isSubmit
+            ? [
+                {
+                  key: "approve",
+                  label: "申请通过",
+                  icon: <CheckCircle size={16} />,
+                  onClick: () =>
+                    Modal.confirm({
+                      title: "是否通过申请？",
+                      okButtonProps: { style: { backgroundColor: "#198348" } },
+                      onOk: () => handleDetail(record.id),
+                    }),
+                },
+              ]
+            : []),
+          {
+            key: "reject",
+            label: "退回申请",
+            icon: <Stop size={16} />,
+            danger: true,
+            onClick: () =>
+              Modal.confirm({
+                title: "是否退回申请？",
+                okButtonProps: { style: { backgroundColor: "#198348" } },
+                onOk: () => setRejectId(record.id),
+              }),
+          },
+          {
+            key: "logs",
+            label: "查看审核日志",
+            icon: <Calendar size={16} />,
+            onClick: () => handleLogsOne(record.id),
+          },
+        ];
         return (
-          <Space size="middle" className="flex flex-row !gap-x-1">
+          <Space size={4} className="justify-center">
             <Tooltip title={<span>查看应收应付</span>}>
               <Button
+                type="text"
+                size="small"
+                className="!px-1 !py-0.5 !text-xs"
                 onClick={() => setProjectId(record.projectId)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "3px 5px",
-                }}
               >
-                <ProfileTwoTone twoToneColor="#198348" />
+                <Eye size={16} />
               </Button>
             </Tooltip>
-            {isSubmit && (
-              <Tooltip title="申请通过">
-                <Popconfirm
-                  title="是否通过申请？"
-                  placement="bottom"
-                  getPopupContainer={() => document.body}
-                  okButtonProps={{ style: { backgroundColor: "#198348" } }}
-                  onConfirm={() => {
-                    handleDetail(record.id);
-                  }}
-                >
+            {moreItems.length > 0 && (
+              <Tooltip title="更多">
+                <Dropdown trigger={["click"]} menu={{ items: moreItems }}>
                   <Button
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      padding: "3px 5px",
-                    }}
+                    type="text"
+                    size="small"
+                    className="!px-1 !py-0.5 !text-xs"
                   >
-                    <CheckCircleTwoTone twoToneColor="#198348" />
+                    <More size={16} />
                   </Button>
-                </Popconfirm>
+                </Dropdown>
               </Tooltip>
             )}
-            {
-              <Tooltip title="退回申请">
-                <Popconfirm
-                  title="是否退回申请？"
-                  okButtonProps={{ style: { backgroundColor: "#198348" } }}
-                  placement="bottom"
-                  getPopupContainer={() => document.body}
-                  onConfirm={() => setRejectId(record.id)}
-                >
-                  <Button
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      padding: "3px 5px",
-                    }}
-                  >
-                    <StopTwoTone twoToneColor="#198348" />
-                  </Button>
-                </Popconfirm>
-              </Tooltip>
-            }
-            <Tooltip title="查看审核日志">
-              <Button
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "3px 5px",
-                }}
-                onClick={() => handleLogsOne(record.id)}
-              >
-                <CalendarTwoTone twoToneColor="#198348" />
-              </Button>
-            </Tooltip>
           </Space>
         );
       },
@@ -459,7 +446,7 @@ const InvoicingCW = () => {
             padding: "10px",
           }}
           title="选中项总金额"
-          prefix={<AccountBookTwoTone twoToneColor="#198348" />}
+          prefix={<Book size={16} />}
           value={selectedFee}
           precision={2}
         />

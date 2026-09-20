@@ -81,3 +81,8 @@ body {
   position: relative !important;
   top: 0px !important;
 }
+
+/* reicon 图标默认无主题色，hover 按钮时显示主题色 */
+button:hover svg.reicon {
+  color: #198348;
+}

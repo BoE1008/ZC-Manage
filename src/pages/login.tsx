@@ -1,5 +1,5 @@
 import { Input, Button, Form, Space, Modal } from "antd";
-import { UserOutlined } from "@ant-design/icons";
+import { User } from "reicon-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Background2 from "@/assets/images/bg2.jpg";
@@ -232,7 +232,7 @@ const Login = () => {
                 <Input
                   size="large"
                   placeholder="请输入用户名"
-                  prefix={<UserOutlined />}
+                  prefix={<User size={16} />}
                   className="h-[45px]"
                 />
               </Form.Item>

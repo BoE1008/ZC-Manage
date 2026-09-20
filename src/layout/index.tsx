@@ -32,7 +32,8 @@ const AppLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
     (async () => {
       const userName = sessionStorage.getItem("username");
       if (!!userName) {
-        const menu = JSON.parse(sessionStorage.getItem("menu") as string);
+        const menuStr = sessionStorage.getItem("menu");
+        const menu = menuStr ? JSON.parse(menuStr) : [];
         setUserName(userName);
         setMenu(menu);
       }
@@ -127,7 +128,7 @@ const AppLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
               minHeight: "100%",
               flex: 1,
             }}
-            className="h-screen overflow-y-auto"
+            className="h-screen overflow-y-auto overflow-x-auto"
           >
             <Content
               style={{

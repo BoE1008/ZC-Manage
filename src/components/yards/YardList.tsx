@@ -7,6 +7,7 @@ import YardDetailModal from "./YardDetailModal";
 import { getYardList, deleteYard } from "@/restApi/yard";
 import { getDictByCode } from "@/restApi/dict";
 import { unwrapList, normalizeDictOptions } from "@/utils";
+import { Eye, Edit, Trash } from "reicon-react";
 
 const YardList: React.FC = () => {
   const [data, setData] = useState<any[]>([]);
@@ -45,9 +46,7 @@ const YardList: React.FC = () => {
     getDictByCode("yard_city")
       .then((res: any) => {
         const list = unwrapList(res);
-        setCityOptions(
-          normalizeDictOptions(list),
-        );
+        setCityOptions(normalizeDictOptions(list));
       })
       .catch(() => setCityOptions([]));
   }, []);
@@ -120,16 +119,18 @@ const YardList: React.FC = () => {
     { title: "作业时间", dataIndex: "workingTime" },
     {
       title: "操作",
+      align: "center",
+      width: 120,
       fixed: "right" as const,
       render: (_: any, r: any) => (
-        <Space size={4}>
+        <Space size={4} className="justify-center">
           <Button
             type="text"
             size="small"
             className="!px-1"
             onClick={() => setViewId(r.id)}
           >
-            👁
+            <Eye size={16} />
           </Button>
           <Button
             type="text"
@@ -137,7 +138,7 @@ const YardList: React.FC = () => {
             className="!px-1"
             onClick={() => setEditId(r.id)}
           >
-            ✎
+            <Edit size={16} />
           </Button>
           <Button
             type="text"
@@ -145,7 +146,7 @@ const YardList: React.FC = () => {
             className="!px-1"
             onClick={() => handleDelete(r)}
           >
-            🗑
+            <Trash size={16} color="#ff4d4f" />
           </Button>
         </Space>
       ),
@@ -235,7 +236,6 @@ const YardList: React.FC = () => {
           loading={loading}
           rowKey="id"
           size="small"
-          scroll={{ x: 1300, y: 500 }}
           pagination={{
             current: page,
             pageSize,

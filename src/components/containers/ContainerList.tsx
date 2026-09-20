@@ -1,14 +1,18 @@
 import { useState, useEffect, useCallback, type ReactNode } from "react";
 import { useRouter } from "next/router";
-import { Button, Tooltip, Select, Space, Modal, message } from "antd";
+import { Button, Dropdown, Tooltip, Select, Space, Modal, message } from "antd";
 import {
-  PlusCircleOutlined,
-  RiseOutlined,
-  MinusCircleOutlined,
-  FallOutlined,
-  FileTextOutlined,
-  DownloadOutlined,
-} from "@ant-design/icons";
+  PlusCircle,
+  TrendUp,
+  MinusCircle,
+  TrendDown,
+  FileText,
+  Download,
+  Eye,
+  Edit,
+  Trash,
+  More,
+} from "reicon-react";
 import Table from "@/components/ResizeTable";
 import type { ColumnsType } from "antd/es/table";
 import { Container } from "@/types";
@@ -255,7 +259,6 @@ export const ContainerList = () => {
       title: "售卖状态",
       dataIndex: "saleStatus",
       align: "center",
-      width: 110,
       render: (v) => <SaleStatusTag saleStatus={v} />,
     },
     {
@@ -304,60 +307,65 @@ export const ContainerList = () => {
     {
       title: "操作",
       align: "center",
+      width: 120,
       fixed: "right",
       render: (_, r) => (
-        <Space size={2} direction="vertical" className="items-center">
-          <Space size={2}>
-            <ActionButton title="查看" onClick={() => openDetail(r.id)}>
-              👁
-            </ActionButton>
-            <ActionButton title="编辑" onClick={() => setEditId(r.id)}>
-              ✎
-            </ActionButton>
-            <ActionButton title="删除" onClick={() => handleDelete(r.id)}>
-              🗑
-            </ActionButton>
-          </Space>
-          <Space size={2}>
-            <ActionButton
-              title="新增成本明细"
-              onClick={() =>
-                setDetailForm({
-                  type: "cost",
-                  id: null,
-                  containerId: r.id,
-                  containerNo: r.containerNo ?? "",
-                })
-              }
-            >
-              <span className="inline-flex items-center gap-0.5">
-                <MinusCircleOutlined />
-                <FallOutlined />
-              </span>
-            </ActionButton>
-            <ActionButton
-              title="新增收入明细"
-              onClick={() =>
-                setDetailForm({
-                  type: "income",
-                  id: null,
-                  containerId: r.id,
-                  containerNo: r.containerNo ?? "",
-                })
-              }
-            >
-              <span className="inline-flex items-center gap-0.5">
-                <PlusCircleOutlined />
-                <RiseOutlined />
-              </span>
-            </ActionButton>
-            <ActionButton
-              title="查看成本/收入明细"
-              onClick={() => openDetail(r.id, "costIncome")}
-            >
-              <FileTextOutlined />
-            </ActionButton>
-          </Space>
+        <Space size={4} className="justify-center">
+          <ActionButton title="查看" onClick={() => openDetail(r.id)}>
+            <Eye size={16} />
+          </ActionButton>
+          <ActionButton title="编辑" onClick={() => setEditId(r.id)}>
+            <Edit size={16} />
+          </ActionButton>
+          <Dropdown
+            trigger={["click"]}
+            menu={{
+              items: [
+                {
+                  key: "cost",
+                  label: "新增成本明细",
+                  icon: <MinusCircle size={16} />,
+                  onClick: () =>
+                    setDetailForm({
+                      type: "cost",
+                      id: null,
+                      containerId: r.id,
+                      containerNo: r.containerNo ?? "",
+                    }),
+                },
+                {
+                  key: "income",
+                  label: "新增收入明细",
+                  icon: <PlusCircle size={16} />,
+                  onClick: () =>
+                    setDetailForm({
+                      type: "income",
+                      id: null,
+                      containerId: r.id,
+                      containerNo: r.containerNo ?? "",
+                    }),
+                },
+                {
+                  key: "viewCI",
+                  label: "查看成本/收入明细",
+                  icon: <FileText size={16} />,
+                  onClick: () => openDetail(r.id, "costIncome"),
+                },
+                { type: "divider" },
+                {
+                  key: "delete",
+                  label: "删除",
+                  icon: <Trash size={16} color="#ff4d4f" />,
+                  danger: true,
+                  onClick: () => handleDelete(r.id),
+                },
+              ],
+            }}
+          >
+            <Button type="text" size="small" className="!px-1 !py-0.5 !text-xs">
+              <More size={16} />
+            </Button>
+          </Dropdown>
         </Space>
       ),
     },
@@ -376,7 +384,7 @@ export const ContainerList = () => {
             download
             className="flex items-center gap-1"
           >
-            <DownloadOutlined />
+            <Download size={16} />
             下载模板
           </a>
         </Button>
@@ -448,7 +456,6 @@ export const ContainerList = () => {
             pushQuery({ page: "1", pageSize: String(ps) }),
           showTotal: (t) => `共 ${t} 条`,
         }}
-        scroll={{ x: 1700 }}
       />
 
       {/* 新增/编辑弹窗 */}

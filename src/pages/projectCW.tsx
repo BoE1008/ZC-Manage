@@ -14,11 +14,7 @@ import {
   Popover,
   Checkbox,
 } from "antd";
-import {
-  ProfileTwoTone,
-  AppstoreTwoTone,
-  FundTwoTone,
-} from "@ant-design/icons";
+import { Eye, Grid, Chart } from "reicon-react";
 import {
   getProjectsCWList,
   addProject,
@@ -472,6 +468,7 @@ const Project = () => {
         title: "操作",
         align: "center",
         fixed: "right",
+        width: 120,
         key: "action",
         render: (_, record: Company) => {
           return (
@@ -485,7 +482,7 @@ const Project = () => {
                   }}
                   onClick={() => setProjectId(record.id)}
                 >
-                  <ProfileTwoTone twoToneColor="#198348" />
+                  <Eye size={16} />
                 </Button>
               </Tooltip>
             </Space>
@@ -616,16 +613,13 @@ const Project = () => {
               title="显隐列"
               trigger="click"
             >
-              <AppstoreTwoTone
-                style={{ fontSize: "30px", cursor: "pointer" }}
-                twoToneColor="#198348"
-              />
+              <Grid size={16} style={{ fontSize: "30px", cursor: "pointer" }} />
             </Popover>
           </Tooltip>
 
           <Tooltip title="统计数据">
-            <FundTwoTone
-              twoToneColor="#198348"
+            <Chart
+              size={16}
               style={{ fontSize: "30px", cursor: "pointer" }}
               onClick={() => setStaticModal(true)}
             />
