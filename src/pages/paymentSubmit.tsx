@@ -7,10 +7,8 @@ import {
   Form,
   Select,
   DatePicker,
-  Dropdown,
   message,
   Tooltip,
-  Popconfirm,
   List,
   Avatar,
   Typography,
@@ -27,7 +25,6 @@ import {
   Upload as UploadIcon,
   Eye,
   Stop,
-  More,
 } from "reicon-react";
 import {
   getPaymentList,
@@ -48,6 +45,7 @@ import { getDictByCode } from "@/restApi/dict";
 import PaymentSubmitModal from "@/components/PaymentSubmitModal";
 import { formatNumber } from "@/utils";
 import PaymentDetailModal from "@/components/PaymentDetailModal";
+import MoreButton from "@/components/MoreButton";
 import { ModalType } from "@/types";
 import YSYFModal from "@/components/YSYFModal";
 import ResizeTable from "@/components/ResizeTable";
@@ -667,15 +665,7 @@ const Payment = () => {
             )}
             {moreItems.length > 0 && (
               <Tooltip title="更多">
-                <Dropdown trigger={["click"]} menu={{ items: moreItems }}>
-                  <Button
-                    type="text"
-                    size="small"
-                    className="!px-1 !py-0.5 !text-xs"
-                  >
-                    <More size={16} />
-                  </Button>
-                </Dropdown>
+                <MoreButton items={moreItems} />
               </Tooltip>
             )}
           </Space>

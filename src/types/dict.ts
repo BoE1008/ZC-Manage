@@ -291,3 +291,33 @@ export const RETURN_ORDER_STATUS_OPTIONS: DictOption[] = [
   { label: "待还箱", value: "pending" },
   { label: "已还箱", value: "returned" },
 ];
+
+/**
+ * 审核状态 Select 选项（6 步流程：未提交 → 业务 → 领导 → 财务 → 通过 / 退回）
+ * 用于开票 / 付款 / 项目等所有走完整审批链的业务
+ */
+export const AUDIT_STATE_OPTIONS: DictOption[] = [
+  { label: "未提交", value: "0" },
+  { label: "待业务审批", value: "1" },
+  { label: "待领导审批", value: "2" },
+  { label: "待财务审批", value: "3" },
+  { label: "审批通过", value: "4" },
+  { label: "已退回", value: "-1" },
+];
+
+/** 开票审核状态（5 步，无领导审批） */
+export const INVOICING_AUDIT_OPTIONS: DictOption[] = AUDIT_STATE_OPTIONS.filter(
+  (o) => o.value !== "2",
+);
+
+/** Table column filter（text/value）— 完整 6 步 */
+export const AUDIT_STATE_FILTERS = AUDIT_STATE_OPTIONS.map((o) => ({
+  text: o.label,
+  value: o.value,
+}));
+
+/** 开票 Table filter（5 步） */
+export const INVOICING_AUDIT_FILTERS = INVOICING_AUDIT_OPTIONS.map((o) => ({
+  text: o.label,
+  value: o.value,
+}));

@@ -8,17 +8,16 @@ import {
   Space,
   Select,
   DatePicker,
-  Dropdown,
   message,
   List,
   Avatar,
-  Popconfirm,
   Tooltip,
   Popover,
   Checkbox,
   InputNumber,
 } from "antd";
 import { Edit, Eye, Trash, Chat, Grid, Gift, Rocket, More } from "reicon-react";
+import MoreButton from "@/components/MoreButton";
 import {
   getProjectsSubmitList,
   addProject,
@@ -161,7 +160,6 @@ const Project = () => {
   const handleOk = async () => {
     form.validateFields().then(async () => {
       const values = form.getFieldsValue();
-      console.log(values);
       const params = {
         ...values,
         projectDate: dayjs(values.projectDate).format("YYYY-MM-DD"),
@@ -622,15 +620,7 @@ const Project = () => {
               )}
               {moreItems.length > 0 && (
                 <Tooltip title="更多">
-                  <Dropdown trigger={["click"]} menu={{ items: moreItems }}>
-                    <Button
-                      type="text"
-                      size="small"
-                      className="!px-1 !py-0.5 !text-xs"
-                    >
-                      <More size={16} />
-                    </Button>
-                  </Dropdown>
+                  <MoreButton items={moreItems} />
                 </Tooltip>
               )}
             </Space>

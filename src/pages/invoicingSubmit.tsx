@@ -22,9 +22,7 @@ import {
   message,
   List,
   Avatar,
-  Dropdown,
   Tooltip,
-  Popconfirm,
   Typography,
   Upload,
   InputNumber,
@@ -39,13 +37,13 @@ import {
   Upload as UploadIcon,
   Eye,
   Stop,
-  More,
 } from "reicon-react";
 import { getCustomersYSList, getCustomersList } from "@/restApi/customer";
 import { InvoicingTypeArr } from "@/utils/const";
 import { getDictByCode } from "@/restApi/dict";
 import InvoicingSubmitModal from "@/components/InvoicingSubmitModal";
 import InvoicingDetailModal from "@/components/InvoicingDetailModal";
+import MoreButton from "@/components/MoreButton";
 import { formatNumber } from "@/utils";
 import { ModalType } from "@/types";
 import YSYFModal from "@/components/YSYFModal";
@@ -664,15 +662,7 @@ const InvoicingSubmit = () => {
             )}
             {moreItems.length > 0 && (
               <Tooltip title="更多">
-                <Dropdown trigger={["click"]} menu={{ items: moreItems }}>
-                  <Button
-                    type="text"
-                    size="small"
-                    className="!px-1 !py-0.5 !text-xs"
-                  >
-                    <More size={16} />
-                  </Button>
-                </Dropdown>
+                <MoreButton items={moreItems} />
               </Tooltip>
             )}
           </Space>

@@ -381,7 +381,7 @@ const User = () => {
           >
             <Input.Password
               size="large"
-              placeholder="不能小于六位，为字母、数字、特殊字符的组合！"
+              placeholder="请输入新密码，不能小于六位，为字母、数字、特殊字符的组合！"
             />
           </Form.Item>
         </Form>

@@ -73,7 +73,7 @@ const Login = () => {
           const data = await getMenu();
           sessionStorage.setItem(
             "menu",
-            JSON.stringify(menuHandler(data.entity.data))
+            JSON.stringify(menuHandler(data.entity.data)),
           );
 
           if (res.entity?.changePassword === "0") {
@@ -213,7 +213,7 @@ const Login = () => {
           <div
             className={clsx(
               "flex flex-col gap-y-20 px-10 py-[80px] rounded-[10px]  backdrop-blur-[4px] shadow-lg shadow-light-500 border-slate-100 bg-white-500/10 items-center justify-center absolute md:right-[1%] lg:right-[5%] xl:right-[8%] 2xl:right-[10%]",
-              styles.loginContainer
+              styles.loginContainer,
             )}
           >
             <section className="md:w-[300px] 2xl:w-[350px] md:h-[80px] 2xl:h-[120px]">
@@ -265,7 +265,7 @@ const Login = () => {
                   size="large"
                   className={clsx(
                     "!bg-[#198348] !text-white w-full h-[45px]",
-                    styles.loginbutton
+                    styles.loginbutton,
                   )}
                   onClick={userLogin}
                 >
@@ -311,16 +311,16 @@ const Login = () => {
                       let total = 0;
                       const oSpeArr = value.split("");
                       const oNumberItem = oSpeArr.find(
-                        (item: any) => oNumber.indexOf(item) !== -1
+                        (item: any) => oNumber.indexOf(item) !== -1,
                       );
                       const oLetterItem = oSpeArr.find(
-                        (item: any) => oLetter.indexOf(item) !== -1
+                        (item: any) => oLetter.indexOf(item) !== -1,
                       );
                       const oSpeItem = oSpeArr.find(
-                        (item: any) => oSpecial.indexOf(item) !== -1
+                        (item: any) => oSpecial.indexOf(item) !== -1,
                       );
                       const oTherItem = oSpeArr.find(
-                        (item: any) => oTher.indexOf(item) === -1
+                        (item: any) => oTher.indexOf(item) === -1,
                       );
 
                       if (value.length < 6 || oTherItem !== undefined) {

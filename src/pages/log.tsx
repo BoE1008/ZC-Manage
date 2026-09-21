@@ -1,7 +1,8 @@
 import { getLogs } from "@/restApi/log";
 import { useEffect, useState } from "react";
-import { Table, Space } from "antd";
+import { Space } from "antd";
 import SearchInput from "@/components/SearchInput";
+import ResizeTable from "@/components/ResizeTable";
 
 const Log = () => {
   const [data, setData] = useState();
@@ -50,7 +51,7 @@ const Log = () => {
       <Space className="my-4 ml-4">
         <SearchInput placeholder="按用户名搜索" onSearch={setUserName} />
       </Space>
-      <Table
+      <ResizeTable
         bordered
         loading={loading}
         dataSource={data?.entity.data}

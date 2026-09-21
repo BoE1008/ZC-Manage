@@ -6,12 +6,8 @@ import {
   Modal,
   message,
   Tooltip,
-  Popconfirm,
-  List,
-  Avatar,
   Statistic,
   DatePicker,
-  Dropdown,
 } from "antd";
 import { CheckCircle, Stop, Eye, Calendar, Book, More } from "reicon-react";
 import {
@@ -23,10 +19,12 @@ import {
 } from "@/restApi/payment";
 import { getSuppliersList } from "@/restApi/supplyer";
 import RejectModal from "@/components/RejectModal";
+import MoreButton from "@/components/MoreButton";
+import AuditLogModal from "@/components/AuditLogModal";
 import PaymentSubmitModal from "@/components/PaymentSubmitModal";
 import { formatNumber } from "@/utils";
 import PaymentDetailModal from "@/components/PaymentDetailModal";
-import { ModalType } from "@/types";
+import { ModalType, AUDIT_STATE_FILTERS } from "@/types";
 import YSYFModal from "@/components/YSYFModal";
 import { getDictById } from "@/restApi/dict";
 import ResizeTable from "@/components/ResizeTable";
@@ -171,32 +169,7 @@ const Payment = () => {
     }));
   }, [supplier]);
 
-  const stateFilters = [
-    {
-      text: "未提交",
-      value: "0",
-    },
-    {
-      text: "待业务审批",
-      value: "1",
-    },
-    {
-      text: "待领导审批",
-      value: "2",
-    },
-    {
-      text: "待财务审批",
-      value: "3",
-    },
-    {
-      text: "审批通过",
-      value: "4",
-    },
-    {
-      text: "已退回",
-      value: "-1",
-    },
-  ];
+  const stateFilters = AUDIT_STATE_FILTERS;
 
   const moneyTypeFilters = dict
     ?.find((item) => item.id === "5")
@@ -407,15 +380,7 @@ const Payment = () => {
             </Tooltip>
             {moreItems.length > 0 && (
               <Tooltip title="更多">
-                <Dropdown trigger={["click"]} menu={{ items: moreItems }}>
-                  <Button
-                    type="text"
-                    size="small"
-                    className="!px-1 !py-0.5 !text-xs"
-                  >
-                    <More size={16} />
-                  </Button>
-                </Dropdown>
+                <MoreButton items={moreItems} />
               </Tooltip>
             )}
           </Space>
@@ -505,36 +470,7 @@ const Payment = () => {
         }}
       />
 
-      <Modal
-        centered
-        destroyOnClose
-        footer={null}
-        title={"审核日志"}
-        open={!!logs}
-        style={{ minWidth: "650px" }}
-        onCancel={() => setLogs(undefined)}
-        maskClosable={false}
-      >
-        <List
-          pagination={{ position: "bottom", align: "end" }}
-          dataSource={logs}
-          renderItem={(item, index) => (
-            <List.Item>
-              <List.Item.Meta
-                avatar={
-                  <Avatar
-                    src={`https://xsgames.co/randomusers/avatar.php?g=pixel&key=${index}`}
-                  />
-                }
-                title={item.state}
-                description={`${item.userName} ${item.createTime} 备注：${
-                  item.remark || ""
-                } `}
-              />
-            </List.Item>
-          )}
-        />
-      </Modal>
+      <AuditLogModal logs={logs} onClose={() => setLogs(undefined)} />
 
       {!!check && (
         <PaymentDetailModal data={check} onClose={() => setCheck(undefined)} />
