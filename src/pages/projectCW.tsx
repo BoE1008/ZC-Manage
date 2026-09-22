@@ -596,7 +596,7 @@ const Project = () => {
           </div>
         </div>
 
-        <Space className="flex flex-row !gap-x-5">
+        <Space className="flex flex-row !gap-x-[10px]">
           <Tooltip title="显隐列">
             <Popover
               content={
@@ -613,13 +613,18 @@ const Project = () => {
               title="显隐列"
               trigger="click"
             >
-              <Grid size={16} style={{ fontSize: "30px", cursor: "pointer" }} />
+              <Grid
+                size={22}
+                className="hover:text-[#198348]"
+                style={{ fontSize: "30px", cursor: "pointer" }}
+              />
             </Popover>
           </Tooltip>
 
           <Tooltip title="统计数据">
             <Chart
-              size={16}
+              size={22}
+              className="hover:text-[#198348]"
               style={{ fontSize: "30px", cursor: "pointer" }}
               onClick={() => setStaticModal(true)}
             />

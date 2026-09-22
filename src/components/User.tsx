@@ -1,26 +1,22 @@
 import { useRouter } from "next/router";
 import { useState, useEffect, useRef, useMemo } from "react";
 import clsx from "clsx";
-import { ChevronDown, Sound } from "reicon-react";
-import { logout } from "@/restApi/user";
 import {
-  Modal,
-  Form,
-  Input,
-  message,
-  Badge,
-  Statistic,
-  Col,
-  Row,
-  Card,
-  Avatar,
-} from "antd";
+  Boombox,
+  ChevronDown,
+  Key,
+  Logout3,
+  Profile,
+  Sound,
+} from "reicon-react";
+import { logout } from "@/restApi/user";
+import { Modal, Form, Input, message, Badge, Col, Row } from "antd";
 import { updatePassword } from "@/restApi/user";
 import { sm2 } from "sm-crypto";
 import { SM_PUBLIC_KEY } from "@/utils/const";
 import { getBadge } from "@/restApi/menu";
-import Link from "next/link";
 import { useClickAway } from "ahooks";
+import NoticeCard from "./NoticeCard";
 
 const User = () => {
   const router = useRouter();
@@ -37,7 +33,7 @@ const User = () => {
 
   const noticeContainerRef = useRef();
 
-  const { Meta } = Card;
+  const closeNotice = () => setNoticeModal(false);
 
   useEffect(() => {
     setUsername(sessionStorage.getItem("username")!);
@@ -93,9 +89,11 @@ const User = () => {
         <div
           ref={noticeContainerRef}
           className="relative w-[25px] h-[50px] cursor-pointer"
-          onClick={() => setNoticeModal(true)}
         >
-          <div className="absolute inset-0 w-full h-full">
+          <div
+            className="absolute inset-0 w-full h-full"
+            onClick={() => setNoticeModal(true)}
+          >
             <Badge size="small" color="red" count={badges ? count : 0}>
               <Sound
                 size={22}
@@ -114,121 +112,105 @@ const User = () => {
             <Row gutter={[16, 16]}>
               {!!badges?.projectNum && (
                 <Col>
-                  <Link href="/projectYW" onClick={() => setNoticeModal(false)}>
-                    <Card size="small">
-                      <Statistic
-                        title="项目业务审核"
-                        value={badges?.projectNum}
-                      />
-                    </Card>
-                  </Link>
+                  <NoticeCard
+                    title="项目业务审核"
+                    value={badges?.projectNum}
+                    href="/projectYW"
+                    onClose={closeNotice}
+                    accent="#198348"
+                  />
                 </Col>
               )}
               {!!badges?.projectThNum && (
                 <Col>
-                  <Link
+                  <NoticeCard
+                    title="项目退回代办数"
+                    value={badges?.projectThNum}
                     href="/projectSubmit"
-                    onClick={() => setNoticeModal(false)}
-                  >
-                    <Card size="small">
-                      <Statistic
-                        title="项目退回代办数"
-                        value={badges?.projectThNum}
-                      />
-                    </Card>
-                  </Link>
+                    onClose={closeNotice}
+                    accent="#fa8c16"
+                  />
                 </Col>
               )}
             </Row>
             <Row gutter={[16, 16]}>
               {!!badges?.iywNum && (
                 <Col>
-                  <Link
+                  <NoticeCard
+                    title="开票业务审核"
+                    value={badges?.iywNum}
                     href="/invoicingYW"
-                    onClick={() => setNoticeModal(false)}
-                  >
-                    <Card size="small">
-                      <Statistic title="开票业务审核" value={badges?.iywNum} />
-                    </Card>
-                  </Link>
+                    onClose={closeNotice}
+                    accent="#198348"
+                  />
                 </Col>
               )}
               {!!badges?.icwNum && (
                 <Col>
-                  <Link
+                  <NoticeCard
+                    title="开票财务审核"
+                    value={badges?.icwNum}
                     href="/invoicingCW"
-                    onClick={() => setNoticeModal(false)}
-                  >
-                    <Card size="small">
-                      <Statistic title="开票财务审核" value={badges?.icwNum} />
-                    </Card>
-                  </Link>
+                    onClose={closeNotice}
+                    accent="#fa541c"
+                  />
                 </Col>
               )}
               {!!badges?.ithNum && (
                 <Col>
-                  <Link
+                  <NoticeCard
+                    title="开票退回代办数"
+                    value={badges?.ithNum}
                     href="/invoicingSubmit"
-                    onClick={() => setNoticeModal(false)}
-                  >
-                    <Card size="small">
-                      <Statistic
-                        title="开票退回代办数"
-                        value={badges?.ithNum}
-                      />
-                    </Card>
-                  </Link>
+                    onClose={closeNotice}
+                    accent="#fa8c16"
+                  />
                 </Col>
               )}
             </Row>
             <Row gutter={[16, 16]}>
               {!!badges?.pywNum && (
                 <Col>
-                  <Link href="/paymentYW" onClick={() => setNoticeModal(false)}>
-                    <Card size="small">
-                      <Statistic title="付款业务审核" value={badges?.pywNum} />
-                    </Card>
-                  </Link>
+                  <NoticeCard
+                    title="付款业务审核"
+                    value={badges?.pywNum}
+                    href="/paymentYW"
+                    onClose={closeNotice}
+                    accent="#198348"
+                  />
                 </Col>
               )}
-
               {!!badges?.pldNum && (
                 <Col>
-                  <div
-                    className="cursor-pointer"
-                    onClick={() => {
-                      setNoticeModal(false);
-                      router.push("/paymentLD");
-                    }}
-                  >
-                    <Card size="small">
-                      <Statistic title="付款领导审核" value={badges?.pldNum} />
-                    </Card>
-                  </div>
+                  <NoticeCard
+                    title="付款领导审核"
+                    value={badges?.pldNum}
+                    href="/paymentLD"
+                    onClose={closeNotice}
+                    accent="#fa541c"
+                  />
                 </Col>
               )}
               {!!badges?.pcwNum && (
                 <Col>
-                  <Link href="/paymentCW" onClick={() => setNoticeModal(false)}>
-                    <Card size="small">
-                      <Statistic title="付款财务审核" value={badges?.pcwNum} />
-                    </Card>
-                  </Link>
+                  <NoticeCard
+                    title="付款财务审核"
+                    value={badges?.pcwNum}
+                    href="/paymentCW"
+                    onClose={closeNotice}
+                    accent="#fa541c"
+                  />
                 </Col>
               )}
               {!!badges?.pthNum && (
                 <Col>
-                  <Link
+                  <NoticeCard
+                    title="付款退回代办数"
+                    value={badges?.pthNum}
                     href="/paymentSubmit"
-                    onClick={() => setNoticeModal(false)}
-                  >
-                    <Card size="small">
-                      <Statistic
-                        title="付款退回代办数"
-                        value={badges?.pthNum}
-                      />
-                    </Card>
-                  </Link>
+                    onClose={closeNotice}
+                    accent="#fa8c16"
+                  />
                 </Col>
               )}
             </Row>
@@ -242,7 +224,10 @@ const User = () => {
         onMouseLeave={() => setHovered(false)}
       >
         <div className="flex flex-row gap-x-3 items-center">
-          <span className="text-[#198348]">{username}</span>
+          <span className="text-[#198348] flex flex-row items-center gap-x-2">
+            <Boombox />
+            {username}
+          </span>
           <ChevronDown
             size={16}
             className={clsx(
@@ -259,14 +244,16 @@ const User = () => {
         >
           <li
             onClick={() => setModalOpen(true)}
-            className="cursor-pointer px-7.5 transform transition-all hover:scale-110 text-center"
+            className="cursor-pointer px-7.5 transform transition-all hover:scale-110 text-center flex flex-row items-center gap-x-2"
           >
+            <Profile size={16} />
             {"个人中心"}
           </li>
           <li
             onClick={() => setPassModal(true)}
-            className="cursor-pointer px-7.5 transform transition-all hover:scale-110 text-center"
+            className="cursor-pointer px-7.5 transform transition-all hover:scale-110 text-center flex flex-row items-center gap-x-2"
           >
+            <Key size={16} />
             {"修改密码"}
           </li>
           <li
@@ -278,8 +265,9 @@ const User = () => {
               setHovered(false);
               router.push("/login");
             }}
-            className="cursor-pointer px-7.5 transform transition-all hover:scale-110 text-center"
+            className="cursor-pointer px-7.5 transform transition-all hover:scale-110 text-center flex flex-row items-center gap-x-2"
           >
+            <Logout3 size={16} />
             {"退出登录"}
           </li>
         </ul>

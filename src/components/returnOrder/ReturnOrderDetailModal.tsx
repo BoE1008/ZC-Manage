@@ -1,8 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Spin, Button, Table, message } from "antd";
-import { getReturnOrderDetail, downloadReturnOrderDoc } from "@/restApi/returnOrder";
+import {
+  getReturnOrderDetail,
+  downloadReturnOrderDoc,
+} from "@/restApi/returnOrder";
 import { getDictByCode } from "@/restApi/dict";
-import { unwrapList, unwrapEntity, normalizeDictOptions, formatDate } from "@/utils";
+import {
+  unwrapList,
+  unwrapEntity,
+  normalizeDictOptions,
+  formatDate,
+} from "@/utils";
 import { InfoItem, SectionTitle } from "@/components/ui/InfoItem";
 
 interface Props {
@@ -17,10 +25,18 @@ const STATUS_MAP: Record<string, string> = {
   returned: "已还箱",
 };
 
-const ReturnOrderDetailModal: React.FC<Props> = ({ id, onClose, onEdit, onConfirm }) => {
+const ReturnOrderDetailModal: React.FC<Props> = ({
+  id,
+  onClose,
+  onEdit,
+  onConfirm,
+}) => {
   const [loading, setLoading] = useState(true);
   const [r, setR] = useState<any>(null);
-  const [typeOptions, setTypeOptions] = useState<{ label: string; value: string }[]>([]);
+  const [boxes, setBoxes] = useState<any>(null);
+  const [typeOptions, setTypeOptions] = useState<
+    { label: string; value: string }[]
+  >([]);
 
   useEffect(() => {
     getDictByCode("return_order_type")
@@ -34,6 +50,7 @@ const ReturnOrderDetailModal: React.FC<Props> = ({ id, onClose, onEdit, onConfir
       .then((res: any) => {
         const entity = unwrapEntity(res);
         setR(entity);
+        setBoxes(res.entity.boxes);
       })
       .finally(() => setLoading(false));
   }, [id]);
@@ -76,7 +93,6 @@ const ReturnOrderDetailModal: React.FC<Props> = ({ id, onClose, onEdit, onConfir
   if (!r) return null;
 
   const isPending = r.status === "pending";
-  const boxes = r.boxes ?? [];
   const boxCount = boxes.length;
 
   const columns: any[] = [
@@ -86,29 +102,31 @@ const ReturnOrderDetailModal: React.FC<Props> = ({ id, onClose, onEdit, onConfir
       key: "containerNo",
       render: (v: any) => <span className="font-mono">{v ?? "-"}</span>,
     },
-    {
-      title: "还箱时间",
-      dataIndex: "returnTime",
-      key: "returnTime",
-      render: (v: any) => formatDate(v),
-    },
-    {
-      title: "实际还箱堆场",
-      dataIndex: "actualYardName",
-      key: "actualYardName",
-      render: (v: any) =>
-        v ? (
-          <span className="text-[#198348] font-medium">{v}</span>
-        ) : (
-          <span className="text-gray-400">待确认</span>
-        ),
-    },
+    // {
+    //   title: "还箱时间",
+    //   dataIndex: "returnTime",
+    //   key: "returnTime",
+    //   render: (v: any) => formatDate(v),
+    // },
+    // {
+    //   title: "实际还箱堆场",
+    //   dataIndex: "actualYardName",
+    //   key: "actualYardName",
+    //   render: (v: any) =>
+    //     v ? (
+    //       <span className="text-[#198348] font-medium">{v}</span>
+    //     ) : (
+    //       <span className="text-gray-400">待确认</span>
+    //     ),
+    // },
   ];
 
   return (
     <Modal
       title={
-        <span className="text-[#198348] font-bold">还箱令详情 - {r.orderNo}</span>
+        <span className="text-[#198348] font-bold">
+          还箱令详情 - {r.orderNo}
+        </span>
       }
       open
       onCancel={onClose}
@@ -171,9 +189,11 @@ const ReturnOrderDetailModal: React.FC<Props> = ({ id, onClose, onEdit, onConfir
         <InfoItem label="还箱城市" value={r.city} />
         <InfoItem
           label="堆场"
-          value={r.yardName ?? (r.yardId ? `ID: ${r.yardId}` : undefined) ?? "未指定"}
+          value={
+            r.yardName ?? (r.yardId ? `ID: ${r.yardId}` : undefined) ?? "未指定"
+          }
         />
-        <InfoItem
+        {/* <InfoItem
           label="状态"
           value={
             <span
@@ -186,9 +206,12 @@ const ReturnOrderDetailModal: React.FC<Props> = ({ id, onClose, onEdit, onConfir
               {STATUS_MAP[r.status] ?? r.status ?? "-"}
             </span>
           }
-        />
+        /> */}
         <InfoItem label="还箱时间" value={formatDate(r.returnTime)} />
-        <InfoItem label="创建时间" value={formatDate(r.createTime, r.createTime || "-")} />
+        <InfoItem
+          label="创建时间"
+          value={formatDate(r.createTime, r.createTime || "-")}
+        />
         <InfoItem label="备注" value={r.remark} colSpan="col-span-2" />
       </div>
 

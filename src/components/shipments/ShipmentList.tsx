@@ -333,119 +333,6 @@ export const ShipmentList = () => {
           onSuccess={() => loadShipments(page)}
           label="批量导入"
         />
-
-        <div className="ml-auto flex items-center gap-2">
-          <Select
-            size="small"
-            allowClear
-            showSearch
-            placeholder="项目编号"
-            className="!w-44"
-            value={projectFilter || undefined}
-            onChange={(v) => {
-              const q: any = { ...router.query, page: "1" };
-              if (v) q.projectId = v;
-              else delete q.projectId;
-              router.push({ pathname: router.pathname, query: q }, undefined, {
-                shallow: true,
-              });
-            }}
-            filterOption={(i, o) =>
-              ((o?.label as string) || "")
-                .toLowerCase()
-                .includes(i.toLowerCase())
-            }
-            options={summaryProjects.map((p) => ({
-              label: p.num || p.name,
-              value: p.id,
-            }))}
-          />
-          <Select
-            size="small"
-            allowClear
-            showSearch
-            placeholder="项目名称"
-            className="!w-48"
-            value={projectFilter || undefined}
-            onChange={(v) => {
-              const q: any = { ...router.query, page: "1" };
-              if (v) q.projectId = v;
-              else delete q.projectId;
-              router.push({ pathname: router.pathname, query: q }, undefined, {
-                shallow: true,
-              });
-            }}
-            filterOption={(i, o) =>
-              ((o?.label as string) || "")
-                .toLowerCase()
-                .includes(i.toLowerCase())
-            }
-            options={summaryProjects.map((p) => ({
-              label: p.name,
-              value: p.id,
-            }))}
-          />
-          <Select
-            placeholder="全部状态"
-            allowClear
-            value={statusFilter || undefined}
-            onChange={(v) => {
-              const q: Record<string, string | string[] | undefined> = {
-                ...router.query,
-                status: v || undefined,
-                page: "1",
-              };
-              if (!v) delete q.status;
-              delete q.keyword;
-              router.push({ pathname: router.pathname, query: q }, undefined, {
-                shallow: true,
-              });
-            }}
-            className="w-32"
-            size="small"
-            options={statusOptions}
-          />
-          <Select
-            placeholder="全部售卖状态"
-            allowClear
-            value={saleFilter || undefined}
-            onChange={(v) => {
-              const q: Record<string, string | string[] | undefined> = {
-                ...router.query,
-                sale: v || undefined,
-                page: "1",
-              };
-              if (!v) delete q.sale;
-              router.push({ pathname: router.pathname, query: q }, undefined, {
-                shallow: true,
-              });
-            }}
-            className="w-32"
-            size="small"
-            options={SALE_STATUS_OPTIONS}
-          />
-          <div className="!w-48">
-            <SearchInput
-              placeholder="箱号"
-              onSearch={(v) => {
-                const q: Record<string, string | string[] | undefined> = {
-                  ...router.query,
-                  keyword: v || undefined,
-                  page: "1",
-                };
-                if (!v) delete q.keyword;
-                delete q.status;
-                router.push(
-                  { pathname: router.pathname, query: q },
-                  undefined,
-                  {
-                    shallow: true,
-                  },
-                );
-              }}
-            />
-          </div>
-        </div>
       </div>
 
       {/* 项目运踪汇总 */}
@@ -569,6 +456,119 @@ export const ShipmentList = () => {
         运踪以「项目+箱号」为维度，每次发运记录一段运踪。同一集装箱多次复用时，按发运顺序记录多段。点击箱号查看该集装箱完整运生命周期。已录入集装箱号的箱子可直接新增运踪（箱号支持输入搜索）。
       </div>
 
+      <div className="flex items-center gap-2 flex-wrap">
+        <Select
+          size="small"
+          allowClear
+          showSearch
+          placeholder="项目编号"
+          className="!w-44"
+          value={projectFilter || undefined}
+          onChange={(v) => {
+            const q: any = { ...router.query, page: "1" };
+            if (v) q.projectId = v;
+            else delete q.projectId;
+            router.push({ pathname: router.pathname, query: q }, undefined, {
+              shallow: true,
+            });
+          }}
+          filterOption={(i, o) =>
+            ((o?.label as string) || "")
+              .toLowerCase()
+              .includes(i.toLowerCase())
+          }
+          options={summaryProjects.map((p) => ({
+            label: p.num || p.name,
+            value: p.id,
+          }))}
+        />
+        <Select
+          size="small"
+          allowClear
+          showSearch
+          placeholder="项目名称"
+          className="!w-48"
+          value={projectFilter || undefined}
+          onChange={(v) => {
+            const q: any = { ...router.query, page: "1" };
+            if (v) q.projectId = v;
+            else delete q.projectId;
+            router.push({ pathname: router.pathname, query: q }, undefined, {
+              shallow: true,
+            });
+          }}
+          filterOption={(i, o) =>
+            ((o?.label as string) || "")
+              .toLowerCase()
+              .includes(i.toLowerCase())
+          }
+          options={summaryProjects.map((p) => ({
+            label: p.name,
+            value: p.id,
+          }))}
+        />
+        <Select
+          placeholder="全部状态"
+          allowClear
+          value={statusFilter || undefined}
+          onChange={(v) => {
+            const q: Record<string, string | string[] | undefined> = {
+              ...router.query,
+              status: v || undefined,
+              page: "1",
+            };
+            if (!v) delete q.status;
+            delete q.keyword;
+            router.push({ pathname: router.pathname, query: q }, undefined, {
+              shallow: true,
+            });
+          }}
+          className="w-32"
+          size="small"
+          options={statusOptions}
+        />
+        <Select
+          placeholder="全部售卖状态"
+          allowClear
+          value={saleFilter || undefined}
+          onChange={(v) => {
+            const q: Record<string, string | string[] | undefined> = {
+              ...router.query,
+              sale: v || undefined,
+              page: "1",
+            };
+            if (!v) delete q.sale;
+            router.push({ pathname: router.pathname, query: q }, undefined, {
+              shallow: true,
+            });
+          }}
+          className="w-32"
+          size="small"
+          options={SALE_STATUS_OPTIONS}
+        />
+        <div className="!w-48">
+          <SearchInput
+            placeholder="箱号"
+            onSearch={(v) => {
+              const q: Record<string, string | string[] | undefined> = {
+                ...router.query,
+                keyword: v || undefined,
+                page: "1",
+              };
+              if (!v) delete q.keyword;
+              delete q.status;
+              router.push(
+                { pathname: router.pathname, query: q },
+                undefined,
+                {
+                  shallow: true,
+                },
+              );
+            }}
+          />
+        </div>
+      </div>
+
       <div className="bg-white rounded shadow-sm overflow-hidden">
         <Table
           columns={columns}
@@ -620,10 +620,6 @@ export const ShipmentList = () => {
         <ContainerDetailModal
           id={viewId}
           onClose={() => setViewId(null)}
-          onEdit={() => {
-            setViewId(null);
-            setEditId(viewId);
-          }}
         />
       )}
     </div>

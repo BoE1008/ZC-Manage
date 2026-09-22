@@ -40,6 +40,28 @@ const AppLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
     })();
   }, [asPath]);
 
+  // 当前路径不在菜单顶级时，自动展开其父级子菜单
+  useEffect(() => {
+    const m = menu as any;
+    if (!Array.isArray(m) || m.length === 0) return;
+    const currentKey = asPath.split("?")[0].slice(1);
+    if (!currentKey) return;
+    const findParentKey = (items: any[], childKey: string): string | null => {
+      for (const item of items || []) {
+        if (item?.children?.some((c: any) => c?.key === childKey)) return item.key;
+        if (item?.children) {
+          const found = findParentKey(item.children, childKey);
+          if (found !== null) return found;
+        }
+      }
+      return null;
+    };
+    const parentKey = findParentKey(m, currentKey);
+    if (parentKey && !(openKeys as any[]).includes(parentKey)) {
+      (setOpenKeys as any)([parentKey]);
+    }
+  }, [menu, asPath]);
+
   const handleClick: MenuProps["onClick"] = (props) => {
     router.push(`/${props.key}`);
   };

@@ -811,7 +811,7 @@ const Project = () => {
             title="显隐列"
             trigger="click"
           >
-            <Grid size={16} style={{ fontSize: "30px" }} />
+            <Grid size={22} className="hover:text-[#198348]" />
           </Popover>
         </Space>
       </div>

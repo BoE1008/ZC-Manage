@@ -730,11 +730,16 @@ const Project = () => {
             title="显隐列"
             trigger="click"
           >
-            <Grid size={16} style={{ fontSize: "30px" }} className="mr-15" />
+            <Grid
+              size={22}
+              style={{ fontSize: "30px" }}
+              className="mr-[10px] hover:text-[#198348]"
+            />
           </Popover>
           <Tooltip title="统计数据">
             <Chart
-              size={16}
+              size={22}
+              className="hover:text-[#198348]"
               style={{ fontSize: "30px", cursor: "pointer" }}
               onClick={() => setStaticModal(true)}
             />

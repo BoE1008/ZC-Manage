@@ -122,23 +122,23 @@ const ReturnOrderList: React.FC = () => {
         );
       },
     },
-    {
-      title: "状态",
-      dataIndex: "status",
-      render: (v: string) => (
-        <span
-          className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
-            v === "pending"
-              ? "bg-amber-100 text-amber-700"
-              : v === "returned"
-                ? "bg-green-100 text-green-700"
-                : "bg-gray-100 text-gray-600"
-          }`}
-        >
-          {STATUS_MAP[v] ?? v ?? "-"}
-        </span>
-      ),
-    },
+    // {
+    //   title: "状态",
+    //   dataIndex: "status",
+    //   render: (v: string) => (
+    //     <span
+    //       className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
+    //         v === "pending"
+    //           ? "bg-amber-100 text-amber-700"
+    //           : v === "returned"
+    //             ? "bg-green-100 text-green-700"
+    //             : "bg-gray-100 text-gray-600"
+    //       }`}
+    //     >
+    //       {STATUS_MAP[v] ?? v ?? "-"}
+    //     </span>
+    //   ),
+    // },
     {
       title: "箱数",
       dataIndex: "boxCount",
@@ -173,23 +173,6 @@ const ReturnOrderList: React.FC = () => {
           <span className="text-gray-400">未指定</span>
         ),
     },
-    {
-      title: "确认进度",
-      dataIndex: "confirmProgress",
-      align: "center" as const,
-      render: (v: string) =>
-        v ? (
-          <span className="text-xs font-medium text-gray-700">{v}</span>
-        ) : (
-          "-"
-        ),
-    },
-    {
-      title: "实际还箱时间",
-      dataIndex: "returnTime",
-      render: (v: string) => formatDate(v),
-    },
-
     {
       title: "操作",
       align: "center",
@@ -307,7 +290,7 @@ const ReturnOrderList: React.FC = () => {
             }}
             options={typeOptions}
           />
-          <Select
+          {/* <Select
             size="small"
             allowClear
             placeholder="状态"
@@ -332,7 +315,7 @@ const ReturnOrderList: React.FC = () => {
               { label: "待还箱", value: "pending" },
               { label: "已还箱", value: "returned" },
             ]}
-          />
+          /> */}
           <div style={{ width: 220 }}>
             <SearchInput
               placeholder="还箱令编号"
