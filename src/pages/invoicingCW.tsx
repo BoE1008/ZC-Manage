@@ -6,15 +6,7 @@ import {
   getInvoicingDetailById,
 } from "@/restApi/invoicing";
 import { useEffect, useState, useMemo } from "react";
-import {
-  Space,
-  Button,
-  Input,
-  Modal,
-  message,
-  Tooltip,
-  Statistic,
-} from "antd";
+import { Space, Button, Input, Modal, message, Tooltip, Statistic } from "antd";
 import { CheckCircle, Stop, Calendar, Eye, Book, More } from "reicon-react";
 import { getCustomersList } from "@/restApi/customer";
 import RejectModal from "@/components/RejectModal";
@@ -115,8 +107,8 @@ const InvoicingCW = () => {
     setCheck(res.entity.data);
   };
 
-  const handleApprove = async () => {
-    await approveOne(detail.id);
+  const handleApprove = async (remark: string) => {
+    await approveOne(detail.id, remark);
     message.success({ content: "审核完成", type: "success" });
     setDetail(undefined);
     const data = await getinvoicingCWList(
@@ -467,7 +459,7 @@ const InvoicingCW = () => {
       {!!detail && (
         <InvoicingSubmitModal
           data={detail}
-          onConfirm={handleApprove}
+          onConfirm={(remark) => handleApprove(remark)}
           onClose={() => {
             setDetail(undefined);
           }}

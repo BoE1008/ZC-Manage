@@ -111,8 +111,8 @@ const PaymentYW = () => {
     setCheck(res.entity.data);
   };
 
-  const handleSubmitToLD = async () => {
-    await submitToLD(detail.id);
+  const handleSubmitToLD = async (remark: string) => {
+    await submitToLD(detail.id, remark);
     message.success({ content: "已提交至领导审核", type: "success" });
     setDetail(undefined);
     const res = await getPaymentYWList(
@@ -128,8 +128,8 @@ const PaymentYW = () => {
     setData(res);
   };
 
-  const handleSubmitToCW = async () => {
-    await submitYWToCW(detail.id);
+  const handleSubmitToCW = async (remark: string) => {
+    await submitYWToCW(detail.id, remark);
     message.success({ content: "已提交至财务审核", type: "success" });
     setDetail(undefined);
     const res = await getPaymentYWList(
@@ -470,8 +470,10 @@ const PaymentYW = () => {
       {!!detail && (
         <PaymentSubmitModal
           data={detail}
-          onConfirm={() => {
-            submitType === 0 ? handleSubmitToLD() : handleSubmitToCW();
+          onConfirm={(remark) => {
+            submitType === 0
+              ? handleSubmitToLD(remark)
+              : handleSubmitToCW(remark);
           }}
           onClose={() => setDetail(undefined)}
         />

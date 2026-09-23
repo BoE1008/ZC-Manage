@@ -10,7 +10,7 @@ export const getPaymentList = async (
   userName?: string,
   projectNum?: string,
   yfDate?: string,
-  updateTimeSort?: string
+  updateTimeSort?: string,
 ) => {
   const res = await axiosInstance.get(`/zc/payment/list`, {
     params: {
@@ -66,7 +66,7 @@ export const getPaymentYWList = async (
   userName?: string,
   projectNum?: string,
   yfDate?: string,
-  updateTimeSort?: string
+  updateTimeSort?: string,
 ) => {
   const res = await axiosInstance.get(`/zc/payment/yw/list`, {
     params: {
@@ -94,7 +94,7 @@ export const getPaymentCWList = async (
   projectNum?: string,
   moneyType?: string,
   yfDate?: string,
-  updateTimeSort?: string
+  updateTimeSort?: string,
 ) => {
   const res = await axiosInstance.get(`/zc/payment/cw/list`, {
     params: {
@@ -122,7 +122,7 @@ export const getPaymentLDList = async (
   userName?: string,
   projectNum?: string,
   yfDate?: string,
-  updateTimeSort?: string
+  updateTimeSort?: string,
 ) => {
   const res = await axiosInstance.get(`/zc/payment/ld/list`, {
     params: {
@@ -148,33 +148,37 @@ export const submitToYW = async (paymentId: string) => {
   return res.data;
 };
 
-export const submitToLD = async (paymentId: string) => {
+export const submitToLD = async (paymentId: string, remark: string) => {
   const res = await axiosInstance.post(`/zc/payment/submitLeader`, {
     paymentId,
+    remark,
   });
 
   return res.data;
 };
 
-export const submitLDToCW = async (paymentId: string) => {
+export const submitLDToCW = async (paymentId: string, remark: string) => {
   const res = await axiosInstance.post(`/zc/payment/submitLDToCW`, {
     paymentId,
+    remark,
   });
 
   return res.data;
 };
 
-export const submitYWToCW = async (paymentId: string) => {
+export const submitYWToCW = async (paymentId: string, remark: string) => {
   const res = await axiosInstance.post(`/zc/payment/submitYWToCW`, {
     paymentId,
+    remark,
   });
 
   return res.data;
 };
 
-export const approveOne = async (paymentId: string) => {
+export const approveOne = async (paymentId: string, remark: string) => {
   const res = await axiosInstance.post(`/zc/payment/approve`, {
     paymentId,
+    remark,
   });
 
   return res.data;
@@ -183,7 +187,7 @@ export const approveOne = async (paymentId: string) => {
 export const rejectOne = async (
   paymentId: string,
   remark: string,
-  approveState
+  approveState,
 ) => {
   const res = await axiosInstance.post(`/zc/payment/reject`, {
     paymentId,
@@ -205,7 +209,7 @@ export const deleteOne = async (id: string) => {
 
 export const logsOne = async (paymentId: string) => {
   const res = await axiosInstance.get(
-    `/zc/payment/log/list?paymentId=${paymentId}`
+    `/zc/payment/log/list?paymentId=${paymentId}`,
   );
   return res.data;
 };
@@ -254,7 +258,7 @@ export const getPaymentOthersList = async (
   userName?: string,
   projectNum?: string,
   yfDate?: string,
-  updateTimeSort?: string
+  updateTimeSort?: string,
 ) => {
   const res = await axiosInstance.get(`/zc/payment/list/others`, {
     params: {
@@ -274,7 +278,7 @@ export const getPaymentOthersList = async (
 
 export const submitOthers = async (
   paymentId: string,
-  paymentType: PaymentOthersType
+  paymentType: PaymentOthersType,
 ) => {
   const res = await axiosInstance.post(`/zc/payment/others/submit`, {
     paymentId,

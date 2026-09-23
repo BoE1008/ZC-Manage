@@ -121,8 +121,8 @@ const Payment = () => {
     setCheck(res.entity.data);
   };
 
-  const handleApproveOne = async () => {
-    await approveOne(detail.id);
+  const handleApproveOne = async (remark: string) => {
+    await approveOne(detail.id, remark);
     const res = await getPaymentCWList(
       page,
       pageSize,
@@ -479,7 +479,7 @@ const Payment = () => {
       {!!detail && (
         <PaymentSubmitModal
           data={detail}
-          onConfirm={handleApproveOne}
+          onConfirm={(remark) => handleApproveOne(remark)}
           onClose={() => setDetail(undefined)}
         />
       )}

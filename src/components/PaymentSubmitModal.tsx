@@ -1,9 +1,10 @@
 import { memo, useEffect, useState, FC } from "react";
-import { Modal, Upload, Button } from "antd";
+import { Modal, Upload, Button, Input, Avatar, List } from "antd";
 import {
   getFilesById,
   deleteFileById,
   updateFileById,
+  logsOne,
 } from "@/restApi/payment";
 import { Upload as UploadIcon } from "reicon-react";
 import { formatNumber } from "@/utils";
@@ -11,10 +12,12 @@ import { formatNumber } from "@/utils";
 const PaymentDetailModal: FC<{
   onClose: () => void;
   data: any;
-  onConfirm: () => void;
+  onConfirm: (remark: string) => void;
 }> = ({ onClose, data, onConfirm }) => {
   const [files, setFiles] = useState([]);
   const [oldFiles, setOldFiles] = useState([]);
+  const [remark, setRemark] = useState("");
+  const [logs, setLogs] = useState();
 
   useEffect(() => {
     (async () => {
@@ -26,6 +29,8 @@ const PaymentDetailModal: FC<{
         uid: item.id,
         status: "done",
       }));
+      const res = await logsOne(data?.id);
+      setLogs(res.entity.data);
 
       setOldFiles(fileList);
       setFiles(fileList);
@@ -49,7 +54,7 @@ const PaymentDetailModal: FC<{
       await updateFileById(formData);
     }
 
-    onConfirm();
+    onConfirm(remark);
   };
 
   const uploadProps = {
@@ -353,6 +358,34 @@ const PaymentDetailModal: FC<{
           </td>
         </tr>
       </table>
+
+      <List
+        pagination={{ position: "bottom", align: "end" }}
+        dataSource={logs}
+        renderItem={(item, index) => (
+          <List.Item>
+            <List.Item.Meta
+              avatar={
+                <Avatar
+                  src={`https://xsgames.co/randomusers/avatar.php?g=pixel&key=${index}`}
+                />
+              }
+              title={item.state}
+              description={`${item.userName} ${item.createTime} 备注：${
+                item.remark || ""
+              } `}
+            />
+          </List.Item>
+        )}
+      />
+
+      <Input.TextArea
+        className="my-4"
+        value={remark}
+        onChange={(e) => setRemark(e.target.value)}
+        autoSize={{ minRows: 2, maxRows: 6 }}
+        placeholder="请输入审核备注"
+      />
 
       <Upload {...uploadProps}>
         <Button icon={<UploadIcon size={16} />}>点击上传</Button>
